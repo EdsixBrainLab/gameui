@@ -1574,7 +1574,6 @@ function applyHowToPlayButtonState(button, state) {
     if (highlight) {
         highlight.graphics.clear();
     }
-  if (glow) {
         glow.graphics.clear();
     }
 
@@ -1611,33 +1610,40 @@ function applyHowToPlayButtonState(button, state) {
     } else {
         if (glow) {
             glow.graphics
-                .beginRadialGradientFill(["rgba(255, 255, 255, 0.7)", "rgba(255, 255, 255, 0)"], [0, 1], 0, 0, 0, 0, 0, 170)
-                .drawCircle(0, 0, 160);
-            glow.alpha = 0.85;
+                .beginRadialGradientFill([
+                    "rgba(255, 170, 115, 0.55)",
+                    "rgba(255, 170, 115, 0)"
+                ], [0, 1], 0, 0, 0, 0, 0, 165)
+                .drawCircle(0, 0, 165);
+            glow.alpha = 0.9;
         }
         if (base) {
             base.graphics
                 .setStrokeStyle(2)
-                .beginStroke("rgba(255, 141, 60, 0.65)")
-                .beginLinearGradientFill(["#FFFFFF", "#FFF3E7"], [0, 1], -160, 0, 160, 0)
+                .beginStroke("rgba(240, 102, 37, 0.75)")
+                .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
                 .drawRoundRect(-160, -44, 320, 88, 30);
         }
         if (highlight) {
             highlight.graphics
-                .beginLinearGradientFill(["rgba(255, 141, 60, 0.22)", "rgba(255, 141, 60, 0)"], [0, 1], -160, -18, 160, 26)
-                .drawRoundRect(-160, -32, 320, 64, 28);
+                .beginLinearGradientFill([
+                    "rgba(255, 255, 255, 0.72)",
+                    "rgba(255, 255, 255, 0.18)",
+                    "rgba(255, 255, 255, 0)"
+                ], [0, 0.55, 1], -160, -44, 160, 16)
+                .drawRoundRect(-160, -44, 320, 60, 28);
         }
         if (icon) {
             icon.text = "\u279C";
             icon.font = "700 30px 'Baloo 2'";
-            icon.color = "#FF8D3C";
+            icon.color = "#FFFFFF";
         }
         if (label) {
             label.text = "Skip";
             label.font = "700 26px 'Baloo 2'";
-            label.color = "#FF8D3C";
+            label.color = "#FFFFFF";
         }
-        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
+        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.32)", 0, 16, 32);
     }
 
     button.state = state;
