@@ -79,17 +79,16 @@ else
 <body>
 
 <?php if($runningBg1==1){ ?>
-	<div id="content"><canvas id="gameCanvas" width="1280" height="720" style="background:url(<?php echo $getassetsPathLang; ?>/HowToPlayScreen1.png),
-																					url(assets/<?php echo $themeArr[$i]; ?>/Background3.png),
-																					url(assets/<?php echo $themeArr[$i]; ?>/Background2.png),
-																					url(assets/<?php echo $themeArr[$i]; ?>/Background1.png),
-																					url(assets/<?php echo $themeArr[$i]; ?>/Background.png);
-																					background-position: center;background-repeat: no-repeat, no-repeat; background-color:#000; background-size: 100%, 100%;" ></canvas></div>
+        <div id="content"><canvas id="gameCanvas" width="1280" height="720" style="background:url(assets/<?php echo $themeArr[$i]; ?>/Background3.png),
+                                                                                                                              url(assets/<?php echo $themeArr[$i]; ?>/Background2.png),
+                                                                                                                              url(assets/<?php echo $themeArr[$i]; ?>/Background1.png),
+                                                                                                                              url(assets/<?php echo $themeArr[$i]; ?>/Background.png);
+                                                                                                                              background-position: center;background-repeat: no-repeat, no-repeat; background-color:#000; background-size: 100%, 100%;" ></canvas></div>
 <?php } else{ ?>
 
 	
-	<div id="content"><canvas id="gameCanvas" width="1280" height="720" style="background:url(<?php echo $getassetsPathLang; ?>/HowToPlayScreen1.png),url(<?php echo $gamename; ?>/Background.png);background-position: center;
-	background-repeat: no-repeat, no-repeat; background-color:#000;  background-size: 100%, 100%;" ></canvas></div>
+        <div id="content"><canvas id="gameCanvas" width="1280" height="720" style="background:url(<?php echo $gamename; ?>/Background.png);background-position: center;
+        background-repeat: no-repeat; background-color:#000;  background-size: 100%, 100%;" ></canvas></div>
 
 <?php } ?>
  
