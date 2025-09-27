@@ -1,0 +1,195 @@
+﻿{"frames": {
+
+"howToPlayMc0000":
+{
+	"frame": {"x":0,"y":0,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0001":
+{
+	"frame": {"x":389,"y":0,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0002":
+{
+	"frame": {"x":778,"y":0,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0003":
+{
+	"frame": {"x":1167,"y":0,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0004":
+{
+	"frame": {"x":1556,"y":0,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0005":
+{
+	"frame": {"x":0,"y":398,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0006":
+{
+	"frame": {"x":389,"y":398,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0007":
+{
+	"frame": {"x":778,"y":398,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0008":
+{
+	"frame": {"x":1167,"y":398,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0009":
+{
+	"frame": {"x":1556,"y":398,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0010":
+{
+	"frame": {"x":0,"y":796,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0011":
+{
+	"frame": {"x":389,"y":796,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0012":
+{
+	"frame": {"x":778,"y":796,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0013":
+{
+	"frame": {"x":1167,"y":796,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0014":
+{
+	"frame": {"x":1556,"y":796,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0015":
+{
+	"frame": {"x":0,"y":1194,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0016":
+{
+	"frame": {"x":389,"y":1194,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0017":
+{
+	"frame": {"x":778,"y":1194,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0018":
+{
+	"frame": {"x":1167,"y":1194,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0019":
+{
+	"frame": {"x":1556,"y":1194,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0020":
+{
+	"frame": {"x":0,"y":1592,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0021":
+{
+	"frame": {"x":389,"y":1592,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+},
+"howToPlayMc0022":
+{
+	"frame": {"x":778,"y":1592,"w":389,"h":398},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":398},
+	"sourceSize": {"w":389,"h":398}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "20.0.2.22168",
+	"image": "HowToPlay.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":2048},
+	"scale": "1"
+}
+}
