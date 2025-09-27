@@ -27,31 +27,72 @@ function startAnimationHandler(evt) {
 }
 
 function isVisibleSkipBtn() {
+    showHowToPlayOverlay();
+
+    if (!SkipBtnMc) {
+        return;
+    }
+
     SkipBtnMc.visible = true;
     SkipBtnMc.gotoAndStop(0);
-    skipMc = new createjs.MovieClip()
-    container.parent.addChild(skipMc)
-    skipMc.timeline.addTween(createjs.Tween.get(SkipBtnMc).to({ scaleX: .97, scaleY: .97 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
-    SkipBtnMc.addEventListener("click", createDelayToStartGame);
     SkipBtnMc.cursor = "pointer";
+    createjs.Tween.removeTweens(SkipBtnMc);
 
+    if (howToPlayPulseTween) {
+        howToPlayPulseTween.setPaused(true);
+    }
+
+    SkipBtnMc.scaleX = SkipBtnMc.scaleY = 1;
+    SkipBtnMc.alpha = 0;
+    createjs.Tween.get(SkipBtnMc).to({ alpha: 1 }, 220, createjs.Ease.quadOut);
+    howToPlayPulseTween = createjs.Tween.get(SkipBtnMc, { loop: true })
+        .wait(480)
+        .to({ scaleX: 1.03, scaleY: 1.03 }, 720, createjs.Ease.sineInOut)
+        .to({ scaleX: 1, scaleY: 1 }, 720, createjs.Ease.sineInOut);
+
+    if (SkipBtnMc.removeAllEventListeners) {
+        SkipBtnMc.removeAllEventListeners("click");
+    }
+    SkipBtnMc.addEventListener("click", createDelayToStartGame);
 }
 
 function isVisibleStartBtn() {
+    showHowToPlayOverlay();
+
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    SkipBtnMc.visible = true;
     SkipBtnMc.gotoAndStop(1);
-    ////////////////////////////////////////////////////////////////////   
+    SkipBtnMc.cursor = "pointer";
+    createjs.Tween.removeTweens(SkipBtnMc);
+
+    if (howToPlayPulseTween) {
+        howToPlayPulseTween.setPaused(true);
+    }
+
+    SkipBtnMc.scaleX = SkipBtnMc.scaleY = 1;
+    SkipBtnMc.alpha = 1;
+    howToPlayPulseTween = createjs.Tween.get(SkipBtnMc, { loop: true })
+        .to({ scaleX: 1.04, scaleY: 1.04 }, 620, createjs.Ease.sineInOut)
+        .to({ scaleX: 1, scaleY: 1 }, 620, createjs.Ease.sineInOut);
+
+    if (SkipBtnMc.removeAllEventListeners) {
+        SkipBtnMc.removeAllEventListeners("click");
+    }
+    SkipBtnMc.addEventListener("click", createDelayToStartGame);
 }
 
 
 //=============================================================================//
 function createDelayToStartGame() {
 
-    howToPlayImageMc.visible = false;
+    hideHowToPlayOverlay();
 
-    SkipBtnMc.visible = false;
     //gameIntroAnimMc.stop();
     stopValue = 0;
-    removeGameIntro() // know 
+    removeGameIntro() // know
     window.removeEventListener('focus', startIntro);
     window.removeEventListener('blur', stopGameIntro);
     TimerAnsScoreTweens()
@@ -75,20 +116,7 @@ function createDelayToStartGame() {
     //     // TitleContaier.mouseEnabled = true;
     //     // TitleContaier.cursor = "move";
     //     // TitleContaier.addEventListener("pressmove", onObjectDownHandler1);
-    //     // TitleContaier.addEventListener("pressup", getDragUp1);
-
-    //     setTimeout(handleClick, 1000);
-    // }
-    // else {
-
-    //     intChkVar = 0
-    //     internetErrorFn()
-    // }
 }
-//=============================================================================//
-
-
-
 function onObjectDownHandler1(evt) {
     var p = evt.currentTarget.parent.globalToLocal(evt.stageX, evt.stageY);
     container.parent.addChild(evt.currentTarget);
