@@ -27,6 +27,9 @@ var hudContainer,
     questionProgressBarBg,
     questionProgressBarFill;
 
+var HowToPlayScreenImg,
+    howToPlayImageMc;
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
