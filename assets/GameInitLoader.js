@@ -10,7 +10,7 @@ var TitleContaier;
 var extradot = "";
 
 //var introStartCnt = -1;
-var TotalAssetsCnt = 34
+var TotalAssetsCnt = 33
 var betweenChars = ' '; // a space
 var volumeBtn1, QuesCntMc1, fullScreenBtn1, closeBtn1, QuesCntMc2;
 var hudContainer,
@@ -26,6 +26,9 @@ var hudContainer,
     closeBtnWrapper,
     questionProgressBarBg,
     questionProgressBarFill;
+
+var HowToPlayScreenImg,
+    howToPlayImageMc;
 
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
@@ -137,7 +140,6 @@ function createManifest() {
         { id: "handCursor", src: assetsPath + "handCursor.png" },
         { id: "SkipBtn", src: assetsPathLang + "SkipBtn.png" },
         { id: "HowToPlayScreen", src: assetsPathLang + "HowToPlayScreen.png" },
-        { id: "HowToPlayScreenImg", src: assetsPathLang + "HowToPlayScreen1.png" },
 
         { id: "scoreImgMc", src: assetsPath + "Score.png" },
         { id: "ResponseImgMc", src: assetsPath + "ResponseTime.png" },
@@ -605,13 +607,6 @@ function doneLoading(event) {
                 continue;
             }
 
-            if (id == "HowToPlayScreenImg") {
-                HowToPlayScreenImg = new createjs.Bitmap(preload.getResult('HowToPlayScreenImg'));
-                container.parent.addChild(HowToPlayScreenImg);
-                HowToPlayScreenImg.visible = true;
-                continue;
-            }
-
             if (id == "GameFinishedImg") {
                 GameFinishedImg = new createjs.Bitmap(preload.getResult('GameFinishedImg'));
                 container.parent.addChild(GameFinishedImg);
@@ -692,6 +687,20 @@ function watchRestart() {
 
     if (hudContainer) {
         hudContainer.visible = false;
+    }
+
+    if (!HowToPlayScreenImg) {
+        HowToPlayScreenImg = buildHowToPlayOverlay();
+    }
+
+    var overlayParent = container && container.parent ? container.parent : stage;
+    if (HowToPlayScreenImg && overlayParent) {
+        if (!HowToPlayScreenImg.parent) {
+            overlayParent.addChild(HowToPlayScreenImg);
+        } else {
+            overlayParent.setChildIndex(HowToPlayScreenImg, overlayParent.numChildren - 1);
+        }
+        HowToPlayScreenImg.visible = true;
     }
 
 
@@ -1183,6 +1192,134 @@ if(time<=5){   accentColors = isCritical ? ["rgba(255,135,135,0.45)", "rgba(255,
     drawHudIcon(timerCardContainer.icon, "timer", isCritical ? "#FF9DA5" : "#66B9FF");
     gameTimerTxt.color = isCritical ? "#FFD7D7" : "#F6FBFF";
 }
+
+function buildHowToPlayOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "HowToPlayOverlay";
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#FFF8E6", "#FFE1AE"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 44);
+    pattern.alpha = 0.45;
+    overlay.addChild(pattern);
+
+    var header = createHowToPlayHeader();
+    overlay.addChild(header);
+
+    var subtitle = new createjs.Text("Personalising your session.", "600 26px 'Baloo 2'", "#9A5A1E");
+    subtitle.textAlign = "center";
+    subtitle.x = 640;
+    subtitle.y = 500;
+    subtitle.shadow = new createjs.Shadow("rgba(255, 255, 255, 0.45)", 0, 6, 20);
+    overlay.addChild(subtitle);
+
+    var progress = createHowToPlayProgressBar();
+    progress.x = 340;
+    progress.y = 560;
+    overlay.addChild(progress);
+
+    var footer = new createjs.Text("Get ready for a quick warm-up!", "500 22px 'Baloo 2'", "#B36B1C");
+    footer.textAlign = "center";
+    footer.x = 640;
+    footer.y = 610;
+    overlay.addChild(footer);
+
+    var accentCircle = new createjs.Shape();
+    accentCircle.graphics.beginFill("rgba(255,255,255,0.35)").drawCircle(1100, 150, 26);
+    overlay.addChild(accentCircle);
+
+    var accentCircle2 = new createjs.Shape();
+    accentCircle2.graphics.beginFill("rgba(255,255,255,0.2)").drawCircle(1020, 210, 16);
+    overlay.addChild(accentCircle2);
+
+    return overlay;
+}
+
+function drawHoneycombPattern(width, height, radius) {
+    var shape = new createjs.Shape();
+    var graphics = shape.graphics;
+    var hexHeight = Math.sqrt(3) * radius;
+    var horizontalSpacing = radius * 1.5;
+    var row = 0;
+
+    for (var y = radius; y < height + hexHeight; y += hexHeight, row++) {
+        var offsetX = (row % 2) ? horizontalSpacing / 2 : 0;
+        for (var x = radius; x < width + radius; x += horizontalSpacing) {
+            var centerX = x + offsetX;
+            var fill = row % 2 === 0 ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.22)";
+            graphics.beginFill(fill).drawPolyStar(centerX, y, radius, 6, 0, 30);
+        }
+    }
+
+    return shape;
+}
+
+function createHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 80;
+    container.y = 60;
+
+    var card = new createjs.Shape();
+    card.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 240, 0)
+        .drawRoundRect(0, 0, 280, 130, 34);
+    card.shadow = new createjs.Shadow("rgba(227, 138, 45, 0.35)", 0, 14, 24);
+    container.addChild(card);
+
+    var iconBackground = new createjs.Shape();
+    iconBackground.graphics.beginFill("#FFFFFF").drawCircle(78, 65, 36);
+    container.addChild(iconBackground);
+
+    var icon = new createjs.Text("!", "700 58px 'Baloo 2'", "#FF8D3C");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 78;
+    icon.y = 65;
+    container.addChild(icon);
+
+    var title = new createjs.Text("HOW\nTO PLAY", "700 34px 'Baloo 2'", "#FFFFFF");
+    title.lineHeight = 38;
+    title.x = 132;
+    title.y = 26;
+    container.addChild(title);
+
+    return container;
+}
+
+function createHowToPlayProgressBar() {
+    var container = new createjs.Container();
+
+    var shadow = new createjs.Shape();
+    shadow.graphics.beginFill("rgba(223, 163, 79, 0.25)").drawRoundRect(6, 10, 612, 20, 12);
+    shadow.alpha = 0.7;
+    container.addChild(shadow);
+
+    var background = new createjs.Shape();
+    background.graphics.beginFill("rgba(255,255,255,0.8)").drawRoundRect(0, 0, 600, 18, 12);
+    container.addChild(background);
+
+    var fill = new createjs.Shape();
+    fill.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 600, 0)
+        .drawRoundRect(0, 0, 600, 18, 12);
+    fill.scaleX = 0.35;
+    container.addChild(fill);
+
+    var label = new createjs.Text("Preparing your experience...", "600 20px 'Baloo 2'", "#9A5A1E");
+    label.textAlign = "center";
+    label.x = 300;
+    label.y = 26;
+    container.addChild(label);
+
+    container.progressFill = fill;
+
+    return container;
+}
+
 
 //==========================================================================//
 function createHowToPlay() {
