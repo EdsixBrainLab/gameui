@@ -218,9 +218,7 @@ function updateLoading(event) {
     }
 
     if (HowToPlayScreenImg && HowToPlayScreenImg.proceedButton) {
-        if (progresPrecentage >= 100) {
-            showLoaderProceedButton();
-        } else {
+        if (progresPrecentage < 100) {
             hideLoaderProceedButton();
         }
     }
@@ -1472,14 +1470,78 @@ function attachProceedButtonListeners(button) {
 
     button.on("click", function () {
         hideLoaderProceedButton();
-        if (typeof toggleFullScreen === "function") {
+
+        var globalContext = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : null);
+
+        var toggleInvoked = false;
+        if (typeof togglefullscreen === "function") {
             try {
-                toggleFullScreen();
+                togglefullscreen();
+                toggleInvoked = true;
             } catch (e) {
-                console.log("toggleFullScreen unavailable", e);
+                console.log("togglefullscreen invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.togglefullscreen === "function") {
+            try {
+                globalContext.togglefullscreen();
+                toggleInvoked = true;
+            } catch (e) {
+                console.log("window.togglefullscreen invocation failed", e);
             }
         }
-        createHowToPlay();
+
+        if (!toggleInvoked) {
+            if (typeof toggleFullScreen === "function") {
+                try {
+                    toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("toggleFullScreen unavailable", e);
+                }
+            } else if (globalContext && typeof globalContext.toggleFullScreen === "function") {
+                try {
+                    globalContext.toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("window.toggleFullScreen unavailable", e);
+                }
+            }
+        }
+
+        var howToPlayInvoked = false;
+        if (typeof createhowtoplay === "function") {
+            try {
+                createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("createhowtoplay invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.createhowtoplay === "function") {
+            try {
+                globalContext.createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("window.createhowtoplay invocation failed", e);
+            }
+        }
+
+        if (!howToPlayInvoked) {
+            if (typeof createHowToPlay === "function") {
+                try {
+                    createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("createHowToPlay invocation failed", e);
+                }
+            } else if (globalContext && typeof globalContext.createHowToPlay === "function") {
+                try {
+                    globalContext.createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("window.createHowToPlay invocation failed", e);
+                }
+            }
+        }
     });
 
     button.on("rollover", function () {
@@ -1511,6 +1573,14 @@ function showLoaderProceedButton() {
     }
     createjs.Tween.get(button, { override: true })
         .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut);
+
+    // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
+    button.alpha = 1;
+    button.scaleX = button.scaleY = 1;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
 }
 
 function hideLoaderProceedButton() {
@@ -1527,6 +1597,10 @@ function hideLoaderProceedButton() {
     button.mouseEnabled = false;
     button.mouseChildren = false;
     button.visible = false;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
 }
 
 
