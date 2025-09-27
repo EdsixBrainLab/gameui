@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -207,7 +206,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         bar.scaleX = progressRatio;
     }
@@ -1320,7 +1318,6 @@ function createHowToPlayInstructions() {
 }
 
 
-
 function drawHoneycombPattern(width, height, radius) {
     var shape = new createjs.Shape();
     var graphics = shape.graphics;
@@ -1534,7 +1531,6 @@ function createIntroActionButton() {
     var highlight = new createjs.Shape();
     highlight.name = "highlight";
     button.addChild(highlight);
-
     var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
     icon.textAlign = "center";
@@ -1566,7 +1562,6 @@ function applyHowToPlayButtonState(button, state) {
     if (!button) {
         return;
     }
-
     var base = button.getChildByName("base");
     var highlight = button.getChildByName("highlight");
     var label = button.getChildByName("label");
@@ -1579,7 +1574,6 @@ function applyHowToPlayButtonState(button, state) {
     if (highlight) {
         highlight.graphics.clear();
     }
-    if (glow) {
         glow.graphics.clear();
     }
 
