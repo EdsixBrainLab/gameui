@@ -42,6 +42,326 @@ var HUD_CARD_ACCENT_WIDTH = 140;
 var HUD_CARD_SPACING = 590;
 var QUESTION_PROGRESS_WIDTH = 80;
 
+var HOW_TO_PLAY_COLOR_PALETTE = [
+    ["#6FE3C6", "#58B5FF"],
+    ["#FFBC55", "#FF7A9C"],
+    ["#9F8CFF", "#67E0F8"],
+    ["#7DE4FF", "#8BE3B6"]
+];
+
+var DEFAULT_HOW_TO_PLAY_CONTENT = {
+    title: "How to Play",
+    subtitle: "Follow these quick steps to learn the controls and objective before you begin.",
+    steps: [
+        {
+            title: "Understand the goal",
+            description: "Read the prompt at the top of the screen to know what the challenge is asking for."
+        },
+        {
+            title: "Interact with the board",
+            description: "Use your mouse or touch controls to move, drag, or tap the highlighted game pieces."
+        },
+        {
+            title: "Beat the timer",
+            description: "Complete the task before the countdown hits zero to maximize your score."
+        }
+    ]
+};
+
+var HOW_TO_PLAY_LIBRARY = {
+    Anagrams: {
+        subtitle: "Rearrange the jumbled letters to uncover the hidden word.",
+        steps: [
+            {
+                title: "Study the clue",
+                description: "Read the hint at the top to understand the theme of the hidden word."
+            },
+            {
+                title: "Arrange the letters",
+                description: "Tap or drag the tiles to rearrange them until they form the correct word."
+            },
+            {
+                title: "Submit in time",
+                description: "Hit the answer button before the timer expires to earn full points."
+            }
+        ]
+    },
+    CycleRace: {
+        subtitle: "Guide your cyclist to the finish line without missing any boosts.",
+        steps: [
+            {
+                title: "Watch the indicators",
+                description: "Keep an eye on the prompts that tell you when to switch lanes or boost speed."
+            },
+            {
+                title: "React quickly",
+                description: "Tap or press the instructed controls as soon as the highlight reaches the target zone."
+            },
+            {
+                title: "Maintain rhythm",
+                description: "Chain together accurate moves to extend your combo and earn bonus time."
+            }
+        ]
+    },
+    CarPark: {
+        subtitle: "Navigate the car through the maze to park in the highlighted spot.",
+        steps: [
+            {
+                title: "Plan the path",
+                description: "Preview the route and note obstacles before you start moving."
+            },
+            {
+                title: "Drive precisely",
+                description: "Use the on-screen controls to steer carefully without touching the barriers."
+            },
+            {
+                title: "Park smoothly",
+                description: "Align the vehicle fully inside the glowing bay to complete the level."
+            }
+        ]
+    },
+    IAmCube: {
+        subtitle: "Rotate the 3D cube to match the requested faces and colors.",
+        steps: [
+            {
+                title: "Check the target",
+                description: "Look at the reference tile to see which face and color combination is required."
+            },
+            {
+                title: "Spin the cube",
+                description: "Swipe or drag to rotate the cube until the correct face is in view."
+            },
+            {
+                title: "Confirm the match",
+                description: "Tap the submit area once the cube orientation matches the target card."
+            }
+        ]
+    },
+    SparrowHunt: {
+        subtitle: "Spot the sparrows and tap them quickly before they fly away.",
+        steps: [
+            {
+                title: "Scan the scene",
+                description: "Observe the environment and memorize where the sparrows might appear."
+            },
+            {
+                title: "Tap the birds",
+                description: "As soon as a sparrow pops up, tap it to score. Avoid touching other creatures."
+            },
+            {
+                title: "Keep your streak",
+                description: "Hit consecutive sparrows to build a streak multiplier for bonus points."
+            }
+        ]
+    }
+};
+
+function getGameDisplayName() {
+    if (typeof GameNameWithLvl === "string" && GameNameWithLvl.length) {
+        return GameNameWithLvl.replace(/[\-_]+/g, " ");
+    }
+
+    if (typeof UniqueGameName === "string" && UniqueGameName.length) {
+        return UniqueGameName.replace(/[\-_]+/g, " ");
+    }
+
+    return "the game";
+}
+
+function getStepColors(index, customColors) {
+    if (Array.isArray(customColors) && customColors.length >= 2) {
+        return [customColors[0], customColors[1]];
+    }
+
+    return HOW_TO_PLAY_COLOR_PALETTE[index % HOW_TO_PLAY_COLOR_PALETTE.length];
+}
+
+function sanitizeHowToPlaySteps(stepList) {
+    var fallback = DEFAULT_HOW_TO_PLAY_CONTENT.steps;
+    if (!Array.isArray(stepList) || !stepList.length) {
+        stepList = fallback;
+    }
+
+    var sanitized = [];
+    for (var i = 0; i < stepList.length; i++) {
+        var rawStep = stepList[i] || {};
+        var fallbackStep = fallback[i % fallback.length];
+        sanitized.push({
+            title: String(rawStep.title || (fallbackStep && fallbackStep.title) || ("Step " + (i + 1))),
+            description: String(
+                rawStep.description || (fallbackStep && fallbackStep.description) || "Follow the on-screen instructions."
+            ),
+            colors: getStepColors(i, rawStep.colors)
+        });
+    }
+
+    return sanitized;
+}
+
+function getHowToPlayContent() {
+    var baseName = typeof UniqueGameName === "string" ? UniqueGameName : "";
+    var libraryContent = baseName && HOW_TO_PLAY_LIBRARY[baseName] ? HOW_TO_PLAY_LIBRARY[baseName] : null;
+    var overrideContent = null;
+
+    if (typeof window !== "undefined") {
+        if (window.howToPlayContent && Array.isArray(window.howToPlayContent.steps) && window.howToPlayContent.steps.length) {
+            overrideContent = window.howToPlayContent;
+        } else if (
+            baseName &&
+            window[baseName + "HowToPlayContent"] &&
+            Array.isArray(window[baseName + "HowToPlayContent"].steps) &&
+            window[baseName + "HowToPlayContent"].steps.length
+        ) {
+            overrideContent = window[baseName + "HowToPlayContent"];
+        }
+    }
+
+    var result = {
+        title: DEFAULT_HOW_TO_PLAY_CONTENT.title,
+        subtitle: DEFAULT_HOW_TO_PLAY_CONTENT.subtitle,
+        steps: sanitizeHowToPlaySteps(DEFAULT_HOW_TO_PLAY_CONTENT.steps)
+    };
+
+    if (!libraryContent && !overrideContent) {
+        var displayName = getGameDisplayName();
+        result.subtitle = "Get ready to play " + displayName + ". Follow these quick steps before you begin.";
+    }
+
+    if (libraryContent) {
+        if (libraryContent.title) {
+            result.title = libraryContent.title;
+        }
+        if (libraryContent.subtitle) {
+            result.subtitle = libraryContent.subtitle;
+        }
+        result.steps = sanitizeHowToPlaySteps(libraryContent.steps);
+    }
+
+    if (overrideContent) {
+        if (overrideContent.title) {
+            result.title = overrideContent.title;
+        }
+        if (overrideContent.subtitle) {
+            result.subtitle = overrideContent.subtitle;
+        }
+        result.steps = sanitizeHowToPlaySteps(overrideContent.steps);
+    }
+
+    return result;
+}
+
+function createHowToPlayStep(index, stepConfig) {
+    var step = new createjs.Container();
+    step.y = index * 120;
+    step.alpha = 0;
+    step.baseX = 0;
+
+    var stepBg = new createjs.Shape();
+    stepBg.graphics
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.06)",
+            "rgba(255,255,255,0.02)"
+        ], [0, 1], 0, -44, 0, 44)
+        .drawRoundRect(0, -44, 560, 104, 30);
+    stepBg.alpha = 0.6;
+    step.addChild(stepBg);
+    step.bg = stepBg;
+
+    var colors = getStepColors(index, stepConfig.colors);
+
+    var badge = new createjs.Shape();
+    badge.graphics.beginLinearGradientFill(colors, [0, 1], 0, -26, 0, 26).drawCircle(0, 0, 28);
+    badge.x = 52;
+    step.addChild(badge);
+
+    var stepNumber = String(index + 1);
+    if (stepNumber.length < 2) {
+        stepNumber = "0" + stepNumber;
+    }
+
+    var badgeTxt = new createjs.Text(stepNumber, "700 20px 'Baloo 2'", "#051126");
+    badgeTxt.textAlign = "center";
+    badgeTxt.textBaseline = "middle";
+    badgeTxt.x = 52;
+    badgeTxt.y = 0;
+    step.addChild(badgeTxt);
+
+    var badgeLight = new createjs.Shape();
+    badgeLight.graphics
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.55)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, -10, 0, 0, -10, 30)
+        .drawCircle(0, 0, 36);
+    badgeLight.alpha = 0.55;
+    badgeLight.x = 52;
+    badgeLight.y = -8;
+    step.addChild(badgeLight);
+
+    var stepTitle = new createjs.Text(String(stepConfig.title || "Step " + (index + 1)).toUpperCase(), "700 20px 'Baloo 2'", "#F4FAFF");
+    stepTitle.textAlign = "left";
+    stepTitle.x = 112;
+    stepTitle.y = -22;
+    step.addChild(stepTitle);
+    step.titleField = stepTitle;
+
+    var stepBody = new createjs.Text(String(stepConfig.description || "Follow the instruction."), "400 18px 'Baloo 2'", "#D1E4FF");
+    stepBody.lineWidth = 404;
+    stepBody.textAlign = "left";
+    stepBody.x = 112;
+    stepBody.y = 2;
+    step.addChild(stepBody);
+    step.bodyField = stepBody;
+
+    createjs.Tween.get(stepBg, { loop: true })
+        .wait(index * 320)
+        .to({ alpha: 0.85 }, 1400, createjs.Ease.sineInOut)
+        .to({ alpha: 0.6 }, 1400, createjs.Ease.sineInOut);
+
+    return step;
+}
+
+function applyHowToPlayContent(content) {
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    var resolvedContent = content || getHowToPlayContent();
+
+    if (howToPlayImageMc.titleTxt) {
+        howToPlayImageMc.titleTxt.text = resolvedContent.title || DEFAULT_HOW_TO_PLAY_CONTENT.title;
+    }
+
+    if (howToPlayImageMc.subtitleTxt) {
+        howToPlayImageMc.subtitleTxt.text = resolvedContent.subtitle || "";
+    }
+
+    if (howToPlayImageMc.stepContainers && howToPlayImageMc.stepContainers.length) {
+        for (var i = 0; i < howToPlayImageMc.stepContainers.length; i++) {
+            var existingStep = howToPlayImageMc.stepContainers[i];
+            createjs.Tween.removeTweens(existingStep);
+            if (existingStep.bg) {
+                createjs.Tween.removeTweens(existingStep.bg);
+            }
+        }
+    }
+
+    if (howToPlayStepsContainer) {
+        howToPlayStepsContainer.removeAllChildren();
+    }
+
+    howToPlayImageMc.stepContainers = [];
+
+    var steps = sanitizeHowToPlaySteps(resolvedContent.steps);
+    for (var j = 0; j < steps.length; j++) {
+        var step = createHowToPlayStep(j, steps[j]);
+        if (howToPlayStepsContainer) {
+            howToPlayStepsContainer.addChild(step);
+        }
+        howToPlayImageMc.stepContainers.push(step);
+    }
+}
+
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -1100,7 +1420,20 @@ function createIntroButton() {
         label.color = config.textColor;
         label.text = config.label;
         subtitle.color = config.subtitleColor;
-        subtitle.text = config.subtitle;
+
+        var displayName = getGameDisplayName();
+        if (displayName !== "the game") {
+            if (state === 1) {
+                subtitle.text = "I'm ready to play " + displayName;
+            } else if (state === 0) {
+                subtitle.text = "Jump straight into " + displayName;
+            } else {
+                subtitle.text = config.subtitle;
+            }
+        } else {
+            subtitle.text = config.subtitle;
+        }
+
         button.currentState = state || 0;
     };
 
@@ -1193,106 +1526,27 @@ function buildHowToPlayOverlay() {
     title.y = -184;
     howToPlayCardContainer.addChild(title);
 
-    var subtitle = new createjs.Text(
-        "Master the anagram challenge with these quick tips.",
-        "400 20px 'Baloo 2'",
-        "#BFD6FF"
-    );
+    howToPlayImageMc.titleTxt = title;
+
+    var subtitle = new createjs.Text("", "400 20px 'Baloo 2'", "#BFD6FF");
+
     subtitle.lineWidth = 520;
     subtitle.textAlign = "left";
     subtitle.x = -320;
     subtitle.y = -128;
     howToPlayCardContainer.addChild(subtitle);
 
+    howToPlayImageMc.subtitleTxt = subtitle;
+
+
     howToPlayStepsContainer = new createjs.Container();
     howToPlayStepsContainer.x = -320;
     howToPlayStepsContainer.y = -64;
     howToPlayCardContainer.addChild(howToPlayStepsContainer);
 
-    var stepData = [
-        {
-            title: "Study the clue",
-            description: "Read the hint at the top to understand the theme of the hidden word.",
-            colors: ["#6FE3C6", "#58B5FF"]
-        },
-        {
-            title: "Arrange the letters",
-            description: "Tap or drag the letters to rearrange them until they form the correct word.",
-            colors: ["#FFBC55", "#FF7A9C"]
-        },
-        {
-            title: "Beat the timer",
-            description: "Submit your answer before the countdown hits zero to earn maximum points.",
-            colors: ["#9F8CFF", "#67E0F8"]
-        }
-    ];
 
     howToPlayImageMc.stepContainers = [];
 
-    for (var i = 0; i < stepData.length; i++) {
-        var stepConfig = stepData[i];
-        var step = new createjs.Container();
-        step.y = i * 120;
-        step.alpha = 0;
-        step.baseX = 0;
-
-        var stepBg = new createjs.Shape();
-        stepBg.graphics
-            .beginLinearGradientFill([
-                "rgba(255,255,255,0.06)",
-                "rgba(255,255,255,0.02)"
-            ], [0, 1], 0, -44, 0, 44)
-            .drawRoundRect(0, -44, 560, 104, 30);
-        stepBg.alpha = 0.6;
-        step.addChild(stepBg);
-
-        var badge = new createjs.Shape();
-        badge.graphics
-            .beginLinearGradientFill(stepConfig.colors, [0, 1], 0, -26, 0, 26)
-            .drawCircle(0, 0, 28);
-        badge.x = 52;
-        step.addChild(badge);
-
-        var badgeTxt = new createjs.Text("0" + (i + 1), "700 20px 'Baloo 2'", "#051126");
-        badgeTxt.textAlign = "center";
-        badgeTxt.textBaseline = "middle";
-        badgeTxt.x = 52;
-        badgeTxt.y = 0;
-        step.addChild(badgeTxt);
-
-        var badgeLight = new createjs.Shape();
-        badgeLight.graphics
-            .beginRadialGradientFill([
-                "rgba(255,255,255,0.55)",
-                "rgba(255,255,255,0)"
-            ], [0, 1], 0, -10, 0, 0, -10, 30)
-            .drawCircle(0, 0, 36);
-        badgeLight.alpha = 0.55;
-        badgeLight.x = 52;
-        badgeLight.y = -8;
-        step.addChild(badgeLight);
-
-        var stepTitle = new createjs.Text(stepConfig.title.toUpperCase(), "700 20px 'Baloo 2'", "#F4FAFF");
-        stepTitle.textAlign = "left";
-        stepTitle.x = 112;
-        stepTitle.y = -22;
-        step.addChild(stepTitle);
-
-        var stepBody = new createjs.Text(stepConfig.description, "400 18px 'Baloo 2'", "#D1E4FF");
-        stepBody.lineWidth = 404;
-        stepBody.textAlign = "left";
-        stepBody.x = 112;
-        stepBody.y = 2;
-        step.addChild(stepBody);
-
-        createjs.Tween.get(stepBg, { loop: true })
-            .wait(i * 320)
-            .to({ alpha: 0.85 }, 1400, createjs.Ease.sineInOut)
-            .to({ alpha: 0.6 }, 1400, createjs.Ease.sineInOut);
-
-        howToPlayStepsContainer.addChild(step);
-        howToPlayImageMc.stepContainers.push(step);
-    }
 
     SkipBtnMc = createIntroButton();
     SkipBtnMc.x = 0;
@@ -1305,6 +1559,10 @@ function buildHowToPlayOverlay() {
 
     container.parent.addChild(howToPlayImageMc);
     container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
+
+
+    applyHowToPlayContent(getHowToPlayContent());
+
 }
 
 function showHowToPlayOverlay() {
@@ -1313,6 +1571,10 @@ function showHowToPlayOverlay() {
     if (!howToPlayImageMc) {
         return;
     }
+
+
+    applyHowToPlayContent();
+
 
     container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
 
