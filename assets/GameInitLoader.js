@@ -1420,6 +1420,7 @@ function createIntroButton() {
         label.color = config.textColor;
         label.text = config.label;
         subtitle.color = config.subtitleColor;
+
         var displayName = getGameDisplayName();
         if (displayName !== "the game") {
             if (state === 1) {
@@ -1432,6 +1433,7 @@ function createIntroButton() {
         } else {
             subtitle.text = config.subtitle;
         }
+
         button.currentState = state || 0;
     };
 
@@ -1523,22 +1525,28 @@ function buildHowToPlayOverlay() {
     title.x = -320;
     title.y = -184;
     howToPlayCardContainer.addChild(title);
+
     howToPlayImageMc.titleTxt = title;
 
     var subtitle = new createjs.Text("", "400 20px 'Baloo 2'", "#BFD6FF");
+
     subtitle.lineWidth = 520;
     subtitle.textAlign = "left";
     subtitle.x = -320;
     subtitle.y = -128;
     howToPlayCardContainer.addChild(subtitle);
+
     howToPlayImageMc.subtitleTxt = subtitle;
+
 
     howToPlayStepsContainer = new createjs.Container();
     howToPlayStepsContainer.x = -320;
     howToPlayStepsContainer.y = -64;
     howToPlayCardContainer.addChild(howToPlayStepsContainer);
 
+
     howToPlayImageMc.stepContainers = [];
+
 
     SkipBtnMc = createIntroButton();
     SkipBtnMc.x = 0;
@@ -1552,7 +1560,9 @@ function buildHowToPlayOverlay() {
     container.parent.addChild(howToPlayImageMc);
     container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
 
+
     applyHowToPlayContent(getHowToPlayContent());
+
 }
 
 function showHowToPlayOverlay() {
@@ -1562,7 +1572,9 @@ function showHowToPlayOverlay() {
         return;
     }
 
+
     applyHowToPlayContent();
+
 
     container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
 
