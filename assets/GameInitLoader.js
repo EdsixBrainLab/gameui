@@ -642,8 +642,6 @@ function doneLoading(event) {
             }
 
         } else {
-			console.log("progressbarremove")
-
             doneLoading1(event)
 
         }
@@ -1285,10 +1283,10 @@ function createHowToPlayInstructions() {
     container.addChild(title);
 
     var steps = [
-        "Review the How to Play tips carefully.",
-        "Once you understand them, tap Start to begin.",
-        "Scores improve with correct answers and quicker time.",
-        "You cannot change your answer after submitting."
+        "See the How to Play properly.",
+        "After understood start the game.",
+        "The score is awarded based on correct answer and time taken.",
+        "Once answered you can't go back."
     ];
 
     for (var i = 0; i < steps.length; i++) {
