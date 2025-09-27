@@ -611,17 +611,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "SkipBtn") {
-                var spriteSheet4 = new createjs.SpriteSheet({
-                    framerate: 30,
-                    "images": [preload.getResult("SkipBtn")],
-                    "frames": { "regX": 50, "height": 137, "count": 0, "regY": 50, "width": 262 },
-                    // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-                });
-                //
-                SkipBtnMc = new createjs.Sprite(spriteSheet4);
+                SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                SkipBtnMc.x = 1095;
-                SkipBtnMc.y = 60
+                SkipBtnMc.x = 1100;
+                SkipBtnMc.y = 92;
                 SkipBtnMc.visible = false;
 
                 continue;
@@ -635,10 +628,9 @@ function doneLoading(event) {
             }
 
             if (id == "HowToPlayScreen") {
-                howToPlayImageMc = new createjs.Bitmap(preload.getResult('HowToPlayScreen'));
+                howToPlayImageMc = buildGameIntroOverlay();
                 container.parent.addChild(howToPlayImageMc);
                 howToPlayImageMc.visible = false;
-                howToPlayImageMc.x = howToPlayImageMc.x - 20
                 continue;
             }
 
@@ -1459,6 +1451,165 @@ function createLoaderProceedButton() {
     button.cursor = "pointer";
 
     return button;
+}
+
+function buildGameIntroOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "GameIntroOverlay";
+    overlay.mouseEnabled = false;
+    overlay.mouseChildren = false;
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 34);
+    pattern.alpha = 0.14;
+    overlay.addChild(pattern);
+
+    var header = createIntroHowToPlayHeader();
+    overlay.addChild(header);
+
+    var accent = new createjs.Shape();
+    accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
+    overlay.addChild(accent);
+
+    return overlay;
+}
+
+function createIntroHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 90;
+    container.y = 44;
+
+    var frame = new createjs.Shape();
+    frame.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 360, 0)
+        .drawRoundRect(0, 0, 360, 96, 48);
+    frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.45)", 0, 18, 32);
+    container.addChild(frame);
+
+    var iconBg = new createjs.Shape();
+    iconBg.graphics.beginFill("rgba(255,255,255,0.16)").drawCircle(72, 48, 34);
+    container.addChild(iconBg);
+
+    var icon = new createjs.Text("\u2139", "700 46px 'Baloo 2'", "#FFFFFF");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 72;
+    icon.y = 48;
+    container.addChild(icon);
+
+    var title = new createjs.Text("How to Play", "700 34px 'Baloo 2'", "#FFFFFF");
+    title.x = 128;
+    title.y = 22;
+    container.addChild(title);
+
+    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 22px 'Baloo 2'", "rgba(255,255,255,0.88)");
+    subtitle.x = 128;
+    subtitle.y = 56;
+    container.addChild(subtitle);
+
+    return container;
+}
+
+function createIntroActionButton() {
+    var button = new createjs.Container();
+    button.name = "IntroActionButton";
+    button.mouseChildren = false;
+    button.mouseEnabled = false;
+    button.cursor = "pointer";
+
+    var shadow = new createjs.Shape();
+    shadow.name = "shadow";
+    shadow.graphics.beginFill("rgba(5, 12, 28, 0.45)").drawRoundRect(-118, -28, 236, 56, 24);
+    shadow.y = 6;
+    shadow.alpha = 0.3;
+    button.addChild(shadow);
+
+    var frame = new createjs.Shape();
+    frame.name = "frame";
+    button.addChild(frame);
+
+    var highlight = new createjs.Shape();
+    highlight.name = "highlight";
+    button.addChild(highlight);
+
+    var label = new createjs.Text("", "700 26px 'Baloo 2'", "#FFFFFF");
+    label.name = "label";
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    button.addChild(label);
+
+    applyHowToPlayButtonState(button, "skip");
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRoundRect(-118, -34, 236, 68, 24);
+    button.hitArea = hit;
+
+    return button;
+}
+
+function applyHowToPlayButtonState(button, state) {
+    if (!button) {
+        return;
+    }
+
+    var frame = button.getChildByName("frame");
+    var highlight = button.getChildByName("highlight");
+    var label = button.getChildByName("label");
+    var shadow = button.getChildByName("shadow");
+
+    if (frame) {
+        frame.graphics.clear();
+    }
+    if (highlight) {
+        highlight.graphics.clear();
+    }
+
+    if (state === "start") {
+        if (frame) {
+            frame.graphics
+                .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -118, 0, 118, 0)
+                .drawRoundRect(-118, -34, 236, 68, 26);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(["rgba(255,255,255,0.6)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"], [0, 0.5, 1], -118, -34, 118, 20)
+                .drawRoundRect(-118, -34, 236, 40, 24);
+        }
+        if (label) {
+            label.text = "Start";
+            label.color = "#FFFFFF";
+        }
+        if (shadow) {
+            shadow.alpha = 0.45;
+        }
+    } else {
+        if (frame) {
+            frame.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(255, 141, 60, 0.65)")
+                .beginFill("rgba(255,255,255,0.95)")
+                .drawRoundRect(-118, -34, 236, 68, 26);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(["rgba(255,141,60,0.2)", "rgba(255,141,60,0)"], [0, 1], -118, -10, 118, 20)
+                .drawRoundRect(-118, -24, 236, 48, 22);
+        }
+        if (label) {
+            label.text = "Skip";
+            label.color = "#FF8D3C";
+        }
+        if (shadow) {
+            shadow.alpha = 0.3;
+        }
+    }
+
+    button.state = state;
 }
 
 function attachProceedButtonListeners(button) {
