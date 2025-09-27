@@ -1,0 +1,35 @@
+﻿{"frames": [
+
+{
+	"filename": "Symbol 1 instance 10000",
+	"frame": {"x":0,"y":0,"w":537,"h":476},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":537,"h":476},
+	"sourceSize": {"w":537,"h":476}
+}
+,{
+	"filename": "Symbol 1 instance 10001",
+	"frame": {"x":537,"y":0,"w":537,"h":476},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":537,"h":476},
+	"sourceSize": {"w":537,"h":476}
+}
+,{
+	"filename": "Symbol 1 instance 10002",
+	"frame": {"x":1074,"y":0,"w":537,"h":476},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":537,"h":476},
+	"sourceSize": {"w":537,"h":476}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "20.0.0.17400",
+	"image": "Opps sprite.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":512},
+	"scale": "1"
+}
+}

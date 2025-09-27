@@ -1,0 +1,35 @@
+﻿{"frames": [
+
+{
+	"filename": "Symbol 1 instance 10000",
+	"frame": {"x":0,"y":0,"w":490,"h":552},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":490,"h":552},
+	"sourceSize": {"w":490,"h":552}
+}
+,{
+	"filename": "Symbol 1 instance 10001",
+	"frame": {"x":490,"y":0,"w":490,"h":552},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":490,"h":552},
+	"sourceSize": {"w":490,"h":552}
+}
+,{
+	"filename": "Symbol 1 instance 10002",
+	"frame": {"x":980,"y":0,"w":490,"h":552},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":490,"h":552},
+	"sourceSize": {"w":490,"h":552}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "20.0.0.17400",
+	"image": "Wow sprit.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":1024},
+	"scale": "1"
+}
+}

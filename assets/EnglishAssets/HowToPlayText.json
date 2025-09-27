@@ -1,0 +1,843 @@
+﻿{"frames": {
+
+"howToPlayMc0000":
+{
+	"frame": {"x":0,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0001":
+{
+	"frame": {"x":253,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0002":
+{
+	"frame": {"x":506,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0003":
+{
+	"frame": {"x":759,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0004":
+{
+	"frame": {"x":1012,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0005":
+{
+	"frame": {"x":1265,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0006":
+{
+	"frame": {"x":1518,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0007":
+{
+	"frame": {"x":1771,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0008":
+{
+	"frame": {"x":2024,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0009":
+{
+	"frame": {"x":2277,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0010":
+{
+	"frame": {"x":2530,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0011":
+{
+	"frame": {"x":2783,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0012":
+{
+	"frame": {"x":3036,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0013":
+{
+	"frame": {"x":3289,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0014":
+{
+	"frame": {"x":3542,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0015":
+{
+	"frame": {"x":3795,"y":0,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0016":
+{
+	"frame": {"x":0,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0017":
+{
+	"frame": {"x":253,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0018":
+{
+	"frame": {"x":506,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0019":
+{
+	"frame": {"x":759,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0020":
+{
+	"frame": {"x":1012,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0021":
+{
+	"frame": {"x":1265,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0022":
+{
+	"frame": {"x":1518,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0023":
+{
+	"frame": {"x":1771,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0024":
+{
+	"frame": {"x":2024,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0025":
+{
+	"frame": {"x":2277,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0026":
+{
+	"frame": {"x":2530,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0027":
+{
+	"frame": {"x":2783,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0028":
+{
+	"frame": {"x":3036,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0029":
+{
+	"frame": {"x":3289,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0030":
+{
+	"frame": {"x":3542,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0031":
+{
+	"frame": {"x":3795,"y":185,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0032":
+{
+	"frame": {"x":0,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0033":
+{
+	"frame": {"x":253,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0034":
+{
+	"frame": {"x":506,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0035":
+{
+	"frame": {"x":759,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0036":
+{
+	"frame": {"x":1012,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0037":
+{
+	"frame": {"x":1265,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0038":
+{
+	"frame": {"x":1518,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0039":
+{
+	"frame": {"x":1771,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0040":
+{
+	"frame": {"x":2024,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0041":
+{
+	"frame": {"x":2277,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0042":
+{
+	"frame": {"x":2530,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0043":
+{
+	"frame": {"x":2783,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0044":
+{
+	"frame": {"x":3036,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0045":
+{
+	"frame": {"x":3289,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0046":
+{
+	"frame": {"x":3542,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0047":
+{
+	"frame": {"x":3795,"y":370,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0048":
+{
+	"frame": {"x":0,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0049":
+{
+	"frame": {"x":253,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0050":
+{
+	"frame": {"x":506,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0051":
+{
+	"frame": {"x":759,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0052":
+{
+	"frame": {"x":1012,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0053":
+{
+	"frame": {"x":1265,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0054":
+{
+	"frame": {"x":1518,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0055":
+{
+	"frame": {"x":1771,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0056":
+{
+	"frame": {"x":2024,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0057":
+{
+	"frame": {"x":2277,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0058":
+{
+	"frame": {"x":2530,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0059":
+{
+	"frame": {"x":2783,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0060":
+{
+	"frame": {"x":3036,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0061":
+{
+	"frame": {"x":3289,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0062":
+{
+	"frame": {"x":3542,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0063":
+{
+	"frame": {"x":3795,"y":555,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0064":
+{
+	"frame": {"x":0,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0065":
+{
+	"frame": {"x":253,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0066":
+{
+	"frame": {"x":506,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0067":
+{
+	"frame": {"x":759,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0068":
+{
+	"frame": {"x":1012,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0069":
+{
+	"frame": {"x":1265,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0070":
+{
+	"frame": {"x":1518,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0071":
+{
+	"frame": {"x":1771,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0072":
+{
+	"frame": {"x":2024,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0073":
+{
+	"frame": {"x":2277,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0074":
+{
+	"frame": {"x":2530,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0075":
+{
+	"frame": {"x":2783,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0076":
+{
+	"frame": {"x":3036,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0077":
+{
+	"frame": {"x":3289,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0078":
+{
+	"frame": {"x":3542,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0079":
+{
+	"frame": {"x":3795,"y":740,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0080":
+{
+	"frame": {"x":0,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0081":
+{
+	"frame": {"x":253,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0082":
+{
+	"frame": {"x":506,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0083":
+{
+	"frame": {"x":759,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0084":
+{
+	"frame": {"x":1012,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0085":
+{
+	"frame": {"x":1265,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0086":
+{
+	"frame": {"x":1518,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0087":
+{
+	"frame": {"x":1771,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0088":
+{
+	"frame": {"x":2024,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0089":
+{
+	"frame": {"x":2277,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0090":
+{
+	"frame": {"x":2530,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0091":
+{
+	"frame": {"x":2783,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0092":
+{
+	"frame": {"x":3036,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0093":
+{
+	"frame": {"x":3289,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0094":
+{
+	"frame": {"x":3542,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0095":
+{
+	"frame": {"x":3795,"y":925,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0096":
+{
+	"frame": {"x":0,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0097":
+{
+	"frame": {"x":253,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0098":
+{
+	"frame": {"x":506,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0099":
+{
+	"frame": {"x":759,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0100":
+{
+	"frame": {"x":1012,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0101":
+{
+	"frame": {"x":1265,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0102":
+{
+	"frame": {"x":1518,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+},
+"howToPlayMc0103":
+{
+	"frame": {"x":1771,"y":1110,"w":253,"h":185},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":253,"h":185},
+	"sourceSize": {"w":253,"h":185}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "20.0.2.22168",
+	"image": "HowToPlayText.png",
+	"format": "RGBA8888",
+	"size": {"w":4096,"h":2048},
+	"scale": "1"
+}
+}

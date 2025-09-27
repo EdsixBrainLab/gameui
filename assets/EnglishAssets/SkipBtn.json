@@ -1,0 +1,27 @@
+﻿{"frames": {
+
+"hjfhj instance 10000":
+{
+	"frame": {"x":0,"y":0,"w":262,"h":137},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":262,"h":137},
+	"sourceSize": {"w":262,"h":137}
+},
+"hjfhj instance 10001":
+{
+	"frame": {"x":0,"y":137,"w":262,"h":137},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":262,"h":137},
+	"sourceSize": {"w":262,"h":137}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "Startandskip_v8.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1"
+}
+}
