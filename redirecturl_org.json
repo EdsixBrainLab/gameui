@@ -1,0 +1,7 @@
+{
+	"baseurl":"https://demo.skillangels.com/karefo/index.php",
+	"path":"https://demo.skillangels.com/karefo/result",
+	"get_info":"https://demo.skillangels.com/karefo/get_info",
+	"scoreupdate":"https://demo.skillangels.com/karefo/scoreupdate",
+	"nav":"yes"
+}
