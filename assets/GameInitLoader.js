@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -220,6 +219,7 @@ function updateLoading(event) {
 
     if (HowToPlayScreenImg && HowToPlayScreenImg.proceedButton) {
         if (progresPrecentage < 100) {
+
             hideLoaderProceedButton();
         }
     }
@@ -1330,7 +1330,6 @@ function createHowToPlayInstructions() {
 }
 
 
-
 function drawHoneycombPattern(width, height, radius) {
     var shape = new createjs.Shape();
     var graphics = shape.graphics;
@@ -1544,6 +1543,7 @@ function attachProceedButtonListeners(button) {
                 }
             }
         }
+
     });
 
     button.on("rollover", function () {
