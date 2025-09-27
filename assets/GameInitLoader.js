@@ -206,7 +206,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         bar.scaleX = progressRatio;
     }
@@ -1519,33 +1518,42 @@ function createIntroActionButton() {
     button.mouseChildren = false;
     button.mouseEnabled = false;
     button.cursor = "pointer";
+    button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
 
-    var shadow = new createjs.Shape();
-    shadow.name = "shadow";
-    shadow.graphics.beginFill("rgba(5, 12, 28, 0.45)").drawRoundRect(-118, -28, 236, 56, 24);
-    shadow.y = 6;
-    shadow.alpha = 0.3;
-    button.addChild(shadow);
+    var glow = new createjs.Shape();
+    glow.name = "glow";
+    button.addChild(glow);
 
-    var frame = new createjs.Shape();
-    frame.name = "frame";
-    button.addChild(frame);
+    var base = new createjs.Shape();
+    base.name = "base";
+    button.addChild(base);
 
     var highlight = new createjs.Shape();
     highlight.name = "highlight";
     button.addChild(highlight);
+    var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
+    icon.name = "icon";
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = -96;
+    icon.y = 0;
+    button.addChild(icon);
 
-    var label = new createjs.Text("", "700 26px 'Baloo 2'", "#FFFFFF");
+    var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
     label.name = "label";
-    label.textAlign = "center";
+    label.textAlign = "left";
     label.textBaseline = "middle";
+    label.x = -34;
+    label.y = 0;
     button.addChild(label);
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRoundRect(-170, -48, 340, 96, 32);
+    button.hitArea = hit;
 
     applyHowToPlayButtonState(button, "skip");
 
-    var hit = new createjs.Shape();
-    hit.graphics.beginFill("#000").drawRoundRect(-118, -34, 236, 68, 24);
-    button.hitArea = hit;
+    button.scaleX = button.scaleY = 0.96;
 
     return button;
 }
@@ -1554,57 +1562,82 @@ function applyHowToPlayButtonState(button, state) {
     if (!button) {
         return;
     }
-
-    var frame = button.getChildByName("frame");
+    var base = button.getChildByName("base");
     var highlight = button.getChildByName("highlight");
     var label = button.getChildByName("label");
-    var shadow = button.getChildByName("shadow");
+    var icon = button.getChildByName("icon");
+    var glow = button.getChildByName("glow");
 
-    if (frame) {
-        frame.graphics.clear();
+    if (base) {
+        base.graphics.clear();
     }
     if (highlight) {
         highlight.graphics.clear();
     }
+  if (glow) {
+        glow.graphics.clear();
+    }
 
     if (state === "start") {
-        if (frame) {
-            frame.graphics
-                .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -118, 0, 118, 0)
-                .drawRoundRect(-118, -34, 236, 68, 26);
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(["rgba(255, 166, 94, 0.45)", "rgba(255, 166, 94, 0)"], [0, 1], 0, 0, 0, 0, 0, 180)
+                .drawCircle(0, 0, 170);
+            glow.alpha = 0.95;
+        }
+        if (base) {
+            base.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(245, 107, 32, 0.85)")
+                .beginLinearGradientFill(["#FFB760", "#FF7A2F"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
         }
         if (highlight) {
             highlight.graphics
-                .beginLinearGradientFill(["rgba(255,255,255,0.6)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"], [0, 0.5, 1], -118, -34, 118, 20)
-                .drawRoundRect(-118, -34, 236, 40, 24);
+                .beginLinearGradientFill(["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"], [0, 0.55, 1], -160, -44, 160, 14)
+                .drawRoundRect(-160, -44, 320, 58, 28);
+        }
+        if (icon) {
+            icon.text = "\u25B6";
+            icon.font = "700 34px 'Baloo 2'";
+            icon.color = "#FFFFFF";
         }
         if (label) {
             label.text = "Start";
+            label.font = "700 28px 'Baloo 2'";
             label.color = "#FFFFFF";
         }
-        if (shadow) {
-            shadow.alpha = 0.45;
-        }
+        button.shadow = new createjs.Shadow("rgba(8, 17, 38, 0.38)", 0, 18, 34);
     } else {
-        if (frame) {
-            frame.graphics
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(["rgba(255, 255, 255, 0.7)", "rgba(255, 255, 255, 0)"], [0, 1], 0, 0, 0, 0, 0, 170)
+                .drawCircle(0, 0, 160);
+            glow.alpha = 0.85;
+        }
+        if (base) {
+            base.graphics
                 .setStrokeStyle(2)
                 .beginStroke("rgba(255, 141, 60, 0.65)")
-                .beginFill("rgba(255,255,255,0.95)")
-                .drawRoundRect(-118, -34, 236, 68, 26);
+                .beginLinearGradientFill(["#FFFFFF", "#FFF3E7"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
         }
         if (highlight) {
             highlight.graphics
-                .beginLinearGradientFill(["rgba(255,141,60,0.2)", "rgba(255,141,60,0)"], [0, 1], -118, -10, 118, 20)
-                .drawRoundRect(-118, -24, 236, 48, 22);
+                .beginLinearGradientFill(["rgba(255, 141, 60, 0.22)", "rgba(255, 141, 60, 0)"], [0, 1], -160, -18, 160, 26)
+                .drawRoundRect(-160, -32, 320, 64, 28);
+        }
+        if (icon) {
+            icon.text = "\u279C";
+            icon.font = "700 30px 'Baloo 2'";
+            icon.color = "#FF8D3C";
         }
         if (label) {
             label.text = "Skip";
+            label.font = "700 26px 'Baloo 2'";
             label.color = "#FF8D3C";
         }
-        if (shadow) {
-            shadow.alpha = 0.3;
-        }
+        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
     }
 
     button.state = state;
