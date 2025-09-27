@@ -13,6 +13,14 @@ var extradot = "";
 var TotalAssetsCnt = 34
 var betweenChars = ' '; // a space
 var volumeBtn1, QuesCntMc1, fullScreenBtn1, closeBtn1, QuesCntMc2;
+var howToPlayImageMc,
+    howToPlayCardContainer,
+    howToPlayStepsContainer,
+    howToPlayAccentGlow,
+    howToPlayPulseTween;
+var SkipBtnMc,
+    skipMc,
+    howToPlayButtonSubtitleTxt;
 var hudContainer,
     hudBackgroundShape,
     hudHighlightShape,
@@ -135,9 +143,6 @@ function createManifest() {
         { id: "arrow1", src: assetsPath + "Arrow1.png" },
         { id: "fingure", src: assetsPath + "Fingure.png" },
         { id: "handCursor", src: assetsPath + "handCursor.png" },
-        { id: "SkipBtn", src: assetsPathLang + "SkipBtn.png" },
-        { id: "HowToPlayScreen", src: assetsPathLang + "HowToPlayScreen.png" },
-        { id: "HowToPlayScreenImg", src: assetsPathLang + "HowToPlayScreen1.png" },
 
         { id: "scoreImgMc", src: assetsPath + "Score.png" },
         { id: "ResponseImgMc", src: assetsPath + "ResponseTime.png" },
@@ -573,42 +578,11 @@ function doneLoading(event) {
                 nav = json.nav;
                 continue;
             }
-            if (id == "SkipBtn") {
-                var spriteSheet4 = new createjs.SpriteSheet({
-                    framerate: 30,
-                    "images": [preload.getResult("SkipBtn")],
-                    "frames": { "regX": 50, "height": 137, "count": 0, "regY": 50, "width": 262 },
-                    // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-                });
-                //
-                SkipBtnMc = new createjs.Sprite(spriteSheet4);
-                container.parent.addChild(SkipBtnMc);
-                SkipBtnMc.x = 1095;
-                SkipBtnMc.y = 60
-                SkipBtnMc.visible = false;
-
-                continue;
-            }
             if (id == "handCursor") {
                 handCursor = new createjs.Bitmap(preload.getResult('handCursor'));
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
 
-                continue;
-            }
-
-            if (id == "HowToPlayScreen") {
-                howToPlayImageMc = new createjs.Bitmap(preload.getResult('HowToPlayScreen'));
-                container.parent.addChild(howToPlayImageMc);
-                howToPlayImageMc.visible = false;
-                howToPlayImageMc.x = howToPlayImageMc.x - 20
-                continue;
-            }
-
-            if (id == "HowToPlayScreenImg") {
-                HowToPlayScreenImg = new createjs.Bitmap(preload.getResult('HowToPlayScreenImg'));
-                container.parent.addChild(HowToPlayScreenImg);
-                HowToPlayScreenImg.visible = true;
                 continue;
             }
 
@@ -693,6 +667,8 @@ function watchRestart() {
     if (hudContainer) {
         hudContainer.visible = false;
     }
+
+    buildHowToPlayOverlay();
 
 
 
@@ -1036,6 +1012,367 @@ function refreshHudValues() {
     updateQuestionProgress();
 }
 
+function createIntroButton() {
+    var button = new createjs.Container();
+    var BUTTON_WIDTH = 320;
+    var BUTTON_HEIGHT = 78;
+
+    button.regX = BUTTON_WIDTH / 2;
+    button.regY = BUTTON_HEIGHT / 2;
+    button.mouseChildren = false;
+
+    var shadow = new createjs.Shape();
+    shadow.graphics
+        .beginFill("rgba(6,12,30,0.55)")
+        .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT, 38);
+    shadow.y = 10;
+    shadow.alpha = 0.45;
+    button.addChild(shadow);
+
+    var background = new createjs.Shape();
+    button.addChild(background);
+
+    var highlight = new createjs.Shape();
+    highlight.alpha = 0.45;
+    button.addChild(highlight);
+
+    var label = new createjs.Text("", "700 30px 'Baloo 2'", "#031529");
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.y = -6;
+    button.addChild(label);
+
+    var subtitle = new createjs.Text("", "400 16px 'Baloo 2'", "#0F2C4A");
+    subtitle.textAlign = "center";
+    subtitle.textBaseline = "middle";
+    subtitle.y = 20;
+    button.addChild(subtitle);
+
+    var halo = new createjs.Shape();
+    halo.graphics.beginRadialGradientFill([
+        "rgba(255,255,255,0.45)",
+        "rgba(255,255,255,0)"
+    ], [0, 1], 0, 0, 0, 0, 0, 160).drawCircle(0, 0, 160);
+    halo.alpha = 0.2;
+    halo.y = 12;
+    button.addChildAt(halo, 0);
+
+    button.background = background;
+    button.highlight = highlight;
+    button.label = label;
+    button.subtitle = subtitle;
+
+    var STATE_CONFIG = [
+        {
+            label: "Skip Intro",
+            subtitle: "Jump straight into the challenge",
+            colors: ["#6FE3C6", "#6CA7FF"],
+            textColor: "#031529",
+            subtitleColor: "#0F2C4A"
+        },
+        {
+            label: "Start Game",
+            subtitle: "I'm ready to play now",
+            colors: ["#FFBC55", "#FF6F8C"],
+            textColor: "#2A0F1F",
+            subtitleColor: "#3A1D30"
+        }
+    ];
+
+    function drawButtonBackground(config) {
+        background.graphics
+            .clear()
+            .beginLinearGradientFill(config.colors, [0, 1], -BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2)
+            .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT, 38);
+
+        highlight.graphics
+            .clear()
+            .beginLinearGradientFill([
+                "rgba(255,255,255,0.55)",
+                "rgba(255,255,255,0)"
+            ], [0, 1], -BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH / 2, 0)
+            .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT / 1.6, 30);
+    }
+
+    button.gotoAndStop = function (state) {
+        var config = STATE_CONFIG[state] || STATE_CONFIG[0];
+        drawButtonBackground(config);
+        label.color = config.textColor;
+        label.text = config.label;
+        subtitle.color = config.subtitleColor;
+        subtitle.text = config.subtitle;
+        button.currentState = state || 0;
+    };
+
+    button.on("mouseover", function () {
+        createjs.Tween.get(highlight).to({ alpha: 0.7 }, 180);
+        createjs.Tween.get(button).to({ scaleX: 1.02, scaleY: 1.02 }, 180, createjs.Ease.quadOut);
+    });
+
+    button.on("mouseout", function () {
+        createjs.Tween.get(highlight).to({ alpha: 0.45 }, 220);
+        createjs.Tween.get(button).to({ scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadIn);
+    });
+
+    button.gotoAndStop(0);
+
+    return button;
+}
+
+function buildHowToPlayOverlay() {
+    if (howToPlayImageMc) {
+        return;
+    }
+
+    var stageWidth = stage && stage.canvas ? stage.canvas.width : 1280;
+    var stageHeight = stage && stage.canvas ? stage.canvas.height : 720;
+
+    howToPlayImageMc = new createjs.Container();
+    howToPlayImageMc.visible = false;
+    howToPlayImageMc.alpha = 0;
+    howToPlayImageMc.mouseChildren = true;
+    howToPlayImageMc.mouseEnabled = true;
+
+    var backdrop = new createjs.Shape();
+    backdrop.graphics.beginFill("rgba(5,12,28,0.82)").drawRect(0, 0, stageWidth, stageHeight);
+    howToPlayImageMc.addChild(backdrop);
+
+    howToPlayCardContainer = new createjs.Container();
+    howToPlayCardContainer.x = stageWidth / 2;
+    howToPlayCardContainer.y = stageHeight / 2;
+    howToPlayImageMc.addChild(howToPlayCardContainer);
+    howToPlayImageMc.baseY = howToPlayCardContainer.y;
+
+    var cardShadow = new createjs.Shape();
+    cardShadow.graphics
+        .beginFill("rgba(4,12,26,0.45)")
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    cardShadow.y = 14;
+    cardShadow.alpha = 0.5;
+    howToPlayCardContainer.addChild(cardShadow);
+
+    var cardBackground = new createjs.Shape();
+    cardBackground.graphics
+        .beginLinearGradientFill(["#122552", "#0B1433"], [0, 1], -480, -268, 480, 268)
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    howToPlayCardContainer.addChild(cardBackground);
+
+    var cardStroke = new createjs.Shape();
+    cardStroke.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255,255,255,0.08)")
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    howToPlayCardContainer.addChild(cardStroke);
+
+    var accent = new createjs.Shape();
+    accent.graphics
+        .beginLinearGradientFill([
+            "rgba(110,175,255,0.18)",
+            "rgba(99,227,198,0.05)"
+        ], [0, 1], -440, -268, -260, 268)
+        .drawRoundRect(-480, -268, 180, 536, 44);
+    howToPlayCardContainer.addChild(accent);
+
+    howToPlayAccentGlow = new createjs.Shape();
+    howToPlayAccentGlow.graphics
+        .beginRadialGradientFill([
+            "rgba(111,183,255,0.65)",
+            "rgba(111,183,255,0)"
+        ], [0, 1], -360, -120, 0, -360, -120, 220)
+        .drawCircle(-360, -120, 220);
+    howToPlayAccentGlow.alpha = 0.4;
+    howToPlayCardContainer.addChild(howToPlayAccentGlow);
+
+    createjs.Tween.get(howToPlayAccentGlow, { loop: true })
+        .to({ alpha: 0.75 }, 1600, createjs.Ease.sineInOut)
+        .to({ alpha: 0.35 }, 1600, createjs.Ease.sineInOut);
+
+    var title = new createjs.Text("How to Play", "800 44px 'Baloo 2'", "#FFFFFF");
+    title.textAlign = "left";
+    title.x = -320;
+    title.y = -184;
+    howToPlayCardContainer.addChild(title);
+
+    var subtitle = new createjs.Text(
+        "Master the anagram challenge with these quick tips.",
+        "400 20px 'Baloo 2'",
+        "#BFD6FF"
+    );
+    subtitle.lineWidth = 520;
+    subtitle.textAlign = "left";
+    subtitle.x = -320;
+    subtitle.y = -128;
+    howToPlayCardContainer.addChild(subtitle);
+
+    howToPlayStepsContainer = new createjs.Container();
+    howToPlayStepsContainer.x = -320;
+    howToPlayStepsContainer.y = -64;
+    howToPlayCardContainer.addChild(howToPlayStepsContainer);
+
+    var stepData = [
+        {
+            title: "Study the clue",
+            description: "Read the hint at the top to understand the theme of the hidden word.",
+            colors: ["#6FE3C6", "#58B5FF"]
+        },
+        {
+            title: "Arrange the letters",
+            description: "Tap or drag the letters to rearrange them until they form the correct word.",
+            colors: ["#FFBC55", "#FF7A9C"]
+        },
+        {
+            title: "Beat the timer",
+            description: "Submit your answer before the countdown hits zero to earn maximum points.",
+            colors: ["#9F8CFF", "#67E0F8"]
+        }
+    ];
+
+    howToPlayImageMc.stepContainers = [];
+
+    for (var i = 0; i < stepData.length; i++) {
+        var stepConfig = stepData[i];
+        var step = new createjs.Container();
+        step.y = i * 120;
+        step.alpha = 0;
+        step.baseX = 0;
+
+        var stepBg = new createjs.Shape();
+        stepBg.graphics
+            .beginLinearGradientFill([
+                "rgba(255,255,255,0.06)",
+                "rgba(255,255,255,0.02)"
+            ], [0, 1], 0, -44, 0, 44)
+            .drawRoundRect(0, -44, 560, 104, 30);
+        stepBg.alpha = 0.6;
+        step.addChild(stepBg);
+
+        var badge = new createjs.Shape();
+        badge.graphics
+            .beginLinearGradientFill(stepConfig.colors, [0, 1], 0, -26, 0, 26)
+            .drawCircle(0, 0, 28);
+        badge.x = 52;
+        step.addChild(badge);
+
+        var badgeTxt = new createjs.Text("0" + (i + 1), "700 20px 'Baloo 2'", "#051126");
+        badgeTxt.textAlign = "center";
+        badgeTxt.textBaseline = "middle";
+        badgeTxt.x = 52;
+        badgeTxt.y = 0;
+        step.addChild(badgeTxt);
+
+        var badgeLight = new createjs.Shape();
+        badgeLight.graphics
+            .beginRadialGradientFill([
+                "rgba(255,255,255,0.55)",
+                "rgba(255,255,255,0)"
+            ], [0, 1], 0, -10, 0, 0, -10, 30)
+            .drawCircle(0, 0, 36);
+        badgeLight.alpha = 0.55;
+        badgeLight.x = 52;
+        badgeLight.y = -8;
+        step.addChild(badgeLight);
+
+        var stepTitle = new createjs.Text(stepConfig.title.toUpperCase(), "700 20px 'Baloo 2'", "#F4FAFF");
+        stepTitle.textAlign = "left";
+        stepTitle.x = 112;
+        stepTitle.y = -22;
+        step.addChild(stepTitle);
+
+        var stepBody = new createjs.Text(stepConfig.description, "400 18px 'Baloo 2'", "#D1E4FF");
+        stepBody.lineWidth = 404;
+        stepBody.textAlign = "left";
+        stepBody.x = 112;
+        stepBody.y = 2;
+        step.addChild(stepBody);
+
+        createjs.Tween.get(stepBg, { loop: true })
+            .wait(i * 320)
+            .to({ alpha: 0.85 }, 1400, createjs.Ease.sineInOut)
+            .to({ alpha: 0.6 }, 1400, createjs.Ease.sineInOut);
+
+        howToPlayStepsContainer.addChild(step);
+        howToPlayImageMc.stepContainers.push(step);
+    }
+
+    SkipBtnMc = createIntroButton();
+    SkipBtnMc.x = 0;
+    SkipBtnMc.y = 214;
+    SkipBtnMc.visible = false;
+    howToPlayCardContainer.addChild(SkipBtnMc);
+    howToPlayButtonSubtitleTxt = SkipBtnMc.subtitle;
+
+    howToPlayImageMc.cursor = "default";
+
+    container.parent.addChild(howToPlayImageMc);
+    container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
+}
+
+function showHowToPlayOverlay() {
+    buildHowToPlayOverlay();
+
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
+
+    howToPlayImageMc.visible = true;
+    createjs.Tween.removeTweens(howToPlayImageMc);
+    createjs.Tween.removeTweens(howToPlayCardContainer);
+
+    howToPlayImageMc.alpha = 0;
+    howToPlayCardContainer.scaleX = howToPlayCardContainer.scaleY = 0.94;
+    howToPlayCardContainer.y = howToPlayImageMc.baseY + 18;
+
+    createjs.Tween.get(howToPlayImageMc).to({ alpha: 1 }, 260, createjs.Ease.quadOut);
+    createjs.Tween.get(howToPlayCardContainer).to({ scaleX: 1, scaleY: 1, y: howToPlayImageMc.baseY }, 420, createjs.Ease.quadOut);
+
+    if (howToPlayImageMc.stepContainers) {
+        for (var i = 0; i < howToPlayImageMc.stepContainers.length; i++) {
+            var step = howToPlayImageMc.stepContainers[i];
+            createjs.Tween.removeTweens(step);
+            step.alpha = 0;
+            step.x = step.baseX - 20;
+            createjs.Tween.get(step)
+                .wait(120 * i)
+                .to({ alpha: 1, x: step.baseX }, 320, createjs.Ease.quadOut);
+        }
+    }
+
+    if (SkipBtnMc) {
+        SkipBtnMc.visible = false;
+        SkipBtnMc.scaleX = SkipBtnMc.scaleY = 1;
+        SkipBtnMc.alpha = 1;
+    }
+}
+
+function hideHowToPlayOverlay() {
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(howToPlayImageMc);
+    createjs.Tween.removeTweens(howToPlayCardContainer);
+
+    createjs.Tween.get(howToPlayCardContainer)
+        .to({ scaleX: 0.96, scaleY: 0.96, y: howToPlayImageMc.baseY + 16 }, 240, createjs.Ease.quadIn);
+
+    createjs.Tween.get(howToPlayImageMc)
+        .to({ alpha: 0 }, 240, createjs.Ease.quadIn)
+        .call(function () {
+            howToPlayImageMc.visible = false;
+        });
+
+    if (SkipBtnMc) {
+        createjs.Tween.removeTweens(SkipBtnMc);
+        if (howToPlayPulseTween) {
+            howToPlayPulseTween.setPaused(true);
+            howToPlayPulseTween = null;
+        }
+        SkipBtnMc.visible = false;
+    }
+}
+
 function updateQuestionProgress() {
     if (!questionProgressBarFill) {
         return;
@@ -1187,9 +1524,8 @@ if(time<=5){   accentColors = isCritical ? ["rgba(255,135,135,0.45)", "rgba(255,
 //==========================================================================//
 function createHowToPlay() {
     handCursor.visible = false;
-    HowToPlayScreenImg.visible = false;
 
-    createGameIntroAnimationPlay(true)
+    createGameIntroAnimationPlay()
 }
 //==========================================================================//
 function createHowToPlayHandler(evt) {
@@ -1211,7 +1547,7 @@ function gameHowToPlayAnimation() {
     // if()
     // {
 
-    //     createGameIntroAnimationPlay(true) // GameOrientation.js
+    //     createGameIntroAnimationPlay() // GameOrientation.js
     // }
 }
 //===========================================================================================//
@@ -1219,8 +1555,7 @@ function gameHowToPlayAnimation() {
 function createGameIntroAnimationPlay() {
     //////////////////////////////////////Dynamicintro///////////////////////
 
-    howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    showHowToPlayOverlay();
 
     commongameintro() //   know
     //  introStartCnt++;
@@ -1305,11 +1640,7 @@ function panelVisibleFn() {
     }
 
     if (typeof howToPlayImageMc !== "undefined" && howToPlayImageMc) {
-        howToPlayImageMc.visible = false;
-    }
-
-    if (typeof HowToPlayScreenImg !== "undefined" && HowToPlayScreenImg) {
-        HowToPlayScreenImg.visible = false;
+        hideHowToPlayOverlay();
     }
 
     if (typeof handCursor !== "undefined" && handCursor) {
