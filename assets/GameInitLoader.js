@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -1330,7 +1329,6 @@ function createHowToPlayInstructions() {
 
     return container;
 }
-
 
 
 function drawHoneycombPattern(width, height, radius) {
