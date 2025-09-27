@@ -1,0 +1,43 @@
+﻿{"frames": [
+
+{
+	"filename": "Symbol 3 instance 10000",
+	"frame": {"x":0,"y":0,"w":210,"h":183},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":210,"h":183},
+	"sourceSize": {"w":210,"h":183}
+}
+,{
+	"filename": "Symbol 3 instance 10001",
+	"frame": {"x":210,"y":0,"w":210,"h":183},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":210,"h":183},
+	"sourceSize": {"w":210,"h":183}
+}
+,{
+	"filename": "Symbol 3 instance 10002",
+	"frame": {"x":420,"y":0,"w":210,"h":183},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":210,"h":183},
+	"sourceSize": {"w":210,"h":183}
+}
+,{
+	"filename": "Symbol 3 instance 10003",
+	"frame": {"x":630,"y":0,"w":210,"h":183},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":210,"h":183},
+	"sourceSize": {"w":210,"h":183}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "20.0.1.19255",
+	"image": "question.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":2048},
+	"scale": "1"
+}
+}
