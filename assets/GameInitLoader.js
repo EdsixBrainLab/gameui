@@ -13,6 +13,14 @@ var extradot = "";
 var TotalAssetsCnt = 34
 var betweenChars = ' '; // a space
 var volumeBtn1, QuesCntMc1, fullScreenBtn1, closeBtn1, QuesCntMc2;
+var howToPlayImageMc,
+    howToPlayCardContainer,
+    howToPlayStepsContainer,
+    howToPlayAccentGlow,
+    howToPlayPulseTween;
+var SkipBtnMc,
+    skipMc,
+    howToPlayButtonSubtitleTxt;
 var hudContainer,
     hudBackgroundShape,
     hudHighlightShape,
@@ -33,6 +41,326 @@ var HUD_CARD_CORNER_RADIUS = 20;
 var HUD_CARD_ACCENT_WIDTH = 140;
 var HUD_CARD_SPACING = 590;
 var QUESTION_PROGRESS_WIDTH = 80;
+
+var HOW_TO_PLAY_COLOR_PALETTE = [
+    ["#6FE3C6", "#58B5FF"],
+    ["#FFBC55", "#FF7A9C"],
+    ["#9F8CFF", "#67E0F8"],
+    ["#7DE4FF", "#8BE3B6"]
+];
+
+var DEFAULT_HOW_TO_PLAY_CONTENT = {
+    title: "How to Play",
+    subtitle: "Follow these quick steps to learn the controls and objective before you begin.",
+    steps: [
+        {
+            title: "Understand the goal",
+            description: "Read the prompt at the top of the screen to know what the challenge is asking for."
+        },
+        {
+            title: "Interact with the board",
+            description: "Use your mouse or touch controls to move, drag, or tap the highlighted game pieces."
+        },
+        {
+            title: "Beat the timer",
+            description: "Complete the task before the countdown hits zero to maximize your score."
+        }
+    ]
+};
+
+var HOW_TO_PLAY_LIBRARY = {
+    Anagrams: {
+        subtitle: "Rearrange the jumbled letters to uncover the hidden word.",
+        steps: [
+            {
+                title: "Study the clue",
+                description: "Read the hint at the top to understand the theme of the hidden word."
+            },
+            {
+                title: "Arrange the letters",
+                description: "Tap or drag the tiles to rearrange them until they form the correct word."
+            },
+            {
+                title: "Submit in time",
+                description: "Hit the answer button before the timer expires to earn full points."
+            }
+        ]
+    },
+    CycleRace: {
+        subtitle: "Guide your cyclist to the finish line without missing any boosts.",
+        steps: [
+            {
+                title: "Watch the indicators",
+                description: "Keep an eye on the prompts that tell you when to switch lanes or boost speed."
+            },
+            {
+                title: "React quickly",
+                description: "Tap or press the instructed controls as soon as the highlight reaches the target zone."
+            },
+            {
+                title: "Maintain rhythm",
+                description: "Chain together accurate moves to extend your combo and earn bonus time."
+            }
+        ]
+    },
+    CarPark: {
+        subtitle: "Navigate the car through the maze to park in the highlighted spot.",
+        steps: [
+            {
+                title: "Plan the path",
+                description: "Preview the route and note obstacles before you start moving."
+            },
+            {
+                title: "Drive precisely",
+                description: "Use the on-screen controls to steer carefully without touching the barriers."
+            },
+            {
+                title: "Park smoothly",
+                description: "Align the vehicle fully inside the glowing bay to complete the level."
+            }
+        ]
+    },
+    IAmCube: {
+        subtitle: "Rotate the 3D cube to match the requested faces and colors.",
+        steps: [
+            {
+                title: "Check the target",
+                description: "Look at the reference tile to see which face and color combination is required."
+            },
+            {
+                title: "Spin the cube",
+                description: "Swipe or drag to rotate the cube until the correct face is in view."
+            },
+            {
+                title: "Confirm the match",
+                description: "Tap the submit area once the cube orientation matches the target card."
+            }
+        ]
+    },
+    SparrowHunt: {
+        subtitle: "Spot the sparrows and tap them quickly before they fly away.",
+        steps: [
+            {
+                title: "Scan the scene",
+                description: "Observe the environment and memorize where the sparrows might appear."
+            },
+            {
+                title: "Tap the birds",
+                description: "As soon as a sparrow pops up, tap it to score. Avoid touching other creatures."
+            },
+            {
+                title: "Keep your streak",
+                description: "Hit consecutive sparrows to build a streak multiplier for bonus points."
+            }
+        ]
+    }
+};
+
+function getGameDisplayName() {
+    if (typeof GameNameWithLvl === "string" && GameNameWithLvl.length) {
+        return GameNameWithLvl.replace(/[\-_]+/g, " ");
+    }
+
+    if (typeof UniqueGameName === "string" && UniqueGameName.length) {
+        return UniqueGameName.replace(/[\-_]+/g, " ");
+    }
+
+    return "the game";
+}
+
+function getStepColors(index, customColors) {
+    if (Array.isArray(customColors) && customColors.length >= 2) {
+        return [customColors[0], customColors[1]];
+    }
+
+    return HOW_TO_PLAY_COLOR_PALETTE[index % HOW_TO_PLAY_COLOR_PALETTE.length];
+}
+
+function sanitizeHowToPlaySteps(stepList) {
+    var fallback = DEFAULT_HOW_TO_PLAY_CONTENT.steps;
+    if (!Array.isArray(stepList) || !stepList.length) {
+        stepList = fallback;
+    }
+
+    var sanitized = [];
+    for (var i = 0; i < stepList.length; i++) {
+        var rawStep = stepList[i] || {};
+        var fallbackStep = fallback[i % fallback.length];
+        sanitized.push({
+            title: String(rawStep.title || (fallbackStep && fallbackStep.title) || ("Step " + (i + 1))),
+            description: String(
+                rawStep.description || (fallbackStep && fallbackStep.description) || "Follow the on-screen instructions."
+            ),
+            colors: getStepColors(i, rawStep.colors)
+        });
+    }
+
+    return sanitized;
+}
+
+function getHowToPlayContent() {
+    var baseName = typeof UniqueGameName === "string" ? UniqueGameName : "";
+    var libraryContent = baseName && HOW_TO_PLAY_LIBRARY[baseName] ? HOW_TO_PLAY_LIBRARY[baseName] : null;
+    var overrideContent = null;
+
+    if (typeof window !== "undefined") {
+        if (window.howToPlayContent && Array.isArray(window.howToPlayContent.steps) && window.howToPlayContent.steps.length) {
+            overrideContent = window.howToPlayContent;
+        } else if (
+            baseName &&
+            window[baseName + "HowToPlayContent"] &&
+            Array.isArray(window[baseName + "HowToPlayContent"].steps) &&
+            window[baseName + "HowToPlayContent"].steps.length
+        ) {
+            overrideContent = window[baseName + "HowToPlayContent"];
+        }
+    }
+
+    var result = {
+        title: DEFAULT_HOW_TO_PLAY_CONTENT.title,
+        subtitle: DEFAULT_HOW_TO_PLAY_CONTENT.subtitle,
+        steps: sanitizeHowToPlaySteps(DEFAULT_HOW_TO_PLAY_CONTENT.steps)
+    };
+
+    if (!libraryContent && !overrideContent) {
+        var displayName = getGameDisplayName();
+        result.subtitle = "Get ready to play " + displayName + ". Follow these quick steps before you begin.";
+    }
+
+    if (libraryContent) {
+        if (libraryContent.title) {
+            result.title = libraryContent.title;
+        }
+        if (libraryContent.subtitle) {
+            result.subtitle = libraryContent.subtitle;
+        }
+        result.steps = sanitizeHowToPlaySteps(libraryContent.steps);
+    }
+
+    if (overrideContent) {
+        if (overrideContent.title) {
+            result.title = overrideContent.title;
+        }
+        if (overrideContent.subtitle) {
+            result.subtitle = overrideContent.subtitle;
+        }
+        result.steps = sanitizeHowToPlaySteps(overrideContent.steps);
+    }
+
+    return result;
+}
+
+function createHowToPlayStep(index, stepConfig) {
+    var step = new createjs.Container();
+    step.y = index * 120;
+    step.alpha = 0;
+    step.baseX = 0;
+
+    var stepBg = new createjs.Shape();
+    stepBg.graphics
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.06)",
+            "rgba(255,255,255,0.02)"
+        ], [0, 1], 0, -44, 0, 44)
+        .drawRoundRect(0, -44, 560, 104, 30);
+    stepBg.alpha = 0.6;
+    step.addChild(stepBg);
+    step.bg = stepBg;
+
+    var colors = getStepColors(index, stepConfig.colors);
+
+    var badge = new createjs.Shape();
+    badge.graphics.beginLinearGradientFill(colors, [0, 1], 0, -26, 0, 26).drawCircle(0, 0, 28);
+    badge.x = 52;
+    step.addChild(badge);
+
+    var stepNumber = String(index + 1);
+    if (stepNumber.length < 2) {
+        stepNumber = "0" + stepNumber;
+    }
+
+    var badgeTxt = new createjs.Text(stepNumber, "700 20px 'Baloo 2'", "#051126");
+    badgeTxt.textAlign = "center";
+    badgeTxt.textBaseline = "middle";
+    badgeTxt.x = 52;
+    badgeTxt.y = 0;
+    step.addChild(badgeTxt);
+
+    var badgeLight = new createjs.Shape();
+    badgeLight.graphics
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.55)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, -10, 0, 0, -10, 30)
+        .drawCircle(0, 0, 36);
+    badgeLight.alpha = 0.55;
+    badgeLight.x = 52;
+    badgeLight.y = -8;
+    step.addChild(badgeLight);
+
+    var stepTitle = new createjs.Text(String(stepConfig.title || "Step " + (index + 1)).toUpperCase(), "700 20px 'Baloo 2'", "#F4FAFF");
+    stepTitle.textAlign = "left";
+    stepTitle.x = 112;
+    stepTitle.y = -22;
+    step.addChild(stepTitle);
+    step.titleField = stepTitle;
+
+    var stepBody = new createjs.Text(String(stepConfig.description || "Follow the instruction."), "400 18px 'Baloo 2'", "#D1E4FF");
+    stepBody.lineWidth = 404;
+    stepBody.textAlign = "left";
+    stepBody.x = 112;
+    stepBody.y = 2;
+    step.addChild(stepBody);
+    step.bodyField = stepBody;
+
+    createjs.Tween.get(stepBg, { loop: true })
+        .wait(index * 320)
+        .to({ alpha: 0.85 }, 1400, createjs.Ease.sineInOut)
+        .to({ alpha: 0.6 }, 1400, createjs.Ease.sineInOut);
+
+    return step;
+}
+
+function applyHowToPlayContent(content) {
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    var resolvedContent = content || getHowToPlayContent();
+
+    if (howToPlayImageMc.titleTxt) {
+        howToPlayImageMc.titleTxt.text = resolvedContent.title || DEFAULT_HOW_TO_PLAY_CONTENT.title;
+    }
+
+    if (howToPlayImageMc.subtitleTxt) {
+        howToPlayImageMc.subtitleTxt.text = resolvedContent.subtitle || "";
+    }
+
+    if (howToPlayImageMc.stepContainers && howToPlayImageMc.stepContainers.length) {
+        for (var i = 0; i < howToPlayImageMc.stepContainers.length; i++) {
+            var existingStep = howToPlayImageMc.stepContainers[i];
+            createjs.Tween.removeTweens(existingStep);
+            if (existingStep.bg) {
+                createjs.Tween.removeTweens(existingStep.bg);
+            }
+        }
+    }
+
+    if (howToPlayStepsContainer) {
+        howToPlayStepsContainer.removeAllChildren();
+    }
+
+    howToPlayImageMc.stepContainers = [];
+
+    var steps = sanitizeHowToPlaySteps(resolvedContent.steps);
+    for (var j = 0; j < steps.length; j++) {
+        var step = createHowToPlayStep(j, steps[j]);
+        if (howToPlayStepsContainer) {
+            howToPlayStepsContainer.addChild(step);
+        }
+        howToPlayImageMc.stepContainers.push(step);
+    }
+}
 
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
@@ -135,9 +463,6 @@ function createManifest() {
         { id: "arrow1", src: assetsPath + "Arrow1.png" },
         { id: "fingure", src: assetsPath + "Fingure.png" },
         { id: "handCursor", src: assetsPath + "handCursor.png" },
-        { id: "SkipBtn", src: assetsPathLang + "SkipBtn.png" },
-        { id: "HowToPlayScreen", src: assetsPathLang + "HowToPlayScreen.png" },
-        { id: "HowToPlayScreenImg", src: assetsPathLang + "HowToPlayScreen1.png" },
 
         { id: "scoreImgMc", src: assetsPath + "Score.png" },
         { id: "ResponseImgMc", src: assetsPath + "ResponseTime.png" },
@@ -573,42 +898,11 @@ function doneLoading(event) {
                 nav = json.nav;
                 continue;
             }
-            if (id == "SkipBtn") {
-                var spriteSheet4 = new createjs.SpriteSheet({
-                    framerate: 30,
-                    "images": [preload.getResult("SkipBtn")],
-                    "frames": { "regX": 50, "height": 137, "count": 0, "regY": 50, "width": 262 },
-                    // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-                });
-                //
-                SkipBtnMc = new createjs.Sprite(spriteSheet4);
-                container.parent.addChild(SkipBtnMc);
-                SkipBtnMc.x = 1095;
-                SkipBtnMc.y = 60
-                SkipBtnMc.visible = false;
-
-                continue;
-            }
             if (id == "handCursor") {
                 handCursor = new createjs.Bitmap(preload.getResult('handCursor'));
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
 
-                continue;
-            }
-
-            if (id == "HowToPlayScreen") {
-                howToPlayImageMc = new createjs.Bitmap(preload.getResult('HowToPlayScreen'));
-                container.parent.addChild(howToPlayImageMc);
-                howToPlayImageMc.visible = false;
-                howToPlayImageMc.x = howToPlayImageMc.x - 20
-                continue;
-            }
-
-            if (id == "HowToPlayScreenImg") {
-                HowToPlayScreenImg = new createjs.Bitmap(preload.getResult('HowToPlayScreenImg'));
-                container.parent.addChild(HowToPlayScreenImg);
-                HowToPlayScreenImg.visible = true;
                 continue;
             }
 
@@ -693,6 +987,8 @@ function watchRestart() {
     if (hudContainer) {
         hudContainer.visible = false;
     }
+
+    buildHowToPlayOverlay();
 
 
 
@@ -1036,6 +1332,297 @@ function refreshHudValues() {
     updateQuestionProgress();
 }
 
+function createIntroButton() {
+    var button = new createjs.Container();
+    var BUTTON_WIDTH = 320;
+    var BUTTON_HEIGHT = 78;
+
+    button.regX = BUTTON_WIDTH / 2;
+    button.regY = BUTTON_HEIGHT / 2;
+    button.mouseChildren = false;
+
+    var shadow = new createjs.Shape();
+    shadow.graphics
+        .beginFill("rgba(6,12,30,0.55)")
+        .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT, 38);
+    shadow.y = 10;
+    shadow.alpha = 0.45;
+    button.addChild(shadow);
+
+    var background = new createjs.Shape();
+    button.addChild(background);
+
+    var highlight = new createjs.Shape();
+    highlight.alpha = 0.45;
+    button.addChild(highlight);
+
+    var label = new createjs.Text("", "700 30px 'Baloo 2'", "#031529");
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.y = -6;
+    button.addChild(label);
+
+    var subtitle = new createjs.Text("", "400 16px 'Baloo 2'", "#0F2C4A");
+    subtitle.textAlign = "center";
+    subtitle.textBaseline = "middle";
+    subtitle.y = 20;
+    button.addChild(subtitle);
+
+    var halo = new createjs.Shape();
+    halo.graphics.beginRadialGradientFill([
+        "rgba(255,255,255,0.45)",
+        "rgba(255,255,255,0)"
+    ], [0, 1], 0, 0, 0, 0, 0, 160).drawCircle(0, 0, 160);
+    halo.alpha = 0.2;
+    halo.y = 12;
+    button.addChildAt(halo, 0);
+
+    button.background = background;
+    button.highlight = highlight;
+    button.label = label;
+    button.subtitle = subtitle;
+
+    var STATE_CONFIG = [
+        {
+            label: "Skip Intro",
+            subtitle: "Jump straight into the challenge",
+            colors: ["#6FE3C6", "#6CA7FF"],
+            textColor: "#031529",
+            subtitleColor: "#0F2C4A"
+        },
+        {
+            label: "Start Game",
+            subtitle: "I'm ready to play now",
+            colors: ["#FFBC55", "#FF6F8C"],
+            textColor: "#2A0F1F",
+            subtitleColor: "#3A1D30"
+        }
+    ];
+
+    function drawButtonBackground(config) {
+        background.graphics
+            .clear()
+            .beginLinearGradientFill(config.colors, [0, 1], -BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2)
+            .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT, 38);
+
+        highlight.graphics
+            .clear()
+            .beginLinearGradientFill([
+                "rgba(255,255,255,0.55)",
+                "rgba(255,255,255,0)"
+            ], [0, 1], -BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH / 2, 0)
+            .drawRoundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT / 1.6, 30);
+    }
+
+    button.gotoAndStop = function (state) {
+        var config = STATE_CONFIG[state] || STATE_CONFIG[0];
+        drawButtonBackground(config);
+        label.color = config.textColor;
+        label.text = config.label;
+        subtitle.color = config.subtitleColor;
+        var displayName = getGameDisplayName();
+        if (displayName !== "the game") {
+            if (state === 1) {
+                subtitle.text = "I'm ready to play " + displayName;
+            } else if (state === 0) {
+                subtitle.text = "Jump straight into " + displayName;
+            } else {
+                subtitle.text = config.subtitle;
+            }
+        } else {
+            subtitle.text = config.subtitle;
+        }
+        button.currentState = state || 0;
+    };
+
+    button.on("mouseover", function () {
+        createjs.Tween.get(highlight).to({ alpha: 0.7 }, 180);
+        createjs.Tween.get(button).to({ scaleX: 1.02, scaleY: 1.02 }, 180, createjs.Ease.quadOut);
+    });
+
+    button.on("mouseout", function () {
+        createjs.Tween.get(highlight).to({ alpha: 0.45 }, 220);
+        createjs.Tween.get(button).to({ scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadIn);
+    });
+
+    button.gotoAndStop(0);
+
+    return button;
+}
+
+function buildHowToPlayOverlay() {
+    if (howToPlayImageMc) {
+        return;
+    }
+
+    var stageWidth = stage && stage.canvas ? stage.canvas.width : 1280;
+    var stageHeight = stage && stage.canvas ? stage.canvas.height : 720;
+
+    howToPlayImageMc = new createjs.Container();
+    howToPlayImageMc.visible = false;
+    howToPlayImageMc.alpha = 0;
+    howToPlayImageMc.mouseChildren = true;
+    howToPlayImageMc.mouseEnabled = true;
+
+    var backdrop = new createjs.Shape();
+    backdrop.graphics.beginFill("rgba(5,12,28,0.82)").drawRect(0, 0, stageWidth, stageHeight);
+    howToPlayImageMc.addChild(backdrop);
+
+    howToPlayCardContainer = new createjs.Container();
+    howToPlayCardContainer.x = stageWidth / 2;
+    howToPlayCardContainer.y = stageHeight / 2;
+    howToPlayImageMc.addChild(howToPlayCardContainer);
+    howToPlayImageMc.baseY = howToPlayCardContainer.y;
+
+    var cardShadow = new createjs.Shape();
+    cardShadow.graphics
+        .beginFill("rgba(4,12,26,0.45)")
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    cardShadow.y = 14;
+    cardShadow.alpha = 0.5;
+    howToPlayCardContainer.addChild(cardShadow);
+
+    var cardBackground = new createjs.Shape();
+    cardBackground.graphics
+        .beginLinearGradientFill(["#122552", "#0B1433"], [0, 1], -480, -268, 480, 268)
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    howToPlayCardContainer.addChild(cardBackground);
+
+    var cardStroke = new createjs.Shape();
+    cardStroke.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255,255,255,0.08)")
+        .drawRoundRect(-480, -268, 960, 536, 44);
+    howToPlayCardContainer.addChild(cardStroke);
+
+    var accent = new createjs.Shape();
+    accent.graphics
+        .beginLinearGradientFill([
+            "rgba(110,175,255,0.18)",
+            "rgba(99,227,198,0.05)"
+        ], [0, 1], -440, -268, -260, 268)
+        .drawRoundRect(-480, -268, 180, 536, 44);
+    howToPlayCardContainer.addChild(accent);
+
+    howToPlayAccentGlow = new createjs.Shape();
+    howToPlayAccentGlow.graphics
+        .beginRadialGradientFill([
+            "rgba(111,183,255,0.65)",
+            "rgba(111,183,255,0)"
+        ], [0, 1], -360, -120, 0, -360, -120, 220)
+        .drawCircle(-360, -120, 220);
+    howToPlayAccentGlow.alpha = 0.4;
+    howToPlayCardContainer.addChild(howToPlayAccentGlow);
+
+    createjs.Tween.get(howToPlayAccentGlow, { loop: true })
+        .to({ alpha: 0.75 }, 1600, createjs.Ease.sineInOut)
+        .to({ alpha: 0.35 }, 1600, createjs.Ease.sineInOut);
+
+    var title = new createjs.Text("How to Play", "800 44px 'Baloo 2'", "#FFFFFF");
+    title.textAlign = "left";
+    title.x = -320;
+    title.y = -184;
+    howToPlayCardContainer.addChild(title);
+    howToPlayImageMc.titleTxt = title;
+
+    var subtitle = new createjs.Text("", "400 20px 'Baloo 2'", "#BFD6FF");
+    subtitle.lineWidth = 520;
+    subtitle.textAlign = "left";
+    subtitle.x = -320;
+    subtitle.y = -128;
+    howToPlayCardContainer.addChild(subtitle);
+    howToPlayImageMc.subtitleTxt = subtitle;
+
+    howToPlayStepsContainer = new createjs.Container();
+    howToPlayStepsContainer.x = -320;
+    howToPlayStepsContainer.y = -64;
+    howToPlayCardContainer.addChild(howToPlayStepsContainer);
+
+    howToPlayImageMc.stepContainers = [];
+
+    SkipBtnMc = createIntroButton();
+    SkipBtnMc.x = 0;
+    SkipBtnMc.y = 214;
+    SkipBtnMc.visible = false;
+    howToPlayCardContainer.addChild(SkipBtnMc);
+    howToPlayButtonSubtitleTxt = SkipBtnMc.subtitle;
+
+    howToPlayImageMc.cursor = "default";
+
+    container.parent.addChild(howToPlayImageMc);
+    container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
+
+    applyHowToPlayContent(getHowToPlayContent());
+}
+
+function showHowToPlayOverlay() {
+    buildHowToPlayOverlay();
+
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    applyHowToPlayContent();
+
+    container.parent.setChildIndex(howToPlayImageMc, container.parent.numChildren - 1);
+
+    howToPlayImageMc.visible = true;
+    createjs.Tween.removeTweens(howToPlayImageMc);
+    createjs.Tween.removeTweens(howToPlayCardContainer);
+
+    howToPlayImageMc.alpha = 0;
+    howToPlayCardContainer.scaleX = howToPlayCardContainer.scaleY = 0.94;
+    howToPlayCardContainer.y = howToPlayImageMc.baseY + 18;
+
+    createjs.Tween.get(howToPlayImageMc).to({ alpha: 1 }, 260, createjs.Ease.quadOut);
+    createjs.Tween.get(howToPlayCardContainer).to({ scaleX: 1, scaleY: 1, y: howToPlayImageMc.baseY }, 420, createjs.Ease.quadOut);
+
+    if (howToPlayImageMc.stepContainers) {
+        for (var i = 0; i < howToPlayImageMc.stepContainers.length; i++) {
+            var step = howToPlayImageMc.stepContainers[i];
+            createjs.Tween.removeTweens(step);
+            step.alpha = 0;
+            step.x = step.baseX - 20;
+            createjs.Tween.get(step)
+                .wait(120 * i)
+                .to({ alpha: 1, x: step.baseX }, 320, createjs.Ease.quadOut);
+        }
+    }
+
+    if (SkipBtnMc) {
+        SkipBtnMc.visible = false;
+        SkipBtnMc.scaleX = SkipBtnMc.scaleY = 1;
+        SkipBtnMc.alpha = 1;
+    }
+}
+
+function hideHowToPlayOverlay() {
+    if (!howToPlayImageMc) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(howToPlayImageMc);
+    createjs.Tween.removeTweens(howToPlayCardContainer);
+
+    createjs.Tween.get(howToPlayCardContainer)
+        .to({ scaleX: 0.96, scaleY: 0.96, y: howToPlayImageMc.baseY + 16 }, 240, createjs.Ease.quadIn);
+
+    createjs.Tween.get(howToPlayImageMc)
+        .to({ alpha: 0 }, 240, createjs.Ease.quadIn)
+        .call(function () {
+            howToPlayImageMc.visible = false;
+        });
+
+    if (SkipBtnMc) {
+        createjs.Tween.removeTweens(SkipBtnMc);
+        if (howToPlayPulseTween) {
+            howToPlayPulseTween.setPaused(true);
+            howToPlayPulseTween = null;
+        }
+        SkipBtnMc.visible = false;
+    }
+}
+
 function updateQuestionProgress() {
     if (!questionProgressBarFill) {
         return;
@@ -1187,9 +1774,8 @@ if(time<=5){   accentColors = isCritical ? ["rgba(255,135,135,0.45)", "rgba(255,
 //==========================================================================//
 function createHowToPlay() {
     handCursor.visible = false;
-    HowToPlayScreenImg.visible = false;
 
-    createGameIntroAnimationPlay(true)
+    createGameIntroAnimationPlay()
 }
 //==========================================================================//
 function createHowToPlayHandler(evt) {
@@ -1211,7 +1797,7 @@ function gameHowToPlayAnimation() {
     // if()
     // {
 
-    //     createGameIntroAnimationPlay(true) // GameOrientation.js
+    //     createGameIntroAnimationPlay() // GameOrientation.js
     // }
 }
 //===========================================================================================//
@@ -1219,8 +1805,7 @@ function gameHowToPlayAnimation() {
 function createGameIntroAnimationPlay() {
     //////////////////////////////////////Dynamicintro///////////////////////
 
-    howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    showHowToPlayOverlay();
 
     commongameintro() //   know
     //  introStartCnt++;
@@ -1305,11 +1890,7 @@ function panelVisibleFn() {
     }
 
     if (typeof howToPlayImageMc !== "undefined" && howToPlayImageMc) {
-        howToPlayImageMc.visible = false;
-    }
-
-    if (typeof HowToPlayScreenImg !== "undefined" && HowToPlayScreenImg) {
-        HowToPlayScreenImg.visible = false;
+        hideHowToPlayOverlay();
     }
 
     if (typeof handCursor !== "undefined" && handCursor) {
