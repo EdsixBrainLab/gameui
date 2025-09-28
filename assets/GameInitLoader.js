@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -134,6 +133,7 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     fill: "#FFD166",
                     strokeColor: "rgba(11,29,61,0.45)",
+
                     strokeWidth: 2
                 }
             },
@@ -353,12 +353,10 @@ function createLoader() {
     if (!HowToPlayScreenImg) {
         HowToPlayScreenImg = buildHowToPlayOverlay();
     }
-
     loaderBar = HowToPlayScreenImg;
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
-
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -498,7 +496,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         bar.scaleX = progressRatio;
     }
