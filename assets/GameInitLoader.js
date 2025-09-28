@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -218,6 +217,649 @@ var HUD_THEME_PRESETS = {
 
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
+}
+function resolveHudThemeMode() {
+    var scopes = [];
+
+    if (typeof window !== "undefined") {
+        scopes.push(window);
+    }
+
+    if (typeof globalThis !== "undefined") {
+        scopes.push(globalThis);
+    }
+
+    for (var i = 0; i < scopes.length; i++) {
+        var scope = scopes[i];
+        if (!scope) {
+            continue;
+        }
+
+        if (typeof scope.headerPanelThemeMode !== "undefined") {
+            return String(scope.headerPanelThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.hudThemeMode !== "undefined") {
+            return String(scope.hudThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.headerPanelTheme !== "undefined") {
+            return String(scope.headerPanelTheme).toLowerCase();
+        }
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        return String(headerPanelThemeMode).toLowerCase();
+    }
+
+    if (typeof hudThemeMode !== "undefined") {
+        return String(hudThemeMode).toLowerCase();
+    }
+
+    if (typeof headerPanelTheme !== "undefined") {
+        return String(headerPanelTheme).toLowerCase();
+    }
+
+    return "dark";
+}
+
+function getHudThemeConfig() {
+    var mode = resolveHudThemeMode();
+    if (!HUD_THEME_PRESETS[mode]) {
+        mode = "dark";
+    }
+    if (cachedHudThemeConfig && activeHudThemeMode === mode) {
+        return cachedHudThemeConfig;
+    }
+
+    activeHudThemeMode = mode;
+    cachedHudThemeConfig = HUD_THEME_PRESETS[mode];
+
+    return cachedHudThemeConfig;
+}
+
+function applyTextStyle(target, style) {
+    if (!target || !style) {
+        return;
+    }
+
+    if (typeof style.color !== "undefined") {
+        target.color = style.color;
+    }
+
+    if (style.shadow) {
+        target.shadow = new createjs.Shadow(
+            style.shadow.color || "rgba(0,0,0,0)",
+            style.shadow.x || 0,
+            style.shadow.y || 0,
+            style.shadow.blur || 0
+        );
+    } else {
+        target.shadow = null;
+    }
+}
+
+function updateHudIconWrapper(wrapper, paletteConfig, theme) {
+    if (!wrapper) {
+        return;
+    }
+
+    var wrapperTheme = theme.iconWrapper || {};
+    var primary = paletteConfig && paletteConfig.primary ? paletteConfig.primary : (wrapperTheme.defaultPrimary || "rgba(120,144,255,0.75)");
+    var glowColor = paletteConfig && paletteConfig.glow ? paletteConfig.glow : primary;
+    var gradientColors = wrapperTheme.backgroundGradient ? cloneArray(wrapperTheme.backgroundGradient) : [primary, "rgba(255,255,255,0.08)"];
+
+    if (wrapper.glow) {
+        wrapper.glow.graphics
+            .clear()
+            .beginRadialGradientFill([glowColor, "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 34)
+            .drawCircle(0, 0, 18);
+
+        var glowAlpha = typeof wrapperTheme.glowAlpha === "number" ? wrapperTheme.glowAlpha : 0.45;
+        var hoverGlowAlpha = typeof wrapperTheme.hoverGlowAlpha === "number" ? wrapperTheme.hoverGlowAlpha : glowAlpha + 0.2;
+        wrapper.glow.alpha = glowAlpha;
+        wrapper.glow.baseAlpha = glowAlpha;
+        wrapper.glow.hoverAlpha = hoverGlowAlpha;
+    }
+
+    if (wrapper.background) {
+        wrapper.background.graphics
+            .clear()
+            .beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28)
+            .drawCircle(0, 0, 12);
+    }
+
+    if (wrapper.ring) {
+        var ringColor = wrapperTheme.ringColor || "rgba(255,255,255,0.5)";
+        var ringAlpha = typeof wrapperTheme.ringAlpha === "number" ? wrapperTheme.ringAlpha : 0.6;
+        var hoverRingAlpha = typeof wrapperTheme.hoverRingAlpha === "number" ? wrapperTheme.hoverRingAlpha : 0.9;
+
+        wrapper.ring.graphics
+            .clear()
+            .setStrokeStyle(2)
+            .beginStroke(ringColor)
+            .drawCircle(0, 0, 12);
+
+        wrapper.ring.alpha = ringAlpha;
+        wrapper.ring.baseAlpha = ringAlpha;
+        wrapper.ring.hoverAlpha = hoverRingAlpha;
+    }
+}
+
+function applyHudThemeToCard(card, type, theme) {
+    if (!card) {
+        return;
+    }
+
+    var cardsTheme = theme.cards || {};
+    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
+
+    var gradient = cloneArray(cardTheme.background || card.baseGradient || []);
+    var accent = cloneArray(cardTheme.accent || card.baseAccent || []);
+    var highlightConfig = theme.cardHighlight || {};
+    var highlightColors = cloneArray((highlightConfig && highlightConfig.colors) || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
+
+    var cardWidth = card.__cardWidth || HUD_CARD_WIDTH;
+    var cardHeight = card.__cardHeight || HUD_CARD_HEIGHT;
+    var halfWidth = cardWidth / 2;
+    var halfHeight = cardHeight / 2;
+    var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
+    var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
+
+    if (card.background) {
+        card.background.graphics
+            .clear()
+            .beginLinearGradientFill((gradient && gradient.length ? gradient : card.baseGradient || []), [0, 1], -halfWidth, 0, halfWidth, 0)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
+        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
+    }
+
+    if (card.iconAccent) {
+        card.iconAccent.graphics
+            .clear()
+            .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
+
+        var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
+        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
+    }
+
+    if (card.highlight) {
+        card.highlight.graphics
+            .clear()
+            .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
+        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
+    }
+
+    if (card.icon) {
+        var iconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        card.baseIconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        drawHudIcon(card.icon, type, iconStyle);
+    }
+
+    if (card.label) {
+        var labelStyle = theme.textStyles ? theme.textStyles.label : null;
+        if (labelStyle && typeof labelStyle.color !== "undefined") {
+            card.label.color = labelStyle.color;
+        }
+        applyTextStyle(card.label, labelStyle || {});
+    }
+
+    card.baseGradient = cloneArray(gradient);
+    card.baseAccent = cloneArray(accent);
+}
+
+function applyHudThemeToQuestionProgress(theme) {
+    if (!questionProgressBarBg || !questionProgressBarFill) {
+        return;
+    }
+
+    var progressTheme = theme.questionProgress || {};
+    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
+    var fillScale = questionProgressBarFill.scaleX;
+
+    questionProgressBarBg.graphics
+        .clear()
+        .beginFill(progressTheme.background || "rgba(255,255,255,0.14)")
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.graphics
+        .clear()
+        .beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0)
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.scaleX = typeof fillScale === "number" ? fillScale : questionProgressBarFill.scaleX;
+}
+
+function applyHudThemeToControls(theme) {
+    if (!controlContainer) {
+        return;
+    }
+
+    var controlTheme = theme.controlBackground || {};
+    var controlPalette = theme.controlPalette || {};
+
+    if (controlContainer.backgroundShape) {
+        var controlBg = controlContainer.backgroundShape;
+        var controlWidth = controlBg.__width || 120;
+        var controlHeight = controlBg.__height || 53;
+        var controlRadius = controlBg.__radius || 24;
+        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+
+        controlBg.graphics
+            .clear()
+            .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
+            .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+
+        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
+    }
+
+    updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
+    updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
+    updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
+}
+
+function applyHudThemeToTexts(theme) {
+    if (!theme || !theme.textStyles) {
+        return;
+    }
+
+    var textStyles = theme.textStyles;
+
+    if (gameScoreTxt) {
+        var valueStyle = textStyles.value || {};
+        if (typeof valueStyle.color !== "undefined") {
+            gameScoreTxt.color = valueStyle.color;
+        }
+        applyTextStyle(gameScoreTxt, valueStyle);
+        gameScoreTxt.__baseColor = gameScoreTxt.color;
+        gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+    }
+
+    if (gameQCntTxt) {
+        var questionStyle = textStyles.value || {};
+        if (typeof questionStyle.color !== "undefined") {
+            gameQCntTxt.color = questionStyle.color;
+        }
+        applyTextStyle(gameQCntTxt, questionStyle);
+        gameQCntTxt.__baseColor = gameQCntTxt.color;
+        gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+    }
+
+    if (gameTimerTxt) {
+        var timerStyle = textStyles.timerValue || textStyles.value || {};
+        if (typeof timerStyle.color !== "undefined") {
+            gameTimerTxt.color = timerStyle.color;
+        }
+        applyTextStyle(gameTimerTxt, timerStyle);
+        gameTimerTxt.__baseColor = gameTimerTxt.color;
+        gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+    }
+}
+
+function applyHudThemeToHud() {
+    var theme = getHudThemeConfig();
+    if (!theme) {
+        return;
+    }
+
+    applyHudThemeToCard(scoreCardContainer, "score", theme);
+    applyHudThemeToCard(timerCardContainer, "timer", theme);
+    applyHudThemeToCard(hudQuestionCardContainer, "question", theme);
+
+    applyHudThemeToTexts(theme);
+    applyHudThemeToQuestionProgress(theme);
+    applyHudThemeToControls(theme);
+
+    if (typeof setTimerCriticalState === "function" && timerCardContainer) {
+        setTimerCriticalState(!!timerCardContainer.__isCritical);
+    }
+
+    if (stage) {
+        stage.update();
+    }
+}
+
+function resetHudThemeCache() {
+    cachedHudThemeConfig = null;
+    activeHudThemeMode = null;
+}
+
+function refreshHudTheme() {
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+function setHudThemeMode(mode) {
+    if (typeof mode !== "string") {
+        return;
+    }
+
+    var normalized = mode.toLowerCase();
+    if (!HUD_THEME_PRESETS[normalized]) {
+        normalized = "dark";
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        headerPanelThemeMode = normalized;
+    }
+
+    if (typeof window !== "undefined") {
+        window.headerPanelThemeMode = normalized;
+    }
+
+    if (typeof globalThis !== "undefined") {
+        globalThis.headerPanelThemeMode = normalized;
+    }
+
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+if (typeof window !== "undefined") {
+    window.setHudThemeMode = setHudThemeMode;
+    window.refreshHudTheme = refreshHudTheme;
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.setHudThemeMode = setHudThemeMode;
+    globalThis.refreshHudTheme = refreshHudTheme;
+}
+
+function mergeIconStyle(base, override) {
+    var result = {};
+
+    if (base) {
+        if (typeof base.fill !== "undefined") {
+            result.fill = base.fill;
+        }
+        if (typeof base.strokeColor !== "undefined") {
+            result.strokeColor = base.strokeColor;
+        }
+        if (typeof base.strokeWidth !== "undefined") {
+            result.strokeWidth = base.strokeWidth;
+        }
+    }
+
+    if (override) {
+        if (typeof override === "string") {
+            result.fill = override;
+            result.strokeColor = override;
+        } else {
+            if (typeof override.fill !== "undefined") {
+                result.fill = override.fill;
+            }
+            if (typeof override.strokeColor !== "undefined") {
+                result.strokeColor = override.strokeColor;
+            }
+            if (typeof override.strokeWidth !== "undefined") {
+                result.strokeWidth = override.strokeWidth;
+            }
+        }
+    }
+
+    return result;
+}
+
+
+    var cardsTheme = theme.cards || {};
+    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
+
+    var gradient = cloneArray(cardTheme.background || card.baseGradient || []);
+    var accent = cloneArray(cardTheme.accent || card.baseAccent || []);
+    var highlightConfig = theme.cardHighlight || {};
+    var highlightColors = cloneArray((highlightConfig && highlightConfig.colors) || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
+
+    var cardWidth = card.__cardWidth || HUD_CARD_WIDTH;
+    var cardHeight = card.__cardHeight || HUD_CARD_HEIGHT;
+    var halfWidth = cardWidth / 2;
+    var halfHeight = cardHeight / 2;
+    var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
+    var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
+
+    if (card.background) {
+        card.background.graphics
+            .clear()
+            .beginLinearGradientFill((gradient && gradient.length ? gradient : card.baseGradient || []), [0, 1], -halfWidth, 0, halfWidth, 0)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
+        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
+    }
+
+    if (card.iconAccent) {
+        card.iconAccent.graphics
+            .clear()
+            .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
+
+        var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
+        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
+    }
+
+    if (card.highlight) {
+        card.highlight.graphics
+            .clear()
+            .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
+        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
+    }
+
+    if (card.icon) {
+        var iconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        card.baseIconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        drawHudIcon(card.icon, type, iconStyle);
+    }
+
+    if (card.label) {
+        var labelStyle = theme.textStyles ? theme.textStyles.label : null;
+        if (labelStyle && typeof labelStyle.color !== "undefined") {
+            card.label.color = labelStyle.color;
+        }
+        applyTextStyle(card.label, labelStyle || {});
+    }
+
+    card.baseGradient = cloneArray(gradient);
+    card.baseAccent = cloneArray(accent);
+}
+
+function applyHudThemeToQuestionProgress(theme) {
+    if (!questionProgressBarBg || !questionProgressBarFill) {
+        return;
+    }
+
+    var progressTheme = theme.questionProgress || {};
+    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
+    var fillScale = questionProgressBarFill.scaleX;
+
+    questionProgressBarBg.graphics
+        .clear()
+        .beginFill(progressTheme.background || "rgba(255,255,255,0.14)")
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.graphics
+        .clear()
+        .beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0)
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.scaleX = typeof fillScale === "number" ? fillScale : questionProgressBarFill.scaleX;
+}
+
+function applyHudThemeToControls(theme) {
+    if (!controlContainer) {
+        return;
+    }
+
+    var controlTheme = theme.controlBackground || {};
+    var controlPalette = theme.controlPalette || {};
+
+    if (controlContainer.backgroundShape) {
+        var controlBg = controlContainer.backgroundShape;
+        var controlWidth = controlBg.__width || 120;
+        var controlHeight = controlBg.__height || 53;
+        var controlRadius = controlBg.__radius || 24;
+        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+
+        controlBg.graphics
+            .clear()
+            .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
+            .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+
+        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
+    }
+
+    updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
+    updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
+    updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
+}
+
+function applyHudThemeToTexts(theme) {
+    if (!theme || !theme.textStyles) {
+        return;
+    }
+
+    var textStyles = theme.textStyles;
+
+    if (gameScoreTxt) {
+        var valueStyle = textStyles.value || {};
+        if (typeof valueStyle.color !== "undefined") {
+            gameScoreTxt.color = valueStyle.color;
+        }
+        applyTextStyle(gameScoreTxt, valueStyle);
+        gameScoreTxt.__baseColor = gameScoreTxt.color;
+        gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+    }
+
+    if (gameQCntTxt) {
+        var questionStyle = textStyles.value || {};
+        if (typeof questionStyle.color !== "undefined") {
+            gameQCntTxt.color = questionStyle.color;
+        }
+        applyTextStyle(gameQCntTxt, questionStyle);
+        gameQCntTxt.__baseColor = gameQCntTxt.color;
+        gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+    }
+
+    if (gameTimerTxt) {
+        var timerStyle = textStyles.timerValue || textStyles.value || {};
+        if (typeof timerStyle.color !== "undefined") {
+            gameTimerTxt.color = timerStyle.color;
+        }
+        applyTextStyle(gameTimerTxt, timerStyle);
+        gameTimerTxt.__baseColor = gameTimerTxt.color;
+        gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+    }
+}
+
+function applyHudThemeToHud() {
+    var theme = getHudThemeConfig();
+    if (!theme) {
+        return;
+    }
+
+    applyHudThemeToCard(scoreCardContainer, "score", theme);
+    applyHudThemeToCard(timerCardContainer, "timer", theme);
+    applyHudThemeToCard(hudQuestionCardContainer, "question", theme);
+
+    applyHudThemeToTexts(theme);
+    applyHudThemeToQuestionProgress(theme);
+    applyHudThemeToControls(theme);
+
+    if (typeof setTimerCriticalState === "function" && timerCardContainer) {
+        setTimerCriticalState(!!timerCardContainer.__isCritical);
+    }
+
+    if (stage) {
+        stage.update();
+    }
+}
+
+function resetHudThemeCache() {
+    cachedHudThemeConfig = null;
+    activeHudThemeMode = null;
+}
+
+function refreshHudTheme() {
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+function setHudThemeMode(mode) {
+    if (typeof mode !== "string") {
+        return;
+    }
+
+    var normalized = mode.toLowerCase();
+    if (!HUD_THEME_PRESETS[normalized]) {
+        normalized = "dark";
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        headerPanelThemeMode = normalized;
+    }
+
+    if (typeof window !== "undefined") {
+        window.headerPanelThemeMode = normalized;
+    }
+
+    if (typeof globalThis !== "undefined") {
+        globalThis.headerPanelThemeMode = normalized;
+    }
+
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+if (typeof window !== "undefined") {
+    window.setHudThemeMode = setHudThemeMode;
+    window.refreshHudTheme = refreshHudTheme;
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.setHudThemeMode = setHudThemeMode;
+    globalThis.refreshHudTheme = refreshHudTheme;
+}
+
+function mergeIconStyle(base, override) {
+    var result = {};
+
+    if (base) {
+        if (typeof base.fill !== "undefined") {
+            result.fill = base.fill;
+        }
+        if (typeof base.strokeColor !== "undefined") {
+            result.strokeColor = base.strokeColor;
+        }
+        if (typeof base.strokeWidth !== "undefined") {
+            result.strokeWidth = base.strokeWidth;
+        }
+    }
+
+    if (override) {
+        if (typeof override === "string") {
+            result.fill = override;
+            result.strokeColor = override;
+        } else {
+            if (typeof override.fill !== "undefined") {
+                result.fill = override.fill;
+            }
+            if (typeof override.strokeColor !== "undefined") {
+                result.strokeColor = override.strokeColor;
+            }
+            if (typeof override.strokeWidth !== "undefined") {
+                result.strokeWidth = override.strokeWidth;
+            }
+        }
+    }
+
+    return result;
 }
 
 function resolveHudThemeMode() {
@@ -608,6 +1250,9 @@ function mergeIconStyle(base, override) {
     return result;
 }
 
+
+    return result;
+}
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -633,12 +1278,10 @@ function createLoader() {
     if (!HowToPlayScreenImg) {
         HowToPlayScreenImg = buildHowToPlayOverlay();
     }
-
     loaderBar = HowToPlayScreenImg;
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
-
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -779,7 +1422,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -1601,7 +2243,6 @@ function buildHudLayout() {
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
-
     var controlPalette = hudTheme.controlPalette || {};
     var volumePalette = controlPalette.volume || {};
     var fullscreenPalette = controlPalette.fullscreen || {};
@@ -1898,7 +2539,6 @@ function buildHowToPlayOverlay() {
 
     var progress = createHowToPlayProgressBar();
     overlay.addChild(progress);
-
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
     overlay.header = header;
@@ -1924,7 +2564,6 @@ function buildHowToPlayOverlay() {
     var accentSmall = new createjs.Shape();
     accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
     overlay.addChild(accentSmall);
-
     header.baseY = header.y;
     instructions.baseY = instructions.y;
     progress.baseY = progress.y;
@@ -2002,7 +2641,6 @@ function createHowToPlayInstructions() {
         stepText.y = itemY - 18;
         container.addChild(stepText);
     }
-
     container.cardShape = card;
 
     return container;
@@ -2307,6 +2945,7 @@ function startHowToPlayTildeWaveAnimation(waveContainer) {
         .to({ alpha: lowAlpha }, 2000, createjs.Ease.sineInOut);
 }
 
+
 function startProgressFillShimmer(shineShape) {
     if (!shineShape) {
         return;
@@ -2361,6 +3000,7 @@ function applyHowToPlayAmbientAnimations(overlay) {
     if (overlay.header && overlay.header.tildeWave) {
         startHowToPlayTildeWaveAnimation(overlay.header.tildeWave);
     }
+
 
     if (overlay.accentLarge) {
         var large = overlay.accentLarge;
@@ -2430,7 +3070,6 @@ function startHowToPlayHeaderIdleAnimation(header) {
             .to({ scaleX: 1.01, scaleY: 1.01 }, 2400, createjs.Ease.sineInOut)
             .to({ scaleX: 1, scaleY: 1 }, 2400, createjs.Ease.sineInOut);
     }
-
     if (header.tildeWave) {
         startHowToPlayTildeWaveAnimation(header.tildeWave);
     }
