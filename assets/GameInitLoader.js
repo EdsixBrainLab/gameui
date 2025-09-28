@@ -668,7 +668,7 @@ function mergeIconStyle(base, override) {
 
     card.baseGradient = cloneArray(gradient);
     card.baseAccent = cloneArray(accent);
-}
+
 
 function applyHudThemeToQuestionProgress(theme) {
     if (!questionProgressBarBg || !questionProgressBarFill) {
@@ -1250,9 +1250,6 @@ function mergeIconStyle(base, override) {
     return result;
 }
 
-
-    return result;
-}
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -1982,7 +1979,7 @@ function watchRestart() {
         }
     }
 
-    hideLoaderProceedButton();
+
 
 
     stage.update(); //update the stage to show text;
@@ -3213,15 +3210,7 @@ function buildGameIntroOverlay() {
     overlay.mouseEnabled = false;
     overlay.mouseChildren = false;
 
-    var background = new createjs.Shape();
-    background.graphics
-        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
-        .drawRect(0, 0, 1280, 720);
-    overlay.addChild(background);
 
-    var pattern = drawHoneycombPattern(1280, 720, 34);
-    pattern.alpha = 0.14;
-    overlay.addChild(pattern);
 
     var header = createIntroHowToPlayHeader();
     overlay.addChild(header);
