@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -779,7 +778,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -2495,7 +2493,6 @@ function startHowToPlayHeaderIdleAnimation(header) {
     }
 
     header.__idleAnimationAttached = true;
-
     if (header.highlightSweep && header.cardWidth) {
         var sweep = header.highlightSweep;
         var travelStart = -160;
