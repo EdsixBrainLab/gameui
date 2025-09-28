@@ -128,88 +128,89 @@ var HUD_THEME_PRESETS = {
     light: {
         cards: {
             score: {
-                background: ["rgba(255,255,255,0.96)", "rgba(237,244,255,0.96)"],
-                accent: ["rgba(78,146,249,0.24)", "rgba(78,146,249,0.08)"],
+                background: ["rgba(20,41,78,0.95)", "rgba(43,88,156,0.95)"],
+                accent: ["rgba(95,169,255,0.32)", "rgba(95,169,255,0.12)"],
                 iconStyle: {
-                    fill: "#F4B400",
-                    strokeColor: "rgba(20,52,91,0.18)",
+                    fill: "#FFD166",
+                    strokeColor: "rgba(11,29,61,0.45)",
+
                     strokeWidth: 2
                 }
             },
             timer: {
-                background: ["rgba(255,255,255,0.96)", "rgba(226,243,255,0.96)"],
-                accent: ["rgba(85,172,238,0.22)", "rgba(85,172,238,0.08)"],
+                background: ["rgba(18,38,72,0.95)", "rgba(32,70,122,0.95)"],
+                accent: ["rgba(102,185,255,0.32)", "rgba(102,185,255,0.12)"],
                 iconStyle: {
-                    strokeColor: "#1A73E8",
+                    strokeColor: "#66B9FF",
                     strokeWidth: 3
                 }
             },
             question: {
-                background: ["rgba(255,255,255,0.96)", "rgba(232,249,244,0.96)"],
-                accent: ["rgba(52,211,153,0.24)", "rgba(52,211,153,0.08)"],
+                background: ["rgba(16,54,50,0.95)", "rgba(34,96,90,0.95)"],
+                accent: ["rgba(94,234,212,0.32)", "rgba(94,234,212,0.12)"],
                 iconStyle: {
-                    fill: "#0F9D58",
-                    strokeColor: "rgba(17,58,54,0.35)",
+                    fill: "#6EE7B7",
+                    strokeColor: "rgba(9,33,30,0.45)",
                     strokeWidth: 3
                 }
             }
         },
-        cardBackgroundAlpha: 0.98,
-        cardAccentAlpha: 0.95,
+        cardBackgroundAlpha: 0.96,
+        cardAccentAlpha: 0.92,
         cardHighlight: {
-            colors: ["rgba(255,255,255,0.78)", "rgba(255,255,255,0)"],
-            alpha: 0.24
+            colors: ["rgba(255,255,255,0.1)", "rgba(255,255,255,0)"],
+            alpha: 0.2
         },
         textStyles: {
             label: {
-                color: "#1E3A5F",
-                shadow: { color: "rgba(255,255,255,0.85)", x: 0, y: 1, blur: 2 }
+                color: "#D6E6FF",
+                shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
             },
             value: {
-                color: "#15325B",
-                shadow: { color: "rgba(255,255,255,0.7)", x: 0, y: 2, blur: 6 }
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,14,32,0.65)", x: 0, y: 4, blur: 14 }
             },
             timerValue: {
-                color: "#0B1B33",
-                shadow: { color: "rgba(255,255,255,0.65)", x: 0, y: 2, blur: 6 }
+                color: "#F6FBFF",
+                shadow: { color: "rgba(4,14,32,0.7)", x: 0, y: 4, blur: 16 }
             }
         },
         questionProgress: {
-            background: "rgba(15,35,66,0.12)",
-            fill: ["#4C6FFF", "#2DD4BF"]
+            background: "rgba(7,19,40,0.35)",
+            fill: ["#34d399", "#60a5fa"]
         },
         controlBackground: {
-            colors: ["rgba(18,43,96,0.12)", "rgba(18,43,96,0.04)"],
-            alpha: 0.9
+            colors: ["rgba(9,25,54,0.75)", "rgba(11,31,70,0.48)"],
+            alpha: 0.82
         },
         controlPalette: {
-            volume: { primary: "rgba(78,146,249,0.75)", glow: "rgba(78,146,249,0.25)" },
-            fullscreen: { primary: "rgba(158,108,237,0.75)", glow: "rgba(158,108,237,0.25)" },
-            close: { primary: "rgba(255,96,102,0.8)", glow: "rgba(255,96,102,0.28)" }
+            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.45)" },
+            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.45)" },
+            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.5)" }
         },
         iconWrapper: {
-            ringColor: "rgba(22,45,79,0.35)",
-            ringAlpha: 0.55,
-            hoverRingAlpha: 0.85,
-            glowAlpha: 0.35,
-            hoverGlowAlpha: 0.55,
-            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(233,242,255,0.95)"]
+            ringColor: "rgba(197,219,255,0.65)",
+            ringAlpha: 0.75,
+            hoverRingAlpha: 0.95,
+            glowAlpha: 0.55,
+            hoverGlowAlpha: 0.75,
+            backgroundGradient: ["rgba(26,46,79,0.9)", "rgba(41,73,122,0.85)"]
         },
         timerCritical: {
             warning: {
-                background: ["rgba(255,216,149,0.96)", "rgba(255,196,102,0.96)"],
-                accent: ["rgba(255,200,138,0.4)", "rgba(255,200,138,0.14)"],
-                icon: "#E65100",
-                text: "#A33A00"
+                background: ["rgba(255,159,67,0.92)", "rgba(215,118,23,0.92)"],
+                accent: ["rgba(255,198,124,0.45)", "rgba(255,198,124,0.15)"],
+                icon: "#FFE082",
+                text: "#FFF3E0"
             },
             danger: {
-                background: ["rgba(255,173,173,0.96)", "rgba(248,120,120,0.96)"],
-                accent: ["rgba(255,138,138,0.45)", "rgba(255,138,138,0.16)"],
-                icon: "#D32F2F",
-                text: "#8B1A1A"
+                background: ["rgba(153,27,39,0.92)", "rgba(220,38,38,0.92)"],
+                accent: ["rgba(248,113,113,0.45)", "rgba(248,113,113,0.18)"],
+                icon: "#FFD1DC",
+                text: "#FFE4E6"
             },
-            normalIcon: "#1A73E8",
-            normalText: "#0B1B33"
+            normalIcon: "#66B9FF",
+            normalText: "#F6FBFF"
         }
     }
 };
@@ -356,7 +357,6 @@ function createLoader() {
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
-
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -1676,6 +1676,7 @@ function createHowToPlayInstructions() {
 }
 
 
+
 function drawHoneycombPattern(width, height, radius) {
     var shape = new createjs.Shape();
     var graphics = shape.graphics;
@@ -1889,6 +1890,7 @@ function createIntroActionButton() {
     var highlight = new createjs.Shape();
     highlight.name = "highlight";
     button.addChild(highlight);
+
     var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
     icon.textAlign = "center";
@@ -1920,6 +1922,7 @@ function applyHowToPlayButtonState(button, state) {
     if (!button) {
         return;
     }
+
     var base = button.getChildByName("base");
     var highlight = button.getChildByName("highlight");
     var label = button.getChildByName("label");
