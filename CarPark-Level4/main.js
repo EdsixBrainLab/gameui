@@ -43,6 +43,11 @@ var respDim = 'both'
 var isScale = true
 var scaleType = 1;
 
+var headerPanelThemeMode = "light";
+if (typeof window !== "undefined") {
+    window.headerPanelThemeMode = headerPanelThemeMode;
+}
+
 var lastW, lastH, lastS = 1;
 var borderPadding = 10,
     barHeight = 20;
