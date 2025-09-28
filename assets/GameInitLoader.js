@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -608,6 +607,297 @@ function mergeIconStyle(base, override) {
     return result;
 }
 
+var HUD_THEME_PRESETS = {
+    dark: {
+        cards: {
+            score: {
+                background: ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"],
+                accent: ["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.03)"],
+                iconStyle: {
+                    fill: "#FACC6B",
+                    strokeColor: "rgba(12, 27, 46, 0.45)",
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(20, 42, 74, 0.92)", "rgba(45, 86, 148, 0.92)"],
+                accent: ["rgba(102, 185, 255, 0.35)", "rgba(102, 185, 255, 0.08)"],
+                iconStyle: {
+                    strokeColor: "#66B9FF",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(18, 60, 53, 0.92)", "rgba(34, 110, 95, 0.92)"],
+                accent: ["rgba(110, 231, 183, 0.32)", "rgba(110, 231, 183, 0.08)"],
+                iconStyle: {
+                    fill: "#6EE7B7",
+                    strokeColor: "#0d1b2a",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 0.96,
+        cardAccentAlpha: 0.9,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"],
+            alpha: 0.24
+        },
+        textStyles: {
+            label: {
+                color: "#C4DBFF",
+                shadow: { color: "rgba(5, 16, 32, 0.65)", x: 0, y: 2, blur: 6 }
+            },
+            value: {
+                color: "#FFFFFF",
+                shadow: { color: "rgba(12, 21, 40, 0.35)", x: 0, y: 4, blur: 12 }
+            },
+            timerValue: {
+                color: "#F6FBFF",
+                shadow: { color: "rgba(5, 16, 32, 0.3)", x: 0, y: 4, blur: 12 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(255,255,255,0.14)",
+            fill: ["#34d399", "#60a5fa"]
+        },
+        controlBackground: {
+            colors: ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"],
+            alpha: 0.88
+        },
+        controlPalette: {
+            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.5)" },
+            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.5)" },
+            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.55)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(255,255,255,0.5)",
+            ringAlpha: 0.6,
+            hoverRingAlpha: 0.9,
+            glowAlpha: 0.45,
+            hoverGlowAlpha: 0.65,
+            backgroundGradient: null
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,152,0,0.95)", "rgba(212,138,29,0.95)"],
+                accent: ["rgba(245,192,112,0.45)", "rgba(245,192,112,0.1)"],
+                icon: "#FF9DA5",
+                text: "#FFD7D7"
+            },
+            danger: {
+                background: ["rgba(88,26,36,0.95)", "rgba(148,41,52,0.95)"],
+                accent: ["rgba(255,135,135,0.45)", "rgba(255,135,135,0.1)"],
+                icon: "#FF9DA5",
+                text: "#FFD7D7"
+            },
+            normalIcon: "#66B9FF",
+            normalText: "#F6FBFF"
+        }
+    },
+    light: {
+        cards: {
+            score: {
+                background: ["rgba(20,41,78,0.95)", "rgba(43,88,156,0.95)"],
+                accent: ["rgba(95,169,255,0.32)", "rgba(95,169,255,0.12)"],
+                iconStyle: {
+                    fill: "#FFD166",
+                    strokeColor: "rgba(11,29,61,0.45)",
+
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(18,38,72,0.95)", "rgba(32,70,122,0.95)"],
+                accent: ["rgba(102,185,255,0.32)", "rgba(102,185,255,0.12)"],
+                iconStyle: {
+                    strokeColor: "#66B9FF",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(16,54,50,0.95)", "rgba(34,96,90,0.95)"],
+                accent: ["rgba(94,234,212,0.32)", "rgba(94,234,212,0.12)"],
+                iconStyle: {
+                    fill: "#6EE7B7",
+                    strokeColor: "rgba(9,33,30,0.45)",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 0.96,
+        cardAccentAlpha: 0.92,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.1)", "rgba(255,255,255,0)"],
+            alpha: 0.2
+        },
+        textStyles: {
+            label: {
+                color: "#D6E6FF",
+                shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
+            },
+            value: {
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,14,32,0.65)", x: 0, y: 4, blur: 14 }
+            },
+            timerValue: {
+                color: "#F6FBFF",
+                shadow: { color: "rgba(4,14,32,0.7)", x: 0, y: 4, blur: 16 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(7,19,40,0.35)",
+            fill: ["#34d399", "#60a5fa"]
+        },
+        controlBackground: {
+            colors: ["rgba(9,25,54,0.75)", "rgba(11,31,70,0.48)"],
+            alpha: 0.82
+        },
+        controlPalette: {
+            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.45)" },
+            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.45)" },
+            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.5)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(197,219,255,0.65)",
+            ringAlpha: 0.75,
+            hoverRingAlpha: 0.95,
+            glowAlpha: 0.55,
+            hoverGlowAlpha: 0.75,
+            backgroundGradient: ["rgba(26,46,79,0.9)", "rgba(41,73,122,0.85)"]
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,159,67,0.92)", "rgba(215,118,23,0.92)"],
+                accent: ["rgba(255,198,124,0.45)", "rgba(255,198,124,0.15)"],
+                icon: "#FFE082",
+                text: "#FFF3E0"
+            },
+            danger: {
+                background: ["rgba(153,27,39,0.92)", "rgba(220,38,38,0.92)"],
+                accent: ["rgba(248,113,113,0.45)", "rgba(248,113,113,0.18)"],
+                icon: "#FFD1DC",
+                text: "#FFE4E6"
+            },
+            normalIcon: "#66B9FF",
+            normalText: "#F6FBFF"
+        }
+    }
+};
+
+function cloneArray(source) {
+    return source && source.slice ? source.slice() : source;
+}
+
+function resolveHudThemeMode() {
+    var scopes = [];
+
+    if (typeof window !== "undefined") {
+        scopes.push(window);
+    }
+
+    if (typeof globalThis !== "undefined") {
+        scopes.push(globalThis);
+    }
+
+    for (var i = 0; i < scopes.length; i++) {
+        var scope = scopes[i];
+        if (!scope) {
+            continue;
+        }
+
+        if (typeof scope.headerPanelThemeMode !== "undefined") {
+            return String(scope.headerPanelThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.hudThemeMode !== "undefined") {
+            return String(scope.hudThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.headerPanelTheme !== "undefined") {
+            return String(scope.headerPanelTheme).toLowerCase();
+        }
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        return String(headerPanelThemeMode).toLowerCase();
+    }
+
+    if (typeof hudThemeMode !== "undefined") {
+        return String(hudThemeMode).toLowerCase();
+    }
+
+    if (typeof headerPanelTheme !== "undefined") {
+        return String(headerPanelTheme).toLowerCase();
+    }
+
+    return "dark";
+}
+
+function getHudThemeConfig() {
+    var mode = resolveHudThemeMode();
+    if (!HUD_THEME_PRESETS[mode]) {
+        mode = "dark";
+    }
+    return HUD_THEME_PRESETS[mode];
+}
+
+function applyTextStyle(target, style) {
+    if (!target || !style) {
+        return;
+    }
+
+    if (style.color) {
+        target.color = style.color;
+    }
+
+    if (style.shadow) {
+        target.shadow = new createjs.Shadow(
+            style.shadow.color || "rgba(0,0,0,0)",
+            style.shadow.x || 0,
+            style.shadow.y || 0,
+            style.shadow.blur || 0
+        );
+    } else {
+        target.shadow = null;
+    }
+}
+
+function mergeIconStyle(base, override) {
+    var result = {};
+
+    if (base) {
+        if (typeof base.fill !== "undefined") {
+            result.fill = base.fill;
+        }
+        if (typeof base.strokeColor !== "undefined") {
+            result.strokeColor = base.strokeColor;
+        }
+        if (typeof base.strokeWidth !== "undefined") {
+            result.strokeWidth = base.strokeWidth;
+        }
+    }
+
+    if (override) {
+        if (typeof override === "string") {
+            result.fill = override;
+            result.strokeColor = override;
+        } else {
+            if (typeof override.fill !== "undefined") {
+                result.fill = override.fill;
+            }
+            if (typeof override.strokeColor !== "undefined") {
+                result.strokeColor = override.strokeColor;
+            }
+            if (typeof override.strokeWidth !== "undefined") {
+                result.strokeWidth = override.strokeWidth;
+            }
+        }
+    }
+
+    return result;
+}
+
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -633,12 +923,10 @@ function createLoader() {
     if (!HowToPlayScreenImg) {
         HowToPlayScreenImg = buildHowToPlayOverlay();
     }
-
     loaderBar = HowToPlayScreenImg;
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
-
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -778,7 +1066,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         bar.scaleX = progressRatio;
     }
@@ -1589,6 +1876,7 @@ function buildHudLayout() {
     controlBg.__width = controlWidth;
     controlBg.__height = controlHeight;
     controlBg.__radius = 24;
+
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
