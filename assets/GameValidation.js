@@ -1,16 +1,35 @@
 /////////////////////////////////////////////////
 var removeTimeOut
 var container1
-var questionTxtR;
-var attemptTxtR;
-var correctTxtR;
-var responseTxtR;
-var scoreTxtR;
 var clrSent;
 var stopValue
 var starCnt = -1
 var scBar = 0
 var scores = 0;
+
+var resultsOverlay,
+  resultsOverlayBg,
+  resultsCardContainer,
+  resultsCardMask,
+  resultsCardSheen,
+  resultsCardAmbientGlow,
+  resultsScoreRibbon,
+  resultsCardAurora,
+  resultsCardAuroraTrail,
+  resultsCardSparkleLayer,
+  resultsCardSparkles,
+  resultsHeadingTxt,
+  resultsSubheadingTxt,
+  resultsScoreDial,
+  resultsResponseDial,
+  resultsQuestionsDial,
+  resultsAttemptsDial,
+  resultsCorrectDial,
+  resultsScorePulse;
+
+var resultsCloseBtnGlow,
+  resultsCloseBtnHighlight,
+  resultsCloseBtnIconShape;
 
 var answer_status;
 var rightCnt = -1, wrongCnt = -1;
@@ -35,26 +54,35 @@ function startAnimationHandler(evt) {
 }
 
 function isVisibleSkipBtn() {
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "skip");
     SkipBtnMc.visible = true;
-    SkipBtnMc.gotoAndStop(0);
-    skipMc = new createjs.MovieClip()
-    container.parent.addChild(skipMc)
+    SkipBtnMc.mouseEnabled = true;
+    container.parent.addChild(SkipBtnMc);
+    skipMc = new createjs.MovieClip();
+    container.parent.addChild(skipMc);
     skipMc.timeline.addTween(createjs.Tween.get(SkipBtnMc).to({ scaleX: .97, scaleY: .97 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
     SkipBtnMc.addEventListener("click", createDelayToStartGame);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     SkipBtnMc.cursor = "pointer";
-
 }
 
 function isVisibleStartBtn() {
-    SkipBtnMc.gotoAndStop(1);
-    container.parent.addChild(SkipBtnMc)
-    container.parent.addChild(skipMc)
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "start");
+    container.parent.addChild(SkipBtnMc);
+    container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     console.log("isVisibleStartBtn");
-    ////////////////////////////////////////////////////////////////////   
+    ////////////////////////////////////////////////////////////////////
 }
 
 
@@ -62,8 +90,9 @@ function isVisibleStartBtn() {
 function createDelayToStartGame() {
 
     howToPlayImageMc.visible = false;
-    
+
     SkipBtnMc.visible = false;
+    SkipBtnMc.mouseEnabled = false;
     //gameIntroAnimMc.stop();
     stopValue = 0;
     removeGameIntro() // know 
@@ -550,168 +579,28 @@ console.log("computeresult");
 
 
     //////////////////////////////////////////////////////////////////////////////
-    container1.parent.addChild(scoreImgMc);
-    scoreImgMc.x = 540;
-    scoreImgMc.y = 130;
-    scoreImgMc.visible = true;
-
-    if (score == 0) {
-        scoreImgMc.gotoAndStop(0)
-    }
-    else if (score <= 10) {
-        scoreImgMc.gotoAndStop(1)
-    }
-    else if (score > 10 && score <= 20) {
-        scoreImgMc.gotoAndStop(2)
-    }
-    else if (score > 20 && score <= 30) {
-        scoreImgMc.gotoAndStop(3)
-    }
-
-    else if (score > 30 && score <= 40) {
-        scoreImgMc.gotoAndStop(4)
-    }
-    else if (score > 40 && score <= 50) {
-        scoreImgMc.gotoAndStop(5)
-    }
-    else if (score > 50 && score <= 60) {
-        scoreImgMc.gotoAndStop(6)
-    }
-    else if (score > 60 && score <= 70) {
-        scoreImgMc.gotoAndStop(7)
-    }
-    else if (score > 70 && score <= 80) {
-        scoreImgMc.gotoAndStop(8)
-    }
-    else if (score > 80 && score <= 90) {
-        scoreImgMc.gotoAndStop(9)
-    }
-    else if (score > 90 && score < 100) {
-        scoreImgMc.gotoAndStop(9)
-    }
-    else if (score == 100) {
-        scoreImgMc.gotoAndStop(10)
-    }
-
-
-    container1.parent.addChild(ResponseImgMc);
-    ResponseImgMc.x = 150;
-    ResponseImgMc.y = 410;
-    ResponseImgMc.visible = true;
-
-    if (responseTime == 0) {
-        ResponseImgMc.gotoAndStop(0)
-    }
-
-    else if (responseTime > 0 && responseTime <= 20) {
-        ResponseImgMc.gotoAndStop(1)
-    }
-
-    else if (responseTime > 20 && responseTime <= 40) {
-        ResponseImgMc.gotoAndStop(2)
-    }
-
-    else if (responseTime > 40 && responseTime <= 60) {
-        ResponseImgMc.gotoAndStop(3)
-    }
-
-    else if (responseTime > 60 && responseTime <= 80) {
-        ResponseImgMc.gotoAndStop(4)
-    }
-
-    else if (responseTime > 80 && responseTime <= 100) {
-        ResponseImgMc.gotoAndStop(5)
-    }
-
-    else if (responseTime > 100 && responseTime <= 120) {
-        ResponseImgMc.gotoAndStop(6)
-    }
-
-    else if (responseTime > 120 && responseTime <= 140) {
-        ResponseImgMc.gotoAndStop(7)
-    }
-    else if (responseTime > 140 && responseTime <= 160) {
-        ResponseImgMc.gotoAndStop(8)
-    }
-    else if (responseTime > 160 && responseTime <= 180) {
-        ResponseImgMc.gotoAndStop(9)
-    }
-    else if (responseTime == 180) {
-        ResponseImgMc.gotoAndStop(10)
-    }
-
-    container1.parent.addChild(questionImgMc);
-    questionImgMc.x = 420;
-    questionImgMc.y = 410;
-    questionImgMc.visible = true;
-    questionImgMc.gotoAndStop(totalQuestions)
-
-    container1.parent.addChild(AttemptsImgMc);
-    AttemptsImgMc.x = 690;
-    AttemptsImgMc.y = 410;
-    AttemptsImgMc.visible = true;
-    AttemptsImgMc.gotoAndStop(answeredQuestions)
-
-    container1.parent.addChild(CorrectImgMc);
-    CorrectImgMc.x = 960;
-    CorrectImgMc.y = 410;
-    CorrectImgMc.visible = true;
-    CorrectImgMc.gotoAndStop(ccnt)
-
-    questionTxtR = new createjs.Text(totalQuestions, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(questionTxtR);
-    questionTxtR.x = 502; questionTxtR.y = 493;
-    questionTxtR.textAlign = "center";
-    questionTxtR.textBaseline = "middle";
-
-    //
-    attemptTxtR = new createjs.Text(answeredQuestions, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(attemptTxtR);
-    attemptTxtR.x = 772; attemptTxtR.y = 493;
-    attemptTxtR.textAlign = "center";
-    attemptTxtR.textBaseline = "middle";
-
-    correctTxtR = new createjs.Text(ccnt, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(correctTxtR);
-    correctTxtR.x = 1045; correctTxtR.y = 493;
-    correctTxtR.textAlign = "center";
-    correctTxtR.textBaseline = "middle";
-    //
-    responseTxtR = new createjs.Text(responseTime, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(responseTxtR);
-    responseTxtR.x = 232; responseTxtR.y = 493;
-    responseTxtR.textAlign = "center";
-    responseTxtR.textBaseline = "middle";
-
-    //
-    scoreTxtR = new createjs.Text(score, "bold 70px 'Baloo 2'", "black");
-    container1.parent.addChild(scoreTxtR);
-    scoreTxtR.x = 633; scoreTxtR.y = 225;
-    scoreTxtR.textAlign = "center";
-    scoreTxtR.textBaseline = "middle";
-
-    container1.parent.addChild(closeBtnFinal);
-    closeBtnFinal.visible = true;
-    closeBtnFinal.mouseEnabled = true
-    closeBtnFinal.cursor = "pointer";
-    closeBtnFinal.addEventListener("click", closeGameFn);
-
-
-
-    var container2 = new createjs.Container();
-    stage.addChild(container2)
-    container2.parent.addChild(bitmap)
+    ensureResultsSummaryOverlay(container1);
 
     if (gameType == 0) {
-        showScoreFn()
+        showScoreFn();
     }
     else {
-        bitmap.visible = true;
-        questionTxtR.visible = false;
-        attemptTxtR.visible = false;
-        correctTxtR.visible = false;
-        responseTxtR.visible = false;
-        scoreTxtR.visible = false;
+        if (resultsOverlay) {
+            resultsOverlay.visible = false;
+        }
+        if (bitmap) {
+            bitmap.visible = true;
+        }
+        if (closeBtnFinal) {
+            closeBtnFinal.visible = true;
+            closeBtnFinal.mouseEnabled = true;
+            closeBtnFinal.cursor = "pointer";
+            closeBtnFinal.removeAllEventListeners("click");
+            closeBtnFinal.addEventListener("click", closeGameFn);
+            if (container1 && container1.parent) {
+                container1.parent.addChild(closeBtnFinal);
+            }
+        }
     }
 
 
@@ -809,20 +698,720 @@ console.log("rstrst:"+rst);
     }
     rst1 = rst1 + rst;
 }
+function createResultsSummaryDial(radius, labelText, accentColors, options) {
+    options = options || {};
+
+    var container = new createjs.Container();
+    container.radius = radius;
+
+    var glowColorStops = options.glowStops || ["rgba(8,14,40,0.28)", "rgba(8,14,40,0)"];
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(glowColorStops, [0, 1], 0, radius * 0.55, radius * 0.1, 0, radius * 0.55, radius + 46)
+        .drawCircle(0, radius * 0.55, radius + 46);
+    glow.alpha = options.glowAlpha != null ? options.glowAlpha : 0.55;
+    container.addChild(glow);
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .beginRadialGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0.08)"], [0, 1], 0, 0, 0, 0, 0, radius + 26)
+        .drawCircle(0, 0, radius + 26);
+    halo.alpha = 0.85;
+    container.addChild(halo);
+
+    var base = new createjs.Shape();
+    base.graphics
+        .beginLinearGradientFill(options.baseGradient || ["rgba(255,255,255,0.95)", "rgba(236,240,255,0.65)"], [0, 1], 0, -radius, 0, radius)
+        .drawCircle(0, 0, radius);
+    container.addChild(base);
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .beginLinearGradientFill(options.innerGradient || ["#FFFFFF", "#E7ECFF"], [0, 1], 0, -radius + 28, 0, radius - 30)
+        .drawCircle(0, 0, radius - 30);
+    container.addChild(inner);
+
+    var accent = new createjs.Shape();
+    container.addChild(accent);
+
+    container.updateAccent = function (ratio) {
+        var clamped = Math.max(0, Math.min(ratio, 1));
+        accent.graphics.clear();
+        if (clamped <= 0) {
+            return;
+        }
+
+        accent.graphics
+            .setStrokeStyle(options.accentStroke || 14, "round")
+            .beginLinearGradientStroke(accentColors || ["#FFFFFF", "#FFFFFF"], [0, 1], -radius, 0, radius, 0)
+            .arc(0, 0, radius - (options.accentInset || 20), -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * clamped));
+    };
+
+    var valueText = new createjs.Text("0", options.valueFont || "700 48px 'Baloo 2'", options.valueColor || "#182048");
+    valueText.textAlign = "center";
+    valueText.y = options.valueYOffset != null ? options.valueYOffset : -12;
+    valueText.shadow = new createjs.Shadow(options.valueShadowColor || "rgba(15,18,42,0.35)", 0, 6, 18);
+    container.addChild(valueText);
+    container.valueText = valueText;
+
+    var label = new createjs.Text(labelText ? labelText.toUpperCase() : "", options.labelFont || "600 20px 'Baloo 2'", options.labelColor || "rgba(255,255,255,0.92)");
+    label.textAlign = "center";
+    label.y = options.labelOffset != null ? options.labelOffset : radius + 34;
+    label.letterSpacing = options.labelLetterSpacing != null ? options.labelLetterSpacing : 2;
+    label.shadow = options.labelShadow || new createjs.Shadow("rgba(10,16,36,0.4)", 0, 3, 10);
+    container.addChild(label);
+    container.labelText = label;
+
+    container.updateAccent(0);
+
+    return container;
+}
+
+function ensureVectorCloseButton() {
+    if (closeBtnFinal && closeBtnFinal.isVectorClose) {
+        return closeBtnFinal;
+    }
+
+    var previousParent = closeBtnFinal && closeBtnFinal.parent ? closeBtnFinal.parent : null;
+    var previousIndex = previousParent ? previousParent.getChildIndex(closeBtnFinal) : -1;
+
+    if (closeBtnFinal && closeBtnFinal.parent) {
+        closeBtnFinal.parent.removeChild(closeBtnFinal);
+    }
+
+    var closeContainer = new createjs.Container();
+    closeContainer.visible = false;
+    closeContainer.alpha = 0;
+    closeContainer.mouseChildren = false;
+    closeContainer.mouseEnabled = true;
+    closeContainer.isVectorClose = true;
+    closeContainer.cursor = "pointer";
+    closeContainer.shadow = new createjs.Shadow("rgba(10, 18, 44, 0.45)", 0, 8, 18);
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255, 255, 255, 0.35)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"],
+            [0, 0.6, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            40
+        )
+        .drawCircle(0, 0, 40);
+    glow.alpha = 0.25;
+    closeContainer.addChild(glow);
+
+    var base = new createjs.Shape();
+    base.graphics
+        .beginLinearGradientFill(["#FF8A94", "#FFB15F"], [0, 1], -32, -32, 32, 32)
+        .drawRoundRect(-28, -28, 56, 56, 18);
+    closeContainer.addChild(base);
+
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255, 255, 255, 0.88)")
+        .drawRoundRect(-26, -26, 52, 52, 16);
+    highlight.alpha = 0.85;
+    closeContainer.addChild(highlight);
+
+    var icon = new createjs.Shape();
+    icon.graphics
+        .setStrokeStyle(4, "round", "round")
+        .beginStroke("#FFFFFF")
+        .moveTo(-11, -11)
+        .lineTo(11, 11)
+        .moveTo(-11, 11)
+        .lineTo(11, -11);
+    icon.alpha = 0.92;
+    closeContainer.addChild(icon);
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000000").drawCircle(0, 0, 30);
+    closeContainer.hitArea = hit;
+
+    closeContainer.on("mouseover", function () {
+        createjs.Tween.get(highlight, { override: true }).to({ alpha: 1 }, 160, createjs.Ease.quadOut);
+        createjs.Tween.get(glow, { override: true })
+            .to({ alpha: 0.45, scaleX: 1.05, scaleY: 1.05 }, 180, createjs.Ease.quadOut);
+    });
+
+    closeContainer.on("mouseout", function () {
+        createjs.Tween.get(highlight, { override: true }).to({ alpha: 0.85 }, 200, createjs.Ease.quadOut);
+        createjs.Tween.get(glow, { override: true })
+            .to({ alpha: 0.25, scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadOut);
+    });
+
+    closeBtnFinal = closeContainer;
+    resultsCloseBtnGlow = glow;
+    resultsCloseBtnHighlight = highlight;
+    resultsCloseBtnIconShape = icon;
+
+    if (previousParent) {
+        previousParent.addChildAt(closeBtnFinal, previousIndex >= 0 ? previousIndex : previousParent.numChildren);
+    }
+
+    return closeBtnFinal;
+}
+
+function ensureResultsSummaryOverlay(parentContainer) {
+    ensureVectorCloseButton();
+    if (!resultsOverlay) {
+        resultsOverlay = new createjs.Container();
+        resultsOverlay.visible = false;
+        resultsOverlay.alpha = 0;
+        resultsOverlay.mouseEnabled = true;
+        resultsOverlay.mouseChildren = true;
+
+        resultsOverlayBg = new createjs.Shape();
+        resultsOverlayBg.mouseEnabled = true;
+        resultsOverlay.addChild(resultsOverlayBg);
+
+        resultsCardContainer = new createjs.Container();
+        resultsOverlay.addChild(resultsCardContainer);
+
+        var cardBg = new createjs.Shape();
+        cardBg.graphics
+            .beginLinearGradientFill(["#FFAA6B", "#F66BC6", "#6C6BFF"], [0, 0.48, 1], -460, -280, 460, 280)
+            .drawRoundRect(-460, -280, 920, 560, 52);
+        cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
+        resultsCardContainer.addChild(cardBg);
+
+        resultsCardMask = new createjs.Shape();
+        resultsCardMask.graphics.drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardMask.visible = false;
+        resultsCardMask.mouseEnabled = false;
+        resultsCardMask.mouseChildren = false;
+        resultsCardContainer.addChild(resultsCardMask);
+
+        resultsCardAurora = new createjs.Shape();
+        resultsCardAurora.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -420, -180, 320, 220)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardAurora.alpha = 0.45;
+        resultsCardAurora.rotation = -6;
+        resultsCardAurora.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAurora);
+
+        resultsCardAuroraTrail = new createjs.Shape();
+        resultsCardAuroraTrail.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(255,255,255,0.35)", "rgba(255,255,255,0)"], [0, 0.65, 1], -360, 0, 360, 0)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardAuroraTrail.alpha = 0.3;
+        resultsCardAuroraTrail.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAuroraTrail);
+
+        resultsCardSparkleLayer = new createjs.Container();
+        resultsCardSparkleLayer.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardSparkleLayer);
+        resultsCardSparkles = [];
+        for (var sparkleIndex = 0; sparkleIndex < 6; sparkleIndex++) {
+            var sparkle = new createjs.Shape();
+            sparkle.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
+                    [0, 0.4, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    14
+                )
+                .drawCircle(0, 0, 14);
+            sparkle.alpha = 0;
+            sparkle.x = -360 + Math.random() * 720;
+            sparkle.y = -200 + Math.random() * 400;
+            resultsCardSparkleLayer.addChild(sparkle);
+            resultsCardSparkles.push(sparkle);
+        }
+
+        var cardInnerSheen = new createjs.Shape();
+        cardInnerSheen.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"], [0, 1], -440, -200, 200, 120)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        cardInnerSheen.alpha = 0.35;
+        cardInnerSheen.mask = resultsCardMask;
+        resultsCardContainer.addChild(cardInnerSheen);
+
+        var cardOutline = new createjs.Shape();
+        cardOutline.graphics
+            .setStrokeStyle(3.5)
+            .beginStroke("rgba(255,255,255,0.72)")
+            .drawRoundRect(-460, -280, 920, 560, 52);
+        resultsCardContainer.addChild(cardOutline);
+
+        var cardGlow = new createjs.Shape();
+        cardGlow.graphics
+            .beginRadialGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -260, -200, 0, -260, -200, 320)
+            .drawCircle(-260, -200, 320);
+        cardGlow.alpha = 0.5;
+        resultsCardContainer.addChild(cardGlow);
+
+        resultsCardAmbientGlow = new createjs.Shape();
+        resultsCardAmbientGlow.graphics
+            .beginRadialGradientFill(
+                ["rgba(255,255,255,0)", "rgba(255,255,255,0.25)", "rgba(255,255,255,0)"],
+                [0, 0.55, 1],
+                0,
+                0,
+                0,
+                0,
+                0,
+                420
+            )
+            .drawCircle(0, 0, 420);
+        resultsCardAmbientGlow.alpha = 0.2;
+        resultsCardAmbientGlow.scaleX = resultsCardAmbientGlow.scaleY = 1;
+        resultsCardAmbientGlow.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAmbientGlow);
+
+        var scoreRibbon = new createjs.Shape();
+        scoreRibbon.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.22)", "rgba(255,255,255,0.05)"], [0, 1], -320, 0, 320, 0)
+            .drawRoundRect(-320, -54, 640, 108, 54);
+        scoreRibbon.regX = 0;
+        scoreRibbon.regY = 0;
+        scoreRibbon.rotation = -18;
+        scoreRibbon.alpha = 0.65;
+        resultsCardContainer.addChild(scoreRibbon);
+        resultsScoreRibbon = scoreRibbon;
+
+        resultsCardSheen = new createjs.Shape();
+        resultsCardSheen.graphics
+            .beginLinearGradientFill(
+                ["rgba(255,255,255,0)", "rgba(255,255,255,0.8)", "rgba(255,255,255,0)"],
+                [0, 0.55, 1],
+                -200,
+                0,
+                200,
+                0
+            )
+            .drawRoundRect(-240, -260, 480, 520, 52);
+        resultsCardSheen.alpha = 0;
+        resultsCardSheen.x = -360;
+        resultsCardSheen.mask = resultsCardMask;
+        resultsCardSheen.compositeOperation = "lighter";
+        resultsCardContainer.addChild(resultsCardSheen);
+
+        var headerContainer = new createjs.Container();
+        headerContainer.y = -200;
+        resultsCardContainer.addChild(headerContainer);
+
+        resultsHeadingTxt = new createjs.Text("Performance Summary", "700 36px 'Baloo 2'", "#FFFFFF");
+        resultsHeadingTxt.textAlign = "center";
+        resultsHeadingTxt.shadow = new createjs.Shadow("rgba(8,14,40,0.5)", 0, 6, 24);
+        headerContainer.addChild(resultsHeadingTxt);
+
+        resultsSubheadingTxt = new createjs.Text("Here's how you performed in this round.", "400 20px 'Baloo 2'", "rgba(255,255,255,0.9)");
+        resultsSubheadingTxt.textAlign = "center";
+        resultsSubheadingTxt.y = 38;
+        headerContainer.addChild(resultsSubheadingTxt);
+
+        var headerUnderline = new createjs.Shape();
+        headerUnderline.graphics
+            .setStrokeStyle(2)
+            .beginStroke("rgba(255,255,255,0.45)")
+            .moveTo(-140, 70)
+            .lineTo(140, 70);
+        headerContainer.addChild(headerUnderline);
+
+        resultsScoreDial = createResultsSummaryDial(120, "Score", ["#FFE58A", "#FF7DA6"], {
+            valueFont: "700 68px 'Baloo 2'",
+            valueYOffset: -18,
+            labelFont: "600 24px 'Baloo 2'",
+            labelOffset: 88,
+            accentStroke: 16,
+            accentInset: 22,
+            valueColor: "#1B1B3F",
+            baseGradient: ["rgba(255,255,255,0.96)", "rgba(237,242,255,0.72)"],
+            innerGradient: ["#FFFFFF", "#E9F0FF"],
+            glowAlpha: 0.45,
+            valueShadowColor: "rgba(12,20,48,0.4)",
+            labelShadow: new createjs.Shadow("rgba(13,19,42,0.35)", 0, 3, 12),
+        });
+        resultsScoreDial.y = -24;
+        resultsCardContainer.addChild(resultsScoreDial);
+
+        resultsScorePulse = new createjs.Shape();
+        resultsScorePulse.graphics
+            .beginRadialGradientFill(["rgba(255,255,255,0.4)", "rgba(255,255,255,0)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 0, 0, 0, 150)
+            .drawCircle(0, 0, 150);
+        resultsScorePulse.alpha = 0;
+        resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+        resultsScorePulse.compositeOperation = "lighter";
+        resultsScorePulse.x = resultsScoreDial.x;
+        resultsScorePulse.y = resultsScoreDial.y;
+        resultsCardContainer.addChild(resultsScorePulse);
+        resultsCardContainer.setChildIndex(resultsScorePulse, resultsCardContainer.getChildIndex(resultsScoreDial));
+
+        var footerY = 170;
+
+        resultsResponseDial = createResultsSummaryDial(90, "Response Time", ["#5BEBFF", "#547BFF"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#EAF5FF"],
+            glowAlpha: 0.5,
+        });
+        resultsResponseDial.x = -255;
+        resultsResponseDial.y = footerY;
+        resultsCardContainer.addChild(resultsResponseDial);
+
+        resultsQuestionsDial = createResultsSummaryDial(90, "Questions", ["#FFD271", "#FF7BAE"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(251,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#F7ECFF"],
+            glowAlpha: 0.5,
+        });
+        resultsQuestionsDial.x = -85;
+        resultsQuestionsDial.y = footerY;
+        resultsCardContainer.addChild(resultsQuestionsDial);
+
+        resultsAttemptsDial = createResultsSummaryDial(90, "Attempts", ["#6CF2E6", "#30D6FF"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,251,0.6)"],
+            innerGradient: ["#FFFFFF", "#E9FFFB"],
+            glowAlpha: 0.5,
+        });
+        resultsAttemptsDial.x = 85;
+        resultsAttemptsDial.y = footerY;
+        resultsCardContainer.addChild(resultsAttemptsDial);
+
+        resultsCorrectDial = createResultsSummaryDial(90, "Correct", ["#9EFF7D", "#35C86A"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,236,0.6)"],
+            innerGradient: ["#FFFFFF", "#E6FFEF"],
+            glowAlpha: 0.5,
+        });
+        resultsCorrectDial.x = 255;
+        resultsCorrectDial.y = footerY;
+        resultsCardContainer.addChild(resultsCorrectDial);
+
+        var footerDivider = new createjs.Shape();
+        footerDivider.graphics
+            .setStrokeStyle(1.5)
+            .beginStroke("rgba(255,255,255,0.38)")
+            .moveTo(-360, footerY - 110)
+            .lineTo(360, footerY - 110);
+        footerDivider.alpha = 0.4;
+        resultsCardContainer.addChildAt(footerDivider, resultsCardContainer.getChildIndex(resultsResponseDial));
+
+        resultsCardContainer.setChildIndex(cardOutline, resultsCardContainer.numChildren - 1);
+    }
+
+    if (parentContainer && resultsOverlay.parent !== parentContainer) {
+        parentContainer.addChild(resultsOverlay);
+    }
+}
+
+function layoutResultsSummaryOverlay() {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    var stageWidth = 1280;
+    var stageHeight = 720;
+
+    if (typeof stage !== "undefined" && stage && stage.canvas) {
+        var scaleX = stage.scaleX || 1;
+        var scaleY = stage.scaleY || 1;
+        stageWidth = stage.canvas.width / scaleX;
+        stageHeight = stage.canvas.height / scaleY;
+    } else if (typeof canvas !== "undefined" && canvas) {
+        stageWidth = canvas.width;
+        stageHeight = canvas.height;
+    }
+
+    if (resultsOverlayBg) {
+        resultsOverlayBg.graphics.clear();
+        resultsOverlayBg.graphics
+            .beginFill("rgba(6, 10, 28, 0.82)")
+            .drawRect(0, 0, stageWidth, stageHeight);
+        resultsOverlayBg.x = 0;
+        resultsOverlayBg.y = 0;
+    }
+
+    if (resultsCardContainer) {
+        resultsCardContainer.x = stageWidth / 2;
+        resultsCardContainer.y = stageHeight / 2;
+    }
+
+    positionResultsCloseBtn();
+}
+
+function refreshResultsSummaryAnimations() {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    if (resultsCardContainer) {
+        resultsCardContainer.alpha = 0;
+        resultsCardContainer.scaleX = resultsCardContainer.scaleY = 0.94;
+        createjs.Tween.removeTweens(resultsCardContainer);
+        createjs.Tween.get(resultsCardContainer)
+            .to({ alpha: 1, scaleX: 1.02, scaleY: 1.02 }, 420, createjs.Ease.quartOut)
+            .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
+    }
+
+    if (resultsCardAurora) {
+        resultsCardAurora.rotation = -8;
+        resultsCardAurora.alpha = 0.38;
+        createjs.Tween.removeTweens(resultsCardAurora);
+        createjs.Tween.get(resultsCardAurora, { loop: true })
+            .to({ rotation: 4, alpha: 0.52 }, 4200, createjs.Ease.sineInOut)
+            .to({ rotation: -8, alpha: 0.38 }, 4200, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardAuroraTrail) {
+        resultsCardAuroraTrail.alpha = 0.24;
+        resultsCardAuroraTrail.x = 0;
+        createjs.Tween.removeTweens(resultsCardAuroraTrail);
+        createjs.Tween.get(resultsCardAuroraTrail, { loop: true })
+            .to({ x: 46, alpha: 0.42 }, 3600, createjs.Ease.sineInOut)
+            .to({ x: -36, alpha: 0.28 }, 3600, createjs.Ease.sineInOut)
+            .to({ x: 0, alpha: 0.24 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardSparkles && resultsCardSparkles.length) {
+        for (var s = 0; s < resultsCardSparkles.length; s++) {
+            var sparkle = resultsCardSparkles[s];
+            sparkle.alpha = 0;
+            sparkle.scaleX = sparkle.scaleY = 0.4;
+            sparkle.x = -360 + Math.random() * 720;
+            sparkle.y = -200 + Math.random() * 400;
+            createjs.Tween.removeTweens(sparkle);
+            (function (target, delay) {
+                createjs.Tween.get(target, { loop: true })
+                    .wait(delay)
+                    .to({ alpha: 0.9, scaleX: 1, scaleY: 1 }, 320, createjs.Ease.quadOut)
+                    .to({ alpha: 0, scaleX: 0.4, scaleY: 0.4 }, 520, createjs.Ease.quadIn)
+                    .call(function () {
+                        target.x = -360 + Math.random() * 720;
+                        target.y = -200 + Math.random() * 400;
+                    });
+            })(sparkle, 200 * s);
+        }
+    }
+
+    if (resultsScoreRibbon) {
+        resultsScoreRibbon.rotation = -24;
+        createjs.Tween.removeTweens(resultsScoreRibbon);
+        createjs.Tween.get(resultsScoreRibbon)
+            .to({ rotation: -18 }, 520, createjs.Ease.quartOut)
+            .to({ rotation: -20 }, 1600, createjs.Ease.sineInOut)
+            .to({ rotation: -18 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardSheen) {
+        resultsCardSheen.alpha = 0;
+        resultsCardSheen.x = -360;
+        createjs.Tween.removeTweens(resultsCardSheen);
+        createjs.Tween.get(resultsCardSheen, { loop: true })
+            .wait(800)
+            .to({ alpha: 0.75 }, 200, createjs.Ease.quadOut)
+            .to({ x: 360 }, 1700, createjs.Ease.sineOut)
+            .to({ alpha: 0 }, 260)
+            .set({ x: -360 });
+    }
+
+    if (resultsCardAmbientGlow) {
+        resultsCardAmbientGlow.alpha = 0.2;
+        resultsCardAmbientGlow.scaleX = resultsCardAmbientGlow.scaleY = 1;
+        createjs.Tween.removeTweens(resultsCardAmbientGlow);
+        createjs.Tween.get(resultsCardAmbientGlow, { loop: true })
+            .to({ alpha: 0.42, scaleX: 1.05, scaleY: 1.05 }, 2000, createjs.Ease.sineInOut)
+            .to({ alpha: 0.2, scaleX: 1, scaleY: 1 }, 2200, createjs.Ease.sineInOut);
+    }
+
+    if (closeBtnFinal && closeBtnFinal.isVectorClose) {
+        closeBtnFinal.alpha = 0;
+        closeBtnFinal.scaleX = closeBtnFinal.scaleY = 0.85;
+        createjs.Tween.removeTweens(closeBtnFinal);
+        createjs.Tween.get(closeBtnFinal)
+            .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 360, createjs.Ease.quartOut)
+            .to({ scaleX: 1.04, scaleY: 1.04 }, 800, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 820, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCloseBtnGlow) {
+        resultsCloseBtnGlow.alpha = 0.25;
+        resultsCloseBtnGlow.scaleX = resultsCloseBtnGlow.scaleY = 1;
+        createjs.Tween.removeTweens(resultsCloseBtnGlow);
+        createjs.Tween.get(resultsCloseBtnGlow, { loop: true })
+            .to({ alpha: 0.45, scaleX: 1.08, scaleY: 1.08 }, 1400, createjs.Ease.sineInOut)
+            .to({ alpha: 0.25, scaleX: 1, scaleY: 1 }, 1400, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCloseBtnHighlight) {
+        resultsCloseBtnHighlight.alpha = 0.85;
+        createjs.Tween.removeTweens(resultsCloseBtnHighlight);
+        createjs.Tween.get(resultsCloseBtnHighlight, { loop: true })
+            .to({ alpha: 1 }, 900, createjs.Ease.sineInOut)
+            .to({ alpha: 0.8 }, 900, createjs.Ease.sineInOut);
+    }
+
+    if (resultsScorePulse) {
+        resultsScorePulse.alpha = 0;
+        resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+    }
+
+    var dialTargets = [
+        resultsScoreDial,
+        resultsResponseDial,
+        resultsQuestionsDial,
+        resultsAttemptsDial,
+        resultsCorrectDial,
+    ];
+
+    for (var i = 0; i < dialTargets.length; i++) {
+        var dial = dialTargets[i];
+        if (!dial) {
+            continue;
+        }
+
+        dial.scaleX = dial.scaleY = 1;
+        createjs.Tween.removeTweens(dial);
+        createjs.Tween.get(dial, { loop: true })
+            .wait(400 + i * 180)
+            .to({ scaleX: 1.04, scaleY: 1.04 }, 1400, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 1600, createjs.Ease.sineInOut);
+    }
+}
+
+function triggerResultsScorePulse() {
+    if (!resultsScorePulse) {
+        return;
+    }
+
+    resultsScorePulse.alpha = 0.55;
+    resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+    createjs.Tween.removeTweens(resultsScorePulse);
+    createjs.Tween.get(resultsScorePulse)
+        .to({ alpha: 0.75, scaleX: 1.08, scaleY: 1.08 }, 360, createjs.Ease.quadOut)
+        .to({ alpha: 0 }, 520, createjs.Ease.quadIn)
+        .call(function () {
+            resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+        });
+}
+
+function positionResultsCloseBtn() {
+    if (!closeBtnFinal || !resultsCardContainer) {
+        return;
+    }
+
+    var halfWidth = 460;
+    var halfHeight = 280;
+    var offsetX = closeBtnFinal.isVectorClose ? 52 : 44;
+    var offsetY = closeBtnFinal.isVectorClose ? 52 : 36;
+    closeBtnFinal.x = resultsCardContainer.x + halfWidth - offsetX;
+    closeBtnFinal.y = resultsCardContainer.y - halfHeight + offsetY;
+}
+
+function updateResultsSummary(values) {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    var summary = values || {};
+    var totalQ = summary.totalQuestions || 0;
+    var answered = summary.answeredQuestions || 0;
+    var correct = summary.correctAnswers || 0;
+    var totalScore = summary.score || 0;
+    var totalResponse = summary.responseTime || 0;
+
+    if (resultsScoreDial) {
+        resultsScoreDial.valueText.text = String(totalScore);
+        var scoreRatio = Math.max(0, Math.min(totalScore / 100, 1));
+        resultsScoreDial.updateAccent(scoreRatio);
+        if (totalScore > 0) {
+            triggerResultsScorePulse();
+        } else if (resultsScorePulse) {
+            resultsScorePulse.alpha = 0;
+        }
+    }
+
+    if (resultsResponseDial) {
+        resultsResponseDial.valueText.text = String(totalResponse);
+        var maxResponse = typeof gtime !== "undefined" && gtime ? gtime : (totalResponse > 0 ? totalResponse : 1);
+        var responseRatio = maxResponse ? Math.max(0, Math.min(totalResponse / maxResponse, 1)) : 0;
+        resultsResponseDial.updateAccent(responseRatio);
+    }
+
+    if (resultsQuestionsDial) {
+        resultsQuestionsDial.valueText.text = String(totalQ);
+        resultsQuestionsDial.updateAccent(totalQ > 0 ? 1 : 0);
+    }
+
+    if (resultsAttemptsDial) {
+        resultsAttemptsDial.valueText.text = String(answered);
+        var attemptRatio = totalQ ? Math.max(0, Math.min(answered / totalQ, 1)) : (answered > 0 ? 1 : 0);
+        resultsAttemptsDial.updateAccent(attemptRatio);
+    }
+
+    if (resultsCorrectDial) {
+        resultsCorrectDial.valueText.text = String(correct);
+        var correctRatio = totalQ ? Math.max(0, Math.min(correct / totalQ, 1)) : (correct > 0 ? 1 : 0);
+        resultsCorrectDial.updateAccent(correctRatio);
+    }
+}
+
 function showScoreFn() {
 
-    bitmap.visible = false;
-    resultLoading.visible = true;
-    questionTxtR.visible = true;
-    questionTxtR.text = totalQuestions;
-    attemptTxtR.visible = true;
-    attemptTxtR.text = answeredQuestions;
-    correctTxtR.visible = true;
-    correctTxtR.text = ccnt;
-    responseTxtR.visible = true;
-    responseTxtR.text = responseTime;
-    scoreTxtR.visible = true;
-    scoreTxtR.text = score;
+    if (typeof bitmap !== "undefined" && bitmap) {
+        bitmap.visible = false;
+    }
+
+    if (typeof resultLoading !== "undefined" && resultLoading) {
+        resultLoading.visible = false;
+    }
+
+    ensureResultsSummaryOverlay(container1);
+    layoutResultsSummaryOverlay();
+
+    updateResultsSummary({
+        score: typeof score !== "undefined" ? score : 0,
+        totalQuestions: typeof totalQuestions !== "undefined" ? totalQuestions : 0,
+        answeredQuestions: typeof answeredQuestions !== "undefined" ? answeredQuestions : 0,
+        correctAnswers: typeof ccnt !== "undefined" ? ccnt : 0,
+        responseTime: typeof responseTime !== "undefined" ? responseTime : 0,
+    });
+
+    refreshResultsSummaryAnimations();
+
+    if (resultsOverlay) {
+        resultsOverlay.visible = true;
+        resultsOverlay.alpha = 0;
+        createjs.Tween.removeTweens(resultsOverlay);
+        createjs.Tween.get(resultsOverlay).to({ alpha: 1 }, 400, createjs.Ease.quadOut);
+    }
+
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = true;
+        closeBtnFinal.mouseEnabled = true;
+        closeBtnFinal.cursor = "pointer";
+        closeBtnFinal.removeAllEventListeners("click");
+        closeBtnFinal.addEventListener("click", closeGameFn);
+
+        if (resultsOverlay) {
+            resultsOverlay.addChild(closeBtnFinal);
+            resultsOverlay.setChildIndex(closeBtnFinal, resultsOverlay.numChildren - 1);
+        }
+
+        positionResultsCloseBtn();
+    }
+
+    stage.update();
 }
 //------------------------------------------------------------------------------------------------//
 function closeGameFn() {
@@ -835,12 +1424,13 @@ function closeGameFn() {
 
 function removeScoreBoard() {
     clearTimeout(removeTimeOut)
-    bitmap.visible = false;
-    questionTxtR.visible = false;
-    attemptTxtR.visible = false;
-    correctTxtR.visible = false;
-    responseTxtR.visible = false;
-    scoreTxtR.visible = false;
+    if (resultsOverlay) {
+        resultsOverlay.visible = false;
+    }
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = false;
+        closeBtnFinal.mouseEnabled = false;
+    }
     intChkVar = 1;
     internetErrorFn()
 }
