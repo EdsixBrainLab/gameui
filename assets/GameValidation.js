@@ -10,6 +10,10 @@ var scores = 0;
 var resultsOverlay,
   resultsOverlayBg,
   resultsCardContainer,
+  resultsCardMask,
+  resultsCardSheen,
+  resultsCardAmbientGlow,
+  resultsScoreRibbon,
   resultsHeadingTxt,
   resultsSubheadingTxt,
   resultsScoreDial,
@@ -775,12 +779,19 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawRoundRect(-460, -280, 920, 560, 52);
         cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
         resultsCardContainer.addChild(cardBg);
+        resultsCardMask = new createjs.Shape();
+        resultsCardMask.graphics.drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardMask.visible = false;
+        resultsCardMask.mouseEnabled = false;
+        resultsCardMask.mouseChildren = false;
+        resultsCardContainer.addChild(resultsCardMask);
 
         var cardInnerSheen = new createjs.Shape();
         cardInnerSheen.graphics
             .beginLinearGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"], [0, 1], -440, -200, 200, 120)
             .drawRoundRect(-440, -240, 880, 480, 46);
         cardInnerSheen.alpha = 0.35;
+        cardInnerSheen.mask = resultsCardMask;
         resultsCardContainer.addChild(cardInnerSheen);
 
         var cardOutline = new createjs.Shape();
@@ -796,6 +807,23 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawCircle(-260, -200, 320);
         cardGlow.alpha = 0.5;
         resultsCardContainer.addChild(cardGlow);
+        resultsCardAmbientGlow = new createjs.Shape();
+        resultsCardAmbientGlow.graphics
+            .beginRadialGradientFill(
+                ["rgba(255,255,255,0)", "rgba(255,255,255,0.25)", "rgba(255,255,255,0)"],
+                [0, 0.55, 1],
+                0,
+                0,
+                0,
+                0,
+                0,
+                420
+            )
+            .drawCircle(0, 0, 420);
+        resultsCardAmbientGlow.alpha = 0.2;
+        resultsCardAmbientGlow.scaleX = resultsCardAmbientGlow.scaleY = 1;
+        resultsCardAmbientGlow.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAmbientGlow);
 
         var scoreRibbon = new createjs.Shape();
         scoreRibbon.graphics
@@ -806,6 +834,24 @@ function ensureResultsSummaryOverlay(parentContainer) {
         scoreRibbon.rotation = -18;
         scoreRibbon.alpha = 0.65;
         resultsCardContainer.addChild(scoreRibbon);
+        resultsScoreRibbon = scoreRibbon;
+
+        resultsCardSheen = new createjs.Shape();
+        resultsCardSheen.graphics
+            .beginLinearGradientFill(
+                ["rgba(255,255,255,0)", "rgba(255,255,255,0.8)", "rgba(255,255,255,0)"],
+                [0, 0.55, 1],
+                -200,
+                0,
+                200,
+                0
+            )
+            .drawRoundRect(-240, -260, 480, 520, 52);
+        resultsCardSheen.alpha = 0;
+        resultsCardSheen.x = -360;
+        resultsCardSheen.mask = resultsCardMask;
+        resultsCardSheen.compositeOperation = "lighter";
+        resultsCardContainer.addChild(resultsCardSheen);
 
         var headerContainer = new createjs.Container();
         headerContainer.y = -200;
@@ -906,7 +952,6 @@ function ensureResultsSummaryOverlay(parentContainer) {
         resultsCardContainer.addChildAt(footerDivider, resultsCardContainer.getChildIndex(resultsResponseDial));
 
         resultsCardContainer.setChildIndex(cardOutline, resultsCardContainer.numChildren - 1);
-
     }
 
     if (parentContainer && resultsOverlay.parent !== parentContainer) {
@@ -919,14 +964,26 @@ function layoutResultsSummaryOverlay() {
         return;
     }
 
-    var stageWidth = typeof canvas !== "undefined" && canvas ? canvas.width : 1280;
-    var stageHeight = typeof canvas !== "undefined" && canvas ? canvas.height : 720;
+    var stageWidth = 1280;
+    var stageHeight = 720;
+
+    if (typeof stage !== "undefined" && stage && stage.canvas) {
+        var scaleX = stage.scaleX || 1;
+        var scaleY = stage.scaleY || 1;
+        stageWidth = stage.canvas.width / scaleX;
+        stageHeight = stage.canvas.height / scaleY;
+    } else if (typeof canvas !== "undefined" && canvas) {
+        stageWidth = canvas.width;
+        stageHeight = canvas.height;
+    }
 
     if (resultsOverlayBg) {
         resultsOverlayBg.graphics.clear();
         resultsOverlayBg.graphics
             .beginFill("rgba(6, 10, 28, 0.82)")
             .drawRect(0, 0, stageWidth, stageHeight);
+        resultsOverlayBg.x = 0;
+        resultsOverlayBg.y = 0;
     }
 
     if (resultsCardContainer) {
@@ -935,6 +992,73 @@ function layoutResultsSummaryOverlay() {
     }
 
     positionResultsCloseBtn();
+}
+
+function refreshResultsSummaryAnimations() {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    if (resultsCardContainer) {
+        resultsCardContainer.alpha = 0;
+        resultsCardContainer.scaleX = resultsCardContainer.scaleY = 0.94;
+        createjs.Tween.removeTweens(resultsCardContainer);
+        createjs.Tween.get(resultsCardContainer)
+            .to({ alpha: 1, scaleX: 1.02, scaleY: 1.02 }, 420, createjs.Ease.quartOut)
+            .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
+    }
+
+    if (resultsScoreRibbon) {
+        resultsScoreRibbon.rotation = -24;
+        createjs.Tween.removeTweens(resultsScoreRibbon);
+        createjs.Tween.get(resultsScoreRibbon)
+            .to({ rotation: -18 }, 520, createjs.Ease.quartOut)
+            .to({ rotation: -20 }, 1600, createjs.Ease.sineInOut)
+            .to({ rotation: -18 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardSheen) {
+        resultsCardSheen.alpha = 0;
+        resultsCardSheen.x = -360;
+        createjs.Tween.removeTweens(resultsCardSheen);
+        createjs.Tween.get(resultsCardSheen, { loop: true })
+            .wait(800)
+            .to({ alpha: 0.75 }, 200, createjs.Ease.quadOut)
+            .to({ x: 360 }, 1700, createjs.Ease.sineOut)
+            .to({ alpha: 0 }, 260)
+            .set({ x: -360 });
+    }
+
+    if (resultsCardAmbientGlow) {
+        resultsCardAmbientGlow.alpha = 0.2;
+        resultsCardAmbientGlow.scaleX = resultsCardAmbientGlow.scaleY = 1;
+        createjs.Tween.removeTweens(resultsCardAmbientGlow);
+        createjs.Tween.get(resultsCardAmbientGlow, { loop: true })
+            .to({ alpha: 0.42, scaleX: 1.05, scaleY: 1.05 }, 2000, createjs.Ease.sineInOut)
+            .to({ alpha: 0.2, scaleX: 1, scaleY: 1 }, 2200, createjs.Ease.sineInOut);
+    }
+
+    var dialTargets = [
+        resultsScoreDial,
+        resultsResponseDial,
+        resultsQuestionsDial,
+        resultsAttemptsDial,
+        resultsCorrectDial,
+    ];
+
+    for (var i = 0; i < dialTargets.length; i++) {
+        var dial = dialTargets[i];
+        if (!dial) {
+            continue;
+        }
+
+        dial.scaleX = dial.scaleY = 1;
+        createjs.Tween.removeTweens(dial);
+        createjs.Tween.get(dial, { loop: true })
+            .wait(400 + i * 180)
+            .to({ scaleX: 1.04, scaleY: 1.04 }, 1400, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 1600, createjs.Ease.sineInOut);
+    }
 }
 
 function positionResultsCloseBtn() {
@@ -1011,6 +1135,8 @@ function showScoreFn() {
         correctAnswers: typeof ccnt !== "undefined" ? ccnt : 0,
         responseTime: typeof responseTime !== "undefined" ? responseTime : 0,
     });
+
+    refreshResultsSummaryAnimations();
 
     if (resultsOverlay) {
         resultsOverlay.visible = true;
