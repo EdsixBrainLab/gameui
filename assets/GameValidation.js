@@ -1,16 +1,22 @@
 /////////////////////////////////////////////////
 var removeTimeOut
 var container1
-var questionTxtR;
-var attemptTxtR;
-var correctTxtR;
-var responseTxtR;
-var scoreTxtR;
 var clrSent;
 var stopValue
 var starCnt = -1
 var scBar = 0
 var scores = 0;
+
+var resultsOverlay,
+  resultsOverlayBg,
+  resultsCardContainer,
+  resultsHeadingTxt,
+  resultsSubheadingTxt,
+  resultsScoreDial,
+  resultsResponseDial,
+  resultsQuestionsDial,
+  resultsAttemptsDial,
+  resultsCorrectDial;
 
 var answer_status;
 var rightCnt = -1, wrongCnt = -1;
@@ -35,26 +41,35 @@ function startAnimationHandler(evt) {
 }
 
 function isVisibleSkipBtn() {
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "skip");
     SkipBtnMc.visible = true;
-    SkipBtnMc.gotoAndStop(0);
-    skipMc = new createjs.MovieClip()
-    container.parent.addChild(skipMc)
+    SkipBtnMc.mouseEnabled = true;
+    container.parent.addChild(SkipBtnMc);
+    skipMc = new createjs.MovieClip();
+    container.parent.addChild(skipMc);
     skipMc.timeline.addTween(createjs.Tween.get(SkipBtnMc).to({ scaleX: .97, scaleY: .97 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
     SkipBtnMc.addEventListener("click", createDelayToStartGame);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     SkipBtnMc.cursor = "pointer";
-
 }
 
 function isVisibleStartBtn() {
-    SkipBtnMc.gotoAndStop(1);
-    container.parent.addChild(SkipBtnMc)
-    container.parent.addChild(skipMc)
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "start");
+    container.parent.addChild(SkipBtnMc);
+    container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     console.log("isVisibleStartBtn");
-    ////////////////////////////////////////////////////////////////////   
+    ////////////////////////////////////////////////////////////////////
 }
 
 
@@ -62,8 +77,9 @@ function isVisibleStartBtn() {
 function createDelayToStartGame() {
 
     howToPlayImageMc.visible = false;
-    
+
     SkipBtnMc.visible = false;
+    SkipBtnMc.mouseEnabled = false;
     //gameIntroAnimMc.stop();
     stopValue = 0;
     removeGameIntro() // know 
@@ -550,168 +566,28 @@ console.log("computeresult");
 
 
     //////////////////////////////////////////////////////////////////////////////
-    container1.parent.addChild(scoreImgMc);
-    scoreImgMc.x = 540;
-    scoreImgMc.y = 130;
-    scoreImgMc.visible = true;
-
-    if (score == 0) {
-        scoreImgMc.gotoAndStop(0)
-    }
-    else if (score <= 10) {
-        scoreImgMc.gotoAndStop(1)
-    }
-    else if (score > 10 && score <= 20) {
-        scoreImgMc.gotoAndStop(2)
-    }
-    else if (score > 20 && score <= 30) {
-        scoreImgMc.gotoAndStop(3)
-    }
-
-    else if (score > 30 && score <= 40) {
-        scoreImgMc.gotoAndStop(4)
-    }
-    else if (score > 40 && score <= 50) {
-        scoreImgMc.gotoAndStop(5)
-    }
-    else if (score > 50 && score <= 60) {
-        scoreImgMc.gotoAndStop(6)
-    }
-    else if (score > 60 && score <= 70) {
-        scoreImgMc.gotoAndStop(7)
-    }
-    else if (score > 70 && score <= 80) {
-        scoreImgMc.gotoAndStop(8)
-    }
-    else if (score > 80 && score <= 90) {
-        scoreImgMc.gotoAndStop(9)
-    }
-    else if (score > 90 && score < 100) {
-        scoreImgMc.gotoAndStop(9)
-    }
-    else if (score == 100) {
-        scoreImgMc.gotoAndStop(10)
-    }
-
-
-    container1.parent.addChild(ResponseImgMc);
-    ResponseImgMc.x = 150;
-    ResponseImgMc.y = 410;
-    ResponseImgMc.visible = true;
-
-    if (responseTime == 0) {
-        ResponseImgMc.gotoAndStop(0)
-    }
-
-    else if (responseTime > 0 && responseTime <= 20) {
-        ResponseImgMc.gotoAndStop(1)
-    }
-
-    else if (responseTime > 20 && responseTime <= 40) {
-        ResponseImgMc.gotoAndStop(2)
-    }
-
-    else if (responseTime > 40 && responseTime <= 60) {
-        ResponseImgMc.gotoAndStop(3)
-    }
-
-    else if (responseTime > 60 && responseTime <= 80) {
-        ResponseImgMc.gotoAndStop(4)
-    }
-
-    else if (responseTime > 80 && responseTime <= 100) {
-        ResponseImgMc.gotoAndStop(5)
-    }
-
-    else if (responseTime > 100 && responseTime <= 120) {
-        ResponseImgMc.gotoAndStop(6)
-    }
-
-    else if (responseTime > 120 && responseTime <= 140) {
-        ResponseImgMc.gotoAndStop(7)
-    }
-    else if (responseTime > 140 && responseTime <= 160) {
-        ResponseImgMc.gotoAndStop(8)
-    }
-    else if (responseTime > 160 && responseTime <= 180) {
-        ResponseImgMc.gotoAndStop(9)
-    }
-    else if (responseTime == 180) {
-        ResponseImgMc.gotoAndStop(10)
-    }
-
-    container1.parent.addChild(questionImgMc);
-    questionImgMc.x = 420;
-    questionImgMc.y = 410;
-    questionImgMc.visible = true;
-    questionImgMc.gotoAndStop(totalQuestions)
-
-    container1.parent.addChild(AttemptsImgMc);
-    AttemptsImgMc.x = 690;
-    AttemptsImgMc.y = 410;
-    AttemptsImgMc.visible = true;
-    AttemptsImgMc.gotoAndStop(answeredQuestions)
-
-    container1.parent.addChild(CorrectImgMc);
-    CorrectImgMc.x = 960;
-    CorrectImgMc.y = 410;
-    CorrectImgMc.visible = true;
-    CorrectImgMc.gotoAndStop(ccnt)
-
-    questionTxtR = new createjs.Text(totalQuestions, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(questionTxtR);
-    questionTxtR.x = 502; questionTxtR.y = 493;
-    questionTxtR.textAlign = "center";
-    questionTxtR.textBaseline = "middle";
-
-    //
-    attemptTxtR = new createjs.Text(answeredQuestions, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(attemptTxtR);
-    attemptTxtR.x = 772; attemptTxtR.y = 493;
-    attemptTxtR.textAlign = "center";
-    attemptTxtR.textBaseline = "middle";
-
-    correctTxtR = new createjs.Text(ccnt, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(correctTxtR);
-    correctTxtR.x = 1045; correctTxtR.y = 493;
-    correctTxtR.textAlign = "center";
-    correctTxtR.textBaseline = "middle";
-    //
-    responseTxtR = new createjs.Text(responseTime, "bold 60px 'Baloo 2'", "black");
-    container1.parent.addChild(responseTxtR);
-    responseTxtR.x = 232; responseTxtR.y = 493;
-    responseTxtR.textAlign = "center";
-    responseTxtR.textBaseline = "middle";
-
-    //
-    scoreTxtR = new createjs.Text(score, "bold 70px 'Baloo 2'", "black");
-    container1.parent.addChild(scoreTxtR);
-    scoreTxtR.x = 633; scoreTxtR.y = 225;
-    scoreTxtR.textAlign = "center";
-    scoreTxtR.textBaseline = "middle";
-
-    container1.parent.addChild(closeBtnFinal);
-    closeBtnFinal.visible = true;
-    closeBtnFinal.mouseEnabled = true
-    closeBtnFinal.cursor = "pointer";
-    closeBtnFinal.addEventListener("click", closeGameFn);
-
-
-
-    var container2 = new createjs.Container();
-    stage.addChild(container2)
-    container2.parent.addChild(bitmap)
+    ensureResultsSummaryOverlay(container1);
 
     if (gameType == 0) {
-        showScoreFn()
+        showScoreFn();
     }
     else {
-        bitmap.visible = true;
-        questionTxtR.visible = false;
-        attemptTxtR.visible = false;
-        correctTxtR.visible = false;
-        responseTxtR.visible = false;
-        scoreTxtR.visible = false;
+        if (resultsOverlay) {
+            resultsOverlay.visible = false;
+        }
+        if (bitmap) {
+            bitmap.visible = true;
+        }
+        if (closeBtnFinal) {
+            closeBtnFinal.visible = true;
+            closeBtnFinal.mouseEnabled = true;
+            closeBtnFinal.cursor = "pointer";
+            closeBtnFinal.removeAllEventListeners("click");
+            closeBtnFinal.addEventListener("click", closeGameFn);
+            if (container1 && container1.parent) {
+                container1.parent.addChild(closeBtnFinal);
+            }
+        }
     }
 
 
@@ -809,20 +685,355 @@ console.log("rstrst:"+rst);
     }
     rst1 = rst1 + rst;
 }
+function createResultsSummaryDial(radius, labelText, accentColors, options) {
+    options = options || {};
+
+    var container = new createjs.Container();
+    container.radius = radius;
+
+    var glowColorStops = options.glowStops || ["rgba(8,14,40,0.28)", "rgba(8,14,40,0)"];
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(glowColorStops, [0, 1], 0, radius * 0.55, radius * 0.1, 0, radius * 0.55, radius + 46)
+        .drawCircle(0, radius * 0.55, radius + 46);
+    glow.alpha = options.glowAlpha != null ? options.glowAlpha : 0.55;
+    container.addChild(glow);
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .beginRadialGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0.08)"], [0, 1], 0, 0, 0, 0, 0, radius + 26)
+        .drawCircle(0, 0, radius + 26);
+    halo.alpha = 0.85;
+    container.addChild(halo);
+
+    var base = new createjs.Shape();
+    base.graphics
+        .beginLinearGradientFill(options.baseGradient || ["rgba(255,255,255,0.95)", "rgba(236,240,255,0.65)"], [0, 1], 0, -radius, 0, radius)
+        .drawCircle(0, 0, radius);
+    container.addChild(base);
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .beginLinearGradientFill(options.innerGradient || ["#FFFFFF", "#E7ECFF"], [0, 1], 0, -radius + 28, 0, radius - 30)
+        .drawCircle(0, 0, radius - 30);
+    container.addChild(inner);
+
+    var accent = new createjs.Shape();
+    container.addChild(accent);
+
+    container.updateAccent = function (ratio) {
+        var clamped = Math.max(0, Math.min(ratio, 1));
+        accent.graphics.clear();
+        if (clamped <= 0) {
+            return;
+        }
+
+        accent.graphics
+            .setStrokeStyle(options.accentStroke || 14, "round")
+            .beginLinearGradientStroke(accentColors || ["#FFFFFF", "#FFFFFF"], [0, 1], -radius, 0, radius, 0)
+            .arc(0, 0, radius - (options.accentInset || 20), -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * clamped));
+    };
+
+    var valueText = new createjs.Text("0", options.valueFont || "700 48px 'Baloo 2'", options.valueColor || "#182048");
+    valueText.textAlign = "center";
+    valueText.y = options.valueYOffset != null ? options.valueYOffset : -12;
+    valueText.shadow = new createjs.Shadow(options.valueShadowColor || "rgba(15,18,42,0.35)", 0, 6, 18);
+    container.addChild(valueText);
+    container.valueText = valueText;
+
+    var label = new createjs.Text(labelText ? labelText.toUpperCase() : "", options.labelFont || "600 20px 'Baloo 2'", options.labelColor || "rgba(255,255,255,0.92)");
+    label.textAlign = "center";
+    label.y = options.labelOffset != null ? options.labelOffset : radius + 34;
+    label.letterSpacing = options.labelLetterSpacing != null ? options.labelLetterSpacing : 2;
+    label.shadow = options.labelShadow || new createjs.Shadow("rgba(10,16,36,0.4)", 0, 3, 10);
+    container.addChild(label);
+    container.labelText = label;
+
+    container.updateAccent(0);
+
+    return container;
+}
+
+function ensureResultsSummaryOverlay(parentContainer) {
+    if (!resultsOverlay) {
+        resultsOverlay = new createjs.Container();
+        resultsOverlay.visible = false;
+        resultsOverlay.alpha = 0;
+        resultsOverlay.mouseEnabled = true;
+        resultsOverlay.mouseChildren = true;
+
+        resultsOverlayBg = new createjs.Shape();
+        resultsOverlayBg.mouseEnabled = true;
+        resultsOverlay.addChild(resultsOverlayBg);
+
+        resultsCardContainer = new createjs.Container();
+        resultsOverlay.addChild(resultsCardContainer);
+
+        var cardBg = new createjs.Shape();
+        cardBg.graphics
+            .beginLinearGradientFill(["#FFAA6B", "#F66BC6", "#6C6BFF"], [0, 0.48, 1], -460, -280, 460, 280)
+            .drawRoundRect(-460, -280, 920, 560, 52);
+        cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
+        resultsCardContainer.addChild(cardBg);
+
+        var cardInnerSheen = new createjs.Shape();
+        cardInnerSheen.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"], [0, 1], -440, -200, 200, 120)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        cardInnerSheen.alpha = 0.35;
+        resultsCardContainer.addChild(cardInnerSheen);
+
+        var cardOutline = new createjs.Shape();
+        cardOutline.graphics
+            .setStrokeStyle(3.5)
+            .beginStroke("rgba(255,255,255,0.72)")
+            .drawRoundRect(-460, -280, 920, 560, 52);
+        resultsCardContainer.addChild(cardOutline);
+
+        var cardGlow = new createjs.Shape();
+        cardGlow.graphics
+            .beginRadialGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -260, -200, 0, -260, -200, 320)
+            .drawCircle(-260, -200, 320);
+        cardGlow.alpha = 0.5;
+        resultsCardContainer.addChild(cardGlow);
+
+        var scoreRibbon = new createjs.Shape();
+        scoreRibbon.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.22)", "rgba(255,255,255,0.05)"], [0, 1], -320, 0, 320, 0)
+            .drawRoundRect(-320, -54, 640, 108, 54);
+        scoreRibbon.regX = 0;
+        scoreRibbon.regY = 0;
+        scoreRibbon.rotation = -18;
+        scoreRibbon.alpha = 0.65;
+        resultsCardContainer.addChild(scoreRibbon);
+
+        var headerContainer = new createjs.Container();
+        headerContainer.y = -200;
+        resultsCardContainer.addChild(headerContainer);
+
+        resultsHeadingTxt = new createjs.Text("Performance Summary", "700 36px 'Baloo 2'", "#FFFFFF");
+        resultsHeadingTxt.textAlign = "center";
+        resultsHeadingTxt.shadow = new createjs.Shadow("rgba(8,14,40,0.5)", 0, 6, 24);
+        headerContainer.addChild(resultsHeadingTxt);
+
+        resultsSubheadingTxt = new createjs.Text("Here's how you performed in this round.", "400 20px 'Baloo 2'", "rgba(255,255,255,0.9)");
+        resultsSubheadingTxt.textAlign = "center";
+        resultsSubheadingTxt.y = 38;
+        headerContainer.addChild(resultsSubheadingTxt);
+
+        var headerUnderline = new createjs.Shape();
+        headerUnderline.graphics
+            .setStrokeStyle(2)
+            .beginStroke("rgba(255,255,255,0.45)")
+            .moveTo(-140, 70)
+            .lineTo(140, 70);
+        headerContainer.addChild(headerUnderline);
+
+        resultsScoreDial = createResultsSummaryDial(120, "Score", ["#FFE58A", "#FF7DA6"], {
+            valueFont: "700 68px 'Baloo 2'",
+            valueYOffset: -18,
+            labelFont: "600 24px 'Baloo 2'",
+            labelOffset: 88,
+            accentStroke: 16,
+            accentInset: 22,
+            valueColor: "#1B1B3F",
+            baseGradient: ["rgba(255,255,255,0.96)", "rgba(237,242,255,0.72)"],
+            innerGradient: ["#FFFFFF", "#E9F0FF"],
+            glowAlpha: 0.45,
+            valueShadowColor: "rgba(12,20,48,0.4)",
+            labelShadow: new createjs.Shadow("rgba(13,19,42,0.35)", 0, 3, 12),
+        });
+        resultsScoreDial.y = -24;
+        resultsCardContainer.addChild(resultsScoreDial);
+
+        var footerY = 170;
+
+        resultsResponseDial = createResultsSummaryDial(90, "Response Time", ["#5BEBFF", "#547BFF"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#EAF5FF"],
+            glowAlpha: 0.5,
+        });
+        resultsResponseDial.x = -255;
+        resultsResponseDial.y = footerY;
+        resultsCardContainer.addChild(resultsResponseDial);
+
+        resultsQuestionsDial = createResultsSummaryDial(90, "Questions", ["#FFD271", "#FF7BAE"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(251,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#F7ECFF"],
+            glowAlpha: 0.5,
+        });
+        resultsQuestionsDial.x = -85;
+        resultsQuestionsDial.y = footerY;
+        resultsCardContainer.addChild(resultsQuestionsDial);
+
+        resultsAttemptsDial = createResultsSummaryDial(90, "Attempts", ["#6CF2E6", "#30D6FF"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,251,0.6)"],
+            innerGradient: ["#FFFFFF", "#E9FFFB"],
+            glowAlpha: 0.5,
+        });
+        resultsAttemptsDial.x = 85;
+        resultsAttemptsDial.y = footerY;
+        resultsCardContainer.addChild(resultsAttemptsDial);
+
+        resultsCorrectDial = createResultsSummaryDial(90, "Correct", ["#9EFF7D", "#35C86A"], {
+            valueFont: "700 46px 'Baloo 2'",
+            labelFont: "600 18px 'Baloo 2'",
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,236,0.6)"],
+            innerGradient: ["#FFFFFF", "#E6FFEF"],
+            glowAlpha: 0.5,
+        });
+        resultsCorrectDial.x = 255;
+        resultsCorrectDial.y = footerY;
+        resultsCardContainer.addChild(resultsCorrectDial);
+
+        var footerDivider = new createjs.Shape();
+        footerDivider.graphics
+            .setStrokeStyle(1.5)
+            .beginStroke("rgba(255,255,255,0.38)")
+            .moveTo(-360, footerY - 110)
+            .lineTo(360, footerY - 110);
+        footerDivider.alpha = 0.4;
+        resultsCardContainer.addChildAt(footerDivider, resultsCardContainer.getChildIndex(resultsResponseDial));
+
+        resultsCardContainer.setChildIndex(cardOutline, resultsCardContainer.numChildren - 1);
+    }
+
+    if (parentContainer && resultsOverlay.parent !== parentContainer) {
+        parentContainer.addChild(resultsOverlay);
+    }
+}
+
+function layoutResultsSummaryOverlay() {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    var stageWidth = typeof canvas !== "undefined" && canvas ? canvas.width : 1280;
+    var stageHeight = typeof canvas !== "undefined" && canvas ? canvas.height : 720;
+
+    if (resultsOverlayBg) {
+        resultsOverlayBg.graphics.clear();
+        resultsOverlayBg.graphics
+            .beginFill("rgba(6, 10, 28, 0.82)")
+            .drawRect(0, 0, stageWidth, stageHeight);
+    }
+
+    if (resultsCardContainer) {
+        resultsCardContainer.x = stageWidth / 2;
+        resultsCardContainer.y = stageHeight / 2;
+    }
+
+    positionResultsCloseBtn();
+}
+
+function positionResultsCloseBtn() {
+    if (!closeBtnFinal || !resultsCardContainer) {
+        return;
+    }
+
+    var halfWidth = 460;
+    var halfHeight = 280;
+    closeBtnFinal.x = resultsCardContainer.x + halfWidth - 44;
+    closeBtnFinal.y = resultsCardContainer.y - halfHeight + 36;
+}
+
+function updateResultsSummary(values) {
+    if (!resultsOverlay) {
+        return;
+    }
+
+    var summary = values || {};
+    var totalQ = summary.totalQuestions || 0;
+    var answered = summary.answeredQuestions || 0;
+    var correct = summary.correctAnswers || 0;
+    var totalScore = summary.score || 0;
+    var totalResponse = summary.responseTime || 0;
+
+    if (resultsScoreDial) {
+        resultsScoreDial.valueText.text = String(totalScore);
+        var scoreRatio = Math.max(0, Math.min(totalScore / 100, 1));
+        resultsScoreDial.updateAccent(scoreRatio);
+    }
+
+    if (resultsResponseDial) {
+        resultsResponseDial.valueText.text = String(totalResponse);
+        var maxResponse = typeof gtime !== "undefined" && gtime ? gtime : (totalResponse > 0 ? totalResponse : 1);
+        var responseRatio = maxResponse ? Math.max(0, Math.min(totalResponse / maxResponse, 1)) : 0;
+        resultsResponseDial.updateAccent(responseRatio);
+    }
+
+    if (resultsQuestionsDial) {
+        resultsQuestionsDial.valueText.text = String(totalQ);
+        resultsQuestionsDial.updateAccent(totalQ > 0 ? 1 : 0);
+    }
+
+    if (resultsAttemptsDial) {
+        resultsAttemptsDial.valueText.text = String(answered);
+        var attemptRatio = totalQ ? Math.max(0, Math.min(answered / totalQ, 1)) : (answered > 0 ? 1 : 0);
+        resultsAttemptsDial.updateAccent(attemptRatio);
+    }
+
+    if (resultsCorrectDial) {
+        resultsCorrectDial.valueText.text = String(correct);
+        var correctRatio = totalQ ? Math.max(0, Math.min(correct / totalQ, 1)) : (correct > 0 ? 1 : 0);
+        resultsCorrectDial.updateAccent(correctRatio);
+    }
+}
+
 function showScoreFn() {
 
-    bitmap.visible = false;
-    resultLoading.visible = true;
-    questionTxtR.visible = true;
-    questionTxtR.text = totalQuestions;
-    attemptTxtR.visible = true;
-    attemptTxtR.text = answeredQuestions;
-    correctTxtR.visible = true;
-    correctTxtR.text = ccnt;
-    responseTxtR.visible = true;
-    responseTxtR.text = responseTime;
-    scoreTxtR.visible = true;
-    scoreTxtR.text = score;
+    if (typeof bitmap !== "undefined" && bitmap) {
+        bitmap.visible = false;
+    }
+
+    if (typeof resultLoading !== "undefined" && resultLoading) {
+        resultLoading.visible = false;
+    }
+
+    ensureResultsSummaryOverlay(container1);
+    layoutResultsSummaryOverlay();
+
+    updateResultsSummary({
+        score: typeof score !== "undefined" ? score : 0,
+        totalQuestions: typeof totalQuestions !== "undefined" ? totalQuestions : 0,
+        answeredQuestions: typeof answeredQuestions !== "undefined" ? answeredQuestions : 0,
+        correctAnswers: typeof ccnt !== "undefined" ? ccnt : 0,
+        responseTime: typeof responseTime !== "undefined" ? responseTime : 0,
+    });
+
+    if (resultsOverlay) {
+        resultsOverlay.visible = true;
+        resultsOverlay.alpha = 0;
+        createjs.Tween.removeTweens(resultsOverlay);
+        createjs.Tween.get(resultsOverlay).to({ alpha: 1 }, 400, createjs.Ease.quadOut);
+    }
+
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = true;
+        closeBtnFinal.mouseEnabled = true;
+        closeBtnFinal.cursor = "pointer";
+        closeBtnFinal.removeAllEventListeners("click");
+        closeBtnFinal.addEventListener("click", closeGameFn);
+
+        if (resultsOverlay) {
+            resultsOverlay.addChild(closeBtnFinal);
+            resultsOverlay.setChildIndex(closeBtnFinal, resultsOverlay.numChildren - 1);
+        }
+
+        positionResultsCloseBtn();
+    }
+
+    stage.update();
 }
 //------------------------------------------------------------------------------------------------//
 function closeGameFn() {
@@ -835,12 +1046,13 @@ function closeGameFn() {
 
 function removeScoreBoard() {
     clearTimeout(removeTimeOut)
-    bitmap.visible = false;
-    questionTxtR.visible = false;
-    attemptTxtR.visible = false;
-    correctTxtR.visible = false;
-    responseTxtR.visible = false;
-    scoreTxtR.visible = false;
+    if (resultsOverlay) {
+        resultsOverlay.visible = false;
+    }
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = false;
+        closeBtnFinal.mouseEnabled = false;
+    }
     intChkVar = 1;
     internetErrorFn()
 }
