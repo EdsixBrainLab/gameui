@@ -2571,6 +2571,7 @@ function createHowToPlayProgressBar() {
     return container;
 }
 
+
 function createHowToPlayTildeWave(width, strokeHeight) {
     var container = new createjs.Container();
     container.alpha = 0.72;
@@ -3611,6 +3612,10 @@ function internetErrorFn() {
     gameOverSnd.stop();
     tickSnd.stop();
     bgSnd.stop();
+
+    if (typeof resultsOverlay !== "undefined" && resultsOverlay) {
+        resultsOverlay.visible = false;
+    }
 
     if (container.parent) {
         container.parent.removeAllChildren();
