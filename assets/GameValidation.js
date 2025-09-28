@@ -779,7 +779,6 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawRoundRect(-460, -280, 920, 560, 52);
         cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
         resultsCardContainer.addChild(cardBg);
-
         resultsCardMask = new createjs.Shape();
         resultsCardMask.graphics.drawRoundRect(-440, -240, 880, 480, 46);
         resultsCardMask.visible = false;
@@ -808,7 +807,6 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawCircle(-260, -200, 320);
         cardGlow.alpha = 0.5;
         resultsCardContainer.addChild(cardGlow);
-
         resultsCardAmbientGlow = new createjs.Shape();
         resultsCardAmbientGlow.graphics
             .beginRadialGradientFill(
