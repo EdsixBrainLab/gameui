@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -607,7 +606,6 @@ function mergeIconStyle(base, override) {
 
     return result;
 }
-
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -633,12 +631,10 @@ function createLoader() {
     if (!HowToPlayScreenImg) {
         HowToPlayScreenImg = buildHowToPlayOverlay();
     }
-
     loaderBar = HowToPlayScreenImg;
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
-
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -779,7 +775,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -797,10 +792,10 @@ function updateLoading(event) {
             hideLoaderProceedButton();
         }
     }
-
     if (progressRatio >= 1) {
         hideHowToPlayProgressBar();
     }
+
 
     if (!loadProgressLabel) {
         stage.update();
@@ -1899,7 +1894,6 @@ function buildHowToPlayOverlay() {
     progress.x = 330;
     progress.y = 520;
     overlay.addChild(progress);
-
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
     overlay.header = header;
@@ -1925,7 +1919,6 @@ function buildHowToPlayOverlay() {
     var accentSmall = new createjs.Shape();
     accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
     overlay.addChild(accentSmall);
-
     header.baseY = header.y;
     instructions.baseY = instructions.y;
     progress.baseY = progress.y;
@@ -2547,6 +2540,7 @@ function applyHowToPlayButtonState(button, state) {
 
     button.state = state;
 }
+
 
 function attachProceedButtonListeners(button) {
     if (!button || button._loaderProceedHooked) {
