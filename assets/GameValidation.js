@@ -906,6 +906,7 @@ function ensureResultsSummaryOverlay(parentContainer) {
         resultsCardContainer.addChildAt(footerDivider, resultsCardContainer.getChildIndex(resultsResponseDial));
 
         resultsCardContainer.setChildIndex(cardOutline, resultsCardContainer.numChildren - 1);
+
     }
 
     if (parentContainer && resultsOverlay.parent !== parentContainer) {

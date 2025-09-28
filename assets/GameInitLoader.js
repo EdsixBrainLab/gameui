@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var lastDisplayedScore = null,
     lastDisplayedTime = null,
     lastDisplayedQuestion = null;
@@ -783,7 +782,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -1486,7 +1484,6 @@ function createHudCard(label, type) {
     var baseIconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, null);
     drawHudIcon(icon, type, baseIconStyle);
     card.addChild(icon);
-
     var effectLayer = new createjs.Container();
     effectLayer.mouseEnabled = false;
     effectLayer.mouseChildren = false;
@@ -1864,7 +1861,6 @@ function flashHudCardHighlight(card) {
         .to({ alpha: targetAlpha }, 150, createjs.Ease.quadOut)
         .to({ alpha: baseAlpha }, 280, createjs.Ease.quadIn);
 }
-
 function animateScoreCelebration() {
     if (!scoreCardContainer) {
         return;
