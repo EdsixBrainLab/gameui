@@ -606,6 +606,10 @@ function mergeIconStyle(base, override) {
 
     return result;
 }
+
+
+    return result;
+}
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -792,10 +796,10 @@ function updateLoading(event) {
             hideLoaderProceedButton();
         }
     }
+
     if (progressRatio >= 1) {
         hideHowToPlayProgressBar();
     }
-
 
     if (!loadProgressLabel) {
         stage.update();
@@ -1891,8 +1895,6 @@ function buildHowToPlayOverlay() {
     overlay.addChild(instructions);
 
     var progress = createHowToPlayProgressBar();
-    progress.x = 330;
-    progress.y = 520;
     overlay.addChild(progress);
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
@@ -1932,13 +1934,32 @@ function buildHowToPlayOverlay() {
 
 function createHowToPlayInstructions() {
     var container = new createjs.Container();
-    container.x = 330;
-    container.y = 210;
+    container.regX = 310;
+    container.regY = 135;
+    container.x = 640;
+    container.y = 210 + container.regY;
 
     var card = new createjs.Shape();
     card.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 270, 36);
     card.shadow = new createjs.Shadow("rgba(211, 132, 43, 0.35)", 0, 20, 34);
+    card.regX = 310;
+    card.regY = 135;
+    card.x = 310;
+    card.y = 135;
     container.addChild(card);
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill([
+            "rgba(255, 193, 125, 0.35)",
+            "rgba(255, 157, 70, 0.1)",
+            "rgba(255, 157, 70, 0)"
+        ], [0, 0.5, 1], 310, 135, 0, 310, 135, 280)
+        .drawEllipse(-90, -60, 800, 360);
+    glow.alpha = 0.28;
+    glow.compositeOperation = "lighter";
+    container.addChildAt(glow, 0);
+    container.glowShape = glow;
 
     var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
     title.x = 40;
@@ -1977,6 +1998,7 @@ function createHowToPlayInstructions() {
         stepText.y = itemY - 18;
         container.addChild(stepText);
     }
+    container.cardShape = card;
 
     return container;
 }
@@ -2004,15 +2026,35 @@ function drawHoneycombPattern(width, height, radius) {
 
 function createHowToPlayHeader() {
     var container = new createjs.Container();
-    container.x = 280;
-    container.y = 70;
+    container.regX = 360;
+    container.regY = 60;
+    container.x = 640;
+    container.y = 70 + container.regY;
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill([
+            "rgba(255, 175, 92, 0.28)",
+            "rgba(255, 141, 60, 0.18)",
+            "rgba(255, 141, 60, 0)"
+        ], [0, 0.6, 1], 360, 60, 0, 360, 60, 340)
+        .drawEllipse(-120, -70, 960, 260);
+    glow.alpha = 0.34;
+    glow.compositeOperation = "lighter";
+    container.addChild(glow);
+    container.glowShape = glow;
 
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 720, 0)
         .drawRoundRect(0, 0, 720, 120, 48);
     card.shadow = new createjs.Shadow("rgba(227, 138, 45, 0.35)", 0, 20, 36);
+    card.regX = 360;
+    card.regY = 60;
+    card.x = 360;
+    card.y = 60;
     container.addChild(card);
+    container.cardShape = card;
 
     var iconBackground = new createjs.Shape();
     iconBackground.graphics.beginFill("rgba(255,255,255,0.95)").drawCircle(96, 60, 44);
@@ -2040,6 +2082,10 @@ function createHowToPlayHeader() {
 
 function createHowToPlayProgressBar() {
     var container = new createjs.Container();
+    container.regX = 310;
+    container.regY = 44;
+    container.x = 640;
+    container.y = 520 + container.regY;
 
     var shadow = new createjs.Shape();
     shadow.graphics
@@ -2158,6 +2204,14 @@ function applyHowToPlayAmbientAnimations(overlay) {
             .to({ y: 0, alpha: 0.32 }, 4200, createjs.Ease.sineInOut);
     }
 
+    if (overlay.header && overlay.header.glowShape) {
+        var headerGlow = overlay.header.glowShape;
+        headerGlow.alpha = 0.24;
+        createjs.Tween.get(headerGlow, { loop: true })
+            .to({ alpha: 0.38 }, 2200, createjs.Ease.sineInOut)
+            .to({ alpha: 0.2 }, 2200, createjs.Ease.sineInOut);
+    }
+
     if (overlay.accentLarge) {
         var large = overlay.accentLarge;
         createjs.Tween.get(large, { loop: true })
@@ -2170,6 +2224,14 @@ function applyHowToPlayAmbientAnimations(overlay) {
         createjs.Tween.get(small, { loop: true })
             .to({ scaleX: 1.15, scaleY: 1.15, alpha: 0.2 }, 2400, createjs.Ease.quadInOut)
             .to({ scaleX: 0.9, scaleY: 0.9, alpha: 0.1 }, 2400, createjs.Ease.quadInOut);
+    }
+
+    if (overlay.instructionsCard && overlay.instructionsCard.glowShape) {
+        var cardGlow = overlay.instructionsCard.glowShape;
+        cardGlow.alpha = 0.22;
+        createjs.Tween.get(cardGlow, { loop: true })
+            .to({ alpha: 0.32 }, 2600, createjs.Ease.sineInOut)
+            .to({ alpha: 0.18 }, 2600, createjs.Ease.sineInOut);
     }
 }
 
@@ -2184,7 +2246,10 @@ function animateHowToPlayOverlayEntry(overlay) {
         overlay.header.alpha = 0;
         overlay.header.y = overlay.header.baseY - 24;
         createjs.Tween.get(overlay.header, { override: true })
-            .to({ alpha: 1, y: overlay.header.baseY }, 360, createjs.Ease.quadOut);
+            .to({ alpha: 1, y: overlay.header.baseY }, 360, createjs.Ease.quadOut)
+            .call(function () {
+                startHowToPlayHeaderIdleAnimation(overlay.header);
+            });
     }
 
     if (overlay.instructionsCard) {
@@ -2192,7 +2257,46 @@ function animateHowToPlayOverlayEntry(overlay) {
         overlay.instructionsCard.y = overlay.instructionsCard.baseY + 24;
         createjs.Tween.get(overlay.instructionsCard, { override: true })
             .wait(80)
-            .to({ alpha: 1, y: overlay.instructionsCard.baseY }, 420, createjs.Ease.quadOut);
+            .to({ alpha: 1, y: overlay.instructionsCard.baseY }, 420, createjs.Ease.quadOut)
+            .call(function () {
+                startHowToPlayInstructionsIdleAnimation(overlay.instructionsCard);
+            });
+    }
+}
+
+function startHowToPlayHeaderIdleAnimation(header) {
+    if (!header || header.__idleAnimationAttached) {
+        return;
+    }
+
+    header.__idleAnimationAttached = true;
+
+    createjs.Tween.get(header, { loop: true })
+        .to({ y: header.baseY + 4 }, 2200, createjs.Ease.sineInOut)
+        .to({ y: header.baseY - 4 }, 2200, createjs.Ease.sineInOut);
+
+    if (header.cardShape) {
+        createjs.Tween.get(header.cardShape, { loop: true })
+            .to({ scaleX: 1.01, scaleY: 1.01 }, 2400, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 2400, createjs.Ease.sineInOut);
+    }
+}
+
+function startHowToPlayInstructionsIdleAnimation(cardContainer) {
+    if (!cardContainer || cardContainer.__idleAnimationAttached) {
+        return;
+    }
+
+    cardContainer.__idleAnimationAttached = true;
+
+    createjs.Tween.get(cardContainer, { loop: true })
+        .to({ y: cardContainer.baseY - 6 }, 2600, createjs.Ease.sineInOut)
+        .to({ y: cardContainer.baseY + 6 }, 2600, createjs.Ease.sineInOut);
+
+    if (cardContainer.cardShape) {
+        createjs.Tween.get(cardContainer.cardShape, { loop: true })
+            .to({ scaleX: 1.01, scaleY: 1.01 }, 2800, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 2800, createjs.Ease.sineInOut);
     }
 }
 
@@ -2540,7 +2644,6 @@ function applyHowToPlayButtonState(button, state) {
 
     button.state = state;
 }
-
 
 function attachProceedButtonListeners(button) {
     if (!button || button._loaderProceedHooked) {
