@@ -218,7 +218,6 @@ var HUD_THEME_PRESETS = {
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
 }
-  
 
 function resolveHudThemeMode() {
     var scopes = [];
@@ -779,7 +778,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -797,7 +795,6 @@ function updateLoading(event) {
             hideLoaderProceedButton();
         }
     }
-
 
     if (progressRatio >= 1) {
         hideHowToPlayProgressBar();
@@ -827,7 +824,6 @@ function updateLoading(event) {
 
     } else {
         loadProgressLabel.lineWidth = 432;
-
 
         if (progresPrecentage >= 0 && progresPrecentage <= 25) {
             loadProgressLabel.text = "Collecting game assets" + extradot;
@@ -1342,7 +1338,6 @@ function watchRestart() {
     }
 
     hideLoaderProceedButton();
-
 
 
     stage.update(); //update the stage to show text;
@@ -1954,7 +1949,6 @@ function createHowToPlayInstructions() {
     card.regY = 146;
     card.x = 324;
     card.y = 146;
-
     container.addChild(card);
 
     var glow = new createjs.Shape();
@@ -1966,7 +1960,6 @@ function createHowToPlayInstructions() {
         ], [0, 0.5, 1], 324, 146, 0, 324, 146, 296)
         .drawEllipse(-90, -60, 800, 360);
     glow.alpha = 0.32;
-
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
@@ -1986,13 +1979,11 @@ function createHowToPlayInstructions() {
     for (var i = 0; i < steps.length; i++) {
         var itemY = 100 + i * 46;
 
-
         var badge = new createjs.Shape();
         badge.graphics
             .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -20, -20, 20, 20)
             .drawCircle(0, 0, 20);
         badge.x = 68;
-
         badge.y = itemY;
         container.addChild(badge);
 
@@ -2017,7 +2008,6 @@ function createHowToPlayInstructions() {
         }
     }
 
- 
     container.cardShape = card;
 
     return container;
@@ -2046,11 +2036,10 @@ function drawHoneycombPattern(width, height, radius) {
 
 function createHowToPlayHeader() {
     var container = new createjs.Container();
-    container.regX = 0;
+    container.regX = 260;
     container.regY = 0;
-    container.x = 316;
+    container.x = 640;
     container.y = 118;
-
 
     var glow = new createjs.Shape();
     glow.graphics
@@ -2067,7 +2056,6 @@ function createHowToPlayHeader() {
         .drawCircle(0, 0, 240);
     glow.alpha = 0.8;
     glow.x = 252;
-
     glow.y = 60;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
@@ -2077,10 +2065,10 @@ function createHowToPlayHeader() {
     card.graphics
         .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 520, 0)
         .drawRoundRect(0, 0, 520, 120, 42);
-
     card.shadow = new createjs.Shadow("rgba(170, 74, 16, 0.28)", 0, 18, 32);
     container.addChild(card);
     container.cardShape = card;
+    container.cardWidth = 520;
 
     var cardHighlight = new createjs.Shape();
     cardHighlight.graphics
@@ -2093,13 +2081,39 @@ function createHowToPlayHeader() {
             0
         )
         .drawRoundRect(12, 8, 496, 52, 28);
-
     cardHighlight.alpha = 0.85;
     container.addChild(cardHighlight);
 
+    var highlightMask = new createjs.Shape();
+    highlightMask.graphics.drawRoundRect(0, 0, 520, 120, 42);
+    highlightMask.visible = false;
+    container.addChild(highlightMask);
+
+    var animatedHighlight = new createjs.Shape();
+    animatedHighlight.graphics
+        .beginLinearGradientFill(
+            [
+                "rgba(255, 255, 255, 0)",
+                "rgba(255, 255, 255, 0.45)",
+                "rgba(255, 255, 255, 0)"
+            ],
+            [0, 0.5, 1],
+            -120,
+            0,
+            120,
+            0
+        )
+        .drawRoundRect(-120, -16, 240, 152, 60);
+    animatedHighlight.alpha = 0;
+    animatedHighlight.x = -160;
+    animatedHighlight.y = -16;
+    animatedHighlight.mask = highlightMask;
+    animatedHighlight.compositeOperation = "lighter";
+    container.addChild(animatedHighlight);
+    container.highlightSweep = animatedHighlight;
+
     var tildeWave = createHowToPlayTildeWave(260, 16);
     tildeWave.x = 180;
-
     tildeWave.y = 94;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
@@ -2118,7 +2132,6 @@ function createHowToPlayHeader() {
         )
         .drawCircle(0, 0, 70);
     iconHalo.x = 98;
-
     iconHalo.y = 60;
     iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
@@ -2253,7 +2266,6 @@ function createHowToPlayProgressBar() {
     container.progressShine = shine;
     container.progressMask = fillMask;
     container.progressPulse = pulse;
-
 
     return container;
 }
@@ -2442,11 +2454,7 @@ function applyHowToPlayAmbientAnimations(overlay) {
     }
 
     if (overlay.instructionsCard && overlay.instructionsCard.glowShape) {
-        var cardGlow = overlay.instructionsCard.glowShape;
-        cardGlow.alpha = 0.22;
-        createjs.Tween.get(cardGlow, { loop: true })
-            .to({ alpha: 0.32 }, 2600, createjs.Ease.sineInOut)
-            .to({ alpha: 0.18 }, 2600, createjs.Ease.sineInOut);
+        overlay.instructionsCard.glowShape.alpha = 0.28;
     }
 }
 
@@ -2485,15 +2493,20 @@ function startHowToPlayHeaderIdleAnimation(header) {
     }
 
     header.__idleAnimationAttached = true;
+    if (header.highlightSweep && header.cardWidth) {
+        var sweep = header.highlightSweep;
+        var travelStart = -160;
+        var travelEnd = header.cardWidth + 160;
 
-    createjs.Tween.get(header, { loop: true })
-        .to({ y: header.baseY + 4 }, 2200, createjs.Ease.sineInOut)
-        .to({ y: header.baseY - 4 }, 2200, createjs.Ease.sineInOut);
+        sweep.x = travelStart;
+        sweep.alpha = 0;
 
-    if (header.cardShape) {
-        createjs.Tween.get(header.cardShape, { loop: true })
-            .to({ scaleX: 1.01, scaleY: 1.01 }, 2400, createjs.Ease.sineInOut)
-            .to({ scaleX: 1, scaleY: 1 }, 2400, createjs.Ease.sineInOut);
+        createjs.Tween.get(sweep, { loop: true })
+            .to({ alpha: 0.85 }, 320, createjs.Ease.quadOut)
+            .to({ x: travelEnd }, 1400, createjs.Ease.quadInOut)
+            .to({ alpha: 0 }, 280, createjs.Ease.quadIn)
+            .set({ x: travelStart })
+            .wait(480);
     }
 
     if (header.tildeWave) {
@@ -2502,20 +2515,16 @@ function startHowToPlayHeaderIdleAnimation(header) {
 }
 
 function startHowToPlayInstructionsIdleAnimation(cardContainer) {
-    if (!cardContainer || cardContainer.__idleAnimationAttached) {
+    if (!cardContainer) {
         return;
     }
 
-    cardContainer.__idleAnimationAttached = true;
-
-    createjs.Tween.get(cardContainer, { loop: true })
-        .to({ y: cardContainer.baseY - 6 }, 2600, createjs.Ease.sineInOut)
-        .to({ y: cardContainer.baseY + 6 }, 2600, createjs.Ease.sineInOut);
+    createjs.Tween.removeTweens(cardContainer);
 
     if (cardContainer.cardShape) {
-        createjs.Tween.get(cardContainer.cardShape, { loop: true })
-            .to({ scaleX: 1.01, scaleY: 1.01 }, 2800, createjs.Ease.sineInOut)
-            .to({ scaleX: 1, scaleY: 1 }, 2800, createjs.Ease.sineInOut);
+        createjs.Tween.removeTweens(cardContainer.cardShape);
+        cardContainer.cardShape.scaleX = 1;
+        cardContainer.cardShape.scaleY = 1;
     }
 }
 
@@ -3063,7 +3072,6 @@ function hideLoaderProceedButton() {
         stage.update();
     }
 }
-
 
 
 //==========================================================================//
