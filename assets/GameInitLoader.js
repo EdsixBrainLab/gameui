@@ -36,6 +36,576 @@ var HUD_CARD_CORNER_RADIUS = 20;
 var HUD_CARD_ACCENT_WIDTH = 140;
 var HUD_CARD_SPACING = 590;
 var QUESTION_PROGRESS_WIDTH = 80;
+var activeHudThemeMode = null;
+var cachedHudThemeConfig = null;
+var HUD_THEME_PRESETS = {
+    dark: {
+        cards: {
+            score: {
+                background: ["rgba(248,251,255,0.96)", "rgba(213,231,255,0.96)"],
+                accent: ["rgba(142,196,255,0.75)", "rgba(142,196,255,0.35)"],
+                iconStyle: {
+                    fill: "#30578F",
+                    strokeColor: "rgba(255,255,255,0.65)",
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(244,250,255,0.96)", "rgba(214,236,255,0.96)"],
+                accent: ["rgba(129,209,255,0.65)", "rgba(129,209,255,0.3)"],
+                iconStyle: {
+                    strokeColor: "#2F6CB7",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(245,255,250,0.96)", "rgba(220,246,236,0.96)"],
+                accent: ["rgba(110,231,183,0.65)", "rgba(110,231,183,0.3)"],
+                iconStyle: {
+                    fill: "#1F6F5A",
+                    strokeColor: "rgba(255,255,255,0.6)",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 1,
+        cardAccentAlpha: 0.9,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
+            alpha: 0.35
+        },
+        textStyles: {
+            label: {
+                color: "#2D517C",
+                shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
+            },
+            value: {
+                color: "#133559",
+                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
+            },
+            timerValue: {
+                color: "#214874",
+                shadow: { color: "rgba(255,255,255,0.5)", x: 0, y: 3, blur: 8 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(32,71,115,0.18)",
+            fill: ["#2f7ceb", "#3dd88c"]
+        },
+        controlBackground: {
+            colors: ["rgba(234,244,255,0.9)", "rgba(210,229,255,0.9)"],
+            alpha: 0.95
+        },
+        controlPalette: {
+            volume: { primary: "rgba(76,143,233,0.9)", glow: "rgba(76,143,233,0.55)" },
+            fullscreen: { primary: "rgba(133,111,240,0.9)", glow: "rgba(133,111,240,0.55)" },
+            close: { primary: "rgba(238,87,102,0.92)", glow: "rgba(238,87,102,0.6)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(49,95,160,0.55)",
+            ringAlpha: 0.65,
+            hoverRingAlpha: 0.92,
+            glowAlpha: 0.45,
+            hoverGlowAlpha: 0.65,
+            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(226,239,255,0.95)"]
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,228,173,0.96)", "rgba(255,200,118,0.96)"],
+                accent: ["rgba(255,187,92,0.65)", "rgba(255,187,92,0.28)"],
+                icon: "#BA4B2F",
+                text: "#9C3C20"
+            },
+            danger: {
+                background: ["rgba(255,212,212,0.96)", "rgba(254,153,153,0.96)"],
+                accent: ["rgba(253,116,116,0.65)", "rgba(253,116,116,0.28)"],
+                icon: "#B42332",
+                text: "#881421"
+            },
+            normalIcon: "#2F6CB7",
+            normalText: "#214874"
+        }
+    },
+    light: {
+        cards: {
+            score: {
+                background: ["rgba(24,41,74,0.94)", "rgba(36,67,118,0.94)"],
+                accent: ["rgba(74,126,213,0.6)", "rgba(74,126,213,0.25)"],
+                iconStyle: {
+                    fill: "#FFD166",
+                    strokeColor: "rgba(8,22,45,0.5)",
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(22,45,83,0.94)", "rgba(33,70,120,0.94)"],
+                accent: ["rgba(104,181,255,0.55)", "rgba(104,181,255,0.22)"],
+                iconStyle: {
+                    strokeColor: "#8CD0FF",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(19,58,52,0.94)", "rgba(33,95,88,0.94)"],
+                accent: ["rgba(95,234,212,0.55)", "rgba(95,234,212,0.22)"],
+                iconStyle: {
+                    fill: "#6EE7B7",
+                    strokeColor: "rgba(7,28,26,0.6)",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 0.96,
+        cardAccentAlpha: 0.92,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.1)", "rgba(255,255,255,0)"],
+            alpha: 0.2
+        },
+        textStyles: {
+            label: {
+                color: "#D6E6FF",
+                shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
+            },
+            value: {
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,14,32,0.65)", x: 0, y: 4, blur: 14 }
+            },
+            timerValue: {
+                color: "#F6FBFF",
+                shadow: { color: "rgba(4,14,32,0.7)", x: 0, y: 4, blur: 16 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(7,19,40,0.42)",
+            fill: ["#34d399", "#60a5fa"]
+        },
+        controlBackground: {
+            colors: ["rgba(10,25,54,0.75)", "rgba(15,34,70,0.55)"],
+            alpha: 0.85
+        },
+        controlPalette: {
+            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.45)" },
+            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.45)" },
+            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.5)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(197,219,255,0.65)",
+            ringAlpha: 0.75,
+            hoverRingAlpha: 0.95,
+            glowAlpha: 0.55,
+            hoverGlowAlpha: 0.75,
+            backgroundGradient: ["rgba(26,46,79,0.9)", "rgba(41,73,122,0.85)"]
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,159,67,0.92)", "rgba(215,118,23,0.92)"],
+                accent: ["rgba(255,198,124,0.45)", "rgba(255,198,124,0.15)"],
+                icon: "#FFE082",
+                text: "#FFF3E0"
+            },
+            danger: {
+                background: ["rgba(153,27,39,0.92)", "rgba(220,38,38,0.92)"],
+                accent: ["rgba(248,113,113,0.45)", "rgba(248,113,113,0.18)"],
+                icon: "#FFD1DC",
+                text: "#FFE4E6"
+            },
+            normalIcon: "#66B9FF",
+            normalText: "#F6FBFF"
+        }
+    }
+};
+
+function cloneArray(source) {
+    return source && source.slice ? source.slice() : source;
+}
+
+function resolveHudThemeMode() {
+    var scopes = [];
+
+    if (typeof window !== "undefined") {
+        scopes.push(window);
+    }
+
+    if (typeof globalThis !== "undefined") {
+        scopes.push(globalThis);
+    }
+
+    for (var i = 0; i < scopes.length; i++) {
+        var scope = scopes[i];
+        if (!scope) {
+            continue;
+        }
+
+        if (typeof scope.headerPanelThemeMode !== "undefined") {
+            return String(scope.headerPanelThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.hudThemeMode !== "undefined") {
+            return String(scope.hudThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.headerPanelTheme !== "undefined") {
+            return String(scope.headerPanelTheme).toLowerCase();
+        }
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        return String(headerPanelThemeMode).toLowerCase();
+    }
+
+    if (typeof hudThemeMode !== "undefined") {
+        return String(hudThemeMode).toLowerCase();
+    }
+
+    if (typeof headerPanelTheme !== "undefined") {
+        return String(headerPanelTheme).toLowerCase();
+    }
+
+    return "dark";
+}
+
+function getHudThemeConfig() {
+    var mode = resolveHudThemeMode();
+    if (!HUD_THEME_PRESETS[mode]) {
+        mode = "dark";
+    }
+    if (cachedHudThemeConfig && activeHudThemeMode === mode) {
+        return cachedHudThemeConfig;
+    }
+
+    activeHudThemeMode = mode;
+    cachedHudThemeConfig = HUD_THEME_PRESETS[mode];
+
+    return cachedHudThemeConfig;
+}
+
+function applyTextStyle(target, style) {
+    if (!target || !style) {
+        return;
+    }
+
+    if (typeof style.color !== "undefined") {
+        target.color = style.color;
+    }
+
+    if (style.shadow) {
+        target.shadow = new createjs.Shadow(
+            style.shadow.color || "rgba(0,0,0,0)",
+            style.shadow.x || 0,
+            style.shadow.y || 0,
+            style.shadow.blur || 0
+        );
+    } else {
+        target.shadow = null;
+    }
+}
+
+function updateHudIconWrapper(wrapper, paletteConfig, theme) {
+    if (!wrapper) {
+        return;
+    }
+
+    var wrapperTheme = theme.iconWrapper || {};
+    var primary = paletteConfig && paletteConfig.primary ? paletteConfig.primary : (wrapperTheme.defaultPrimary || "rgba(120,144,255,0.75)");
+    var glowColor = paletteConfig && paletteConfig.glow ? paletteConfig.glow : primary;
+    var gradientColors = wrapperTheme.backgroundGradient ? cloneArray(wrapperTheme.backgroundGradient) : [primary, "rgba(255,255,255,0.08)"];
+
+    if (wrapper.glow) {
+        wrapper.glow.graphics
+            .clear()
+            .beginRadialGradientFill([glowColor, "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 34)
+            .drawCircle(0, 0, 18);
+
+        var glowAlpha = typeof wrapperTheme.glowAlpha === "number" ? wrapperTheme.glowAlpha : 0.45;
+        var hoverGlowAlpha = typeof wrapperTheme.hoverGlowAlpha === "number" ? wrapperTheme.hoverGlowAlpha : glowAlpha + 0.2;
+        wrapper.glow.alpha = glowAlpha;
+        wrapper.glow.baseAlpha = glowAlpha;
+        wrapper.glow.hoverAlpha = hoverGlowAlpha;
+    }
+
+    if (wrapper.background) {
+        wrapper.background.graphics
+            .clear()
+            .beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28)
+            .drawCircle(0, 0, 12);
+    }
+
+    if (wrapper.ring) {
+        var ringColor = wrapperTheme.ringColor || "rgba(255,255,255,0.5)";
+        var ringAlpha = typeof wrapperTheme.ringAlpha === "number" ? wrapperTheme.ringAlpha : 0.6;
+        var hoverRingAlpha = typeof wrapperTheme.hoverRingAlpha === "number" ? wrapperTheme.hoverRingAlpha : 0.9;
+
+        wrapper.ring.graphics
+            .clear()
+            .setStrokeStyle(2)
+            .beginStroke(ringColor)
+            .drawCircle(0, 0, 12);
+
+        wrapper.ring.alpha = ringAlpha;
+        wrapper.ring.baseAlpha = ringAlpha;
+        wrapper.ring.hoverAlpha = hoverRingAlpha;
+    }
+}
+
+function applyHudThemeToCard(card, type, theme) {
+    if (!card) {
+        return;
+    }
+
+    var cardsTheme = theme.cards || {};
+    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
+
+    var gradient = cloneArray(cardTheme.background || card.baseGradient || []);
+    var accent = cloneArray(cardTheme.accent || card.baseAccent || []);
+    var highlightConfig = theme.cardHighlight || {};
+    var highlightColors = cloneArray((highlightConfig && highlightConfig.colors) || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
+
+    var cardWidth = card.__cardWidth || HUD_CARD_WIDTH;
+    var cardHeight = card.__cardHeight || HUD_CARD_HEIGHT;
+    var halfWidth = cardWidth / 2;
+    var halfHeight = cardHeight / 2;
+    var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
+    var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
+
+    if (card.background) {
+        card.background.graphics
+            .clear()
+            .beginLinearGradientFill((gradient && gradient.length ? gradient : card.baseGradient || []), [0, 1], -halfWidth, 0, halfWidth, 0)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
+        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
+    }
+
+    if (card.iconAccent) {
+        card.iconAccent.graphics
+            .clear()
+            .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
+
+        var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
+        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
+    }
+
+    if (card.highlight) {
+        card.highlight.graphics
+            .clear()
+            .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+        var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
+        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
+    }
+
+    if (card.icon) {
+        var iconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        card.baseIconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
+        drawHudIcon(card.icon, type, iconStyle);
+    }
+
+    if (card.label) {
+        var labelStyle = theme.textStyles ? theme.textStyles.label : null;
+        if (labelStyle && typeof labelStyle.color !== "undefined") {
+            card.label.color = labelStyle.color;
+        }
+        applyTextStyle(card.label, labelStyle || {});
+    }
+
+    card.baseGradient = cloneArray(gradient);
+    card.baseAccent = cloneArray(accent);
+}
+
+function applyHudThemeToQuestionProgress(theme) {
+    if (!questionProgressBarBg || !questionProgressBarFill) {
+        return;
+    }
+
+    var progressTheme = theme.questionProgress || {};
+    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
+    var fillScale = questionProgressBarFill.scaleX;
+
+    questionProgressBarBg.graphics
+        .clear()
+        .beginFill(progressTheme.background || "rgba(255,255,255,0.14)")
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.graphics
+        .clear()
+        .beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0)
+        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+
+    questionProgressBarFill.scaleX = typeof fillScale === "number" ? fillScale : questionProgressBarFill.scaleX;
+}
+
+function applyHudThemeToControls(theme) {
+    if (!controlContainer) {
+        return;
+    }
+
+    var controlTheme = theme.controlBackground || {};
+    var controlPalette = theme.controlPalette || {};
+
+    if (controlContainer.backgroundShape) {
+        var controlBg = controlContainer.backgroundShape;
+        var controlWidth = controlBg.__width || 120;
+        var controlHeight = controlBg.__height || 53;
+        var controlRadius = controlBg.__radius || 24;
+        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+
+        controlBg.graphics
+            .clear()
+            .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
+            .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+
+        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
+    }
+
+    updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
+    updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
+    updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
+}
+
+function applyHudThemeToTexts(theme) {
+    if (!theme || !theme.textStyles) {
+        return;
+    }
+
+    var textStyles = theme.textStyles;
+
+    if (gameScoreTxt) {
+        var valueStyle = textStyles.value || {};
+        if (typeof valueStyle.color !== "undefined") {
+            gameScoreTxt.color = valueStyle.color;
+        }
+        applyTextStyle(gameScoreTxt, valueStyle);
+        gameScoreTxt.__baseColor = gameScoreTxt.color;
+        gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+    }
+
+    if (gameQCntTxt) {
+        var questionStyle = textStyles.value || {};
+        if (typeof questionStyle.color !== "undefined") {
+            gameQCntTxt.color = questionStyle.color;
+        }
+        applyTextStyle(gameQCntTxt, questionStyle);
+        gameQCntTxt.__baseColor = gameQCntTxt.color;
+        gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+    }
+
+    if (gameTimerTxt) {
+        var timerStyle = textStyles.timerValue || textStyles.value || {};
+        if (typeof timerStyle.color !== "undefined") {
+            gameTimerTxt.color = timerStyle.color;
+        }
+        applyTextStyle(gameTimerTxt, timerStyle);
+        gameTimerTxt.__baseColor = gameTimerTxt.color;
+        gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+    }
+}
+
+function applyHudThemeToHud() {
+    var theme = getHudThemeConfig();
+    if (!theme) {
+        return;
+    }
+
+    applyHudThemeToCard(scoreCardContainer, "score", theme);
+    applyHudThemeToCard(timerCardContainer, "timer", theme);
+    applyHudThemeToCard(hudQuestionCardContainer, "question", theme);
+
+    applyHudThemeToTexts(theme);
+    applyHudThemeToQuestionProgress(theme);
+    applyHudThemeToControls(theme);
+
+    if (typeof setTimerCriticalState === "function" && timerCardContainer) {
+        setTimerCriticalState(!!timerCardContainer.__isCritical);
+    }
+
+    if (stage) {
+        stage.update();
+    }
+}
+
+function resetHudThemeCache() {
+    cachedHudThemeConfig = null;
+    activeHudThemeMode = null;
+}
+
+function refreshHudTheme() {
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+function setHudThemeMode(mode) {
+    if (typeof mode !== "string") {
+        return;
+    }
+
+    var normalized = mode.toLowerCase();
+    if (!HUD_THEME_PRESETS[normalized]) {
+        normalized = "dark";
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        headerPanelThemeMode = normalized;
+    }
+
+    if (typeof window !== "undefined") {
+        window.headerPanelThemeMode = normalized;
+    }
+
+    if (typeof globalThis !== "undefined") {
+        globalThis.headerPanelThemeMode = normalized;
+    }
+
+    resetHudThemeCache();
+    applyHudThemeToHud();
+}
+
+if (typeof window !== "undefined") {
+    window.setHudThemeMode = setHudThemeMode;
+    window.refreshHudTheme = refreshHudTheme;
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.setHudThemeMode = setHudThemeMode;
+    globalThis.refreshHudTheme = refreshHudTheme;
+}
+
+function mergeIconStyle(base, override) {
+    var result = {};
+
+    if (base) {
+        if (typeof base.fill !== "undefined") {
+            result.fill = base.fill;
+        }
+        if (typeof base.strokeColor !== "undefined") {
+            result.strokeColor = base.strokeColor;
+        }
+        if (typeof base.strokeWidth !== "undefined") {
+            result.strokeWidth = base.strokeWidth;
+        }
+    }
+
+    if (override) {
+        if (typeof override === "string") {
+            result.fill = override;
+            result.strokeColor = override;
+        } else {
+            if (typeof override.fill !== "undefined") {
+                result.fill = override.fill;
+            }
+            if (typeof override.strokeColor !== "undefined") {
+                result.strokeColor = override.strokeColor;
+            }
+            if (typeof override.strokeWidth !== "undefined") {
+                result.strokeWidth = override.strokeWidth;
+            }
+        }
+    }
+
+    return result;
+}
 
 var HUD_THEME_PRESETS = {
     dark: {
@@ -1223,7 +1793,6 @@ function createHudCard(label, type) {
 }
 
 function buildHudLayout() {
-	console.log("buildHudLayout");
     if (!container || !container.parent) {
         return;
     }
@@ -1304,8 +1873,13 @@ function buildHudLayout() {
     var controlColors = (controlBackgroundTheme.colors && controlBackgroundTheme.colors.length) ? controlBackgroundTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
     controlBg.graphics.beginLinearGradientFill(controlColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2).drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, 24);
     controlBg.alpha = typeof controlBackgroundTheme.alpha === "number" ? controlBackgroundTheme.alpha : 0.88;
+    controlBg.__width = controlWidth;
+    controlBg.__height = controlHeight;
+    controlBg.__radius = 24;
+
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
+    controlContainer.backgroundShape = controlBg;
 
     var controlPalette = hudTheme.controlPalette || {};
     var volumePalette = controlPalette.volume || {};
@@ -1316,16 +1890,19 @@ function buildHudLayout() {
     volumeBtnWrapper.x = -30;
     volumeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(volumeBtnWrapper);
+    controlContainer.volumeWrapper = volumeBtnWrapper;
 
     fullScreenBtnWrapper = createHudIconWrapper(fullscreenPalette.primary, fullscreenPalette.glow);
     fullScreenBtnWrapper.x = 0;
     fullScreenBtnWrapper.cursor = "pointer";
     controlContainer.addChild(fullScreenBtnWrapper);
+    controlContainer.fullscreenWrapper = fullScreenBtnWrapper;
 
     closeBtnWrapper = createHudIconWrapper(closePalette.primary, closePalette.glow);
     closeBtnWrapper.x = 30;
     closeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(closeBtnWrapper);
+    controlContainer.closeWrapper = closeBtnWrapper;
 
     if (volumeBtn) {
         if (volumeBtn.parent) {
@@ -1371,6 +1948,7 @@ function buildHudLayout() {
     //container.parent.setChildIndex(hudContainer, container.parent.getNumChildren() - 1);
     container.parent.setChildIndex(hudContainer, 99999999);
 
+    applyHudThemeToHud();
     setTimerCriticalState(false);
     updateQuestionProgress();
 }
