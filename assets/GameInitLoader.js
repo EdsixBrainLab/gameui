@@ -30,6 +30,10 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
+var lastDisplayedScore = null,
+    lastDisplayedTime = null,
+    lastDisplayedQuestion = null;
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -1471,6 +1475,7 @@ function createHudCard(label, type) {
         .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
     var highlightAlpha = typeof highlightConfig.alpha === "number" ? highlightConfig.alpha : 0.24;
     highlight.alpha = highlightAlpha;
+    highlight.baseAlpha = highlightAlpha;
     card.addChild(highlight);
 
     var icon = new createjs.Shape();
@@ -1479,6 +1484,12 @@ function createHudCard(label, type) {
     var baseIconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, null);
     drawHudIcon(icon, type, baseIconStyle);
     card.addChild(icon);
+    var effectLayer = new createjs.Container();
+    effectLayer.mouseEnabled = false;
+    effectLayer.mouseChildren = false;
+    effectLayer.name = type + "Effects";
+    effectLayer.compositeOperation = "lighter";
+    card.addChild(effectLayer);
 
     var labelStyle = theme.textStyles ? theme.textStyles.label : null;
     var labelColor = (labelStyle && labelStyle.color) || "#C4DBFF";
@@ -1500,6 +1511,7 @@ function createHudCard(label, type) {
     card.icon = icon;
     card.label = labelText;
     card.valueHolder = valueHolder;
+    card.effectLayer = effectLayer;
     card.baseGradient = cloneArray(gradient && gradient.length ? gradient : ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"]);
     card.baseAccent = cloneArray(accent && accent.length ? accent : card.baseGradient);
     card.baseIconStyle = mergeIconStyle(baseIconStyle, null);
@@ -1519,6 +1531,10 @@ function buildHudLayout() {
     if (hudContainer && hudContainer.parent) {
         hudContainer.parent.removeChild(hudContainer);
     }
+
+    lastDisplayedScore = null;
+    lastDisplayedTime = null;
+    lastDisplayedQuestion = null;
 
     var hudTheme = getHudThemeConfig();
 
@@ -1669,6 +1685,8 @@ function buildHudLayout() {
     applyHudThemeToHud();
     setTimerCriticalState(false);
     updateQuestionProgress();
+
+    startHudAmbientAnimations();
 }
 
 function refreshHudValues() {
@@ -1679,8 +1697,19 @@ function refreshHudValues() {
     var currentScore = typeof score !== "undefined" ? score : 0;
     gameScoreTxt.text = String(currentScore);
 
+    if (lastDisplayedScore !== null && currentScore > lastDisplayedScore && (!scoreCardContainer || !scoreCardContainer.__scoreCelebrating)) {
+        animateScoreCelebration();
+    }
+    lastDisplayedScore = currentScore;
+
     var timerValue = typeof formatTimerValue === "function" ? formatTimerValue(time) : String(parseInt(time, 10) || 0);
     gameTimerTxt.text = timerValue;
+
+    var numericTime = typeof time !== "undefined" ? parseInt(time, 10) || 0 : 0;
+    if (lastDisplayedTime !== null && numericTime !== lastDisplayedTime) {
+        animateTimerTick();
+    }
+    lastDisplayedTime = numericTime;
 
     var total = typeof totalQuestions !== "undefined" ? totalQuestions : 0;
     var currentQuestion = typeof quesCnt !== "undefined" ? quesCnt : 0;
@@ -1691,6 +1720,11 @@ function refreshHudValues() {
     }
 
     gameQCntTxt.text = currentQuestion + "/" + total;
+
+    if (lastDisplayedQuestion !== null && currentQuestion > lastDisplayedQuestion) {
+        animateQuestionAdvance();
+    }
+    lastDisplayedQuestion = currentQuestion;
 
     if (typeof setTimerCriticalState === "function") {
         setTimerCriticalState(time <= 13);
@@ -1734,6 +1768,8 @@ function pulseHudCard(card) {
     createjs.Tween.get(card, { override: true })
         .to({ scaleX: 1.03, scaleY: 1.03 }, 180, createjs.Ease.quadOut)
         .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadIn);
+
+    flashHudCardHighlight(card);
 }
 
 function shakeHudCard(card) {
@@ -1805,8 +1841,273 @@ function releaseIconWrapper(wrapper) {
 }
 
 function highlightScoreHud() {
+    animateScoreCelebration();
+}
+
+function flashHudCardHighlight(card) {
+    if (!card || !card.highlight) {
+        return;
+    }
+
+    var highlight = card.highlight;
+    if (typeof highlight.baseAlpha !== "number") {
+        highlight.baseAlpha = highlight.alpha;
+    }
+
+    var baseAlpha = typeof highlight.baseAlpha === "number" ? highlight.baseAlpha : highlight.alpha;
+    var targetAlpha = Math.min(baseAlpha + 0.35, 1);
+
+    createjs.Tween.get(highlight, { override: true })
+        .to({ alpha: targetAlpha }, 150, createjs.Ease.quadOut)
+        .to({ alpha: baseAlpha }, 280, createjs.Ease.quadIn);
+}
+
+function animateScoreCelebration() {
+    if (!scoreCardContainer) {
+        return;
+    }
+
+    scoreCardContainer.__scoreCelebrating = true;
+
     animateHudMetric(gameScoreTxt);
     pulseHudCard(scoreCardContainer);
+
+    var animationStarted = animateHudIconImpact(scoreCardContainer, "score", {
+        scale: 1.34,
+        overshoot: 0.9,
+        settle: 1.08,
+        rotation: 26,
+        upDuration: 170,
+        overshootDuration: 150,
+        settleDuration: 150,
+        downDuration: 220,
+        onComplete: function () {
+            scoreCardContainer.__scoreCelebrating = false;
+        }
+    });
+
+    if (!animationStarted) {
+        scoreCardContainer.__scoreCelebrating = false;
+    }
+
+    spawnScoreCardSparkles();
+}
+
+function animateTimerTick() {
+    if (!timerCardContainer) {
+        return;
+    }
+
+    animateHudMetric(gameTimerTxt);
+    flashHudCardHighlight(timerCardContainer);
+
+    animateHudIconImpact(timerCardContainer, "timer", {
+        scale: 1.14,
+        overshoot: 0.95,
+        settle: 1.02,
+        upDuration: 120,
+        overshootDuration: 120,
+        settleDuration: 110,
+        downDuration: 180
+    });
+
+    spawnTimerPulse();
+}
+
+function animateQuestionAdvance() {
+    if (!hudQuestionCardContainer) {
+        return;
+    }
+
+    animateHudMetric(gameQCntTxt);
+    pulseHudCard(hudQuestionCardContainer);
+
+    animateHudIconImpact(hudQuestionCardContainer, "question", {
+        scale: 1.18,
+        overshoot: 0.94,
+        settle: 1.04,
+        upDuration: 150,
+        overshootDuration: 140,
+        settleDuration: 120,
+        downDuration: 200
+    });
+
+    spawnQuestionAdvancePulse();
+}
+
+function animateHudIconImpact(card, type, options) {
+    if (!card || !card.icon) {
+        if (options && typeof options.onComplete === "function") {
+            options.onComplete();
+        }
+        return false;
+    }
+
+    var icon = card.icon;
+    icon.__impactActive = true;
+
+    createjs.Tween.removeTweens(icon);
+
+    var scaleUp = options && typeof options.scale === "number" ? options.scale : 1.24;
+    var overshootScale = options && typeof options.overshoot === "number" ? options.overshoot : 0.94;
+    var settleScale = options && typeof options.settle === "number" ? options.settle : 1.02;
+    var rotation = options && typeof options.rotation === "number" ? options.rotation : 0;
+
+    var upDuration = options && options.upDuration ? options.upDuration : 160;
+    var overshootDuration = options && options.overshootDuration ? options.overshootDuration : 140;
+    var settleDuration = options && options.settleDuration ? options.settleDuration : 120;
+    var downDuration = options && options.downDuration ? options.downDuration : 180;
+
+    createjs.Tween.get(icon, { override: true })
+        .to({ scaleX: scaleUp, scaleY: scaleUp, rotation: rotation }, upDuration, createjs.Ease.quadOut)
+        .to({ scaleX: overshootScale, scaleY: overshootScale, rotation: -rotation * 0.45 }, overshootDuration, createjs.Ease.quadInOut)
+        .to({ scaleX: settleScale, scaleY: settleScale, rotation: rotation * 0.18 }, settleDuration, createjs.Ease.quadOut)
+        .to({ scaleX: 1, scaleY: 1, rotation: 0 }, downDuration, createjs.Ease.quadIn)
+        .call(function () {
+            icon.__impactActive = false;
+            if (options && typeof options.onComplete === "function") {
+                options.onComplete();
+            }
+            restartIconIdleAnimation(card, type);
+        });
+
+    return true;
+}
+
+function spawnScoreCardSparkles() {
+    if (!scoreCardContainer || !scoreCardContainer.effectLayer || !scoreCardContainer.icon) {
+        return;
+    }
+
+    var layer = scoreCardContainer.effectLayer;
+    var baseX = scoreCardContainer.icon.x;
+    var baseY = scoreCardContainer.icon.y;
+    var colors = ["#FDE68A", "#FCD34D", "#FACC15", "#F97316"];
+
+    for (var i = 0; i < 6; i++) {
+        var sparkle = new createjs.Shape();
+        var color = colors[i % colors.length];
+        sparkle.graphics.beginFill(color).drawPolyStar(0, 0, 4 + Math.random() * 3.5, 5, 0.55, -90);
+        sparkle.alpha = 0;
+        sparkle.scaleX = sparkle.scaleY = 0;
+        sparkle.x = baseX;
+        sparkle.y = baseY;
+        sparkle.compositeOperation = "lighter";
+        layer.addChild(sparkle);
+
+        (function (shape, delay, offset) {
+            var angle = offset + Math.random() * 0.5;
+            var distance = 14 + Math.random() * 18;
+            var targetX = baseX + Math.cos(angle) * distance;
+            var targetY = baseY + Math.sin(angle) * distance - 2;
+
+            createjs.Tween.get(shape)
+                .wait(delay)
+                .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 130, createjs.Ease.quadOut)
+                .to({ x: targetX, y: targetY, alpha: 0, scaleX: 0.2, scaleY: 0.2 }, 320, createjs.Ease.quadIn)
+                .call(function () {
+                    if (shape.parent) {
+                        shape.parent.removeChild(shape);
+                    }
+                });
+        })(sparkle, i * 45, (Math.PI * 2 * i) / 6);
+    }
+}
+
+function spawnTimerPulse() {
+    if (!timerCardContainer || !timerCardContainer.effectLayer || !timerCardContainer.icon) {
+        return;
+    }
+
+    var baseX = timerCardContainer.icon.x;
+    var baseY = timerCardContainer.icon.y;
+    var layer = timerCardContainer.effectLayer;
+
+    for (var i = 0; i < 2; i++) {
+        var pulse = new createjs.Shape();
+        pulse.graphics.setStrokeStyle(2).beginStroke("rgba(130,200,255,0.85)").drawCircle(0, 0, 14);
+        pulse.alpha = 0.7;
+        pulse.scaleX = pulse.scaleY = 0.45;
+        pulse.x = baseX;
+        pulse.y = baseY;
+        layer.addChild(pulse);
+
+        (function (shape, delay) {
+            createjs.Tween.get(shape)
+                .wait(delay)
+                .to({ scaleX: 1.6, scaleY: 1.6, alpha: 0 }, 420, createjs.Ease.quadOut)
+                .call(function () {
+                    if (shape.parent) {
+                        shape.parent.removeChild(shape);
+                    }
+                });
+        })(pulse, i * 90);
+    }
+}
+
+function spawnQuestionAdvancePulse() {
+    if (!hudQuestionCardContainer || !hudQuestionCardContainer.effectLayer || !hudQuestionCardContainer.icon) {
+        return;
+    }
+
+    var ripple = new createjs.Shape();
+    ripple.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(110,231,183,0.85)")
+        .drawRoundRect(-12, -12, 24, 24, 6);
+    ripple.alpha = 0.75;
+    ripple.scaleX = ripple.scaleY = 0.8;
+    ripple.x = hudQuestionCardContainer.icon.x;
+    ripple.y = hudQuestionCardContainer.icon.y;
+    hudQuestionCardContainer.effectLayer.addChild(ripple);
+
+    createjs.Tween.get(ripple)
+        .to({ scaleX: 1.4, scaleY: 1.4, alpha: 0 }, 380, createjs.Ease.quadOut)
+        .call(function () {
+            if (ripple.parent) {
+                ripple.parent.removeChild(ripple);
+            }
+        });
+}
+
+function restartIconIdleAnimation(card, type) {
+    if (!card || !card.icon) {
+        return;
+    }
+
+    var icon = card.icon;
+    if (icon.__impactActive) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(icon);
+    icon.scaleX = icon.scaleY = 1;
+    icon.rotation = 0;
+
+    switch (type) {
+        case "score":
+            createjs.Tween.get(icon, { loop: true })
+                .wait(800)
+                .to({ rotation: 8 }, 1600, createjs.Ease.sineInOut)
+                .to({ rotation: -8 }, 1600, createjs.Ease.sineInOut);
+            break;
+        case "timer":
+            createjs.Tween.get(icon, { loop: true })
+                .to({ rotation: -6 }, 1200, createjs.Ease.sineInOut)
+                .to({ rotation: 6 }, 1200, createjs.Ease.sineInOut);
+            break;
+        case "question":
+            createjs.Tween.get(icon, { loop: true })
+                .to({ scaleX: 1.06, scaleY: 1.06 }, 1400, createjs.Ease.sineInOut)
+                .to({ scaleX: 1, scaleY: 1 }, 1400, createjs.Ease.sineInOut);
+            break;
+    }
+}
+
+function startHudAmbientAnimations() {
+    restartIconIdleAnimation(scoreCardContainer, "score");
+    restartIconIdleAnimation(timerCardContainer, "timer");
+    restartIconIdleAnimation(hudQuestionCardContainer, "question");
 }
 
 function setTimerCriticalState(isCritical) {
@@ -2493,6 +2794,7 @@ function startHowToPlayHeaderIdleAnimation(header) {
     }
 
     header.__idleAnimationAttached = true;
+
     if (header.highlightSweep && header.cardWidth) {
         var sweep = header.highlightSweep;
         var travelStart = -160;
