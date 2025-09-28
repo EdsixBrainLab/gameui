@@ -218,649 +218,7 @@ var HUD_THEME_PRESETS = {
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
 }
-function resolveHudThemeMode() {
-    var scopes = [];
-
-    if (typeof window !== "undefined") {
-        scopes.push(window);
-    }
-
-    if (typeof globalThis !== "undefined") {
-        scopes.push(globalThis);
-    }
-
-    for (var i = 0; i < scopes.length; i++) {
-        var scope = scopes[i];
-        if (!scope) {
-            continue;
-        }
-
-        if (typeof scope.headerPanelThemeMode !== "undefined") {
-            return String(scope.headerPanelThemeMode).toLowerCase();
-        }
-
-        if (typeof scope.hudThemeMode !== "undefined") {
-            return String(scope.hudThemeMode).toLowerCase();
-        }
-
-        if (typeof scope.headerPanelTheme !== "undefined") {
-            return String(scope.headerPanelTheme).toLowerCase();
-        }
-    }
-
-    if (typeof headerPanelThemeMode !== "undefined") {
-        return String(headerPanelThemeMode).toLowerCase();
-    }
-
-    if (typeof hudThemeMode !== "undefined") {
-        return String(hudThemeMode).toLowerCase();
-    }
-
-    if (typeof headerPanelTheme !== "undefined") {
-        return String(headerPanelTheme).toLowerCase();
-    }
-
-    return "dark";
-}
-
-function getHudThemeConfig() {
-    var mode = resolveHudThemeMode();
-    if (!HUD_THEME_PRESETS[mode]) {
-        mode = "dark";
-    }
-    if (cachedHudThemeConfig && activeHudThemeMode === mode) {
-        return cachedHudThemeConfig;
-    }
-
-    activeHudThemeMode = mode;
-    cachedHudThemeConfig = HUD_THEME_PRESETS[mode];
-
-    return cachedHudThemeConfig;
-}
-
-function applyTextStyle(target, style) {
-    if (!target || !style) {
-        return;
-    }
-
-    if (typeof style.color !== "undefined") {
-        target.color = style.color;
-    }
-
-    if (style.shadow) {
-        target.shadow = new createjs.Shadow(
-            style.shadow.color || "rgba(0,0,0,0)",
-            style.shadow.x || 0,
-            style.shadow.y || 0,
-            style.shadow.blur || 0
-        );
-    } else {
-        target.shadow = null;
-    }
-}
-
-function updateHudIconWrapper(wrapper, paletteConfig, theme) {
-    if (!wrapper) {
-        return;
-    }
-
-    var wrapperTheme = theme.iconWrapper || {};
-    var primary = paletteConfig && paletteConfig.primary ? paletteConfig.primary : (wrapperTheme.defaultPrimary || "rgba(120,144,255,0.75)");
-    var glowColor = paletteConfig && paletteConfig.glow ? paletteConfig.glow : primary;
-    var gradientColors = wrapperTheme.backgroundGradient ? cloneArray(wrapperTheme.backgroundGradient) : [primary, "rgba(255,255,255,0.08)"];
-
-    if (wrapper.glow) {
-        wrapper.glow.graphics
-            .clear()
-            .beginRadialGradientFill([glowColor, "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 34)
-            .drawCircle(0, 0, 18);
-
-        var glowAlpha = typeof wrapperTheme.glowAlpha === "number" ? wrapperTheme.glowAlpha : 0.45;
-        var hoverGlowAlpha = typeof wrapperTheme.hoverGlowAlpha === "number" ? wrapperTheme.hoverGlowAlpha : glowAlpha + 0.2;
-        wrapper.glow.alpha = glowAlpha;
-        wrapper.glow.baseAlpha = glowAlpha;
-        wrapper.glow.hoverAlpha = hoverGlowAlpha;
-    }
-
-    if (wrapper.background) {
-        wrapper.background.graphics
-            .clear()
-            .beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28)
-            .drawCircle(0, 0, 12);
-    }
-
-    if (wrapper.ring) {
-        var ringColor = wrapperTheme.ringColor || "rgba(255,255,255,0.5)";
-        var ringAlpha = typeof wrapperTheme.ringAlpha === "number" ? wrapperTheme.ringAlpha : 0.6;
-        var hoverRingAlpha = typeof wrapperTheme.hoverRingAlpha === "number" ? wrapperTheme.hoverRingAlpha : 0.9;
-
-        wrapper.ring.graphics
-            .clear()
-            .setStrokeStyle(2)
-            .beginStroke(ringColor)
-            .drawCircle(0, 0, 12);
-
-        wrapper.ring.alpha = ringAlpha;
-        wrapper.ring.baseAlpha = ringAlpha;
-        wrapper.ring.hoverAlpha = hoverRingAlpha;
-    }
-}
-
-function applyHudThemeToCard(card, type, theme) {
-    if (!card) {
-        return;
-    }
-
-    var cardsTheme = theme.cards || {};
-    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
-
-    var gradient = cloneArray(cardTheme.background || card.baseGradient || []);
-    var accent = cloneArray(cardTheme.accent || card.baseAccent || []);
-    var highlightConfig = theme.cardHighlight || {};
-    var highlightColors = cloneArray((highlightConfig && highlightConfig.colors) || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
-
-    var cardWidth = card.__cardWidth || HUD_CARD_WIDTH;
-    var cardHeight = card.__cardHeight || HUD_CARD_HEIGHT;
-    var halfWidth = cardWidth / 2;
-    var halfHeight = cardHeight / 2;
-    var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
-    var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
-
-    if (card.background) {
-        card.background.graphics
-            .clear()
-            .beginLinearGradientFill((gradient && gradient.length ? gradient : card.baseGradient || []), [0, 1], -halfWidth, 0, halfWidth, 0)
-            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-
-        var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
-        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
-    }
-
-    if (card.iconAccent) {
-        card.iconAccent.graphics
-            .clear()
-            .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
-            .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
-
-        var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
-        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
-    }
-
-    if (card.highlight) {
-        card.highlight.graphics
-            .clear()
-            .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
-            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-
-        var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
-        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
-    }
-
-    if (card.icon) {
-        var iconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
-        card.baseIconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
-        drawHudIcon(card.icon, type, iconStyle);
-    }
-
-    if (card.label) {
-        var labelStyle = theme.textStyles ? theme.textStyles.label : null;
-        if (labelStyle && typeof labelStyle.color !== "undefined") {
-            card.label.color = labelStyle.color;
-        }
-        applyTextStyle(card.label, labelStyle || {});
-    }
-
-    card.baseGradient = cloneArray(gradient);
-    card.baseAccent = cloneArray(accent);
-}
-
-function applyHudThemeToQuestionProgress(theme) {
-    if (!questionProgressBarBg || !questionProgressBarFill) {
-        return;
-    }
-
-    var progressTheme = theme.questionProgress || {};
-    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
-    var fillScale = questionProgressBarFill.scaleX;
-
-    questionProgressBarBg.graphics
-        .clear()
-        .beginFill(progressTheme.background || "rgba(255,255,255,0.14)")
-        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
-
-    questionProgressBarFill.graphics
-        .clear()
-        .beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0)
-        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
-
-    questionProgressBarFill.scaleX = typeof fillScale === "number" ? fillScale : questionProgressBarFill.scaleX;
-}
-
-function applyHudThemeToControls(theme) {
-    if (!controlContainer) {
-        return;
-    }
-
-    var controlTheme = theme.controlBackground || {};
-    var controlPalette = theme.controlPalette || {};
-
-    if (controlContainer.backgroundShape) {
-        var controlBg = controlContainer.backgroundShape;
-        var controlWidth = controlBg.__width || 120;
-        var controlHeight = controlBg.__height || 53;
-        var controlRadius = controlBg.__radius || 24;
-        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
-
-        controlBg.graphics
-            .clear()
-            .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
-            .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
-
-        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
-    }
-
-    updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
-    updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
-    updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
-}
-
-function applyHudThemeToTexts(theme) {
-    if (!theme || !theme.textStyles) {
-        return;
-    }
-
-    var textStyles = theme.textStyles;
-
-    if (gameScoreTxt) {
-        var valueStyle = textStyles.value || {};
-        if (typeof valueStyle.color !== "undefined") {
-            gameScoreTxt.color = valueStyle.color;
-        }
-        applyTextStyle(gameScoreTxt, valueStyle);
-        gameScoreTxt.__baseColor = gameScoreTxt.color;
-        gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
-    }
-
-    if (gameQCntTxt) {
-        var questionStyle = textStyles.value || {};
-        if (typeof questionStyle.color !== "undefined") {
-            gameQCntTxt.color = questionStyle.color;
-        }
-        applyTextStyle(gameQCntTxt, questionStyle);
-        gameQCntTxt.__baseColor = gameQCntTxt.color;
-        gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
-    }
-
-    if (gameTimerTxt) {
-        var timerStyle = textStyles.timerValue || textStyles.value || {};
-        if (typeof timerStyle.color !== "undefined") {
-            gameTimerTxt.color = timerStyle.color;
-        }
-        applyTextStyle(gameTimerTxt, timerStyle);
-        gameTimerTxt.__baseColor = gameTimerTxt.color;
-        gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
-    }
-}
-
-function applyHudThemeToHud() {
-    var theme = getHudThemeConfig();
-    if (!theme) {
-        return;
-    }
-
-    applyHudThemeToCard(scoreCardContainer, "score", theme);
-    applyHudThemeToCard(timerCardContainer, "timer", theme);
-    applyHudThemeToCard(hudQuestionCardContainer, "question", theme);
-
-    applyHudThemeToTexts(theme);
-    applyHudThemeToQuestionProgress(theme);
-    applyHudThemeToControls(theme);
-
-    if (typeof setTimerCriticalState === "function" && timerCardContainer) {
-        setTimerCriticalState(!!timerCardContainer.__isCritical);
-    }
-
-    if (stage) {
-        stage.update();
-    }
-}
-
-function resetHudThemeCache() {
-    cachedHudThemeConfig = null;
-    activeHudThemeMode = null;
-}
-
-function refreshHudTheme() {
-    resetHudThemeCache();
-    applyHudThemeToHud();
-}
-
-function setHudThemeMode(mode) {
-    if (typeof mode !== "string") {
-        return;
-    }
-
-    var normalized = mode.toLowerCase();
-    if (!HUD_THEME_PRESETS[normalized]) {
-        normalized = "dark";
-    }
-
-    if (typeof headerPanelThemeMode !== "undefined") {
-        headerPanelThemeMode = normalized;
-    }
-
-    if (typeof window !== "undefined") {
-        window.headerPanelThemeMode = normalized;
-    }
-
-    if (typeof globalThis !== "undefined") {
-        globalThis.headerPanelThemeMode = normalized;
-    }
-
-    resetHudThemeCache();
-    applyHudThemeToHud();
-}
-
-if (typeof window !== "undefined") {
-    window.setHudThemeMode = setHudThemeMode;
-    window.refreshHudTheme = refreshHudTheme;
-}
-
-if (typeof globalThis !== "undefined") {
-    globalThis.setHudThemeMode = setHudThemeMode;
-    globalThis.refreshHudTheme = refreshHudTheme;
-}
-
-function mergeIconStyle(base, override) {
-    var result = {};
-
-    if (base) {
-        if (typeof base.fill !== "undefined") {
-            result.fill = base.fill;
-        }
-        if (typeof base.strokeColor !== "undefined") {
-            result.strokeColor = base.strokeColor;
-        }
-        if (typeof base.strokeWidth !== "undefined") {
-            result.strokeWidth = base.strokeWidth;
-        }
-    }
-
-    if (override) {
-        if (typeof override === "string") {
-            result.fill = override;
-            result.strokeColor = override;
-        } else {
-            if (typeof override.fill !== "undefined") {
-                result.fill = override.fill;
-            }
-            if (typeof override.strokeColor !== "undefined") {
-                result.strokeColor = override.strokeColor;
-            }
-            if (typeof override.strokeWidth !== "undefined") {
-                result.strokeWidth = override.strokeWidth;
-            }
-        }
-    }
-
-    return result;
-}
-
-
-    var cardsTheme = theme.cards || {};
-    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
-
-    var gradient = cloneArray(cardTheme.background || card.baseGradient || []);
-    var accent = cloneArray(cardTheme.accent || card.baseAccent || []);
-    var highlightConfig = theme.cardHighlight || {};
-    var highlightColors = cloneArray((highlightConfig && highlightConfig.colors) || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
-
-    var cardWidth = card.__cardWidth || HUD_CARD_WIDTH;
-    var cardHeight = card.__cardHeight || HUD_CARD_HEIGHT;
-    var halfWidth = cardWidth / 2;
-    var halfHeight = cardHeight / 2;
-    var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
-    var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
-
-    if (card.background) {
-        card.background.graphics
-            .clear()
-            .beginLinearGradientFill((gradient && gradient.length ? gradient : card.baseGradient || []), [0, 1], -halfWidth, 0, halfWidth, 0)
-            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-
-        var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
-        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
-    }
-
-    if (card.iconAccent) {
-        card.iconAccent.graphics
-            .clear()
-            .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
-            .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
-
-        var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
-        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
-    }
-
-    if (card.highlight) {
-        card.highlight.graphics
-            .clear()
-            .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
-            .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-
-        var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
-        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
-    }
-
-    if (card.icon) {
-        var iconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
-        card.baseIconStyle = mergeIconStyle(cardTheme.iconStyle || {}, null);
-        drawHudIcon(card.icon, type, iconStyle);
-    }
-
-    if (card.label) {
-        var labelStyle = theme.textStyles ? theme.textStyles.label : null;
-        if (labelStyle && typeof labelStyle.color !== "undefined") {
-            card.label.color = labelStyle.color;
-        }
-        applyTextStyle(card.label, labelStyle || {});
-    }
-
-    card.baseGradient = cloneArray(gradient);
-    card.baseAccent = cloneArray(accent);
-
-
-function applyHudThemeToQuestionProgress(theme) {
-    if (!questionProgressBarBg || !questionProgressBarFill) {
-        return;
-    }
-
-    var progressTheme = theme.questionProgress || {};
-    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
-    var fillScale = questionProgressBarFill.scaleX;
-
-    questionProgressBarBg.graphics
-        .clear()
-        .beginFill(progressTheme.background || "rgba(255,255,255,0.14)")
-        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
-
-    questionProgressBarFill.graphics
-        .clear()
-        .beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0)
-        .drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
-
-    questionProgressBarFill.scaleX = typeof fillScale === "number" ? fillScale : questionProgressBarFill.scaleX;
-}
-
-function applyHudThemeToControls(theme) {
-    if (!controlContainer) {
-        return;
-    }
-
-    var controlTheme = theme.controlBackground || {};
-    var controlPalette = theme.controlPalette || {};
-
-    if (controlContainer.backgroundShape) {
-        var controlBg = controlContainer.backgroundShape;
-        var controlWidth = controlBg.__width || 120;
-        var controlHeight = controlBg.__height || 53;
-        var controlRadius = controlBg.__radius || 24;
-        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
-
-        controlBg.graphics
-            .clear()
-            .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
-            .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
-
-        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
-    }
-
-    updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
-    updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
-    updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
-}
-
-function applyHudThemeToTexts(theme) {
-    if (!theme || !theme.textStyles) {
-        return;
-    }
-
-    var textStyles = theme.textStyles;
-
-    if (gameScoreTxt) {
-        var valueStyle = textStyles.value || {};
-        if (typeof valueStyle.color !== "undefined") {
-            gameScoreTxt.color = valueStyle.color;
-        }
-        applyTextStyle(gameScoreTxt, valueStyle);
-        gameScoreTxt.__baseColor = gameScoreTxt.color;
-        gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
-    }
-
-    if (gameQCntTxt) {
-        var questionStyle = textStyles.value || {};
-        if (typeof questionStyle.color !== "undefined") {
-            gameQCntTxt.color = questionStyle.color;
-        }
-        applyTextStyle(gameQCntTxt, questionStyle);
-        gameQCntTxt.__baseColor = gameQCntTxt.color;
-        gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
-    }
-
-    if (gameTimerTxt) {
-        var timerStyle = textStyles.timerValue || textStyles.value || {};
-        if (typeof timerStyle.color !== "undefined") {
-            gameTimerTxt.color = timerStyle.color;
-        }
-        applyTextStyle(gameTimerTxt, timerStyle);
-        gameTimerTxt.__baseColor = gameTimerTxt.color;
-        gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
-    }
-}
-
-function applyHudThemeToHud() {
-    var theme = getHudThemeConfig();
-    if (!theme) {
-        return;
-    }
-
-    applyHudThemeToCard(scoreCardContainer, "score", theme);
-    applyHudThemeToCard(timerCardContainer, "timer", theme);
-    applyHudThemeToCard(hudQuestionCardContainer, "question", theme);
-
-    applyHudThemeToTexts(theme);
-    applyHudThemeToQuestionProgress(theme);
-    applyHudThemeToControls(theme);
-
-    if (typeof setTimerCriticalState === "function" && timerCardContainer) {
-        setTimerCriticalState(!!timerCardContainer.__isCritical);
-    }
-
-    if (stage) {
-        stage.update();
-    }
-}
-
-function resetHudThemeCache() {
-    cachedHudThemeConfig = null;
-    activeHudThemeMode = null;
-}
-
-function refreshHudTheme() {
-    resetHudThemeCache();
-    applyHudThemeToHud();
-}
-
-function setHudThemeMode(mode) {
-    if (typeof mode !== "string") {
-        return;
-    }
-
-    var normalized = mode.toLowerCase();
-    if (!HUD_THEME_PRESETS[normalized]) {
-        normalized = "dark";
-    }
-
-    if (typeof headerPanelThemeMode !== "undefined") {
-        headerPanelThemeMode = normalized;
-    }
-
-    if (typeof window !== "undefined") {
-        window.headerPanelThemeMode = normalized;
-    }
-
-    if (typeof globalThis !== "undefined") {
-        globalThis.headerPanelThemeMode = normalized;
-    }
-
-    resetHudThemeCache();
-    applyHudThemeToHud();
-}
-
-if (typeof window !== "undefined") {
-    window.setHudThemeMode = setHudThemeMode;
-    window.refreshHudTheme = refreshHudTheme;
-}
-
-if (typeof globalThis !== "undefined") {
-    globalThis.setHudThemeMode = setHudThemeMode;
-    globalThis.refreshHudTheme = refreshHudTheme;
-}
-
-function mergeIconStyle(base, override) {
-    var result = {};
-
-    if (base) {
-        if (typeof base.fill !== "undefined") {
-            result.fill = base.fill;
-        }
-        if (typeof base.strokeColor !== "undefined") {
-            result.strokeColor = base.strokeColor;
-        }
-        if (typeof base.strokeWidth !== "undefined") {
-            result.strokeWidth = base.strokeWidth;
-        }
-    }
-
-    if (override) {
-        if (typeof override === "string") {
-            result.fill = override;
-            result.strokeColor = override;
-        } else {
-            if (typeof override.fill !== "undefined") {
-                result.fill = override.fill;
-            }
-            if (typeof override.strokeColor !== "undefined") {
-                result.strokeColor = override.strokeColor;
-            }
-            if (typeof override.strokeWidth !== "undefined") {
-                result.strokeWidth = override.strokeWidth;
-            }
-        }
-    }
-
-    return result;
-}
+  
 
 function resolveHudThemeMode() {
     var scopes = [];
@@ -1275,10 +633,12 @@ function createLoader() {
     if (!HowToPlayScreenImg) {
         HowToPlayScreenImg = buildHowToPlayOverlay();
     }
+
     loaderBar = HowToPlayScreenImg;
     bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
     loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
     loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
+
     if (loaderBar) {
         loaderBar.visible = true;
         if (!loaderBar.parent) {
@@ -1419,6 +779,7 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
+
     if (bar) {
         createjs.Tween.get(bar, { override: true })
             .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
@@ -1436,6 +797,7 @@ function updateLoading(event) {
             hideLoaderProceedButton();
         }
     }
+
 
     if (progressRatio >= 1) {
         hideHowToPlayProgressBar();
@@ -1464,7 +826,8 @@ function updateLoading(event) {
         loadProgressLabel.font = "bold 23px Segoe UI";
 
     } else {
-        loadProgressLabel.lineWidth = 420;
+        loadProgressLabel.lineWidth = 432;
+
 
         if (progresPrecentage >= 0 && progresPrecentage <= 25) {
             loadProgressLabel.text = "Collecting game assets" + extradot;
@@ -1531,8 +894,7 @@ function doneLoading(event) {
     hideHowToPlayProgressBar();
     showLoaderProceedButton();
     stage.update();
-    var len = assets.length
-    console.log("assets.length=" + len)
+    var len = assets.length;
     for (i = 0; i < len; i++) {
         //   if (i < 24) { with parrot
         if (i < TotalAssetsCnt) {
@@ -1979,6 +1341,7 @@ function watchRestart() {
         }
     }
 
+    hideLoaderProceedButton();
 
 
 
@@ -2240,6 +1603,7 @@ function buildHudLayout() {
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
+
     var controlPalette = hudTheme.controlPalette || {};
     var volumePalette = controlPalette.volume || {};
     var fullscreenPalette = controlPalette.fullscreen || {};
@@ -2536,6 +1900,7 @@ function buildHowToPlayOverlay() {
 
     var progress = createHowToPlayProgressBar();
     overlay.addChild(progress);
+
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
     overlay.header = header;
@@ -2561,6 +1926,7 @@ function buildHowToPlayOverlay() {
     var accentSmall = new createjs.Shape();
     accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
     overlay.addChild(accentSmall);
+
     header.baseY = header.y;
     instructions.baseY = instructions.y;
     progress.baseY = progress.y;
@@ -2574,18 +1940,21 @@ function buildHowToPlayOverlay() {
 
 function createHowToPlayInstructions() {
     var container = new createjs.Container();
-    container.regX = 310;
-    container.regY = 135;
+    container.regX = 324;
+    container.regY = 146;
     container.x = 640;
-    container.y = 210 + container.regY;
+    container.y = 214 + container.regY;
 
     var card = new createjs.Shape();
-    card.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 270, 36);
-    card.shadow = new createjs.Shadow("rgba(211, 132, 43, 0.35)", 0, 20, 34);
-    card.regX = 310;
-    card.regY = 135;
-    card.x = 310;
-    card.y = 135;
+    card.graphics
+        .beginLinearGradientFill(["rgba(255,255,255,0.97)", "rgba(255,239,220,0.97)"], [0, 1], 0, 0, 0, 292)
+        .drawRoundRect(0, 0, 648, 292, 42);
+    card.shadow = new createjs.Shadow("rgba(211, 132, 43, 0.28)", 0, 18, 38);
+    card.regX = 324;
+    card.regY = 146;
+    card.x = 324;
+    card.y = 146;
+
     container.addChild(card);
 
     var glow = new createjs.Shape();
@@ -2594,33 +1963,36 @@ function createHowToPlayInstructions() {
             "rgba(255, 193, 125, 0.35)",
             "rgba(255, 157, 70, 0.1)",
             "rgba(255, 157, 70, 0)"
-        ], [0, 0.5, 1], 310, 135, 0, 310, 135, 280)
+        ], [0, 0.5, 1], 324, 146, 0, 324, 146, 296)
         .drawEllipse(-90, -60, 800, 360);
-    glow.alpha = 0.28;
+    glow.alpha = 0.32;
+
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
 
     var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
-    title.x = 40;
-    title.y = 34;
+    title.x = 46;
+    title.y = 38;
     container.addChild(title);
 
     var steps = [
-        "See the How to Play properly.",
-        "After understood start the game.",
-        "The score is awarded based on correct answer and time taken.",
-        "Once answered you can't go back."
+        "Review the How to Play tips carefully.",
+        "Start the game once you understand the rules.",
+        "Score is awarded for correct answers and quick responses.",
+        "Submitted answers are final, you cannot go back."
     ];
 
     for (var i = 0; i < steps.length; i++) {
-        var itemY = 90 + i * 44;
+        var itemY = 100 + i * 46;
+
 
         var badge = new createjs.Shape();
         badge.graphics
             .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -20, -20, 20, 20)
             .drawCircle(0, 0, 20);
-        badge.x = 62;
+        badge.x = 68;
+
         badge.y = itemY;
         container.addChild(badge);
 
@@ -2632,12 +2004,20 @@ function createHowToPlayInstructions() {
         container.addChild(badgeText);
 
         var stepText = new createjs.Text(steps[i], "500 22px 'Baloo 2'", "#6B3A15");
-        stepText.lineHeight = 28;
-        stepText.lineWidth = 480;
-        stepText.x = 102;
-        stepText.y = itemY - 18;
+        stepText.lineHeight = 30;
+        stepText.lineWidth = 496;
+        stepText.x = 114;
+        stepText.y = itemY - 20;
         container.addChild(stepText);
+
+        if (i < steps.length - 1) {
+            var divider = new createjs.Shape();
+            divider.graphics.beginFill("rgba(255, 200, 150, 0.32)").drawRoundRect(114, itemY + 28, 484, 2, 1);
+            container.addChild(divider);
+        }
     }
+
+ 
     container.cardShape = card;
 
     return container;
@@ -2668,8 +2048,9 @@ function createHowToPlayHeader() {
     var container = new createjs.Container();
     container.regX = 0;
     container.regY = 0;
-    container.x = 120;
-    container.y = 112;
+    container.x = 316;
+    container.y = 118;
+
 
     var glow = new createjs.Shape();
     glow.graphics
@@ -2685,7 +2066,8 @@ function createHowToPlayHeader() {
         )
         .drawCircle(0, 0, 240);
     glow.alpha = 0.8;
-    glow.x = 212;
+    glow.x = 252;
+
     glow.y = 60;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
@@ -2693,8 +2075,9 @@ function createHowToPlayHeader() {
 
     var card = new createjs.Shape();
     card.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 440, 0)
-        .drawRoundRect(0, 0, 440, 120, 42);
+        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 520, 0)
+        .drawRoundRect(0, 0, 520, 120, 42);
+
     card.shadow = new createjs.Shadow("rgba(170, 74, 16, 0.28)", 0, 18, 32);
     container.addChild(card);
     container.cardShape = card;
@@ -2706,15 +2089,17 @@ function createHowToPlayHeader() {
             [0, 0.5, 1],
             0,
             0,
-            440,
+            520,
             0
         )
-        .drawRoundRect(12, 8, 416, 52, 28);
+        .drawRoundRect(12, 8, 496, 52, 28);
+
     cardHighlight.alpha = 0.85;
     container.addChild(cardHighlight);
 
     var tildeWave = createHowToPlayTildeWave(260, 16);
-    tildeWave.x = 150;
+    tildeWave.x = 180;
+
     tildeWave.y = 94;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
@@ -2732,7 +2117,8 @@ function createHowToPlayHeader() {
             74
         )
         .drawCircle(0, 0, 70);
-    iconHalo.x = 84;
+    iconHalo.x = 98;
+
     iconHalo.y = 60;
     iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
@@ -2741,7 +2127,7 @@ function createHowToPlayHeader() {
     iconBackground.graphics
         .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -36, -36, 36, 36)
         .drawCircle(0, 0, 42);
-    iconBackground.x = 84;
+    iconBackground.x = 98;
     iconBackground.y = 60;
     container.addChild(iconBackground);
 
@@ -2753,19 +2139,19 @@ function createHowToPlayHeader() {
     container.addChild(icon);
 
     var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#FFFFFF");
-    label.x = 150;
+    label.x = 192;
     label.y = 26;
     container.addChild(label);
 
     var subtitle = new createjs.Text("Follow these quick tips before you start", "500 24px 'Baloo 2'", "rgba(255,255,255,0.9)");
-    subtitle.x = 150;
+    subtitle.x = 192;
     subtitle.y = 70;
     container.addChild(subtitle);
 
     var accent = new createjs.Shape();
     accent.graphics
-        .beginLinearGradientFill(["rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"] , [0, 0.6, 1], 0, 18, 0, 102)
-        .drawRoundRect(352, 18, 64, 84, 34);
+        .beginLinearGradientFill(["rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"], [0, 0.6, 1], 0, 18, 0, 102)
+        .drawRoundRect(420, 18, 72, 84, 34);
     accent.alpha = 0.35;
     container.addChild(accent);
 
@@ -2774,64 +2160,81 @@ function createHowToPlayHeader() {
 
 function createHowToPlayProgressBar() {
     var container = new createjs.Container();
-    container.regX = 310;
-    container.regY = 44;
+    container.regX = 324;
+    container.regY = 54;
     container.x = 640;
     container.y = 520 + container.regY;
 
     var shadow = new createjs.Shape();
     shadow.graphics
-        .beginRadialGradientFill(["rgba(211, 132, 43, 0.32)", "rgba(211, 132, 43, 0)"] , [0, 1], 320, 40, 0, 320, 40, 280)
-        .drawRoundRect(4, 10, 632, 96, 28);
-    shadow.alpha = 0.8;
+        .beginRadialGradientFill([
+            "rgba(211, 132, 43, 0.32)",
+            "rgba(211, 132, 43, 0)"
+        ], [0, 1], 324, 44, 0, 324, 44, 300)
+        .drawRoundRect(-4, 6, 656, 118, 34);
+    shadow.alpha = 0.78;
     container.addChild(shadow);
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["#FFFFFF", "#FFE9D0"], [0, 1], 0, 0, 0, 80)
-        .drawRoundRect(0, 0, 620, 88, 26);
-    frame.shadow = new createjs.Shadow("rgba(194, 119, 40, 0.25)", 0, 18, 28);
+        .beginLinearGradientFill(["rgba(255,255,255,0.98)", "rgba(255,231,199,0.98)"], [0, 1], 0, 0, 0, 108)
+        .drawRoundRect(0, 0, 648, 108, 34);
+    frame.shadow = new createjs.Shadow("rgba(194, 119, 40, 0.22)", 0, 16, 34);
     container.addChild(frame);
 
     var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "#A25C1D");
-    status.x = 34;
-    status.y = 22;
-    status.lineWidth = 420;
+    status.x = 48;
+    status.y = 26;
+    status.lineWidth = 432;
     container.addChild(status);
 
-    var percent = new createjs.Text("0%", "700 28px 'Baloo 2'", "#FF8D3C");
+    var percent = new createjs.Text("0%", "700 32px 'Baloo 2'", "#FF7A1F");
     percent.textAlign = "right";
-    percent.x = 586;
-    percent.y = 20;
+    percent.x = 600;
+    percent.y = 22;
     container.addChild(percent);
 
     var track = new createjs.Shape();
-    track.graphics.beginLinearGradientFill(["rgba(255, 205, 158, 0.65)", "rgba(255, 221, 191, 0.35)"], [0, 1], 0, 0, 560, 0)
-        .drawRoundRect(0, 0, 560, 16, 10);
-    track.x = 30;
-    track.y = 56;
+    track.graphics
+        .beginLinearGradientFill(["rgba(255, 205, 158, 0.55)", "rgba(255, 221, 191, 0.2)"], [0, 1], 0, 0, 560, 0)
+        .drawRoundRect(0, 0, 560, 20, 12);
+    track.x = 44;
+    track.y = 66;
     container.addChild(track);
 
     var fillMask = new createjs.Shape();
-    fillMask.graphics.drawRoundRect(0, 0, 560, 16, 10);
-    fillMask.x = 30;
-    fillMask.y = 56;
+    fillMask.graphics.drawRoundRect(0, 0, 560, 20, 12);
+    fillMask.x = 44;
+    fillMask.y = 66;
 
     var fillContainer = new createjs.Container();
-    fillContainer.x = 30;
-    fillContainer.y = 56;
+    fillContainer.x = 44;
+    fillContainer.y = 66;
     fillContainer.scaleX = 0;
 
     var fill = new createjs.Shape();
     fill.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 560, 0)
-        .drawRoundRect(0, 0, 560, 16, 10);
+        .beginLinearGradientFill(["#FFB863", "#FF8D3C"], [0, 1], 0, 0, 560, 0)
+        .drawRoundRect(0, 0, 560, 20, 12);
     fillContainer.addChild(fill);
+
+    var pulse = new createjs.Shape();
+    pulse.graphics
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.05)",
+            "rgba(255,255,255,0.45)",
+            "rgba(255,255,255,0.05)"
+        ], [0, 0.5, 1], 0, 0, 280, 0)
+        .drawRect(-140, 0, 280, 20);
+    pulse.alpha = 0;
+    pulse.x = -140;
+    pulse.compositeOperation = "lighter";
+    fillContainer.addChild(pulse);
 
     var shine = new createjs.Shape();
     shine.graphics
-        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(255,255,255,0.85)", "rgba(255,255,255,0)"], [0, 0.5, 1], 0, 0, 220, 0)
-        .drawRect(-110, -10, 220, 36);
+        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(255,255,255,0.75)", "rgba(255,255,255,0)"], [0, 0.5, 1], 0, 0, 220, 0)
+        .drawRect(-110, -12, 220, 40);
     shine.alpha = 0;
     shine.compositeOperation = "lighter";
     shine.x = 0;
@@ -2849,6 +2252,8 @@ function createHowToPlayProgressBar() {
     container.progressPercent = percent;
     container.progressShine = shine;
     container.progressMask = fillMask;
+    container.progressPulse = pulse;
+
 
     return container;
 }
@@ -2942,33 +2347,57 @@ function startHowToPlayTildeWaveAnimation(waveContainer) {
         .to({ alpha: lowAlpha }, 2000, createjs.Ease.sineInOut);
 }
 
-
-function startProgressFillShimmer(shineShape) {
-    if (!shineShape) {
+function startProgressFillShimmer(shineShape, pulseShape) {
+    if (!shineShape && !pulseShape) {
         return;
     }
 
-    createjs.Tween.removeTweens(shineShape);
-    shineShape.alpha = 0;
-    shineShape.x = -140;
+    if (shineShape) {
+        createjs.Tween.removeTweens(shineShape);
+        shineShape.alpha = 0;
+        shineShape.x = -140;
 
-    createjs.Tween.get(shineShape, { loop: true })
-        .to({ alpha: 0.85 }, 320, createjs.Ease.quadOut)
-        .to({ x: 560, alpha: 0 }, 900, createjs.Ease.quadInOut)
-        .wait(320)
-        .call(function () {
-            shineShape.x = -140;
-            shineShape.alpha = 0;
-        });
+        createjs.Tween.get(shineShape, { loop: true })
+            .to({ alpha: 0.82 }, 320, createjs.Ease.quadOut)
+            .to({ x: 560, alpha: 0 }, 900, createjs.Ease.quadInOut)
+            .wait(320)
+            .call(function () {
+                shineShape.x = -140;
+                shineShape.alpha = 0;
+            });
+    }
+
+    if (pulseShape) {
+        createjs.Tween.removeTweens(pulseShape);
+        pulseShape.alpha = 0;
+        pulseShape.x = -140;
+
+        createjs.Tween.get(pulseShape, { loop: true })
+            .wait(220)
+            .to({ alpha: 0.6 }, 380, createjs.Ease.quadOut)
+            .to({ x: 560, alpha: 0 }, 1180, createjs.Ease.quadIn)
+            .call(function () {
+                pulseShape.alpha = 0;
+                pulseShape.x = -140;
+            });
+    }
 }
 
-function stopProgressFillShimmer(shineShape) {
-    if (!shineShape) {
+function stopProgressFillShimmer(shineShape, pulseShape) {
+    if (!shineShape && !pulseShape) {
         return;
     }
 
-    createjs.Tween.removeTweens(shineShape);
-    shineShape.alpha = 0;
+    if (shineShape) {
+        createjs.Tween.removeTweens(shineShape);
+        shineShape.alpha = 0;
+    }
+
+    if (pulseShape) {
+        createjs.Tween.removeTweens(pulseShape);
+        pulseShape.alpha = 0;
+        pulseShape.x = -140;
+    }
 }
 
 function applyHowToPlayAmbientAnimations(overlay) {
@@ -2997,7 +2426,6 @@ function applyHowToPlayAmbientAnimations(overlay) {
     if (overlay.header && overlay.header.tildeWave) {
         startHowToPlayTildeWaveAnimation(overlay.header.tildeWave);
     }
-
 
     if (overlay.accentLarge) {
         var large = overlay.accentLarge;
@@ -3067,6 +2495,7 @@ function startHowToPlayHeaderIdleAnimation(header) {
             .to({ scaleX: 1.01, scaleY: 1.01 }, 2400, createjs.Ease.sineInOut)
             .to({ scaleX: 1, scaleY: 1 }, 2400, createjs.Ease.sineInOut);
     }
+
     if (header.tildeWave) {
         startHowToPlayTildeWaveAnimation(header.tildeWave);
     }
@@ -3110,6 +2539,12 @@ function resetHowToPlayProgressBar(overlay) {
         overlay.progressFill.scaleX = 0;
     }
 
+    if (overlay.progressPulse) {
+        createjs.Tween.removeTweens(overlay.progressPulse);
+        overlay.progressPulse.alpha = 0;
+        overlay.progressPulse.x = -140;
+    }
+
     if (overlay.progressPercent) {
         overlay.progressPercent.text = "0%";
     }
@@ -3131,13 +2566,13 @@ function resetHowToPlayProgressBar(overlay) {
             overlay.progressLabel.font = "bold 23px Segoe UI";
         } else {
             overlay.progressLabel.text = "Collecting game assets";
-            overlay.progressLabel.lineWidth = 420;
+            overlay.progressLabel.lineWidth = 432;
             overlay.progressLabel.font = "600 22px 'Baloo 2'";
         }
     }
 
-    if (overlay.progressShine) {
-        startProgressFillShimmer(overlay.progressShine);
+    if (overlay.progressShine || overlay.progressPulse) {
+        startProgressFillShimmer(overlay.progressShine, overlay.progressPulse);
     }
 }
 
@@ -3170,7 +2605,7 @@ function hideHowToPlayProgressBar() {
             progress.__hiding = false;
         });
 
-    stopProgressFillShimmer(HowToPlayScreenImg.progressShine);
+    stopProgressFillShimmer(HowToPlayScreenImg.progressShine, HowToPlayScreenImg.progressPulse);
 }
 
 
@@ -3210,10 +2645,20 @@ function buildGameIntroOverlay() {
     overlay.mouseEnabled = false;
     overlay.mouseChildren = false;
 
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
 
+    var pattern = drawHoneycombPattern(1280, 720, 34);
+    pattern.alpha = 0.14;
+    overlay.addChild(pattern);
 
     var header = createIntroHowToPlayHeader();
     overlay.addChild(header);
+    header.baseY = header.y;
+    startHowToPlayHeaderIdleAnimation(header);
 
     var accent = new createjs.Shape();
     accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
@@ -3224,35 +2669,85 @@ function buildGameIntroOverlay() {
 
 function createIntroHowToPlayHeader() {
     var container = new createjs.Container();
-    container.x = 90;
-    container.y = 44;
+    container.name = "IntroHowToPlayBadge";
+    container.x = 120;
+    container.y = 62;
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill([
+            "rgba(255, 174, 102, 0.38)",
+            "rgba(255, 174, 102, 0.12)",
+            "rgba(255, 174, 102, 0)"
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 220)
+        .drawCircle(0, 0, 210);
+    glow.alpha = 0.85;
+    glow.x = 184;
+    glow.y = 52;
+    glow.compositeOperation = "lighter";
+    container.addChild(glow);
+    container.glowShape = glow;
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 360, 0)
-        .drawRoundRect(0, 0, 360, 96, 48);
-    frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.45)", 0, 18, 32);
+        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 420, 0)
+        .drawRoundRect(0, 0, 420, 104, 40);
+    frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.38)", 0, 14, 28);
     container.addChild(frame);
+    container.cardShape = frame;
 
-    var iconBg = new createjs.Shape();
-    iconBg.graphics.beginFill("rgba(255,255,255,0.16)").drawCircle(72, 48, 34);
-    container.addChild(iconBg);
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.75)",
+            "rgba(255,255,255,0.22)",
+            "rgba(255,255,255,0)"
+        ], [0, 0.52, 1], 0, 0, 420, 0)
+        .drawRoundRect(16, 10, 388, 46, 24);
+    highlight.alpha = 0.88;
+    container.addChild(highlight);
 
-    var icon = new createjs.Text("\u2139", "700 46px 'Baloo 2'", "#FFFFFF");
+    var wave = createHowToPlayTildeWave(210, 14);
+    wave.x = 160;
+    wave.y = 84;
+    container.addChild(wave);
+    container.tildeWave = wave;
+
+    var iconHalo = new createjs.Shape();
+    iconHalo.graphics
+        .beginRadialGradientFill([
+            "rgba(255, 255, 255, 0.95)",
+            "rgba(255, 230, 195, 0.15)",
+            "rgba(255, 230, 195, 0)"
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 68)
+        .drawCircle(0, 0, 64);
+    iconHalo.x = 84;
+    iconHalo.y = 52;
+    container.addChild(iconHalo);
+
+    var iconBackground = new createjs.Shape();
+    iconBackground.graphics
+        .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -34, -34, 34, 34)
+        .drawCircle(0, 0, 36);
+    iconBackground.x = iconHalo.x;
+    iconBackground.y = iconHalo.y;
+    container.addChild(iconBackground);
+
+    var icon = new createjs.Text("\u2139", "700 44px 'Baloo 2'", "#FF8D3C");
     icon.textAlign = "center";
     icon.textBaseline = "middle";
-    icon.x = 72;
-    icon.y = 48;
+    icon.x = iconBackground.x;
+    icon.y = iconBackground.y;
     container.addChild(icon);
 
-    var title = new createjs.Text("How to Play", "700 34px 'Baloo 2'", "#FFFFFF");
-    title.x = 128;
+    var title = new createjs.Text("How to Play", "700 32px 'Baloo 2'", "#FFFFFF");
+    title.x = 144;
     title.y = 22;
     container.addChild(title);
 
-    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 22px 'Baloo 2'", "rgba(255,255,255,0.88)");
-    subtitle.x = 128;
-    subtitle.y = 56;
+    var subtitle = new createjs.Text("Follow these tips before you begin", "500 22px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 144;
+    subtitle.y = 58;
     container.addChild(subtitle);
 
     return container;
@@ -3568,6 +3063,7 @@ function hideLoaderProceedButton() {
         stage.update();
     }
 }
+
 
 
 //==========================================================================//
