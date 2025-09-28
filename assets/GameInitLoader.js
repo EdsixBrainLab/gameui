@@ -606,298 +606,6 @@ function mergeIconStyle(base, override) {
 
     return result;
 }
-
-var HUD_THEME_PRESETS = {
-    dark: {
-        cards: {
-            score: {
-                background: ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"],
-                accent: ["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.03)"],
-                iconStyle: {
-                    fill: "#FACC6B",
-                    strokeColor: "rgba(12, 27, 46, 0.45)",
-                    strokeWidth: 2
-                }
-            },
-            timer: {
-                background: ["rgba(20, 42, 74, 0.92)", "rgba(45, 86, 148, 0.92)"],
-                accent: ["rgba(102, 185, 255, 0.35)", "rgba(102, 185, 255, 0.08)"],
-                iconStyle: {
-                    strokeColor: "#66B9FF",
-                    strokeWidth: 3
-                }
-            },
-            question: {
-                background: ["rgba(18, 60, 53, 0.92)", "rgba(34, 110, 95, 0.92)"],
-                accent: ["rgba(110, 231, 183, 0.32)", "rgba(110, 231, 183, 0.08)"],
-                iconStyle: {
-                    fill: "#6EE7B7",
-                    strokeColor: "#0d1b2a",
-                    strokeWidth: 3
-                }
-            }
-        },
-        cardBackgroundAlpha: 0.96,
-        cardAccentAlpha: 0.9,
-        cardHighlight: {
-            colors: ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"],
-            alpha: 0.24
-        },
-        textStyles: {
-            label: {
-                color: "#C4DBFF",
-                shadow: { color: "rgba(5, 16, 32, 0.65)", x: 0, y: 2, blur: 6 }
-            },
-            value: {
-                color: "#FFFFFF",
-                shadow: { color: "rgba(12, 21, 40, 0.35)", x: 0, y: 4, blur: 12 }
-            },
-            timerValue: {
-                color: "#F6FBFF",
-                shadow: { color: "rgba(5, 16, 32, 0.3)", x: 0, y: 4, blur: 12 }
-            }
-        },
-        questionProgress: {
-            background: "rgba(255,255,255,0.14)",
-            fill: ["#34d399", "#60a5fa"]
-        },
-        controlBackground: {
-            colors: ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"],
-            alpha: 0.88
-        },
-        controlPalette: {
-            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.5)" },
-            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.5)" },
-            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.55)" }
-        },
-        iconWrapper: {
-            ringColor: "rgba(255,255,255,0.5)",
-            ringAlpha: 0.6,
-            hoverRingAlpha: 0.9,
-            glowAlpha: 0.45,
-            hoverGlowAlpha: 0.65,
-            backgroundGradient: null
-        },
-        timerCritical: {
-            warning: {
-                background: ["rgba(255,152,0,0.95)", "rgba(212,138,29,0.95)"],
-                accent: ["rgba(245,192,112,0.45)", "rgba(245,192,112,0.1)"],
-                icon: "#FF9DA5",
-                text: "#FFD7D7"
-            },
-            danger: {
-                background: ["rgba(88,26,36,0.95)", "rgba(148,41,52,0.95)"],
-                accent: ["rgba(255,135,135,0.45)", "rgba(255,135,135,0.1)"],
-                icon: "#FF9DA5",
-                text: "#FFD7D7"
-            },
-            normalIcon: "#66B9FF",
-            normalText: "#F6FBFF"
-        }
-    },
-    light: {
-        cards: {
-            score: {
-                background: ["rgba(20,41,78,0.95)", "rgba(43,88,156,0.95)"],
-                accent: ["rgba(95,169,255,0.32)", "rgba(95,169,255,0.12)"],
-                iconStyle: {
-                    fill: "#FFD166",
-                    strokeColor: "rgba(11,29,61,0.45)",
-
-                    strokeWidth: 2
-                }
-            },
-            timer: {
-                background: ["rgba(18,38,72,0.95)", "rgba(32,70,122,0.95)"],
-                accent: ["rgba(102,185,255,0.32)", "rgba(102,185,255,0.12)"],
-                iconStyle: {
-                    strokeColor: "#66B9FF",
-                    strokeWidth: 3
-                }
-            },
-            question: {
-                background: ["rgba(16,54,50,0.95)", "rgba(34,96,90,0.95)"],
-                accent: ["rgba(94,234,212,0.32)", "rgba(94,234,212,0.12)"],
-                iconStyle: {
-                    fill: "#6EE7B7",
-                    strokeColor: "rgba(9,33,30,0.45)",
-                    strokeWidth: 3
-                }
-            }
-        },
-        cardBackgroundAlpha: 0.96,
-        cardAccentAlpha: 0.92,
-        cardHighlight: {
-            colors: ["rgba(255,255,255,0.1)", "rgba(255,255,255,0)"],
-            alpha: 0.2
-        },
-        textStyles: {
-            label: {
-                color: "#D6E6FF",
-                shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
-            },
-            value: {
-                color: "#FFFFFF",
-                shadow: { color: "rgba(4,14,32,0.65)", x: 0, y: 4, blur: 14 }
-            },
-            timerValue: {
-                color: "#F6FBFF",
-                shadow: { color: "rgba(4,14,32,0.7)", x: 0, y: 4, blur: 16 }
-            }
-        },
-        questionProgress: {
-            background: "rgba(7,19,40,0.35)",
-            fill: ["#34d399", "#60a5fa"]
-        },
-        controlBackground: {
-            colors: ["rgba(9,25,54,0.75)", "rgba(11,31,70,0.48)"],
-            alpha: 0.82
-        },
-        controlPalette: {
-            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.45)" },
-            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.45)" },
-            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.5)" }
-        },
-        iconWrapper: {
-            ringColor: "rgba(197,219,255,0.65)",
-            ringAlpha: 0.75,
-            hoverRingAlpha: 0.95,
-            glowAlpha: 0.55,
-            hoverGlowAlpha: 0.75,
-            backgroundGradient: ["rgba(26,46,79,0.9)", "rgba(41,73,122,0.85)"]
-        },
-        timerCritical: {
-            warning: {
-                background: ["rgba(255,159,67,0.92)", "rgba(215,118,23,0.92)"],
-                accent: ["rgba(255,198,124,0.45)", "rgba(255,198,124,0.15)"],
-                icon: "#FFE082",
-                text: "#FFF3E0"
-            },
-            danger: {
-                background: ["rgba(153,27,39,0.92)", "rgba(220,38,38,0.92)"],
-                accent: ["rgba(248,113,113,0.45)", "rgba(248,113,113,0.18)"],
-                icon: "#FFD1DC",
-                text: "#FFE4E6"
-            },
-            normalIcon: "#66B9FF",
-            normalText: "#F6FBFF"
-        }
-    }
-};
-
-function cloneArray(source) {
-    return source && source.slice ? source.slice() : source;
-}
-
-function resolveHudThemeMode() {
-    var scopes = [];
-
-    if (typeof window !== "undefined") {
-        scopes.push(window);
-    }
-
-    if (typeof globalThis !== "undefined") {
-        scopes.push(globalThis);
-    }
-
-    for (var i = 0; i < scopes.length; i++) {
-        var scope = scopes[i];
-        if (!scope) {
-            continue;
-        }
-
-        if (typeof scope.headerPanelThemeMode !== "undefined") {
-            return String(scope.headerPanelThemeMode).toLowerCase();
-        }
-
-        if (typeof scope.hudThemeMode !== "undefined") {
-            return String(scope.hudThemeMode).toLowerCase();
-        }
-
-        if (typeof scope.headerPanelTheme !== "undefined") {
-            return String(scope.headerPanelTheme).toLowerCase();
-        }
-    }
-
-    if (typeof headerPanelThemeMode !== "undefined") {
-        return String(headerPanelThemeMode).toLowerCase();
-    }
-
-    if (typeof hudThemeMode !== "undefined") {
-        return String(hudThemeMode).toLowerCase();
-    }
-
-    if (typeof headerPanelTheme !== "undefined") {
-        return String(headerPanelTheme).toLowerCase();
-    }
-
-    return "dark";
-}
-
-function getHudThemeConfig() {
-    var mode = resolveHudThemeMode();
-    if (!HUD_THEME_PRESETS[mode]) {
-        mode = "dark";
-    }
-    return HUD_THEME_PRESETS[mode];
-}
-
-function applyTextStyle(target, style) {
-    if (!target || !style) {
-        return;
-    }
-
-    if (style.color) {
-        target.color = style.color;
-    }
-
-    if (style.shadow) {
-        target.shadow = new createjs.Shadow(
-            style.shadow.color || "rgba(0,0,0,0)",
-            style.shadow.x || 0,
-            style.shadow.y || 0,
-            style.shadow.blur || 0
-        );
-    } else {
-        target.shadow = null;
-    }
-}
-
-function mergeIconStyle(base, override) {
-    var result = {};
-
-    if (base) {
-        if (typeof base.fill !== "undefined") {
-            result.fill = base.fill;
-        }
-        if (typeof base.strokeColor !== "undefined") {
-            result.strokeColor = base.strokeColor;
-        }
-        if (typeof base.strokeWidth !== "undefined") {
-            result.strokeWidth = base.strokeWidth;
-        }
-    }
-
-    if (override) {
-        if (typeof override === "string") {
-            result.fill = override;
-            result.strokeColor = override;
-        } else {
-            if (typeof override.fill !== "undefined") {
-                result.fill = override.fill;
-            }
-            if (typeof override.strokeColor !== "undefined") {
-                result.strokeColor = override.strokeColor;
-            }
-            if (typeof override.strokeWidth !== "undefined") {
-                result.strokeWidth = override.strokeWidth;
-            }
-        }
-    }
-
-    return result;
-}
-
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
@@ -936,6 +644,7 @@ function createLoader() {
         }
     }
 
+    prepareHowToPlayOverlayForLoading(HowToPlayScreenImg);
     hideLoaderProceedButton();
 
     stage.update();
@@ -1067,6 +776,8 @@ function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
     if (bar) {
+        createjs.Tween.get(bar, { override: true })
+            .to({ scaleX: progressRatio }, 280, createjs.Ease.quadOut);
         bar.scaleX = progressRatio;
     }
 
@@ -1081,6 +792,10 @@ function updateLoading(event) {
             hideLoaderProceedButton();
         }
     }
+    if (progressRatio >= 1) {
+        hideHowToPlayProgressBar();
+    }
+
 
     if (!loadProgressLabel) {
         stage.update();
@@ -1155,7 +870,7 @@ function fileLoaded(e) {
 
 function doneLoading(event) {
     if (bar) {
-        bar.scaleX = 1;
+        createjs.Tween.get(bar, { override: true }).to({ scaleX: 1 }, 200, createjs.Ease.quadOut);
     }
     if (loadProgressPercentLabel) {
         loadProgressPercentLabel.text = "100%";
@@ -1169,6 +884,7 @@ function doneLoading(event) {
             loaderBar.parent.setChildIndex(loaderBar, loaderBar.parent.numChildren - 1);
         }
     }
+    hideHowToPlayProgressBar();
     showLoaderProceedButton();
     stage.update();
     var len = assets.length
@@ -1876,7 +1592,6 @@ function buildHudLayout() {
     controlBg.__width = controlWidth;
     controlBg.__height = controlHeight;
     controlBg.__radius = 24;
-
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
@@ -2179,10 +1894,16 @@ function buildHowToPlayOverlay() {
     progress.x = 330;
     progress.y = 520;
     overlay.addChild(progress);
-
+    overlay.backgroundShape = background;
+    overlay.honeycombPattern = pattern;
+    overlay.header = header;
+    overlay.instructionsCard = instructions;
     overlay.progressFill = progress.progressFill;
     overlay.progressLabel = progress.progressLabel;
     overlay.progressPercent = progress.progressPercent;
+    overlay.progressShine = progress.progressShine;
+    overlay.progressMask = progress.progressMask;
+    overlay.progressContainer = progress;
 
     var proceedButton = createLoaderProceedButton();
     proceedButton.x = 640;
@@ -2198,6 +1919,13 @@ function buildHowToPlayOverlay() {
     var accentSmall = new createjs.Shape();
     accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
     overlay.addChild(accentSmall);
+    header.baseY = header.y;
+    instructions.baseY = instructions.y;
+    progress.baseY = progress.y;
+    accentLarge.baseScale = accentLarge.scaleX = accentLarge.scaleY = 1;
+    accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
+    overlay.accentLarge = accentLarge;
+    overlay.accentSmall = accentSmall;
 
     return overlay;
 }
@@ -2314,46 +2042,241 @@ function createHowToPlayProgressBar() {
     var container = new createjs.Container();
 
     var shadow = new createjs.Shape();
-    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(6, 6, 628, 88, 26);
-    shadow.alpha = 0.75;
+    shadow.graphics
+        .beginRadialGradientFill(["rgba(211, 132, 43, 0.32)", "rgba(211, 132, 43, 0)"] , [0, 1], 320, 40, 0, 320, 40, 280)
+        .drawRoundRect(4, 10, 632, 96, 28);
+    shadow.alpha = 0.8;
     container.addChild(shadow);
 
     var frame = new createjs.Shape();
-    frame.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 80, 24);
+    frame.graphics
+        .beginLinearGradientFill(["#FFFFFF", "#FFE9D0"], [0, 1], 0, 0, 0, 80)
+        .drawRoundRect(0, 0, 620, 88, 26);
+    frame.shadow = new createjs.Shadow("rgba(194, 119, 40, 0.25)", 0, 18, 28);
     container.addChild(frame);
 
     var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "#A25C1D");
-    status.x = 30;
-    status.y = 20;
+    status.x = 34;
+    status.y = 22;
     status.lineWidth = 420;
     container.addChild(status);
 
     var percent = new createjs.Text("0%", "700 28px 'Baloo 2'", "#FF8D3C");
     percent.textAlign = "right";
-    percent.x = 590;
-    percent.y = 18;
+    percent.x = 586;
+    percent.y = 20;
     container.addChild(percent);
 
     var track = new createjs.Shape();
-    track.graphics.beginFill("rgba(255, 212, 170, 0.55)").drawRoundRect(0, 0, 560, 16, 10);
+    track.graphics.beginLinearGradientFill(["rgba(255, 205, 158, 0.65)", "rgba(255, 221, 191, 0.35)"], [0, 1], 0, 0, 560, 0)
+        .drawRoundRect(0, 0, 560, 16, 10);
     track.x = 30;
-    track.y = 50;
+    track.y = 56;
     container.addChild(track);
+
+    var fillMask = new createjs.Shape();
+    fillMask.graphics.drawRoundRect(0, 0, 560, 16, 10);
+    fillMask.x = 30;
+    fillMask.y = 56;
+
+    var fillContainer = new createjs.Container();
+    fillContainer.x = 30;
+    fillContainer.y = 56;
+    fillContainer.scaleX = 0;
 
     var fill = new createjs.Shape();
     fill.graphics
         .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 560, 0)
         .drawRoundRect(0, 0, 560, 16, 10);
-    fill.x = 30;
-    fill.y = 50;
-    fill.scaleX = 0;
-    container.addChild(fill);
+    fillContainer.addChild(fill);
 
-    container.progressFill = fill;
+    var shine = new createjs.Shape();
+    shine.graphics
+        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(255,255,255,0.85)", "rgba(255,255,255,0)"], [0, 0.5, 1], 0, 0, 220, 0)
+        .drawRect(-110, -10, 220, 36);
+    shine.alpha = 0;
+    shine.compositeOperation = "lighter";
+    shine.x = 0;
+    shine.y = 0;
+    fillContainer.addChild(shine);
+
+    fillContainer.mask = fillMask;
+
+    container.addChild(fillContainer);
+    container.addChild(fillMask);
+    fillMask.visible = false;
+
+    container.progressFill = fillContainer;
     container.progressLabel = status;
     container.progressPercent = percent;
+    container.progressShine = shine;
+    container.progressMask = fillMask;
 
     return container;
+}
+
+function startProgressFillShimmer(shineShape) {
+    if (!shineShape) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(shineShape);
+    shineShape.alpha = 0;
+    shineShape.x = -140;
+
+    createjs.Tween.get(shineShape, { loop: true })
+        .to({ alpha: 0.85 }, 320, createjs.Ease.quadOut)
+        .to({ x: 560, alpha: 0 }, 900, createjs.Ease.quadInOut)
+        .wait(320)
+        .call(function () {
+            shineShape.x = -140;
+            shineShape.alpha = 0;
+        });
+}
+
+function stopProgressFillShimmer(shineShape) {
+    if (!shineShape) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(shineShape);
+    shineShape.alpha = 0;
+}
+
+function applyHowToPlayAmbientAnimations(overlay) {
+    if (!overlay || overlay.__ambientAnimationAttached) {
+        return;
+    }
+
+    overlay.__ambientAnimationAttached = true;
+
+    if (overlay.honeycombPattern) {
+        var pattern = overlay.honeycombPattern;
+        pattern.y = 0;
+        createjs.Tween.get(pattern, { loop: true })
+            .to({ y: -24, alpha: 0.28 }, 4200, createjs.Ease.sineInOut)
+            .to({ y: 0, alpha: 0.32 }, 4200, createjs.Ease.sineInOut);
+    }
+
+    if (overlay.accentLarge) {
+        var large = overlay.accentLarge;
+        createjs.Tween.get(large, { loop: true })
+            .to({ scaleX: 1.08, scaleY: 1.08, alpha: 0.26 }, 2600, createjs.Ease.quadInOut)
+            .to({ scaleX: 0.96, scaleY: 0.96, alpha: 0.14 }, 2600, createjs.Ease.quadInOut);
+    }
+
+    if (overlay.accentSmall) {
+        var small = overlay.accentSmall;
+        createjs.Tween.get(small, { loop: true })
+            .to({ scaleX: 1.15, scaleY: 1.15, alpha: 0.2 }, 2400, createjs.Ease.quadInOut)
+            .to({ scaleX: 0.9, scaleY: 0.9, alpha: 0.1 }, 2400, createjs.Ease.quadInOut);
+    }
+}
+
+function animateHowToPlayOverlayEntry(overlay) {
+    if (!overlay) {
+        return;
+    }
+
+    applyHowToPlayAmbientAnimations(overlay);
+
+    if (overlay.header) {
+        overlay.header.alpha = 0;
+        overlay.header.y = overlay.header.baseY - 24;
+        createjs.Tween.get(overlay.header, { override: true })
+            .to({ alpha: 1, y: overlay.header.baseY }, 360, createjs.Ease.quadOut);
+    }
+
+    if (overlay.instructionsCard) {
+        overlay.instructionsCard.alpha = 0;
+        overlay.instructionsCard.y = overlay.instructionsCard.baseY + 24;
+        createjs.Tween.get(overlay.instructionsCard, { override: true })
+            .wait(80)
+            .to({ alpha: 1, y: overlay.instructionsCard.baseY }, 420, createjs.Ease.quadOut);
+    }
+}
+
+function resetHowToPlayProgressBar(overlay) {
+    if (!overlay || !overlay.progressContainer) {
+        return;
+    }
+
+    var progress = overlay.progressContainer;
+    createjs.Tween.removeTweens(progress);
+    progress.visible = true;
+    progress.__hiding = false;
+    progress.alpha = 0;
+    progress.y = progress.baseY + 24;
+    createjs.Tween.get(progress, { override: true })
+        .wait(140)
+        .to({ alpha: 1, y: progress.baseY }, 420, createjs.Ease.quadOut);
+
+    if (overlay.progressFill) {
+        createjs.Tween.removeTweens(overlay.progressFill);
+        overlay.progressFill.scaleX = 0;
+    }
+
+    if (overlay.progressPercent) {
+        overlay.progressPercent.text = "0%";
+    }
+
+    if (overlay.progressLabel) {
+        if (assetsPathLang == "assets/VietnamAssets/") {
+            overlay.progressLabel.text = "0% Đang tải trò chơi...";
+            overlay.progressLabel.lineWidth = 540;
+        } else if (assetsPathLang == "assets/TamilAssets/") {
+            overlay.progressLabel.text = "0% ஆட்டம் தயாராகிக் கொண்டிருக்கிறது...";
+            overlay.progressLabel.lineWidth = 540;
+            overlay.progressLabel.font = "bold 23px Segoe UI";
+        } else if (assetsPathLang == "assets/GujaratiAssets/") {
+            overlay.progressLabel.text = "0% ગેમ લોડ થાય છે...";
+            overlay.progressLabel.lineWidth = 540;
+        } else if (assetsPathLang == "assets/HindiAssets/") {
+            overlay.progressLabel.text = "0%खेल लोड हो रहा है...";
+            overlay.progressLabel.lineWidth = 540;
+            overlay.progressLabel.font = "bold 23px Segoe UI";
+        } else {
+            overlay.progressLabel.text = "Collecting game assets";
+            overlay.progressLabel.lineWidth = 420;
+            overlay.progressLabel.font = "600 22px 'Baloo 2'";
+        }
+    }
+
+    if (overlay.progressShine) {
+        startProgressFillShimmer(overlay.progressShine);
+    }
+}
+
+function prepareHowToPlayOverlayForLoading(overlay) {
+    if (!overlay) {
+        return;
+    }
+
+    overlay.visible = true;
+    animateHowToPlayOverlayEntry(overlay);
+    resetHowToPlayProgressBar(overlay);
+}
+
+function hideHowToPlayProgressBar() {
+    if (!HowToPlayScreenImg || !HowToPlayScreenImg.progressContainer) {
+        return;
+    }
+
+    var progress = HowToPlayScreenImg.progressContainer;
+    if (!progress.visible || progress.__hiding) {
+        return;
+    }
+
+    progress.__hiding = true;
+    createjs.Tween.get(progress, { override: true })
+        .to({ alpha: 0, y: progress.baseY - 18 }, 320, createjs.Ease.quadIn)
+        .call(function () {
+            progress.visible = false;
+            progress.y = progress.baseY;
+            progress.__hiding = false;
+        });
+
+    stopProgressFillShimmer(HowToPlayScreenImg.progressShine);
 }
 
 
@@ -2617,6 +2540,7 @@ function applyHowToPlayButtonState(button, state) {
 
     button.state = state;
 }
+
 
 function attachProceedButtonListeners(button) {
     if (!button || button._loaderProceedHooked) {
