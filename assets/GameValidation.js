@@ -14,13 +14,22 @@ var resultsOverlay,
   resultsCardSheen,
   resultsCardAmbientGlow,
   resultsScoreRibbon,
+  resultsCardAurora,
+  resultsCardAuroraTrail,
+  resultsCardSparkleLayer,
+  resultsCardSparkles,
   resultsHeadingTxt,
   resultsSubheadingTxt,
   resultsScoreDial,
   resultsResponseDial,
   resultsQuestionsDial,
   resultsAttemptsDial,
-  resultsCorrectDial;
+  resultsCorrectDial,
+  resultsScorePulse;
+
+var resultsCloseBtnGlow,
+  resultsCloseBtnHighlight,
+  resultsCloseBtnIconShape;
 
 var answer_status;
 var rightCnt = -1, wrongCnt = -1;
@@ -758,7 +767,98 @@ function createResultsSummaryDial(radius, labelText, accentColors, options) {
     return container;
 }
 
+function ensureVectorCloseButton() {
+    if (closeBtnFinal && closeBtnFinal.isVectorClose) {
+        return closeBtnFinal;
+    }
+
+    var previousParent = closeBtnFinal && closeBtnFinal.parent ? closeBtnFinal.parent : null;
+    var previousIndex = previousParent ? previousParent.getChildIndex(closeBtnFinal) : -1;
+
+    if (closeBtnFinal && closeBtnFinal.parent) {
+        closeBtnFinal.parent.removeChild(closeBtnFinal);
+    }
+
+    var closeContainer = new createjs.Container();
+    closeContainer.visible = false;
+    closeContainer.alpha = 0;
+    closeContainer.mouseChildren = false;
+    closeContainer.mouseEnabled = true;
+    closeContainer.isVectorClose = true;
+    closeContainer.cursor = "pointer";
+    closeContainer.shadow = new createjs.Shadow("rgba(10, 18, 44, 0.45)", 0, 8, 18);
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255, 255, 255, 0.35)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"],
+            [0, 0.6, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            40
+        )
+        .drawCircle(0, 0, 40);
+    glow.alpha = 0.25;
+    closeContainer.addChild(glow);
+
+    var base = new createjs.Shape();
+    base.graphics
+        .beginLinearGradientFill(["#FF8A94", "#FFB15F"], [0, 1], -32, -32, 32, 32)
+        .drawRoundRect(-28, -28, 56, 56, 18);
+    closeContainer.addChild(base);
+
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255, 255, 255, 0.88)")
+        .drawRoundRect(-26, -26, 52, 52, 16);
+    highlight.alpha = 0.85;
+    closeContainer.addChild(highlight);
+
+    var icon = new createjs.Shape();
+    icon.graphics
+        .setStrokeStyle(4, "round", "round")
+        .beginStroke("#FFFFFF")
+        .moveTo(-11, -11)
+        .lineTo(11, 11)
+        .moveTo(-11, 11)
+        .lineTo(11, -11);
+    icon.alpha = 0.92;
+    closeContainer.addChild(icon);
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000000").drawCircle(0, 0, 30);
+    closeContainer.hitArea = hit;
+
+    closeContainer.on("mouseover", function () {
+        createjs.Tween.get(highlight, { override: true }).to({ alpha: 1 }, 160, createjs.Ease.quadOut);
+        createjs.Tween.get(glow, { override: true })
+            .to({ alpha: 0.45, scaleX: 1.05, scaleY: 1.05 }, 180, createjs.Ease.quadOut);
+    });
+
+    closeContainer.on("mouseout", function () {
+        createjs.Tween.get(highlight, { override: true }).to({ alpha: 0.85 }, 200, createjs.Ease.quadOut);
+        createjs.Tween.get(glow, { override: true })
+            .to({ alpha: 0.25, scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadOut);
+    });
+
+    closeBtnFinal = closeContainer;
+    resultsCloseBtnGlow = glow;
+    resultsCloseBtnHighlight = highlight;
+    resultsCloseBtnIconShape = icon;
+
+    if (previousParent) {
+        previousParent.addChildAt(closeBtnFinal, previousIndex >= 0 ? previousIndex : previousParent.numChildren);
+    }
+
+    return closeBtnFinal;
+}
+
 function ensureResultsSummaryOverlay(parentContainer) {
+    ensureVectorCloseButton();
     if (!resultsOverlay) {
         resultsOverlay = new createjs.Container();
         resultsOverlay.visible = false;
@@ -785,6 +885,47 @@ function ensureResultsSummaryOverlay(parentContainer) {
         resultsCardMask.mouseEnabled = false;
         resultsCardMask.mouseChildren = false;
         resultsCardContainer.addChild(resultsCardMask);
+        resultsCardAurora = new createjs.Shape();
+        resultsCardAurora.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -420, -180, 320, 220)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardAurora.alpha = 0.45;
+        resultsCardAurora.rotation = -6;
+        resultsCardAurora.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAurora);
+
+        resultsCardAuroraTrail = new createjs.Shape();
+        resultsCardAuroraTrail.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(255,255,255,0.35)", "rgba(255,255,255,0)"], [0, 0.65, 1], -360, 0, 360, 0)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        resultsCardAuroraTrail.alpha = 0.3;
+        resultsCardAuroraTrail.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardAuroraTrail);
+
+        resultsCardSparkleLayer = new createjs.Container();
+        resultsCardSparkleLayer.mask = resultsCardMask;
+        resultsCardContainer.addChild(resultsCardSparkleLayer);
+        resultsCardSparkles = [];
+        for (var sparkleIndex = 0; sparkleIndex < 6; sparkleIndex++) {
+            var sparkle = new createjs.Shape();
+            sparkle.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
+                    [0, 0.4, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    14
+                )
+                .drawCircle(0, 0, 14);
+            sparkle.alpha = 0;
+            sparkle.x = -360 + Math.random() * 720;
+            sparkle.y = -200 + Math.random() * 400;
+            resultsCardSparkleLayer.addChild(sparkle);
+            resultsCardSparkles.push(sparkle);
+        }
 
         var cardInnerSheen = new createjs.Shape();
         cardInnerSheen.graphics
@@ -891,6 +1032,17 @@ function ensureResultsSummaryOverlay(parentContainer) {
         });
         resultsScoreDial.y = -24;
         resultsCardContainer.addChild(resultsScoreDial);
+        resultsScorePulse = new createjs.Shape();
+        resultsScorePulse.graphics
+            .beginRadialGradientFill(["rgba(255,255,255,0.4)", "rgba(255,255,255,0)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 0, 0, 0, 150)
+            .drawCircle(0, 0, 150);
+        resultsScorePulse.alpha = 0;
+        resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+        resultsScorePulse.compositeOperation = "lighter";
+        resultsScorePulse.x = resultsScoreDial.x;
+        resultsScorePulse.y = resultsScoreDial.y;
+        resultsCardContainer.addChild(resultsScorePulse);
+        resultsCardContainer.setChildIndex(resultsScorePulse, resultsCardContainer.getChildIndex(resultsScoreDial));
 
         var footerY = 170;
 
@@ -1008,6 +1160,46 @@ function refreshResultsSummaryAnimations() {
             .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
     }
 
+    if (resultsCardAurora) {
+        resultsCardAurora.rotation = -8;
+        resultsCardAurora.alpha = 0.38;
+        createjs.Tween.removeTweens(resultsCardAurora);
+        createjs.Tween.get(resultsCardAurora, { loop: true })
+            .to({ rotation: 4, alpha: 0.52 }, 4200, createjs.Ease.sineInOut)
+            .to({ rotation: -8, alpha: 0.38 }, 4200, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardAuroraTrail) {
+        resultsCardAuroraTrail.alpha = 0.24;
+        resultsCardAuroraTrail.x = 0;
+        createjs.Tween.removeTweens(resultsCardAuroraTrail);
+        createjs.Tween.get(resultsCardAuroraTrail, { loop: true })
+            .to({ x: 46, alpha: 0.42 }, 3600, createjs.Ease.sineInOut)
+            .to({ x: -36, alpha: 0.28 }, 3600, createjs.Ease.sineInOut)
+            .to({ x: 0, alpha: 0.24 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCardSparkles && resultsCardSparkles.length) {
+        for (var s = 0; s < resultsCardSparkles.length; s++) {
+            var sparkle = resultsCardSparkles[s];
+            sparkle.alpha = 0;
+            sparkle.scaleX = sparkle.scaleY = 0.4;
+            sparkle.x = -360 + Math.random() * 720;
+            sparkle.y = -200 + Math.random() * 400;
+            createjs.Tween.removeTweens(sparkle);
+            (function (target, delay) {
+                createjs.Tween.get(target, { loop: true })
+                    .wait(delay)
+                    .to({ alpha: 0.9, scaleX: 1, scaleY: 1 }, 320, createjs.Ease.quadOut)
+                    .to({ alpha: 0, scaleX: 0.4, scaleY: 0.4 }, 520, createjs.Ease.quadIn)
+                    .call(function () {
+                        target.x = -360 + Math.random() * 720;
+                        target.y = -200 + Math.random() * 400;
+                    });
+            })(sparkle, 200 * s);
+        }
+    }
+
     if (resultsScoreRibbon) {
         resultsScoreRibbon.rotation = -24;
         createjs.Tween.removeTweens(resultsScoreRibbon);
@@ -1038,6 +1230,38 @@ function refreshResultsSummaryAnimations() {
             .to({ alpha: 0.2, scaleX: 1, scaleY: 1 }, 2200, createjs.Ease.sineInOut);
     }
 
+    if (closeBtnFinal && closeBtnFinal.isVectorClose) {
+        closeBtnFinal.alpha = 0;
+        closeBtnFinal.scaleX = closeBtnFinal.scaleY = 0.85;
+        createjs.Tween.removeTweens(closeBtnFinal);
+        createjs.Tween.get(closeBtnFinal)
+            .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 360, createjs.Ease.quartOut)
+            .to({ scaleX: 1.04, scaleY: 1.04 }, 800, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 820, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCloseBtnGlow) {
+        resultsCloseBtnGlow.alpha = 0.25;
+        resultsCloseBtnGlow.scaleX = resultsCloseBtnGlow.scaleY = 1;
+        createjs.Tween.removeTweens(resultsCloseBtnGlow);
+        createjs.Tween.get(resultsCloseBtnGlow, { loop: true })
+            .to({ alpha: 0.45, scaleX: 1.08, scaleY: 1.08 }, 1400, createjs.Ease.sineInOut)
+            .to({ alpha: 0.25, scaleX: 1, scaleY: 1 }, 1400, createjs.Ease.sineInOut);
+    }
+
+    if (resultsCloseBtnHighlight) {
+        resultsCloseBtnHighlight.alpha = 0.85;
+        createjs.Tween.removeTweens(resultsCloseBtnHighlight);
+        createjs.Tween.get(resultsCloseBtnHighlight, { loop: true })
+            .to({ alpha: 1 }, 900, createjs.Ease.sineInOut)
+            .to({ alpha: 0.8 }, 900, createjs.Ease.sineInOut);
+    }
+
+    if (resultsScorePulse) {
+        resultsScorePulse.alpha = 0;
+        resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+    }
+
     var dialTargets = [
         resultsScoreDial,
         resultsResponseDial,
@@ -1061,6 +1285,22 @@ function refreshResultsSummaryAnimations() {
     }
 }
 
+function triggerResultsScorePulse() {
+    if (!resultsScorePulse) {
+        return;
+    }
+
+    resultsScorePulse.alpha = 0.55;
+    resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+    createjs.Tween.removeTweens(resultsScorePulse);
+    createjs.Tween.get(resultsScorePulse)
+        .to({ alpha: 0.75, scaleX: 1.08, scaleY: 1.08 }, 360, createjs.Ease.quadOut)
+        .to({ alpha: 0 }, 520, createjs.Ease.quadIn)
+        .call(function () {
+            resultsScorePulse.scaleX = resultsScorePulse.scaleY = 0.65;
+        });
+}
+
 function positionResultsCloseBtn() {
     if (!closeBtnFinal || !resultsCardContainer) {
         return;
@@ -1068,8 +1308,10 @@ function positionResultsCloseBtn() {
 
     var halfWidth = 460;
     var halfHeight = 280;
-    closeBtnFinal.x = resultsCardContainer.x + halfWidth - 44;
-    closeBtnFinal.y = resultsCardContainer.y - halfHeight + 36;
+    var offsetX = closeBtnFinal.isVectorClose ? 52 : 44;
+    var offsetY = closeBtnFinal.isVectorClose ? 52 : 36;
+    closeBtnFinal.x = resultsCardContainer.x + halfWidth - offsetX;
+    closeBtnFinal.y = resultsCardContainer.y - halfHeight + offsetY;
 }
 
 function updateResultsSummary(values) {
@@ -1088,6 +1330,11 @@ function updateResultsSummary(values) {
         resultsScoreDial.valueText.text = String(totalScore);
         var scoreRatio = Math.max(0, Math.min(totalScore / 100, 1));
         resultsScoreDial.updateAccent(scoreRatio);
+        if (totalScore > 0) {
+            triggerResultsScorePulse();
+        } else if (resultsScorePulse) {
+            resultsScorePulse.alpha = 0;
+        }
     }
 
     if (resultsResponseDial) {
