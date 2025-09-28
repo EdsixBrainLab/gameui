@@ -2196,6 +2196,17 @@ function buildHowToPlayOverlay() {
     var progress = createHowToPlayProgressBar();
     overlay.addChild(progress);
 
+    var stageWidth = typeof canvas !== "undefined" && canvas && canvas.width ? canvas.width : 1280;
+    var stageCenterX = stageWidth / 2;
+    header.x = stageCenterX;
+    header.y = 118;
+
+    instructions.x = stageCenterX;
+    instructions.y = header.y + header.cardHeight + 48 + instructions.regY;
+
+    progress.x = stageCenterX;
+    progress.y = instructions.y - instructions.regY + instructions.cardHeight + 52 + progress.regY;
+
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
     overlay.header = header;
@@ -2208,8 +2219,12 @@ function buildHowToPlayOverlay() {
     overlay.progressContainer = progress;
 
     var proceedButton = createLoaderProceedButton();
-    proceedButton.x = 640;
-    proceedButton.y = 640;
+    proceedButton.x = stageCenterX;
+    var proceedExpandedY = progress.y + progress.regY + 84;
+    var proceedCompactY = instructions.y - instructions.regY + instructions.cardHeight + 72;
+    proceedButton.y = proceedExpandedY;
+    proceedButton.expandedY = proceedExpandedY;
+    proceedButton.compactY = proceedCompactY;
     overlay.addChild(proceedButton);
 
     overlay.proceedButton = proceedButton;
@@ -2265,8 +2280,9 @@ function createHowToPlayInstructions() {
     container.glowShape = glow;
 
     var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
-    title.x = 46;
+    title.x = 114;
     title.y = 38;
+    title.lineWidth = 420;
     container.addChild(title);
 
     var steps = [
@@ -2309,6 +2325,8 @@ function createHowToPlayInstructions() {
     }
 
     container.cardShape = card;
+    container.cardWidth = 648;
+    container.cardHeight = 292;
 
     return container;
 }
@@ -2336,7 +2354,9 @@ function drawHoneycombPattern(width, height, radius) {
 
 function createHowToPlayHeader() {
     var container = new createjs.Container();
-    container.regX = 260;
+    var cardWidth = 648;
+    var cardHeight = 120;
+    container.regX = cardWidth / 2;
     container.regY = 0;
     container.x = 640;
     container.y = 118;
@@ -2351,24 +2371,25 @@ function createHowToPlayHeader() {
             0,
             0,
             0,
-            260
+            300
         )
-        .drawCircle(0, 0, 240);
-    glow.alpha = 0.8;
-    glow.x = 252;
-    glow.y = 60;
+        .drawCircle(0, 0, 300);
+    glow.alpha = 0.82;
+    glow.x = cardWidth / 2;
+    glow.y = 64;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
     container.glowShape = glow;
 
     var card = new createjs.Shape();
     card.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 520, 0)
-        .drawRoundRect(0, 0, 520, 120, 42);
+        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, cardWidth, 0)
+        .drawRoundRect(0, 0, cardWidth, cardHeight, 42);
     card.shadow = new createjs.Shadow("rgba(170, 74, 16, 0.28)", 0, 18, 32);
     container.addChild(card);
     container.cardShape = card;
-    container.cardWidth = 520;
+    container.cardWidth = cardWidth;
+    container.cardHeight = cardHeight;
 
     var cardHighlight = new createjs.Shape();
     cardHighlight.graphics
@@ -2377,19 +2398,20 @@ function createHowToPlayHeader() {
             [0, 0.5, 1],
             0,
             0,
-            520,
+            cardWidth,
             0
         )
-        .drawRoundRect(12, 8, 496, 52, 28);
+        .drawRoundRect(16, 8, cardWidth - 32, 52, 28);
     cardHighlight.alpha = 0.85;
     container.addChild(cardHighlight);
 
     var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(0, 0, 520, 120, 42);
+    highlightMask.graphics.drawRoundRect(0, 0, cardWidth, cardHeight, 42);
     highlightMask.visible = false;
     container.addChild(highlightMask);
 
     var animatedHighlight = new createjs.Shape();
+    var highlightSpan = cardWidth * 0.62;
     animatedHighlight.graphics
         .beginLinearGradientFill(
             [
@@ -2398,22 +2420,23 @@ function createHowToPlayHeader() {
                 "rgba(255, 255, 255, 0)"
             ],
             [0, 0.5, 1],
-            -120,
+            -highlightSpan / 2,
             0,
-            120,
+            highlightSpan / 2,
             0
         )
-        .drawRoundRect(-120, -16, 240, 152, 60);
+        .drawRoundRect(-highlightSpan / 2, -16, highlightSpan, cardHeight + 32, 60);
     animatedHighlight.alpha = 0;
-    animatedHighlight.x = -160;
+    animatedHighlight.x = -highlightSpan / 2;
     animatedHighlight.y = -16;
     animatedHighlight.mask = highlightMask;
     animatedHighlight.compositeOperation = "lighter";
     container.addChild(animatedHighlight);
     container.highlightSweep = animatedHighlight;
 
-    var tildeWave = createHowToPlayTildeWave(260, 16);
-    tildeWave.x = 180;
+    var tildeWidth = cardWidth - 240;
+    var tildeWave = createHowToPlayTildeWave(tildeWidth, 16);
+    tildeWave.x = cardWidth - tildeWidth - 48;
     tildeWave.y = 94;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
@@ -2431,7 +2454,7 @@ function createHowToPlayHeader() {
             74
         )
         .drawCircle(0, 0, 70);
-    iconHalo.x = 98;
+    iconHalo.x = 104;
     iconHalo.y = 60;
     iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
@@ -2440,8 +2463,8 @@ function createHowToPlayHeader() {
     iconBackground.graphics
         .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -36, -36, 36, 36)
         .drawCircle(0, 0, 42);
-    iconBackground.x = 98;
-    iconBackground.y = 60;
+    iconBackground.x = iconHalo.x;
+    iconBackground.y = iconHalo.y;
     container.addChild(iconBackground);
 
     var icon = new createjs.Text("\u2139", "700 50px 'Baloo 2'", "#FF8D3C");
@@ -2452,19 +2475,19 @@ function createHowToPlayHeader() {
     container.addChild(icon);
 
     var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#FFFFFF");
-    label.x = 192;
+    label.x = 212;
     label.y = 26;
     container.addChild(label);
 
     var subtitle = new createjs.Text("Follow these quick tips before you start", "500 24px 'Baloo 2'", "rgba(255,255,255,0.9)");
-    subtitle.x = 192;
+    subtitle.x = label.x;
     subtitle.y = 70;
     container.addChild(subtitle);
 
     var accent = new createjs.Shape();
     accent.graphics
         .beginLinearGradientFill(["rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"], [0, 0.6, 1], 0, 18, 0, 102)
-        .drawRoundRect(420, 18, 72, 84, 34);
+        .drawRoundRect(cardWidth - 120, 18, 84, 84, 34);
     accent.alpha = 0.35;
     container.addChild(accent);
 
@@ -2566,6 +2589,8 @@ function createHowToPlayProgressBar() {
     container.progressShine = shine;
     container.progressMask = fillMask;
     container.progressPulse = pulse;
+    container.cardWidth = 648;
+    container.cardHeight = 108;
 
     return container;
 }
@@ -2884,6 +2909,15 @@ function resetHowToPlayProgressBar(overlay) {
     if (overlay.progressShine || overlay.progressPulse) {
         startProgressFillShimmer(overlay.progressShine, overlay.progressPulse);
     }
+    if (overlay.proceedButton) {
+        var button = overlay.proceedButton;
+        if (typeof button.expandedY === "number") {
+            button.y = button.expandedY;
+        }
+        if (stage && typeof stage.update === "function") {
+            stage.update();
+        }
+    }
 }
 
 function prepareHowToPlayOverlayForLoading(overlay) {
@@ -2916,6 +2950,16 @@ function hideHowToPlayProgressBar() {
         });
 
     stopProgressFillShimmer(HowToPlayScreenImg.progressShine, HowToPlayScreenImg.progressPulse);
+
+    if (HowToPlayScreenImg.proceedButton) {
+        var button = HowToPlayScreenImg.proceedButton;
+        var targetY = typeof button.compactY === "number" ? button.compactY : button.y;
+        createjs.Tween.get(button, { override: false }).to({ y: targetY }, 360, createjs.Ease.quadOut);
+        button.y = targetY;
+        if (stage && typeof stage.update === "function") {
+            stage.update();
+        }
+    }
 }
 
 
@@ -2926,27 +2970,174 @@ function createLoaderProceedButton() {
     button.scaleX = button.scaleY = 0.92;
     button.mouseEnabled = false;
     button.mouseChildren = false;
+    button._ambientActive = false;
+
+    var body = new createjs.Container();
+    button.addChild(body);
+    button.body = body;
 
     var shadow = new createjs.Shape();
-    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(-110, -32, 220, 64, 24);
-    shadow.alpha = 0.75;
-    shadow.y = 4;
-    button.addChild(shadow);
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.24)").drawRoundRect(-110, -32, 220, 64, 24);
+    shadow.alpha = 0.85;
+    shadow.y = 6;
+    body.addChild(shadow);
+    button.shadowShape = shadow;
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .beginRadialGradientFill([
+            "rgba(255, 189, 120, 0.0)",
+            "rgba(255, 189, 120, 0.26)",
+            "rgba(255, 189, 120, 0.0)"
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 108)
+        .drawCircle(0, 0, 108);
+    halo.alpha = 0.55;
+    halo.compositeOperation = "lighter";
+    body.addChild(halo);
+    button.haloShape = halo;
 
     var frame = new createjs.Shape();
     frame.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255, 255, 255, 0.45)")
         .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -110, 0, 110, 0)
         .drawRoundRect(-110, -36, 220, 72, 24);
-    button.addChild(frame);
+    body.addChild(frame);
+    button.frameShape = frame;
+
+    var gloss = new createjs.Shape();
+    gloss.graphics
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.24)", "rgba(255,255,255,0)"],
+            [0, 0.55, 1],
+            -110,
+            -36,
+            110,
+            -8
+        )
+        .drawRoundRect(-110, -36, 220, 54, 24);
+    gloss.alpha = 0.92;
+    body.addChild(gloss);
+
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0)",
+            "rgba(255,255,255,0.95)",
+            "rgba(255,255,255,0)"
+        ], [0, 0.5, 1], -96, 0, 96, 0)
+        .drawRoundRect(-96, -30, 192, 60, 26);
+    highlight.alpha = 0;
+    highlight.compositeOperation = "lighter";
+    highlight.x = -150;
+    var highlightMask = new createjs.Shape();
+    highlightMask.graphics.drawRoundRect(-110, -36, 220, 72, 24);
+    highlight.mask = highlightMask;
+    body.addChild(highlight);
+    button.highlightShape = highlight;
+    button.highlightMask = highlightMask;
+
+    var content = new createjs.Container();
+    content.y = 2;
+    body.addChild(content);
+    button.contentWrapper = content;
+
+    var icon = new createjs.Shape();
+    icon.graphics.beginFill("rgba(255,255,255,0.95)")
+        .moveTo(-16, -10)
+        .lineTo(10, 0)
+        .lineTo(-16, 10)
+        .closePath();
+    icon.x = -42;
+    icon.y = 0;
+    icon.alpha = 0.92;
+    content.addChild(icon);
+    button.iconShape = icon;
 
     var label = new createjs.Text("Proceed", "700 28px 'Baloo 2'", "#FFFFFF");
-    label.textAlign = "center";
+    label.textAlign = "left";
     label.textBaseline = "middle";
-    button.addChild(label);
+    label.x = -12;
+    label.y = 0;
+    label.shadow = new createjs.Shadow("rgba(0,0,0,0.32)", 0, 4, 10);
+    content.addChild(label);
+    button.labelText = label;
 
     button.cursor = "pointer";
 
     return button;
+}
+
+function startProceedButtonAmbientAnimation(button) {
+    if (!button || button._ambientActive) {
+        return;
+    }
+
+    button._ambientActive = true;
+
+    if (button.body) {
+        button.body.scaleX = button.body.scaleY = 1;
+        createjs.Tween.get(button.body, { loop: true })
+            .to({ scaleX: 1.035, scaleY: 1.035 }, 760, createjs.Ease.sineInOut)
+            .to({ scaleX: 1, scaleY: 1 }, 760, createjs.Ease.sineInOut);
+    }
+
+    if (button.haloShape) {
+        button.haloShape.alpha = 0.5;
+        button.haloShape.scaleX = button.haloShape.scaleY = 1;
+        createjs.Tween.get(button.haloShape, { loop: true })
+            .to({ scaleX: 1.14, scaleY: 1.14, alpha: 0.82 }, 920, createjs.Ease.sineOut)
+            .to({ scaleX: 1, scaleY: 1, alpha: 0.5 }, 880, createjs.Ease.sineInOut);
+    }
+
+    if (button.highlightShape) {
+        button.highlightShape.alpha = 0;
+        button.highlightShape.x = -160;
+        createjs.Tween.get(button.highlightShape, { loop: true })
+            .wait(240)
+            .to({ alpha: 0.9, x: 0 }, 520, createjs.Ease.quadOut)
+            .to({ alpha: 0, x: 160 }, 520, createjs.Ease.quadIn)
+            .wait(360)
+            .set({ alpha: 0, x: -160 });
+    }
+
+    if (button.contentWrapper) {
+        button.contentWrapper.y = 2;
+        createjs.Tween.get(button.contentWrapper, { loop: true })
+            .to({ y: -1 }, 420, createjs.Ease.sineOut)
+            .to({ y: 2 }, 420, createjs.Ease.sineIn)
+            .wait(280);
+    }
+}
+
+function stopProceedButtonAmbientAnimation(button) {
+    if (!button || !button._ambientActive) {
+        return;
+    }
+
+    button._ambientActive = false;
+
+    if (button.body) {
+        createjs.Tween.removeTweens(button.body);
+        button.body.scaleX = button.body.scaleY = 1;
+    }
+
+    if (button.haloShape) {
+        createjs.Tween.removeTweens(button.haloShape);
+        button.haloShape.alpha = 0.5;
+        button.haloShape.scaleX = button.haloShape.scaleY = 1;
+    }
+
+    if (button.highlightShape) {
+        createjs.Tween.removeTweens(button.highlightShape);
+        button.highlightShape.alpha = 0;
+        button.highlightShape.x = -160;
+    }
+
+    if (button.contentWrapper) {
+        createjs.Tween.removeTweens(button.contentWrapper);
+        button.contentWrapper.y = 2;
+    }
 }
 
 function buildGameIntroOverlay() {
@@ -3332,6 +3523,7 @@ function showLoaderProceedButton() {
     }
 
     var button = HowToPlayScreenImg.proceedButton;
+    stopProceedButtonAmbientAnimation(button);
     attachProceedButtonListeners(button);
     button.visible = true;
     button.mouseEnabled = true;
@@ -3343,11 +3535,15 @@ function showLoaderProceedButton() {
         button.scaleX = button.scaleY = 0.92;
     }
     createjs.Tween.get(button, { override: true })
-        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut);
+        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut)
+        .call(function () {
+            startProceedButtonAmbientAnimation(button);
+        });
 
     // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
     button.alpha = 1;
     button.scaleX = button.scaleY = 1;
+    startProceedButtonAmbientAnimation(button);
 
     if (stage && typeof stage.update === "function") {
         stage.update();
@@ -3363,6 +3559,7 @@ function hideLoaderProceedButton() {
     if (button.visible || button.alpha > 0) {
         createjs.Tween.get(button, { override: true }).to({ alpha: 0, scaleX: 0.92, scaleY: 0.92 }, 160, createjs.Ease.quadIn);
     }
+    stopProceedButtonAmbientAnimation(button);
     button.alpha = 0;
     button.scaleX = button.scaleY = 0.92;
     button.mouseEnabled = false;
