@@ -35,26 +35,35 @@ function startAnimationHandler(evt) {
 }
 
 function isVisibleSkipBtn() {
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "skip");
     SkipBtnMc.visible = true;
-    SkipBtnMc.gotoAndStop(0);
-    skipMc = new createjs.MovieClip()
-    container.parent.addChild(skipMc)
+    SkipBtnMc.mouseEnabled = true;
+    container.parent.addChild(SkipBtnMc);
+    skipMc = new createjs.MovieClip();
+    container.parent.addChild(skipMc);
     skipMc.timeline.addTween(createjs.Tween.get(SkipBtnMc).to({ scaleX: .97, scaleY: .97 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
     SkipBtnMc.addEventListener("click", createDelayToStartGame);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     SkipBtnMc.cursor = "pointer";
-
 }
 
 function isVisibleStartBtn() {
-    SkipBtnMc.gotoAndStop(1);
-    container.parent.addChild(SkipBtnMc)
-    container.parent.addChild(skipMc)
+    if (!SkipBtnMc) {
+        return;
+    }
+
+    applyHowToPlayButtonState(SkipBtnMc, "start");
+    container.parent.addChild(SkipBtnMc);
+    container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
-    container.parent.addChild(howToPlayImageMc)
+    container.parent.addChild(howToPlayImageMc);
     console.log("isVisibleStartBtn");
-    ////////////////////////////////////////////////////////////////////   
+    ////////////////////////////////////////////////////////////////////
 }
 
 
@@ -62,8 +71,9 @@ function isVisibleStartBtn() {
 function createDelayToStartGame() {
 
     howToPlayImageMc.visible = false;
-    
+
     SkipBtnMc.visible = false;
+    SkipBtnMc.mouseEnabled = false;
     //gameIntroAnimMc.stop();
     stopValue = 0;
     removeGameIntro() // know 

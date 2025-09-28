@@ -10,7 +10,7 @@ var TitleContaier;
 var extradot = "";
 
 //var introStartCnt = -1;
-var TotalAssetsCnt = 34
+var TotalAssetsCnt = 33
 var betweenChars = ' '; // a space
 var volumeBtn1, QuesCntMc1, fullScreenBtn1, closeBtn1, QuesCntMc2;
 var hudContainer,
@@ -27,6 +27,10 @@ var hudContainer,
     questionProgressBarBg,
     questionProgressBarFill;
 
+var HowToPlayScreenImg,
+    howToPlayImageMc,
+    loadProgressPercentLabel;
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -42,6 +46,7 @@ function formatTimerValue(totalSeconds) {
 	return totalSeconds;
 }
 
+
 if (typeof window !== "undefined") {
     window.formatTimerValue = formatTimerValue;
 }
@@ -53,31 +58,29 @@ if (typeof window !== "undefined") {
 
 function createLoader() {
 
-    loaderColor = createjs.Graphics.getRGB(254, 198, 44, 1);
-    var loaderColor1 = createjs.Graphics.getRGB(254, 198, 44, 1);
-    loaderBar = new createjs.Container();
-    var txt = new createjs.Container();
-    bar = new createjs.Shape();
-    bar.graphics.beginFill(loaderColor).drawRect(0, 0, 1, barHeight).endFill();
     loaderWidth = 600;
 
-    //
+    if (!HowToPlayScreenImg) {
+        HowToPlayScreenImg = buildHowToPlayOverlay();
+    }
 
-    loadProgressLabel = new createjs.Text("", "20px 'Baloo 2'", "#000");
-    loadProgressLabel.lineWidth = 400;
-    loadProgressLabel.textAlign = "center";
-    txt.addChild(loadProgressLabel)
-    txt.x = 260;
-    txt.y = 35;
+    loaderBar = HowToPlayScreenImg;
+    bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
+    loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
+    loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
 
+    if (loaderBar) {
+        loaderBar.visible = true;
+        if (!loaderBar.parent) {
+            stage.addChild(loaderBar);
+        } else {
+            stage.setChildIndex(loaderBar, stage.numChildren - 1);
+        }
+    }
 
-    var bgBar = new createjs.Shape();
-    var padding = 3
-    bgBar.graphics.setStrokeStyle(2).beginStroke(loaderColor1).drawRoundRect(-padding / 2, -padding / 2, loaderWidth + padding, barHeight + padding, 5);
-    loaderBar.x = 1300 - loaderWidth >> 1;
-    loaderBar.y = 1220 - barHeight >> 1;
-    loaderBar.addChild(bar, bgBar, txt);
-    stage.addChild(loaderBar);
+    hideLoaderProceedButton();
+
+    stage.update();
 
 
 
@@ -137,7 +140,6 @@ function createManifest() {
         { id: "handCursor", src: assetsPath + "handCursor.png" },
         { id: "SkipBtn", src: assetsPathLang + "SkipBtn.png" },
         { id: "HowToPlayScreen", src: assetsPathLang + "HowToPlayScreen.png" },
-        { id: "HowToPlayScreenImg", src: assetsPathLang + "HowToPlayScreen1.png" },
 
         { id: "scoreImgMc", src: assetsPath + "Score.png" },
         { id: "ResponseImgMc", src: assetsPath + "ResponseTime.png" },
@@ -205,47 +207,68 @@ function preloadAllAssets() {
 
 function updateLoading(event) {
 
-    bar.scaleX = event.loaded * loaderWidth;
+    var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
 
+    if (bar) {
+        bar.scaleX = progressRatio;
+    }
 
+    progresPrecentage = Math.round(progressRatio * 100);
 
-    progresPrecentage = Math.round(event.loaded * 100);
+    if (loadProgressPercentLabel) {
+        loadProgressPercentLabel.text = progresPrecentage + "%";
+    }
 
+    if (HowToPlayScreenImg && HowToPlayScreenImg.proceedButton) {
+        if (progresPrecentage < 100) {
+            hideLoaderProceedButton();
+        }
+    }
+
+    if (!loadProgressLabel) {
+        stage.update();
+        return;
+    }
 
     if (assetsPathLang == "assets/VietnamAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "% Đang tải trò chơi...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "% Đang tải trò chơi...";
 
     } else if (assetsPathLang == "assets/TamilAssets/") {
-        loadProgressLabel.text = " " + progresPrecentage + "% ஆட்டம் தயாராகிக் கொண்டிருக்கிறது...";
-        loadProgressLabel.lineWidth = 1200;
+        loadProgressLabel.text = progresPrecentage + "% ஆட்டம் தயாராகிக் கொண்டிருக்கிறது...";
+        loadProgressLabel.lineWidth = 540;
         loadProgressLabel.font = "bold 23px Segoe UI";
     } else if (assetsPathLang == "assets/GujaratiAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "% ગેમ લોડ થાય છે...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "% ગેમ લોડ થાય છે...";
 
     } else if (assetsPathLang == "assets/HindiAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "%खेल लोड हो रहा है...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "%खेल लोड हो रहा है...";
         loadProgressLabel.font = "bold 23px Segoe UI";
 
     } else {
-        loadProgressLabel.lineWidth = 1200;
+        loadProgressLabel.lineWidth = 420;
 
-        if (progresPrecentage > 0 && progresPrecentage <= 25) {
-            loadProgressLabel.text = "              " + "Loading game assets" + extradot;
+        if (progresPrecentage >= 0 && progresPrecentage <= 25) {
+            loadProgressLabel.text = "Collecting game assets" + extradot;
 
         }
         else if (progresPrecentage > 25 && progresPrecentage <= 50) {
-            loadProgressLabel.text = "              " + "Loading animations" + extradot;
+            loadProgressLabel.text = "Uploading core files" + extradot;
         }
         else if (progresPrecentage > 50 && progresPrecentage <= 75) {
-            loadProgressLabel.text = "              " + "Personalising your session" + extradot;
+            loadProgressLabel.text = "Uploading animations" + extradot;
 
         }
-        else if (progresPrecentage > 75 && progresPrecentage <= 100) {
-            loadProgressLabel.text = "              " + "Loading your session" + extradot;
+        else if (progresPrecentage > 75 && progresPrecentage < 100) {
+            loadProgressLabel.text = "Finalising setup" + extradot;
 
+        } else {
+            loadProgressLabel.text = "Ready to start";
         }
         if (extradot == "") {
-            extradot = "."
+            extradot = ".";
         }
         else if (extradot == "...") {
             extradot = ".";
@@ -253,13 +276,16 @@ function updateLoading(event) {
         else {
             extradot = extradot + ".";
         }
-        // loadProgressLabel.text = "              " + progresPrecentage + "% Game Loading...";
     }
 
 
     stage.update();
 
 }
+
+
+
+
 
 
 
@@ -271,9 +297,22 @@ function fileLoaded(e) {
 
 
 function doneLoading(event) {
-    loaderBar.visible = false;
-    bar.visible = false;
-    stage.removeChild(loaderBar);
+    if (bar) {
+        bar.scaleX = 1;
+    }
+    if (loadProgressPercentLabel) {
+        loadProgressPercentLabel.text = "100%";
+    }
+    if (loadProgressLabel && assetsPathLang != "assets/VietnamAssets/" && assetsPathLang != "assets/TamilAssets/" && assetsPathLang != "assets/GujaratiAssets/" && assetsPathLang != "assets/HindiAssets/") {
+        loadProgressLabel.text = "Ready to start";
+    }
+    if (loaderBar) {
+        loaderBar.visible = true;
+        if (loaderBar.parent) {
+            loaderBar.parent.setChildIndex(loaderBar, loaderBar.parent.numChildren - 1);
+        }
+    }
+    showLoaderProceedButton();
     stage.update();
     var len = assets.length
     console.log("assets.length=" + len)
@@ -574,17 +613,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "SkipBtn") {
-                var spriteSheet4 = new createjs.SpriteSheet({
-                    framerate: 30,
-                    "images": [preload.getResult("SkipBtn")],
-                    "frames": { "regX": 50, "height": 137, "count": 0, "regY": 50, "width": 262 },
-                    // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-                });
-                //
-                SkipBtnMc = new createjs.Sprite(spriteSheet4);
+                SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                SkipBtnMc.x = 1095;
-                SkipBtnMc.y = 60
+                SkipBtnMc.x = 1100;
+                SkipBtnMc.y = 92;
                 SkipBtnMc.visible = false;
 
                 continue;
@@ -598,17 +630,9 @@ function doneLoading(event) {
             }
 
             if (id == "HowToPlayScreen") {
-                howToPlayImageMc = new createjs.Bitmap(preload.getResult('HowToPlayScreen'));
+                howToPlayImageMc = buildGameIntroOverlay();
                 container.parent.addChild(howToPlayImageMc);
                 howToPlayImageMc.visible = false;
-                howToPlayImageMc.x = howToPlayImageMc.x - 20
-                continue;
-            }
-
-            if (id == "HowToPlayScreenImg") {
-                HowToPlayScreenImg = new createjs.Bitmap(preload.getResult('HowToPlayScreenImg'));
-                container.parent.addChild(HowToPlayScreenImg);
-                HowToPlayScreenImg.visible = true;
                 continue;
             }
 
@@ -620,8 +644,6 @@ function doneLoading(event) {
             }
 
         } else {
-			console.log("progressbarremove")
-
             doneLoading1(event)
 
         }
@@ -694,6 +716,20 @@ function watchRestart() {
         hudContainer.visible = false;
     }
 
+    if (!HowToPlayScreenImg) {
+        HowToPlayScreenImg = buildHowToPlayOverlay();
+    }
+
+    var overlayParent = container && container.parent ? container.parent : stage;
+    if (HowToPlayScreenImg && overlayParent) {
+        if (!HowToPlayScreenImg.parent) {
+            overlayParent.addChild(HowToPlayScreenImg);
+        } else {
+            overlayParent.setChildIndex(HowToPlayScreenImg, overlayParent.numChildren - 1);
+        }
+        HowToPlayScreenImg.visible = true;
+    }
+
 
 
 
@@ -707,13 +743,15 @@ function watchRestart() {
     }
 
 
-    container.parent.addChild(handCursor);
-    handCursor.visible = true;
-    var hcursorMc = new createjs.MovieClip()
-    container.parent.addChild(hcursorMc)
-    hcursorMc.timeline.addTween(createjs.Tween.get(handCursor).to({ scaleX: .98, scaleY: .98 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
-    handCursor.addEventListener("click", toggleFullScreen);
-    handCursor.addEventListener("click", createHowToPlay)
+    if (typeof handCursor !== "undefined" && handCursor) {
+        handCursor.visible = false;
+        handCursor.removeAllEventListeners();
+        if (handCursor.parent) {
+            handCursor.parent.removeChild(handCursor);
+        }
+    }
+
+    hideLoaderProceedButton();
 
 
     stage.update(); //update the stage to show text;
@@ -1184,10 +1222,622 @@ if(time<=5){   accentColors = isCritical ? ["rgba(255,135,135,0.45)", "rgba(255,
     gameTimerTxt.color = isCritical ? "#FFD7D7" : "#F6FBFF";
 }
 
+function buildHowToPlayOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "HowToPlayOverlay";
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#FFF4DB", "#FFD8A4"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 44);
+    pattern.alpha = 0.32;
+    overlay.addChild(pattern);
+
+    var header = createHowToPlayHeader();
+    overlay.addChild(header);
+
+    var instructions = createHowToPlayInstructions();
+    overlay.addChild(instructions);
+
+    var progress = createHowToPlayProgressBar();
+    progress.x = 330;
+    progress.y = 520;
+    overlay.addChild(progress);
+
+    overlay.progressFill = progress.progressFill;
+    overlay.progressLabel = progress.progressLabel;
+    overlay.progressPercent = progress.progressPercent;
+
+    var proceedButton = createLoaderProceedButton();
+    proceedButton.x = 640;
+    proceedButton.y = 640;
+    overlay.addChild(proceedButton);
+
+    overlay.proceedButton = proceedButton;
+
+    var accentLarge = new createjs.Shape();
+    accentLarge.graphics.beginFill("rgba(255,255,255,0.18)").drawCircle(1080, 160, 46);
+    overlay.addChild(accentLarge);
+
+    var accentSmall = new createjs.Shape();
+    accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
+    overlay.addChild(accentSmall);
+
+    return overlay;
+}
+
+function createHowToPlayInstructions() {
+    var container = new createjs.Container();
+    container.x = 330;
+    container.y = 210;
+
+    var card = new createjs.Shape();
+    card.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 270, 36);
+    card.shadow = new createjs.Shadow("rgba(211, 132, 43, 0.35)", 0, 20, 34);
+    container.addChild(card);
+
+    var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
+    title.x = 40;
+    title.y = 34;
+    container.addChild(title);
+
+    var steps = [
+        "See the How to Play properly.",
+        "After understood start the game.",
+        "The score is awarded based on correct answer and time taken.",
+        "Once answered you can't go back."
+    ];
+
+    for (var i = 0; i < steps.length; i++) {
+        var itemY = 90 + i * 44;
+
+        var badge = new createjs.Shape();
+        badge.graphics
+            .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -20, -20, 20, 20)
+            .drawCircle(0, 0, 20);
+        badge.x = 62;
+        badge.y = itemY;
+        container.addChild(badge);
+
+        var badgeText = new createjs.Text((i + 1).toString(), "700 20px 'Baloo 2'", "#FFFFFF");
+        badgeText.textAlign = "center";
+        badgeText.textBaseline = "middle";
+        badgeText.x = badge.x;
+        badgeText.y = badge.y;
+        container.addChild(badgeText);
+
+        var stepText = new createjs.Text(steps[i], "500 22px 'Baloo 2'", "#6B3A15");
+        stepText.lineHeight = 28;
+        stepText.lineWidth = 480;
+        stepText.x = 102;
+        stepText.y = itemY - 18;
+        container.addChild(stepText);
+    }
+
+    return container;
+}
+
+
+
+function drawHoneycombPattern(width, height, radius) {
+    var shape = new createjs.Shape();
+    var graphics = shape.graphics;
+    var hexHeight = Math.sqrt(3) * radius;
+    var horizontalSpacing = radius * 1.5;
+    var row = 0;
+
+    for (var y = radius; y < height + hexHeight; y += hexHeight, row++) {
+        var offsetX = (row % 2) ? horizontalSpacing / 2 : 0;
+        for (var x = radius; x < width + radius; x += horizontalSpacing) {
+            var centerX = x + offsetX;
+            var fill = row % 2 === 0 ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.22)";
+            graphics.beginFill(fill).drawPolyStar(centerX, y, radius, 6, 0, 30);
+        }
+    }
+
+    return shape;
+}
+
+function createHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 280;
+    container.y = 70;
+
+    var card = new createjs.Shape();
+    card.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 720, 0)
+        .drawRoundRect(0, 0, 720, 120, 48);
+    card.shadow = new createjs.Shadow("rgba(227, 138, 45, 0.35)", 0, 20, 36);
+    container.addChild(card);
+
+    var iconBackground = new createjs.Shape();
+    iconBackground.graphics.beginFill("rgba(255,255,255,0.95)").drawCircle(96, 60, 44);
+    container.addChild(iconBackground);
+
+    var icon = new createjs.Text("\u2139", "700 54px 'Baloo 2'", "#FF8D3C");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 96;
+    icon.y = 60;
+    container.addChild(icon);
+
+    var title = new createjs.Text("HOW TO PLAY", "700 44px 'Baloo 2'", "#FFFFFF");
+    title.x = 160;
+    title.y = 28;
+    container.addChild(title);
+
+    var subtitle = new createjs.Text("Get ready with these quick steps", "500 24px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 160;
+    subtitle.y = 68;
+    container.addChild(subtitle);
+
+    return container;
+}
+
+function createHowToPlayProgressBar() {
+    var container = new createjs.Container();
+
+    var shadow = new createjs.Shape();
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(6, 6, 628, 88, 26);
+    shadow.alpha = 0.75;
+    container.addChild(shadow);
+
+    var frame = new createjs.Shape();
+    frame.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 80, 24);
+    container.addChild(frame);
+
+    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "#A25C1D");
+    status.x = 30;
+    status.y = 20;
+    status.lineWidth = 420;
+    container.addChild(status);
+
+    var percent = new createjs.Text("0%", "700 28px 'Baloo 2'", "#FF8D3C");
+    percent.textAlign = "right";
+    percent.x = 590;
+    percent.y = 18;
+    container.addChild(percent);
+
+    var track = new createjs.Shape();
+    track.graphics.beginFill("rgba(255, 212, 170, 0.55)").drawRoundRect(0, 0, 560, 16, 10);
+    track.x = 30;
+    track.y = 50;
+    container.addChild(track);
+
+    var fill = new createjs.Shape();
+    fill.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 560, 0)
+        .drawRoundRect(0, 0, 560, 16, 10);
+    fill.x = 30;
+    fill.y = 50;
+    fill.scaleX = 0;
+    container.addChild(fill);
+
+    container.progressFill = fill;
+    container.progressLabel = status;
+    container.progressPercent = percent;
+
+    return container;
+}
+
+
+function createLoaderProceedButton() {
+    var button = new createjs.Container();
+    button.visible = false;
+    button.alpha = 0;
+    button.scaleX = button.scaleY = 0.92;
+    button.mouseEnabled = false;
+    button.mouseChildren = false;
+
+    var shadow = new createjs.Shape();
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(-110, -32, 220, 64, 24);
+    shadow.alpha = 0.75;
+    shadow.y = 4;
+    button.addChild(shadow);
+
+    var frame = new createjs.Shape();
+    frame.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -110, 0, 110, 0)
+        .drawRoundRect(-110, -36, 220, 72, 24);
+    button.addChild(frame);
+
+    var label = new createjs.Text("Proceed", "700 28px 'Baloo 2'", "#FFFFFF");
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    button.addChild(label);
+
+    button.cursor = "pointer";
+
+    return button;
+}
+
+function buildGameIntroOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "GameIntroOverlay";
+    overlay.mouseEnabled = false;
+    overlay.mouseChildren = false;
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 34);
+    pattern.alpha = 0.14;
+    overlay.addChild(pattern);
+
+    var header = createIntroHowToPlayHeader();
+    overlay.addChild(header);
+
+    var accent = new createjs.Shape();
+    accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
+    overlay.addChild(accent);
+
+    return overlay;
+}
+
+function createIntroHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 90;
+    container.y = 44;
+
+    var frame = new createjs.Shape();
+    frame.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 360, 0)
+        .drawRoundRect(0, 0, 360, 96, 48);
+    frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.45)", 0, 18, 32);
+    container.addChild(frame);
+
+    var iconBg = new createjs.Shape();
+    iconBg.graphics.beginFill("rgba(255,255,255,0.16)").drawCircle(72, 48, 34);
+    container.addChild(iconBg);
+
+    var icon = new createjs.Text("\u2139", "700 46px 'Baloo 2'", "#FFFFFF");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 72;
+    icon.y = 48;
+    container.addChild(icon);
+
+    var title = new createjs.Text("How to Play", "700 34px 'Baloo 2'", "#FFFFFF");
+    title.x = 128;
+    title.y = 22;
+    container.addChild(title);
+
+    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 22px 'Baloo 2'", "rgba(255,255,255,0.88)");
+    subtitle.x = 128;
+    subtitle.y = 56;
+    container.addChild(subtitle);
+
+    return container;
+}
+
+function createIntroActionButton() {
+    var button = new createjs.Container();
+    button.name = "IntroActionButton";
+    button.mouseChildren = false;
+    button.mouseEnabled = false;
+    button.cursor = "pointer";
+    button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
+
+    var glow = new createjs.Shape();
+    glow.name = "glow";
+    button.addChild(glow);
+
+    var base = new createjs.Shape();
+    base.name = "base";
+    button.addChild(base);
+
+    var highlight = new createjs.Shape();
+    highlight.name = "highlight";
+    button.addChild(highlight);
+
+    var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
+    icon.name = "icon";
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = -96;
+    icon.y = 0;
+    button.addChild(icon);
+
+    var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
+    label.name = "label";
+    label.textAlign = "left";
+    label.textBaseline = "middle";
+    label.x = -34;
+    label.y = 0;
+    button.addChild(label);
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRoundRect(-170, -48, 340, 96, 32);
+    button.hitArea = hit;
+
+    applyHowToPlayButtonState(button, "skip");
+
+    button.scaleX = button.scaleY = 0.96;
+
+    return button;
+}
+
+function applyHowToPlayButtonState(button, state) {
+    if (!button) {
+        return;
+    }
+
+    var base = button.getChildByName("base");
+    var highlight = button.getChildByName("highlight");
+    var label = button.getChildByName("label");
+    var icon = button.getChildByName("icon");
+    var glow = button.getChildByName("glow");
+
+    if (base) {
+        base.graphics.clear();
+    }
+    if (highlight) {
+        highlight.graphics.clear();
+    }
+    if (glow) {
+        glow.graphics.clear();
+    }
+
+    if (state === "start") {
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255, 166, 94, 0.45)", "rgba(255, 166, 94, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    180
+                )
+                .drawCircle(0, 0, 170);
+            glow.alpha = 0.95;
+        }
+        if (base) {
+            base.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(245, 107, 32, 0.85)")
+                .beginLinearGradientFill(["#FFB760", "#FF7A2F"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(
+                    ["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    14
+                )
+                .drawRoundRect(-160, -44, 320, 58, 28);
+        }
+        if (icon) {
+            icon.text = "\u25B6";
+            icon.font = "700 34px 'Baloo 2'";
+            icon.color = "#FFFFFF";
+        }
+        if (label) {
+            label.text = "Start";
+            label.font = "700 28px 'Baloo 2'";
+            label.color = "#FFFFFF";
+        }
+        button.shadow = new createjs.Shadow("rgba(8, 17, 38, 0.38)", 0, 18, 34);
+    } else {
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255, 170, 115, 0.55)", "rgba(255, 170, 115, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    165
+                )
+                .drawCircle(0, 0, 165);
+            glow.alpha = 0.9;
+        }
+        if (base) {
+            base.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(240, 102, 37, 0.75)")
+                .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(
+                    [
+                        "rgba(255, 255, 255, 0.72)",
+                        "rgba(255, 255, 255, 0.18)",
+                        "rgba(255, 255, 255, 0)"
+                    ],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    16
+                )
+                .drawRoundRect(-160, -44, 320, 60, 28);
+        }
+        if (icon) {
+            icon.text = "\u279C";
+            icon.font = "700 30px 'Baloo 2'";
+            icon.color = "#FFFFFF";
+        }
+        if (label) {
+            label.text = "Skip";
+            label.font = "700 26px 'Baloo 2'";
+            label.color = "#FFFFFF";
+        }
+        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.32)", 0, 16, 32);
+    }
+
+    button.state = state;
+}
+
+function attachProceedButtonListeners(button) {
+    if (!button || button._loaderProceedHooked) {
+        return;
+    }
+
+    button._loaderProceedHooked = true;
+
+    button.on("click", function () {
+        hideLoaderProceedButton();
+
+        var globalContext = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : null);
+
+        var toggleInvoked = false;
+        if (typeof togglefullscreen === "function") {
+            try {
+                togglefullscreen();
+                toggleInvoked = true;
+            } catch (e) {
+                console.log("togglefullscreen invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.togglefullscreen === "function") {
+            try {
+                globalContext.togglefullscreen();
+                toggleInvoked = true;
+            } catch (e) {
+                console.log("window.togglefullscreen invocation failed", e);
+            }
+        }
+
+        if (!toggleInvoked) {
+            if (typeof toggleFullScreen === "function") {
+                try {
+                    toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("toggleFullScreen unavailable", e);
+                }
+            } else if (globalContext && typeof globalContext.toggleFullScreen === "function") {
+                try {
+                    globalContext.toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("window.toggleFullScreen unavailable", e);
+                }
+            }
+        }
+
+        var howToPlayInvoked = false;
+        if (typeof createhowtoplay === "function") {
+            try {
+                createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("createhowtoplay invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.createhowtoplay === "function") {
+            try {
+                globalContext.createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("window.createhowtoplay invocation failed", e);
+            }
+        }
+
+        if (!howToPlayInvoked) {
+            if (typeof createHowToPlay === "function") {
+                try {
+                    createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("createHowToPlay invocation failed", e);
+                }
+            } else if (globalContext && typeof globalContext.createHowToPlay === "function") {
+                try {
+                    globalContext.createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("window.createHowToPlay invocation failed", e);
+                }
+            }
+        }
+    });
+
+    button.on("rollover", function () {
+        createjs.Tween.get(button, { override: true }).to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut);
+    });
+
+    button.on("rollout", function () {
+        createjs.Tween.get(button, { override: true }).to({ scaleX: 0.94, scaleY: 0.94 }, 200, createjs.Ease.quadOut);
+    });
+
+    button.scaleX = button.scaleY = 0.94;
+}
+
+function showLoaderProceedButton() {
+    if (!HowToPlayScreenImg || !HowToPlayScreenImg.proceedButton) {
+        return;
+    }
+
+    var button = HowToPlayScreenImg.proceedButton;
+    attachProceedButtonListeners(button);
+    button.visible = true;
+    button.mouseEnabled = true;
+    button.mouseChildren = true;
+    if (button.alpha < 1) {
+        button.alpha = 0;
+    }
+    if (button.scaleX < 1 || button.scaleY < 1) {
+        button.scaleX = button.scaleY = 0.92;
+    }
+    createjs.Tween.get(button, { override: true })
+        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut);
+
+    // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
+    button.alpha = 1;
+    button.scaleX = button.scaleY = 1;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
+}
+
+function hideLoaderProceedButton() {
+    if (!HowToPlayScreenImg || !HowToPlayScreenImg.proceedButton) {
+        return;
+    }
+
+    var button = HowToPlayScreenImg.proceedButton;
+    if (button.visible || button.alpha > 0) {
+        createjs.Tween.get(button, { override: true }).to({ alpha: 0, scaleX: 0.92, scaleY: 0.92 }, 160, createjs.Ease.quadIn);
+    }
+    button.alpha = 0;
+    button.scaleX = button.scaleY = 0.92;
+    button.mouseEnabled = false;
+    button.mouseChildren = false;
+    button.visible = false;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
+}
+
+
 //==========================================================================//
 function createHowToPlay() {
-    handCursor.visible = false;
-    HowToPlayScreenImg.visible = false;
+    if (typeof handCursor !== "undefined" && handCursor) {
+        handCursor.visible = false;
+    }
+    hideLoaderProceedButton();
+
+    if (HowToPlayScreenImg) {
+        HowToPlayScreenImg.visible = false;
+    }
 
     createGameIntroAnimationPlay(true)
 }
