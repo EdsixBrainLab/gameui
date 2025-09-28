@@ -1861,7 +1861,6 @@ function flashHudCardHighlight(card) {
         .to({ alpha: targetAlpha }, 150, createjs.Ease.quadOut)
         .to({ alpha: baseAlpha }, 280, createjs.Ease.quadIn);
 }
-
 function animateScoreCelebration() {
     if (!scoreCardContainer) {
         return;
@@ -2570,7 +2569,6 @@ function createHowToPlayProgressBar() {
 
     return container;
 }
-
 
 function createHowToPlayTildeWave(width, strokeHeight) {
     var container = new createjs.Container();

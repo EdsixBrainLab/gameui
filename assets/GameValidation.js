@@ -691,29 +691,31 @@ function createResultsSummaryDial(radius, labelText, accentColors, options) {
     var container = new createjs.Container();
     container.radius = radius;
 
-    var outerGlow = new createjs.Shape();
-    outerGlow.graphics
-        .beginRadialGradientFill(["rgba(0,0,0,0.3)", "rgba(0,0,0,0)"], [0, 1], 0, radius * 0.7, radius * 0.2, 0, radius * 0.7, radius + 30)
-        .drawCircle(0, radius * 0.55, radius + 30);
-    outerGlow.alpha = 0.35;
-    container.addChild(outerGlow);
+    var glowColorStops = options.glowStops || ["rgba(8,14,40,0.28)", "rgba(8,14,40,0)"];
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(glowColorStops, [0, 1], 0, radius * 0.55, radius * 0.1, 0, radius * 0.55, radius + 46)
+        .drawCircle(0, radius * 0.55, radius + 46);
+    glow.alpha = options.glowAlpha != null ? options.glowAlpha : 0.55;
+    container.addChild(glow);
 
-    var outerRing = new createjs.Shape();
-    outerRing.graphics
-        .beginRadialGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0.08)"], [0, 1], 0, 0, 0, 0, 0, radius + 20)
-        .drawCircle(0, 0, radius + 20);
-    container.addChild(outerRing);
+    var halo = new createjs.Shape();
+    halo.graphics
+        .beginRadialGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0.08)"], [0, 1], 0, 0, 0, 0, 0, radius + 26)
+        .drawCircle(0, 0, radius + 26);
+    halo.alpha = 0.85;
+    container.addChild(halo);
 
     var base = new createjs.Shape();
     base.graphics
-        .beginLinearGradientFill(["rgba(255,255,255,0.75)", "rgba(255,255,255,0.25)"], [0, 1], 0, -radius, 0, radius)
+        .beginLinearGradientFill(options.baseGradient || ["rgba(255,255,255,0.95)", "rgba(236,240,255,0.65)"], [0, 1], 0, -radius, 0, radius)
         .drawCircle(0, 0, radius);
     container.addChild(base);
 
     var inner = new createjs.Shape();
     inner.graphics
-        .beginLinearGradientFill(["#FFFFFF", "#EEF4FF"], [0, 1], 0, -radius + 30, 0, radius - 26)
-        .drawCircle(0, 0, radius - 28);
+        .beginLinearGradientFill(options.innerGradient || ["#FFFFFF", "#E7ECFF"], [0, 1], 0, -radius + 28, 0, radius - 30)
+        .drawCircle(0, 0, radius - 30);
     container.addChild(inner);
 
     var accent = new createjs.Shape();
@@ -727,20 +729,23 @@ function createResultsSummaryDial(radius, labelText, accentColors, options) {
         }
 
         accent.graphics
-            .setStrokeStyle(options.accentStroke || 12, "round")
+            .setStrokeStyle(options.accentStroke || 14, "round")
             .beginLinearGradientStroke(accentColors || ["#FFFFFF", "#FFFFFF"], [0, 1], -radius, 0, radius, 0)
-            .arc(0, 0, radius - (options.accentInset || 16), -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * clamped));
+            .arc(0, 0, radius - (options.accentInset || 20), -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * clamped));
     };
 
-    var valueText = new createjs.Text("0", options.valueFont || "700 48px 'Baloo 2'", options.valueColor || "#1F2240");
+    var valueText = new createjs.Text("0", options.valueFont || "700 48px 'Baloo 2'", options.valueColor || "#182048");
     valueText.textAlign = "center";
     valueText.y = options.valueYOffset != null ? options.valueYOffset : -12;
+    valueText.shadow = new createjs.Shadow(options.valueShadowColor || "rgba(15,18,42,0.35)", 0, 6, 18);
     container.addChild(valueText);
     container.valueText = valueText;
 
-    var label = new createjs.Text(labelText ? labelText.toUpperCase() : "", options.labelFont || "600 20px 'Baloo 2'", options.labelColor || "#FFFFFF");
+    var label = new createjs.Text(labelText ? labelText.toUpperCase() : "", options.labelFont || "600 20px 'Baloo 2'", options.labelColor || "rgba(255,255,255,0.92)");
     label.textAlign = "center";
     label.y = options.labelOffset != null ? options.labelOffset : radius + 34;
+    label.letterSpacing = options.labelLetterSpacing != null ? options.labelLetterSpacing : 2;
+    label.shadow = options.labelShadow || new createjs.Shadow("rgba(10,16,36,0.4)", 0, 3, 10);
     container.addChild(label);
     container.labelText = label;
 
@@ -766,90 +771,142 @@ function ensureResultsSummaryOverlay(parentContainer) {
 
         var cardBg = new createjs.Shape();
         cardBg.graphics
-            .beginLinearGradientFill(["#FFB057", "#F25F9C", "#6A52FF"], [0, 0.45, 1], -430, -260, 430, 260)
-            .drawRoundRect(-430, -260, 860, 520, 48);
+            .beginLinearGradientFill(["#FFAA6B", "#F66BC6", "#6C6BFF"], [0, 0.48, 1], -460, -280, 460, 280)
+            .drawRoundRect(-460, -280, 920, 560, 52);
+        cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
         resultsCardContainer.addChild(cardBg);
+
+        var cardInnerSheen = new createjs.Shape();
+        cardInnerSheen.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"], [0, 1], -440, -200, 200, 120)
+            .drawRoundRect(-440, -240, 880, 480, 46);
+        cardInnerSheen.alpha = 0.35;
+        resultsCardContainer.addChild(cardInnerSheen);
 
         var cardOutline = new createjs.Shape();
         cardOutline.graphics
-            .setStrokeStyle(4)
-            .beginStroke("rgba(255,255,255,0.55)")
-            .drawRoundRect(-430, -260, 860, 520, 48);
+            .setStrokeStyle(3.5)
+            .beginStroke("rgba(255,255,255,0.72)")
+            .drawRoundRect(-460, -280, 920, 560, 52);
         resultsCardContainer.addChild(cardOutline);
 
-        var cardHighlight = new createjs.Shape();
-        cardHighlight.graphics
-            .beginRadialGradientFill(["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"], [0, 1], -220, -160, 0, -220, -160, 260)
-            .drawCircle(-220, -160, 260);
-        cardHighlight.alpha = 0.55;
-        resultsCardContainer.addChild(cardHighlight);
+        var cardGlow = new createjs.Shape();
+        cardGlow.graphics
+            .beginRadialGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -260, -200, 0, -260, -200, 320)
+            .drawCircle(-260, -200, 320);
+        cardGlow.alpha = 0.5;
+        resultsCardContainer.addChild(cardGlow);
 
-        var sparkleCluster = new createjs.Shape();
-        sparkleCluster.graphics
-            .beginFill("rgba(255,255,255,0.65)").drawCircle(290, -170, 4)
-            .drawCircle(330, -210, 2)
-            .drawCircle(360, -130, 3)
-            .drawCircle(-320, 140, 2)
-            .drawCircle(-360, 110, 3);
-        resultsCardContainer.addChild(sparkleCluster);
+        var scoreRibbon = new createjs.Shape();
+        scoreRibbon.graphics
+            .beginLinearGradientFill(["rgba(255,255,255,0.22)", "rgba(255,255,255,0.05)"], [0, 1], -320, 0, 320, 0)
+            .drawRoundRect(-320, -54, 640, 108, 54);
+        scoreRibbon.regX = 0;
+        scoreRibbon.regY = 0;
+        scoreRibbon.rotation = -18;
+        scoreRibbon.alpha = 0.65;
+        resultsCardContainer.addChild(scoreRibbon);
 
-        resultsHeadingTxt = new createjs.Text("Performance Summary", "700 34px 'Baloo 2'", "#FFFFFF");
+        var headerContainer = new createjs.Container();
+        headerContainer.y = -200;
+        resultsCardContainer.addChild(headerContainer);
+
+        resultsHeadingTxt = new createjs.Text("Performance Summary", "700 36px 'Baloo 2'", "#FFFFFF");
         resultsHeadingTxt.textAlign = "center";
-        resultsHeadingTxt.y = -200;
-        resultsCardContainer.addChild(resultsHeadingTxt);
+        resultsHeadingTxt.shadow = new createjs.Shadow("rgba(8,14,40,0.5)", 0, 6, 24);
+        headerContainer.addChild(resultsHeadingTxt);
 
-        resultsSubheadingTxt = new createjs.Text("Here's how you performed in this round.", "400 20px 'Baloo 2'", "rgba(255,255,255,0.85)");
+        resultsSubheadingTxt = new createjs.Text("Here's how you performed in this round.", "400 20px 'Baloo 2'", "rgba(255,255,255,0.9)");
         resultsSubheadingTxt.textAlign = "center";
-        resultsSubheadingTxt.y = -164;
-        resultsCardContainer.addChild(resultsSubheadingTxt);
+        resultsSubheadingTxt.y = 38;
+        headerContainer.addChild(resultsSubheadingTxt);
 
-        resultsScoreDial = createResultsSummaryDial(112, "Score", ["#FFE36E", "#FF6F91"], {
-            valueFont: "700 64px 'Baloo 2'",
-            valueYOffset: -20,
-            labelFont: "600 22px 'Baloo 2'",
-            labelOffset: 78,
-            accentStroke: 14,
-            accentInset: 20,
-            valueColor: "#1D1A3A",
+        var headerUnderline = new createjs.Shape();
+        headerUnderline.graphics
+            .setStrokeStyle(2)
+            .beginStroke("rgba(255,255,255,0.45)")
+            .moveTo(-140, 70)
+            .lineTo(140, 70);
+        headerContainer.addChild(headerUnderline);
+
+        resultsScoreDial = createResultsSummaryDial(120, "Score", ["#FFE58A", "#FF7DA6"], {
+            valueFont: "700 68px 'Baloo 2'",
+            valueYOffset: -18,
+            labelFont: "600 24px 'Baloo 2'",
+            labelOffset: 88,
+            accentStroke: 16,
+            accentInset: 22,
+            valueColor: "#1B1B3F",
+            baseGradient: ["rgba(255,255,255,0.96)", "rgba(237,242,255,0.72)"],
+            innerGradient: ["#FFFFFF", "#E9F0FF"],
+            glowAlpha: 0.45,
+            valueShadowColor: "rgba(12,20,48,0.4)",
+            labelShadow: new createjs.Shadow("rgba(13,19,42,0.35)", 0, 3, 12),
         });
-        resultsScoreDial.y = -40;
+        resultsScoreDial.y = -24;
         resultsCardContainer.addChild(resultsScoreDial);
 
-        resultsResponseDial = createResultsSummaryDial(86, "Response Time", ["#4FE4FF", "#4C7DFF"], {
-            valueFont: "700 44px 'Baloo 2'",
+        var footerY = 170;
+
+        resultsResponseDial = createResultsSummaryDial(90, "Response Time", ["#5BEBFF", "#547BFF"], {
+            valueFont: "700 46px 'Baloo 2'",
             labelFont: "600 18px 'Baloo 2'",
-            labelOffset: 132,
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#EAF5FF"],
+            glowAlpha: 0.5,
         });
-        resultsResponseDial.x = -270;
-        resultsResponseDial.y = 150;
+        resultsResponseDial.x = -255;
+        resultsResponseDial.y = footerY;
         resultsCardContainer.addChild(resultsResponseDial);
 
-        resultsQuestionsDial = createResultsSummaryDial(86, "Questions", ["#FFD166", "#FF6F91"], {
-            valueFont: "700 44px 'Baloo 2'",
+        resultsQuestionsDial = createResultsSummaryDial(90, "Questions", ["#FFD271", "#FF7BAE"], {
+            valueFont: "700 46px 'Baloo 2'",
             labelFont: "600 18px 'Baloo 2'",
-            labelOffset: 132,
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(251,243,255,0.6)"],
+            innerGradient: ["#FFFFFF", "#F7ECFF"],
+            glowAlpha: 0.5,
         });
-        resultsQuestionsDial.x = -90;
-        resultsQuestionsDial.y = 150;
+        resultsQuestionsDial.x = -85;
+        resultsQuestionsDial.y = footerY;
         resultsCardContainer.addChild(resultsQuestionsDial);
 
-        resultsAttemptsDial = createResultsSummaryDial(86, "Attempts", ["#6CFFE5", "#28CFFF"], {
-            valueFont: "700 44px 'Baloo 2'",
+        resultsAttemptsDial = createResultsSummaryDial(90, "Attempts", ["#6CF2E6", "#30D6FF"], {
+            valueFont: "700 46px 'Baloo 2'",
             labelFont: "600 18px 'Baloo 2'",
-            labelOffset: 132,
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,251,0.6)"],
+            innerGradient: ["#FFFFFF", "#E9FFFB"],
+            glowAlpha: 0.5,
         });
-        resultsAttemptsDial.x = 90;
-        resultsAttemptsDial.y = 150;
+        resultsAttemptsDial.x = 85;
+        resultsAttemptsDial.y = footerY;
         resultsCardContainer.addChild(resultsAttemptsDial);
 
-        resultsCorrectDial = createResultsSummaryDial(86, "Correct", ["#9BFF6C", "#33C667"], {
-            valueFont: "700 44px 'Baloo 2'",
+        resultsCorrectDial = createResultsSummaryDial(90, "Correct", ["#9EFF7D", "#35C86A"], {
+            valueFont: "700 46px 'Baloo 2'",
             labelFont: "600 18px 'Baloo 2'",
-            labelOffset: 132,
+            labelOffset: 134,
+            baseGradient: ["rgba(255,255,255,0.92)", "rgba(231,255,236,0.6)"],
+            innerGradient: ["#FFFFFF", "#E6FFEF"],
+            glowAlpha: 0.5,
         });
-        resultsCorrectDial.x = 270;
-        resultsCorrectDial.y = 150;
+        resultsCorrectDial.x = 255;
+        resultsCorrectDial.y = footerY;
         resultsCardContainer.addChild(resultsCorrectDial);
+
+        var footerDivider = new createjs.Shape();
+        footerDivider.graphics
+            .setStrokeStyle(1.5)
+            .beginStroke("rgba(255,255,255,0.38)")
+            .moveTo(-360, footerY - 110)
+            .lineTo(360, footerY - 110);
+        footerDivider.alpha = 0.4;
+        resultsCardContainer.addChildAt(footerDivider, resultsCardContainer.getChildIndex(resultsResponseDial));
+
+        resultsCardContainer.setChildIndex(cardOutline, resultsCardContainer.numChildren - 1);
+
     }
 
     if (parentContainer && resultsOverlay.parent !== parentContainer) {
@@ -885,8 +942,8 @@ function positionResultsCloseBtn() {
         return;
     }
 
-    var halfWidth = 430;
-    var halfHeight = 260;
+    var halfWidth = 460;
+    var halfHeight = 280;
     closeBtnFinal.x = resultsCardContainer.x + halfWidth - 44;
     closeBtnFinal.y = resultsCardContainer.y - halfHeight + 36;
 }
