@@ -45,6 +45,7 @@ function formatTimerValue(totalSeconds) {
 	return totalSeconds;
 }
 
+
 if (typeof window !== "undefined") {
     window.formatTimerValue = formatTimerValue;
 }
@@ -1574,13 +1575,24 @@ function applyHowToPlayButtonState(button, state) {
     if (highlight) {
         highlight.graphics.clear();
     }
+    if (glow) {
+
         glow.graphics.clear();
     }
 
     if (state === "start") {
         if (glow) {
             glow.graphics
-                .beginRadialGradientFill(["rgba(255, 166, 94, 0.45)", "rgba(255, 166, 94, 0)"], [0, 1], 0, 0, 0, 0, 0, 180)
+                .beginRadialGradientFill(
+                    ["rgba(255, 166, 94, 0.45)", "rgba(255, 166, 94, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    180
+                )
                 .drawCircle(0, 0, 170);
             glow.alpha = 0.95;
         }
@@ -1593,7 +1605,16 @@ function applyHowToPlayButtonState(button, state) {
         }
         if (highlight) {
             highlight.graphics
-                .beginLinearGradientFill(["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"], [0, 0.55, 1], -160, -44, 160, 14)
+
+                .beginLinearGradientFill(
+                    ["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    14
+                )
+
                 .drawRoundRect(-160, -44, 320, 58, 28);
         }
         if (icon) {
@@ -1610,10 +1631,18 @@ function applyHowToPlayButtonState(button, state) {
     } else {
         if (glow) {
             glow.graphics
-                .beginRadialGradientFill([
-                    "rgba(255, 170, 115, 0.55)",
-                    "rgba(255, 170, 115, 0)"
-                ], [0, 1], 0, 0, 0, 0, 0, 165)
+
+                .beginRadialGradientFill(
+                    ["rgba(255, 170, 115, 0.55)", "rgba(255, 170, 115, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    165
+                )
+
                 .drawCircle(0, 0, 165);
             glow.alpha = 0.9;
         }
@@ -1626,11 +1655,19 @@ function applyHowToPlayButtonState(button, state) {
         }
         if (highlight) {
             highlight.graphics
-                .beginLinearGradientFill([
-                    "rgba(255, 255, 255, 0.72)",
-                    "rgba(255, 255, 255, 0.18)",
-                    "rgba(255, 255, 255, 0)"
-                ], [0, 0.55, 1], -160, -44, 160, 16)
+                .beginLinearGradientFill(
+                    [
+                        "rgba(255, 255, 255, 0.72)",
+                        "rgba(255, 255, 255, 0.18)",
+                        "rgba(255, 255, 255, 0)"
+                    ],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    16
+                )
+
                 .drawRoundRect(-160, -44, 320, 60, 28);
         }
         if (icon) {
