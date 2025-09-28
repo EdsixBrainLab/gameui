@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -219,6 +218,7 @@ var HUD_THEME_PRESETS = {
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
 }
+  
 
 function resolveHudThemeMode() {
     var scopes = [];
@@ -798,6 +798,7 @@ function updateLoading(event) {
         }
     }
 
+
     if (progressRatio >= 1) {
         hideHowToPlayProgressBar();
     }
@@ -826,6 +827,7 @@ function updateLoading(event) {
 
     } else {
         loadProgressLabel.lineWidth = 432;
+
 
         if (progresPrecentage >= 0 && progresPrecentage <= 25) {
             loadProgressLabel.text = "Collecting game assets" + extradot;
@@ -1340,6 +1342,7 @@ function watchRestart() {
     }
 
     hideLoaderProceedButton();
+
 
 
     stage.update(); //update the stage to show text;
@@ -1951,6 +1954,7 @@ function createHowToPlayInstructions() {
     card.regY = 146;
     card.x = 324;
     card.y = 146;
+
     container.addChild(card);
 
     var glow = new createjs.Shape();
@@ -1962,6 +1966,7 @@ function createHowToPlayInstructions() {
         ], [0, 0.5, 1], 324, 146, 0, 324, 146, 296)
         .drawEllipse(-90, -60, 800, 360);
     glow.alpha = 0.32;
+
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
@@ -1981,11 +1986,13 @@ function createHowToPlayInstructions() {
     for (var i = 0; i < steps.length; i++) {
         var itemY = 100 + i * 46;
 
+
         var badge = new createjs.Shape();
         badge.graphics
             .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -20, -20, 20, 20)
             .drawCircle(0, 0, 20);
         badge.x = 68;
+
         badge.y = itemY;
         container.addChild(badge);
 
@@ -2010,6 +2017,7 @@ function createHowToPlayInstructions() {
         }
     }
 
+ 
     container.cardShape = card;
 
     return container;
@@ -2043,6 +2051,7 @@ function createHowToPlayHeader() {
     container.x = 316;
     container.y = 118;
 
+
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
@@ -2058,6 +2067,7 @@ function createHowToPlayHeader() {
         .drawCircle(0, 0, 240);
     glow.alpha = 0.8;
     glow.x = 252;
+
     glow.y = 60;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
@@ -2067,6 +2077,7 @@ function createHowToPlayHeader() {
     card.graphics
         .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 520, 0)
         .drawRoundRect(0, 0, 520, 120, 42);
+
     card.shadow = new createjs.Shadow("rgba(170, 74, 16, 0.28)", 0, 18, 32);
     container.addChild(card);
     container.cardShape = card;
@@ -2082,11 +2093,13 @@ function createHowToPlayHeader() {
             0
         )
         .drawRoundRect(12, 8, 496, 52, 28);
+
     cardHighlight.alpha = 0.85;
     container.addChild(cardHighlight);
 
     var tildeWave = createHowToPlayTildeWave(260, 16);
     tildeWave.x = 180;
+
     tildeWave.y = 94;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
@@ -2105,6 +2118,7 @@ function createHowToPlayHeader() {
         )
         .drawCircle(0, 0, 70);
     iconHalo.x = 98;
+
     iconHalo.y = 60;
     iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
@@ -2239,6 +2253,7 @@ function createHowToPlayProgressBar() {
     container.progressShine = shine;
     container.progressMask = fillMask;
     container.progressPulse = pulse;
+
 
     return container;
 }
@@ -3048,6 +3063,7 @@ function hideLoaderProceedButton() {
         stage.update();
     }
 }
+
 
 
 //==========================================================================//
