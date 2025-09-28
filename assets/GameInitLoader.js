@@ -30,7 +30,6 @@ var hudContainer,
 var HowToPlayScreenImg,
     howToPlayImageMc,
     loadProgressPercentLabel;
-
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -208,7 +207,6 @@ function preloadAllAssets() {
 function updateLoading(event) {
 
     var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
-
     if (bar) {
         bar.scaleX = progressRatio;
     }
@@ -1321,7 +1319,6 @@ function createHowToPlayInstructions() {
 }
 
 
-
 function drawHoneycombPattern(width, height, radius) {
     var shape = new createjs.Shape();
     var graphics = shape.graphics;
@@ -1535,7 +1532,6 @@ function createIntroActionButton() {
     var highlight = new createjs.Shape();
     highlight.name = "highlight";
     button.addChild(highlight);
-
     var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
     icon.textAlign = "center";
@@ -1567,7 +1563,6 @@ function applyHowToPlayButtonState(button, state) {
     if (!button) {
         return;
     }
-
     var base = button.getChildByName("base");
     var highlight = button.getChildByName("highlight");
     var label = button.getChildByName("label");
@@ -1581,6 +1576,7 @@ function applyHowToPlayButtonState(button, state) {
         highlight.graphics.clear();
     }
     if (glow) {
+
         glow.graphics.clear();
     }
 
@@ -1609,6 +1605,7 @@ function applyHowToPlayButtonState(button, state) {
         }
         if (highlight) {
             highlight.graphics
+
                 .beginLinearGradientFill(
                     ["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
                     [0, 0.55, 1],
@@ -1617,6 +1614,7 @@ function applyHowToPlayButtonState(button, state) {
                     160,
                     14
                 )
+
                 .drawRoundRect(-160, -44, 320, 58, 28);
         }
         if (icon) {
@@ -1633,6 +1631,7 @@ function applyHowToPlayButtonState(button, state) {
     } else {
         if (glow) {
             glow.graphics
+
                 .beginRadialGradientFill(
                     ["rgba(255, 170, 115, 0.55)", "rgba(255, 170, 115, 0)"],
                     [0, 1],
@@ -1643,6 +1642,7 @@ function applyHowToPlayButtonState(button, state) {
                     0,
                     165
                 )
+
                 .drawCircle(0, 0, 165);
             glow.alpha = 0.9;
         }
@@ -1667,6 +1667,7 @@ function applyHowToPlayButtonState(button, state) {
                     160,
                     16
                 )
+
                 .drawRoundRect(-160, -44, 320, 60, 28);
         }
         if (icon) {
