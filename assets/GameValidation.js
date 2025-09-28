@@ -879,14 +879,12 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawRoundRect(-460, -280, 920, 560, 52);
         cardBg.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 26, 64);
         resultsCardContainer.addChild(cardBg);
-
         resultsCardMask = new createjs.Shape();
         resultsCardMask.graphics.drawRoundRect(-440, -240, 880, 480, 46);
         resultsCardMask.visible = false;
         resultsCardMask.mouseEnabled = false;
         resultsCardMask.mouseChildren = false;
         resultsCardContainer.addChild(resultsCardMask);
-
         resultsCardAurora = new createjs.Shape();
         resultsCardAurora.graphics
             .beginLinearGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"], [0, 1], -420, -180, 320, 220)
@@ -950,7 +948,6 @@ function ensureResultsSummaryOverlay(parentContainer) {
             .drawCircle(-260, -200, 320);
         cardGlow.alpha = 0.5;
         resultsCardContainer.addChild(cardGlow);
-
         resultsCardAmbientGlow = new createjs.Shape();
         resultsCardAmbientGlow.graphics
             .beginRadialGradientFill(
@@ -1035,7 +1032,6 @@ function ensureResultsSummaryOverlay(parentContainer) {
         });
         resultsScoreDial.y = -24;
         resultsCardContainer.addChild(resultsScoreDial);
-
         resultsScorePulse = new createjs.Shape();
         resultsScorePulse.graphics
             .beginRadialGradientFill(["rgba(255,255,255,0.4)", "rgba(255,255,255,0)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 0, 0, 0, 150)
