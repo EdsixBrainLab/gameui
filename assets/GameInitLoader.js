@@ -10,7 +10,7 @@ var TitleContaier;
 var extradot = "";
 
 //var introStartCnt = -1;
-var TotalAssetsCnt = 34
+var TotalAssetsCnt = 33
 var betweenChars = ' '; // a space
 var volumeBtn1, QuesCntMc1, fullScreenBtn1, closeBtn1, QuesCntMc2;
 var hudContainer,
@@ -27,12 +27,306 @@ var hudContainer,
     questionProgressBarBg,
     questionProgressBarFill;
 
+var HowToPlayScreenImg,
+    howToPlayImageMc,
+    loadProgressPercentLabel;
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
 var HUD_CARD_ACCENT_WIDTH = 140;
 var HUD_CARD_SPACING = 590;
 var QUESTION_PROGRESS_WIDTH = 80;
+
+var HUD_THEME_PRESETS = {
+    dark: {
+        cards: {
+            score: {
+                background: ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"],
+                accent: ["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.03)"],
+                iconStyle: {
+                    fill: "#FACC6B",
+                    strokeColor: "rgba(12, 27, 46, 0.45)",
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(20, 42, 74, 0.92)", "rgba(45, 86, 148, 0.92)"],
+                accent: ["rgba(102, 185, 255, 0.35)", "rgba(102, 185, 255, 0.08)"],
+                iconStyle: {
+                    strokeColor: "#66B9FF",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(18, 60, 53, 0.92)", "rgba(34, 110, 95, 0.92)"],
+                accent: ["rgba(110, 231, 183, 0.32)", "rgba(110, 231, 183, 0.08)"],
+                iconStyle: {
+                    fill: "#6EE7B7",
+                    strokeColor: "#0d1b2a",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 0.96,
+        cardAccentAlpha: 0.9,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"],
+            alpha: 0.24
+        },
+        textStyles: {
+            label: {
+                color: "#C4DBFF",
+                shadow: { color: "rgba(5, 16, 32, 0.65)", x: 0, y: 2, blur: 6 }
+            },
+            value: {
+                color: "#FFFFFF",
+                shadow: { color: "rgba(12, 21, 40, 0.35)", x: 0, y: 4, blur: 12 }
+            },
+            timerValue: {
+                color: "#F6FBFF",
+                shadow: { color: "rgba(5, 16, 32, 0.3)", x: 0, y: 4, blur: 12 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(255,255,255,0.14)",
+            fill: ["#34d399", "#60a5fa"]
+        },
+        controlBackground: {
+            colors: ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"],
+            alpha: 0.88
+        },
+        controlPalette: {
+            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.5)" },
+            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.5)" },
+            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.55)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(255,255,255,0.5)",
+            ringAlpha: 0.6,
+            hoverRingAlpha: 0.9,
+            glowAlpha: 0.45,
+            hoverGlowAlpha: 0.65,
+            backgroundGradient: null
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,152,0,0.95)", "rgba(212,138,29,0.95)"],
+                accent: ["rgba(245,192,112,0.45)", "rgba(245,192,112,0.1)"],
+                icon: "#FF9DA5",
+                text: "#FFD7D7"
+            },
+            danger: {
+                background: ["rgba(88,26,36,0.95)", "rgba(148,41,52,0.95)"],
+                accent: ["rgba(255,135,135,0.45)", "rgba(255,135,135,0.1)"],
+                icon: "#FF9DA5",
+                text: "#FFD7D7"
+            },
+            normalIcon: "#66B9FF",
+            normalText: "#F6FBFF"
+        }
+    },
+    light: {
+        cards: {
+            score: {
+                background: ["rgba(255,255,255,0.96)", "rgba(237,244,255,0.96)"],
+                accent: ["rgba(78,146,249,0.24)", "rgba(78,146,249,0.08)"],
+                iconStyle: {
+                    fill: "#F4B400",
+                    strokeColor: "rgba(20,52,91,0.18)",
+                    strokeWidth: 2
+                }
+            },
+            timer: {
+                background: ["rgba(255,255,255,0.96)", "rgba(226,243,255,0.96)"],
+                accent: ["rgba(85,172,238,0.22)", "rgba(85,172,238,0.08)"],
+                iconStyle: {
+                    strokeColor: "#1A73E8",
+                    strokeWidth: 3
+                }
+            },
+            question: {
+                background: ["rgba(255,255,255,0.96)", "rgba(232,249,244,0.96)"],
+                accent: ["rgba(52,211,153,0.24)", "rgba(52,211,153,0.08)"],
+                iconStyle: {
+                    fill: "#0F9D58",
+                    strokeColor: "rgba(17,58,54,0.35)",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 0.98,
+        cardAccentAlpha: 0.95,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.78)", "rgba(255,255,255,0)"],
+            alpha: 0.24
+        },
+        textStyles: {
+            label: {
+                color: "#1E3A5F",
+                shadow: { color: "rgba(255,255,255,0.85)", x: 0, y: 1, blur: 2 }
+            },
+            value: {
+                color: "#15325B",
+                shadow: { color: "rgba(255,255,255,0.7)", x: 0, y: 2, blur: 6 }
+            },
+            timerValue: {
+                color: "#0B1B33",
+                shadow: { color: "rgba(255,255,255,0.65)", x: 0, y: 2, blur: 6 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(15,35,66,0.12)",
+            fill: ["#4C6FFF", "#2DD4BF"]
+        },
+        controlBackground: {
+            colors: ["rgba(18,43,96,0.12)", "rgba(18,43,96,0.04)"],
+            alpha: 0.9
+        },
+        controlPalette: {
+            volume: { primary: "rgba(78,146,249,0.75)", glow: "rgba(78,146,249,0.25)" },
+            fullscreen: { primary: "rgba(158,108,237,0.75)", glow: "rgba(158,108,237,0.25)" },
+            close: { primary: "rgba(255,96,102,0.8)", glow: "rgba(255,96,102,0.28)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(22,45,79,0.35)",
+            ringAlpha: 0.55,
+            hoverRingAlpha: 0.85,
+            glowAlpha: 0.35,
+            hoverGlowAlpha: 0.55,
+            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(233,242,255,0.95)"]
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,216,149,0.96)", "rgba(255,196,102,0.96)"],
+                accent: ["rgba(255,200,138,0.4)", "rgba(255,200,138,0.14)"],
+                icon: "#E65100",
+                text: "#A33A00"
+            },
+            danger: {
+                background: ["rgba(255,173,173,0.96)", "rgba(248,120,120,0.96)"],
+                accent: ["rgba(255,138,138,0.45)", "rgba(255,138,138,0.16)"],
+                icon: "#D32F2F",
+                text: "#8B1A1A"
+            },
+            normalIcon: "#1A73E8",
+            normalText: "#0B1B33"
+        }
+    }
+};
+
+function cloneArray(source) {
+    return source && source.slice ? source.slice() : source;
+}
+
+function resolveHudThemeMode() {
+    var scopes = [];
+
+    if (typeof window !== "undefined") {
+        scopes.push(window);
+    }
+
+    if (typeof globalThis !== "undefined") {
+        scopes.push(globalThis);
+    }
+
+    for (var i = 0; i < scopes.length; i++) {
+        var scope = scopes[i];
+        if (!scope) {
+            continue;
+        }
+
+        if (typeof scope.headerPanelThemeMode !== "undefined") {
+            return String(scope.headerPanelThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.hudThemeMode !== "undefined") {
+            return String(scope.hudThemeMode).toLowerCase();
+        }
+
+        if (typeof scope.headerPanelTheme !== "undefined") {
+            return String(scope.headerPanelTheme).toLowerCase();
+        }
+    }
+
+    if (typeof headerPanelThemeMode !== "undefined") {
+        return String(headerPanelThemeMode).toLowerCase();
+    }
+
+    if (typeof hudThemeMode !== "undefined") {
+        return String(hudThemeMode).toLowerCase();
+    }
+
+    if (typeof headerPanelTheme !== "undefined") {
+        return String(headerPanelTheme).toLowerCase();
+    }
+
+    return "dark";
+}
+
+function getHudThemeConfig() {
+    var mode = resolveHudThemeMode();
+    if (!HUD_THEME_PRESETS[mode]) {
+        mode = "dark";
+    }
+    return HUD_THEME_PRESETS[mode];
+}
+
+function applyTextStyle(target, style) {
+    if (!target || !style) {
+        return;
+    }
+
+    if (style.color) {
+        target.color = style.color;
+    }
+
+    if (style.shadow) {
+        target.shadow = new createjs.Shadow(
+            style.shadow.color || "rgba(0,0,0,0)",
+            style.shadow.x || 0,
+            style.shadow.y || 0,
+            style.shadow.blur || 0
+        );
+    } else {
+        target.shadow = null;
+    }
+}
+
+function mergeIconStyle(base, override) {
+    var result = {};
+
+    if (base) {
+        if (typeof base.fill !== "undefined") {
+            result.fill = base.fill;
+        }
+        if (typeof base.strokeColor !== "undefined") {
+            result.strokeColor = base.strokeColor;
+        }
+        if (typeof base.strokeWidth !== "undefined") {
+            result.strokeWidth = base.strokeWidth;
+        }
+    }
+
+    if (override) {
+        if (typeof override === "string") {
+            result.fill = override;
+            result.strokeColor = override;
+        } else {
+            if (typeof override.fill !== "undefined") {
+                result.fill = override.fill;
+            }
+            if (typeof override.strokeColor !== "undefined") {
+                result.strokeColor = override.strokeColor;
+            }
+            if (typeof override.strokeWidth !== "undefined") {
+                result.strokeWidth = override.strokeWidth;
+            }
+        }
+    }
+
+    return result;
+}
 
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
@@ -41,6 +335,7 @@ function formatTimerValue(totalSeconds) {
    // return (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
 	return totalSeconds;
 }
+
 
 if (typeof window !== "undefined") {
     window.formatTimerValue = formatTimerValue;
@@ -53,31 +348,29 @@ if (typeof window !== "undefined") {
 
 function createLoader() {
 
-    loaderColor = createjs.Graphics.getRGB(254, 198, 44, 1);
-    var loaderColor1 = createjs.Graphics.getRGB(254, 198, 44, 1);
-    loaderBar = new createjs.Container();
-    var txt = new createjs.Container();
-    bar = new createjs.Shape();
-    bar.graphics.beginFill(loaderColor).drawRect(0, 0, 1, barHeight).endFill();
     loaderWidth = 600;
 
-    //
+    if (!HowToPlayScreenImg) {
+        HowToPlayScreenImg = buildHowToPlayOverlay();
+    }
 
-    loadProgressLabel = new createjs.Text("", "20px 'Baloo 2'", "#000");
-    loadProgressLabel.lineWidth = 400;
-    loadProgressLabel.textAlign = "center";
-    txt.addChild(loadProgressLabel)
-    txt.x = 260;
-    txt.y = 35;
+    loaderBar = HowToPlayScreenImg;
+    bar = HowToPlayScreenImg && HowToPlayScreenImg.progressFill ? HowToPlayScreenImg.progressFill : null;
+    loadProgressLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressLabel ? HowToPlayScreenImg.progressLabel : null;
+    loadProgressPercentLabel = HowToPlayScreenImg && HowToPlayScreenImg.progressPercent ? HowToPlayScreenImg.progressPercent : null;
 
+    if (loaderBar) {
+        loaderBar.visible = true;
+        if (!loaderBar.parent) {
+            stage.addChild(loaderBar);
+        } else {
+            stage.setChildIndex(loaderBar, stage.numChildren - 1);
+        }
+    }
 
-    var bgBar = new createjs.Shape();
-    var padding = 3
-    bgBar.graphics.setStrokeStyle(2).beginStroke(loaderColor1).drawRoundRect(-padding / 2, -padding / 2, loaderWidth + padding, barHeight + padding, 5);
-    loaderBar.x = 1300 - loaderWidth >> 1;
-    loaderBar.y = 1220 - barHeight >> 1;
-    loaderBar.addChild(bar, bgBar, txt);
-    stage.addChild(loaderBar);
+    hideLoaderProceedButton();
+
+    stage.update();
 
 
 
@@ -137,7 +430,6 @@ function createManifest() {
         { id: "handCursor", src: assetsPath + "handCursor.png" },
         { id: "SkipBtn", src: assetsPathLang + "SkipBtn.png" },
         { id: "HowToPlayScreen", src: assetsPathLang + "HowToPlayScreen.png" },
-        { id: "HowToPlayScreenImg", src: assetsPathLang + "HowToPlayScreen1.png" },
 
         { id: "scoreImgMc", src: assetsPath + "Score.png" },
         { id: "ResponseImgMc", src: assetsPath + "ResponseTime.png" },
@@ -205,47 +497,68 @@ function preloadAllAssets() {
 
 function updateLoading(event) {
 
-    bar.scaleX = event.loaded * loaderWidth;
+    var progressRatio = Math.max(0, Math.min(1, (event && event.loaded) || 0));
 
+    if (bar) {
+        bar.scaleX = progressRatio;
+    }
 
+    progresPrecentage = Math.round(progressRatio * 100);
 
-    progresPrecentage = Math.round(event.loaded * 100);
+    if (loadProgressPercentLabel) {
+        loadProgressPercentLabel.text = progresPrecentage + "%";
+    }
 
+    if (HowToPlayScreenImg && HowToPlayScreenImg.proceedButton) {
+        if (progresPrecentage < 100) {
+            hideLoaderProceedButton();
+        }
+    }
+
+    if (!loadProgressLabel) {
+        stage.update();
+        return;
+    }
 
     if (assetsPathLang == "assets/VietnamAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "% Đang tải trò chơi...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "% Đang tải trò chơi...";
 
     } else if (assetsPathLang == "assets/TamilAssets/") {
-        loadProgressLabel.text = " " + progresPrecentage + "% ஆட்டம் தயாராகிக் கொண்டிருக்கிறது...";
-        loadProgressLabel.lineWidth = 1200;
+        loadProgressLabel.text = progresPrecentage + "% ஆட்டம் தயாராகிக் கொண்டிருக்கிறது...";
+        loadProgressLabel.lineWidth = 540;
         loadProgressLabel.font = "bold 23px Segoe UI";
     } else if (assetsPathLang == "assets/GujaratiAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "% ગેમ લોડ થાય છે...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "% ગેમ લોડ થાય છે...";
 
     } else if (assetsPathLang == "assets/HindiAssets/") {
-        loadProgressLabel.text = "              " + progresPrecentage + "%खेल लोड हो रहा है...";
+        loadProgressLabel.lineWidth = 540;
+        loadProgressLabel.text = progresPrecentage + "%खेल लोड हो रहा है...";
         loadProgressLabel.font = "bold 23px Segoe UI";
 
     } else {
-        loadProgressLabel.lineWidth = 1200;
+        loadProgressLabel.lineWidth = 420;
 
-        if (progresPrecentage > 0 && progresPrecentage <= 25) {
-            loadProgressLabel.text = "              " + "Loading game assets" + extradot;
+        if (progresPrecentage >= 0 && progresPrecentage <= 25) {
+            loadProgressLabel.text = "Collecting game assets" + extradot;
 
         }
         else if (progresPrecentage > 25 && progresPrecentage <= 50) {
-            loadProgressLabel.text = "              " + "Loading animations" + extradot;
+            loadProgressLabel.text = "Uploading core files" + extradot;
         }
         else if (progresPrecentage > 50 && progresPrecentage <= 75) {
-            loadProgressLabel.text = "              " + "Personalising your session" + extradot;
+            loadProgressLabel.text = "Uploading animations" + extradot;
 
         }
-        else if (progresPrecentage > 75 && progresPrecentage <= 100) {
-            loadProgressLabel.text = "              " + "Loading your session" + extradot;
+        else if (progresPrecentage > 75 && progresPrecentage < 100) {
+            loadProgressLabel.text = "Finalising setup" + extradot;
 
+        } else {
+            loadProgressLabel.text = "Ready to start";
         }
         if (extradot == "") {
-            extradot = "."
+            extradot = ".";
         }
         else if (extradot == "...") {
             extradot = ".";
@@ -253,13 +566,16 @@ function updateLoading(event) {
         else {
             extradot = extradot + ".";
         }
-        // loadProgressLabel.text = "              " + progresPrecentage + "% Game Loading...";
     }
 
 
     stage.update();
 
 }
+
+
+
+
 
 
 
@@ -271,9 +587,22 @@ function fileLoaded(e) {
 
 
 function doneLoading(event) {
-    loaderBar.visible = false;
-    bar.visible = false;
-    stage.removeChild(loaderBar);
+    if (bar) {
+        bar.scaleX = 1;
+    }
+    if (loadProgressPercentLabel) {
+        loadProgressPercentLabel.text = "100%";
+    }
+    if (loadProgressLabel && assetsPathLang != "assets/VietnamAssets/" && assetsPathLang != "assets/TamilAssets/" && assetsPathLang != "assets/GujaratiAssets/" && assetsPathLang != "assets/HindiAssets/") {
+        loadProgressLabel.text = "Ready to start";
+    }
+    if (loaderBar) {
+        loaderBar.visible = true;
+        if (loaderBar.parent) {
+            loaderBar.parent.setChildIndex(loaderBar, loaderBar.parent.numChildren - 1);
+        }
+    }
+    showLoaderProceedButton();
     stage.update();
     var len = assets.length
     console.log("assets.length=" + len)
@@ -574,17 +903,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "SkipBtn") {
-                var spriteSheet4 = new createjs.SpriteSheet({
-                    framerate: 30,
-                    "images": [preload.getResult("SkipBtn")],
-                    "frames": { "regX": 50, "height": 137, "count": 0, "regY": 50, "width": 262 },
-                    // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-                });
-                //
-                SkipBtnMc = new createjs.Sprite(spriteSheet4);
+                SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                SkipBtnMc.x = 1095;
-                SkipBtnMc.y = 60
+                SkipBtnMc.x = 1100;
+                SkipBtnMc.y = 92;
                 SkipBtnMc.visible = false;
 
                 continue;
@@ -598,17 +920,9 @@ function doneLoading(event) {
             }
 
             if (id == "HowToPlayScreen") {
-                howToPlayImageMc = new createjs.Bitmap(preload.getResult('HowToPlayScreen'));
+                howToPlayImageMc = buildGameIntroOverlay();
                 container.parent.addChild(howToPlayImageMc);
                 howToPlayImageMc.visible = false;
-                howToPlayImageMc.x = howToPlayImageMc.x - 20
-                continue;
-            }
-
-            if (id == "HowToPlayScreenImg") {
-                HowToPlayScreenImg = new createjs.Bitmap(preload.getResult('HowToPlayScreenImg'));
-                container.parent.addChild(HowToPlayScreenImg);
-                HowToPlayScreenImg.visible = true;
                 continue;
             }
 
@@ -620,8 +934,6 @@ function doneLoading(event) {
             }
 
         } else {
-			console.log("progressbarremove")
-
             doneLoading1(event)
 
         }
@@ -668,20 +980,30 @@ function watchRestart() {
     stage.addChild(messageField);
 
 
-    gameScoreTxt = new createjs.Text("0", "700 32px 'Baloo 2'", "#FFFFFF");
+    var hudTheme = getHudThemeConfig();
+    var valueTextStyle = hudTheme.textStyles ? hudTheme.textStyles.value : null;
+    var timerTextStyle = hudTheme.textStyles ? hudTheme.textStyles.timerValue : null;
+
+    gameScoreTxt = new createjs.Text("0", "700 32px 'Baloo 2'", (valueTextStyle && valueTextStyle.color) || "#FFFFFF");
     gameScoreTxt.textAlign = "left";
     gameScoreTxt.textBaseline = "middle";
-    gameScoreTxt.shadow = new createjs.Shadow("rgba(12, 21, 40, 0.35)", 0, 4, 12);
+    applyTextStyle(gameScoreTxt, valueTextStyle);
+    gameScoreTxt.__baseColor = gameScoreTxt.color;
+    gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
 
-    gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 28px 'Digital'", "#F6FBFF");
+    gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 28px 'Digital'", (timerTextStyle && timerTextStyle.color) || "#F6FBFF");
     gameTimerTxt.textAlign = "left";
     gameTimerTxt.textBaseline = "middle";
-    gameTimerTxt.shadow = new createjs.Shadow("rgba(5, 16, 32, 0.3)", 0, 4, 12);
+    applyTextStyle(gameTimerTxt, timerTextStyle);
+    gameTimerTxt.__baseColor = gameTimerTxt.color;
+    gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
 
-    gameQCntTxt = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
+    gameQCntTxt = new createjs.Text("", "700 28px 'Baloo 2'", (valueTextStyle && valueTextStyle.color) || "#FFFFFF");
     gameQCntTxt.textAlign = "left";
     gameQCntTxt.textBaseline = "middle";
-    gameQCntTxt.shadow = new createjs.Shadow("rgba(12, 21, 40, 0.35)", 0, 4, 12);
+    applyTextStyle(gameQCntTxt, valueTextStyle);
+    gameQCntTxt.__baseColor = gameQCntTxt.color;
+    gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
 
     gameScoreTxt.scaleX = gameScoreTxt.scaleY = 1;
     gameTimerTxt.scaleX = gameTimerTxt.scaleY = 1;
@@ -692,6 +1014,20 @@ function watchRestart() {
 
     if (hudContainer) {
         hudContainer.visible = false;
+    }
+
+    if (!HowToPlayScreenImg) {
+        HowToPlayScreenImg = buildHowToPlayOverlay();
+    }
+
+    var overlayParent = container && container.parent ? container.parent : stage;
+    if (HowToPlayScreenImg && overlayParent) {
+        if (!HowToPlayScreenImg.parent) {
+            overlayParent.addChild(HowToPlayScreenImg);
+        } else {
+            overlayParent.setChildIndex(HowToPlayScreenImg, overlayParent.numChildren - 1);
+        }
+        HowToPlayScreenImg.visible = true;
     }
 
 
@@ -707,13 +1043,15 @@ function watchRestart() {
     }
 
 
-    container.parent.addChild(handCursor);
-    handCursor.visible = true;
-    var hcursorMc = new createjs.MovieClip()
-    container.parent.addChild(hcursorMc)
-    hcursorMc.timeline.addTween(createjs.Tween.get(handCursor).to({ scaleX: .98, scaleY: .98 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
-    handCursor.addEventListener("click", toggleFullScreen);
-    handCursor.addEventListener("click", createHowToPlay)
+    if (typeof handCursor !== "undefined" && handCursor) {
+        handCursor.visible = false;
+        handCursor.removeAllEventListeners();
+        if (handCursor.parent) {
+            handCursor.parent.removeChild(handCursor);
+        }
+    }
+
+    hideLoaderProceedButton();
 
 
     stage.update(); //update the stage to show text;
@@ -728,17 +1066,34 @@ function createHudIconWrapper(primaryColor, glowColor) {
     wrapper.mouseChildren = true;
     wrapper.mouseEnabled = true;
 
+    var theme = getHudThemeConfig();
+    var wrapperTheme = theme.iconWrapper || {};
+
+    var resolvedPrimary = primaryColor || (wrapperTheme.defaultPrimary || "rgba(120,144,255,0.75)");
+    var gradientColors = wrapperTheme.backgroundGradient ? cloneArray(wrapperTheme.backgroundGradient) : [resolvedPrimary, "rgba(255,255,255,0.08)"];
+    var resolvedGlowColor = glowColor || resolvedPrimary;
+
     var glow = new createjs.Shape();
-    glow.graphics.beginRadialGradientFill([glowColor, "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 34).drawCircle(0, 0, 18);
-    glow.alpha = 0.45;
+    glow.graphics.beginRadialGradientFill([resolvedGlowColor, "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 34).drawCircle(0, 0, 18);
+    var glowAlpha = typeof wrapperTheme.glowAlpha === "number" ? wrapperTheme.glowAlpha : 0.45;
+    var hoverGlowAlpha = typeof wrapperTheme.hoverGlowAlpha === "number" ? wrapperTheme.hoverGlowAlpha : glowAlpha + 0.2;
+    glow.alpha = glowAlpha;
+    glow.baseAlpha = glowAlpha;
+    glow.hoverAlpha = hoverGlowAlpha;
     wrapper.addChild(glow);
 
     var background = new createjs.Shape();
-    background.graphics.beginLinearGradientFill([primaryColor, "rgba(255,255,255,0.08)"], [0, 1], -28, -28, 28, 28).drawCircle(0, 0, 12);
+    background.graphics.beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28).drawCircle(0, 0, 12);
     wrapper.addChild(background);
 
     var ring = new createjs.Shape();
-    ring.graphics.setStrokeStyle(2).beginStroke("rgba(255,255,255,0.5)").drawCircle(0, 0, 12);
+    var ringColor = wrapperTheme.ringColor || "rgba(255,255,255,0.5)";
+    var ringAlpha = typeof wrapperTheme.ringAlpha === "number" ? wrapperTheme.ringAlpha : 0.6;
+    var hoverRingAlpha = typeof wrapperTheme.hoverRingAlpha === "number" ? wrapperTheme.hoverRingAlpha : 0.9;
+    ring.graphics.setStrokeStyle(2).beginStroke(ringColor).drawCircle(0, 0, 12);
+    ring.alpha = ringAlpha;
+    ring.baseAlpha = ringAlpha;
+    ring.hoverAlpha = hoverRingAlpha;
     wrapper.addChild(ring);
 
     wrapper.background = background;
@@ -748,38 +1103,44 @@ function createHudIconWrapper(primaryColor, glowColor) {
     return wrapper;
 }
 
-function drawHudIcon(iconShape, type, paletteColor) {
+function drawHudIcon(iconShape, type, overrideStyle) {
     if (!iconShape) {
         return;
     }
+
+    var theme = getHudThemeConfig();
+    var cardsTheme = theme.cards || {};
+    var baseCardTheme = cardsTheme[type] || cardsTheme.score || {};
+    var iconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, overrideStyle);
 
     iconShape.graphics.clear();
 
     switch (type) {
         case "score":
-            var starColor = paletteColor || "#FACC6B";
+            var starColor = iconStyle.fill || "#FACC6B";
             iconShape.graphics.beginFill(starColor).drawPolyStar(0, 0, 14, 5, 0.55, -90);
-            iconShape.graphics.setStrokeStyle(2).beginStroke("rgba(12, 27, 46, 0.45)").drawPolyStar(0, 0, 14, 5, 0.55, -90);
+            if (iconStyle.strokeColor) {
+                iconShape.graphics.setStrokeStyle(iconStyle.strokeWidth || 2).beginStroke(iconStyle.strokeColor).drawPolyStar(0, 0, 14, 5, 0.55, -90);
+            }
             break;
         case "timer":
-            var strokeColor = paletteColor || "#66B9FF";
-            iconShape.graphics.setStrokeStyle(3).beginStroke(strokeColor).drawCircle(0, 0, 14);
-            iconShape.graphics.setStrokeStyle(3).beginStroke(strokeColor).moveTo(0, 0).lineTo(0, -10);
-            iconShape.graphics.setStrokeStyle(3).beginStroke(strokeColor).moveTo(0, 0).lineTo(9, 4);
+            var strokeColor = iconStyle.strokeColor || iconStyle.fill || "#66B9FF";
+            var strokeWidth = iconStyle.strokeWidth || 3;
+            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).drawCircle(0, 0, 14);
+            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).moveTo(0, 0).lineTo(0, -10);
+            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).moveTo(0, 0).lineTo(9, 4);
             break;
         case "question":
-            var fillColor = paletteColor || "#6EE7B7";
+            var fillColor = iconStyle.fill || "#6EE7B7";
             iconShape.graphics.beginFill(fillColor).drawRoundRect(-11, -11, 22, 22, 6);
-            iconShape.graphics.setStrokeStyle(3, "round").beginStroke("#0d1b2a");
-            //iconShape.graphics.moveTo(-4, -3);
-            //iconShape.graphics.quadraticCurveTo(-4, -12, 4, -12);
-            //iconShape.graphics.quadraticCurveTo(12, -12, 12, -4);
-            //iconShape.graphics.quadraticCurveTo(12, 0, 6, 2);
-            //iconShape.graphics.quadraticCurveTo(2, 4, 2, 8);
+            if (iconStyle.strokeColor) {
+                iconShape.graphics.setStrokeStyle(iconStyle.strokeWidth || 3, "round").beginStroke(iconStyle.strokeColor);
+            }
             iconShape.graphics.endStroke();
-            //iconShape.graphics.beginFill("#0d1b2a").drawCircle(2, 12, 2);
             break;
     }
+
+    iconShape.__iconStyle = iconStyle;
 }
 
 function createHudCard(label, type) {
@@ -787,26 +1148,14 @@ function createHudCard(label, type) {
     card.baseScale = 1;
     card.type = type;
 
-    var gradientMap = {
-        score: ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"],
-        timer: ["rgba(20, 42, 74, 0.92)", "rgba(45, 86, 148, 0.92)"],
-        question: ["rgba(18, 60, 53, 0.92)", "rgba(34, 110, 95, 0.92)"]
-    };
+    var theme = getHudThemeConfig();
+    var cardsTheme = theme.cards || {};
+    var baseCardTheme = cardsTheme[type] || cardsTheme.score || {};
 
-    /*var accentMap = {
-        score: ["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 1)"],
-        timer: ["rgba(102, 185, 255, 0.35)", "rgba(102, 185, 255, 1)"],
-        question: ["rgba(110, 231, 183, 0.32)", "rgba(110, 231, 183, 1)"]
-    };*/
-
-    var accentMap = {
-        score: ["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.03)"],
-        timer: ["rgba(102, 185, 255, 0.35)", "rgba(102, 185, 255, 0.08)"],
-        question: ["rgba(110, 231, 183, 0.32)", "rgba(110, 231, 183, 0.08)"]
-    };
-
-    var gradient = gradientMap[type] || gradientMap.score;
-    var accent = accentMap[type] || accentMap.score;
+    var gradient = cloneArray(baseCardTheme.background || []);
+    var accent = cloneArray(baseCardTheme.accent || []);
+    var highlightConfig = theme.cardHighlight || {};
+    var highlightColors = cloneArray(highlightConfig.colors || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
 
     var cardWidth = HUD_CARD_WIDTH;
     var cardHeight = HUD_CARD_HEIGHT;
@@ -816,35 +1165,42 @@ function createHudCard(label, type) {
 
     var background = new createjs.Shape();
     background.graphics
-        .beginLinearGradientFill(gradient, [0, 1], -halfWidth, 0, halfWidth, 0)
+        .beginLinearGradientFill((gradient && gradient.length ? gradient : ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"]), [0, 1], -halfWidth, 0, halfWidth, 0)
         .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-    background.alpha = 0.96;
+    var backgroundAlpha = typeof baseCardTheme.backgroundAlpha === "number" ? baseCardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
+    background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : 0.96;
     card.addChild(background);
 
     var accentShape = new createjs.Shape();
     accentShape.graphics
-        .beginLinearGradientFill(accent, [0, 1], -halfWidth, -halfHeight, -halfWidth + HUD_CARD_ACCENT_WIDTH, halfHeight)
+        .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + HUD_CARD_ACCENT_WIDTH, halfHeight)
         .drawRoundRect(-halfWidth, -halfHeight, HUD_CARD_ACCENT_WIDTH, cardHeight, cornerRadius);
-    accentShape.alpha = 0.9;
+    var accentAlpha = typeof baseCardTheme.accentAlpha === "number" ? baseCardTheme.accentAlpha : theme.cardAccentAlpha;
+    accentShape.alpha = typeof accentAlpha === "number" ? accentAlpha : 0.9;
     card.addChild(accentShape);
 
     var highlight = new createjs.Shape();
     highlight.graphics
-        .beginLinearGradientFill(["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"], [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+        .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
         .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-    highlight.alpha = 0.24;
+    var highlightAlpha = typeof highlightConfig.alpha === "number" ? highlightConfig.alpha : 0.24;
+    highlight.alpha = highlightAlpha;
     card.addChild(highlight);
 
     var icon = new createjs.Shape();
     icon.x = -halfWidth + 26;
     icon.y = 0;
-    drawHudIcon(icon, type);
+    var baseIconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, null);
+    drawHudIcon(icon, type, baseIconStyle);
     card.addChild(icon);
 
-    var labelText = new createjs.Text(label.toUpperCase(), "600 12px 'Baloo 2'", "#C4DBFF");
+    var labelStyle = theme.textStyles ? theme.textStyles.label : null;
+    var labelColor = (labelStyle && labelStyle.color) || "#C4DBFF";
+    var labelText = new createjs.Text(label.toUpperCase(), "600 12px 'Baloo 2'", labelColor);
     labelText.textAlign = "left";
     labelText.x = icon.x + 42;
     labelText.y = -18;
+    applyTextStyle(labelText, labelStyle);
     card.addChild(labelText);
 
     var valueHolder = new createjs.Container();
@@ -858,8 +1214,9 @@ function createHudCard(label, type) {
     card.icon = icon;
     card.label = labelText;
     card.valueHolder = valueHolder;
-    card.baseGradient = gradient;
-    card.baseAccent = accent;
+    card.baseGradient = cloneArray(gradient && gradient.length ? gradient : ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"]);
+    card.baseAccent = cloneArray(accent && accent.length ? accent : card.baseGradient);
+    card.baseIconStyle = mergeIconStyle(baseIconStyle, null);
     card.__cardWidth = cardWidth;
     card.__cardHeight = cardHeight;
     card.__cornerRadius = cornerRadius;
@@ -877,6 +1234,8 @@ function buildHudLayout() {
     if (hudContainer && hudContainer.parent) {
         hudContainer.parent.removeChild(hudContainer);
     }
+
+    var hudTheme = getHudThemeConfig();
 
     hudContainer = new createjs.Container();
     hudContainer.x = canvas.width / 2;
@@ -920,14 +1279,18 @@ function buildHudLayout() {
         gameQCntTxt.y = -2;
     }
 
+    var progressTheme = hudTheme.questionProgress || {};
+    var progressBgColor = progressTheme.background || "rgba(255,255,255,0.14)";
+
     questionProgressBarBg = new createjs.Shape();
-    questionProgressBarBg.graphics.beginFill("rgba(255,255,255,0.14)").drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+    questionProgressBarBg.graphics.beginFill(progressBgColor).drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
     questionProgressBarBg.x = -HUD_CARD_WIDTH / 2 + 48;
     questionProgressBarBg.y = 22;
     hudQuestionCardContainer.addChild(questionProgressBarBg);
 
     questionProgressBarFill = new createjs.Shape();
-    questionProgressBarFill.graphics.beginLinearGradientFill(["#34d399", "#60a5fa"], [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0).drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
+    var progressFillColors = (progressTheme.fill && progressTheme.fill.length) ? progressTheme.fill : ["#34d399", "#60a5fa"];
+    questionProgressBarFill.graphics.beginLinearGradientFill(progressFillColors, [0, 1], 0, 0, QUESTION_PROGRESS_WIDTH, 0).drawRoundRect(0, 0, QUESTION_PROGRESS_WIDTH, 8, 4);
     questionProgressBarFill.x = -HUD_CARD_WIDTH / 2 + 48;
     questionProgressBarFill.y = 22;
     questionProgressBarFill.scaleX = 0;
@@ -940,22 +1303,29 @@ function buildHudLayout() {
     var controlBg = new createjs.Shape();
     var controlWidth = 120;
     var controlHeight = 53;
-    controlBg.graphics.beginLinearGradientFill(["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"], [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2).drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, 24);
-    controlBg.alpha = 0.88;
+    var controlBackgroundTheme = hudTheme.controlBackground || {};
+    var controlColors = (controlBackgroundTheme.colors && controlBackgroundTheme.colors.length) ? controlBackgroundTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+    controlBg.graphics.beginLinearGradientFill(controlColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2).drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, 24);
+    controlBg.alpha = typeof controlBackgroundTheme.alpha === "number" ? controlBackgroundTheme.alpha : 0.88;
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
 
-    volumeBtnWrapper = createHudIconWrapper("rgba(102,185,255,0.85)", "rgba(102,185,255,0.5)");
+    var controlPalette = hudTheme.controlPalette || {};
+    var volumePalette = controlPalette.volume || {};
+    var fullscreenPalette = controlPalette.fullscreen || {};
+    var closePalette = controlPalette.close || {};
+
+    volumeBtnWrapper = createHudIconWrapper(volumePalette.primary, volumePalette.glow);
     volumeBtnWrapper.x = -30;
     volumeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(volumeBtnWrapper);
 
-    fullScreenBtnWrapper = createHudIconWrapper("rgba(158,108,237,0.85)", "rgba(158,108,237,0.5)");
+    fullScreenBtnWrapper = createHudIconWrapper(fullscreenPalette.primary, fullscreenPalette.glow);
     fullScreenBtnWrapper.x = 0;
     fullScreenBtnWrapper.cursor = "pointer";
     controlContainer.addChild(fullScreenBtnWrapper);
 
-    closeBtnWrapper = createHudIconWrapper("rgba(255,138,128,0.9)", "rgba(255,138,128,0.55)");
+    closeBtnWrapper = createHudIconWrapper(closePalette.primary, closePalette.glow);
     closeBtnWrapper.x = 30;
     closeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(closeBtnWrapper);
@@ -1110,11 +1480,15 @@ function animateIconWrapper(wrapper, isHover) {
         .to({ scaleX: targetScale, scaleY: targetScale }, 150, createjs.Ease.quadOut);
 
     if (wrapper.glow) {
-        wrapper.glow.alpha = isHover ? 0.65 : 0.45;
+        var baseGlowAlpha = typeof wrapper.glow.baseAlpha === "number" ? wrapper.glow.baseAlpha : wrapper.glow.alpha;
+        var hoverGlowAlpha = typeof wrapper.glow.hoverAlpha === "number" ? wrapper.glow.hoverAlpha : baseGlowAlpha;
+        wrapper.glow.alpha = isHover ? hoverGlowAlpha : baseGlowAlpha;
     }
 
     if (wrapper.ring) {
-        wrapper.ring.alpha = isHover ? 0.9 : 0.6;
+        var baseRingAlpha = typeof wrapper.ring.baseAlpha === "number" ? wrapper.ring.baseAlpha : wrapper.ring.alpha;
+        var hoverRingAlpha = typeof wrapper.ring.hoverAlpha === "number" ? wrapper.ring.hoverAlpha : baseRingAlpha;
+        wrapper.ring.alpha = isHover ? hoverRingAlpha : baseRingAlpha;
     }
 }
 
@@ -1143,22 +1517,29 @@ function highlightScoreHud() {
 }
 
 function setTimerCriticalState(isCritical) {
-	
     if (!timerCardContainer) {
         return;
     }
-console.log("time:::::"+time);
-console.log("timerCardContainer.__isCritical:::::"+timerCardContainer.__isCritical);
-console.log("isCritical:::::"+isCritical);
-  //  if (timerCardContainer.__isCritical === isCritical) {
-   //     return;
-  //  }
-
 
     timerCardContainer.__isCritical = isCritical;
-	var colors =timerCardContainer.baseGradient;
-if(time<=13 && time>5){     colors = isCritical ? ["rgba(255,152,0,0.95)", "rgba(212,138,29,0.95)"] : timerCardContainer.baseGradient; }
-if(time<=5){     colors = isCritical ? ["rgba(88,26,36,0.95)", "rgba(148,41,52,0.95)"] : timerCardContainer.baseGradient;}
+
+    var hudTheme = getHudThemeConfig();
+    var timerTheme = hudTheme.timerCritical || {};
+    var stateConfig = null;
+
+    if (isCritical) {
+        if (time <= 5 && timerTheme.danger) {
+            stateConfig = timerTheme.danger;
+        } else if (time <= 13 && timerTheme.warning) {
+            stateConfig = timerTheme.warning;
+        }
+    }
+
+    var baseGradient = timerCardContainer.baseGradient || cloneArray(((hudTheme.cards && hudTheme.cards.timer) ? hudTheme.cards.timer.background : []) || []);
+    var baseAccent = timerCardContainer.baseAccent || cloneArray(((hudTheme.cards && hudTheme.cards.timer) ? hudTheme.cards.timer.accent : []) || []);
+
+    var colors = stateConfig && stateConfig.background ? cloneArray(stateConfig.background) : cloneArray(baseGradient);
+    var accentColors = stateConfig && stateConfig.accent ? cloneArray(stateConfig.accent) : cloneArray(baseAccent);
 
     var cardWidth = timerCardContainer.__cardWidth || HUD_CARD_WIDTH;
     var cardHeight = timerCardContainer.__cardHeight || HUD_CARD_HEIGHT;
@@ -1169,25 +1550,652 @@ if(time<=5){     colors = isCritical ? ["rgba(88,26,36,0.95)", "rgba(148,41,52,0
 
     timerCardContainer.background.graphics
         .clear()
-        .beginLinearGradientFill(colors, [0, 1], -halfWidth, 0, halfWidth, 0)
+        .beginLinearGradientFill((colors && colors.length ? colors : baseGradient), [0, 1], -halfWidth, 0, halfWidth, 0)
         .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-var accentColors =timerCardContainer.baseAccent;
-   
-if(time<=13 && time>5){  accentColors = isCritical ? ["rgba(245,192,112,0.45)", "rgba(245,192,112,0.1)"] : timerCardContainer.baseAccent;}
-if(time<=5){   accentColors = isCritical ? ["rgba(255,135,135,0.45)", "rgba(255,135,135,0.1)"] : timerCardContainer.baseAccent;}
+
     timerCardContainer.iconAccent.graphics
         .clear()
-        .beginLinearGradientFill(accentColors, [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
+        .beginLinearGradientFill((accentColors && accentColors.length ? accentColors : baseAccent), [0, 1], -halfWidth, -halfHeight, -halfWidth + accentWidth, halfHeight)
         .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
 
-    drawHudIcon(timerCardContainer.icon, "timer", isCritical ? "#FF9DA5" : "#66B9FF");
-    gameTimerTxt.color = isCritical ? "#FFD7D7" : "#F6FBFF";
+    var baseIconStyle = mergeIconStyle(timerCardContainer.baseIconStyle || {}, null);
+
+    if (!baseIconStyle.strokeColor && timerTheme.normalIcon) {
+        baseIconStyle.strokeColor = timerTheme.normalIcon;
+    }
+
+    var iconStyle = stateConfig && stateConfig.icon ? mergeIconStyle(baseIconStyle, { strokeColor: stateConfig.icon }) : baseIconStyle;
+    drawHudIcon(timerCardContainer.icon, "timer", iconStyle);
+
+    if (gameTimerTxt) {
+        if (!gameTimerTxt.__baseColor) {
+            gameTimerTxt.__baseColor = timerTheme.normalText || (hudTheme.textStyles && hudTheme.textStyles.timerValue && hudTheme.textStyles.timerValue.color) || gameTimerTxt.color;
+        }
+
+        if (stateConfig && stateConfig.text) {
+            gameTimerTxt.color = stateConfig.text;
+        } else {
+            gameTimerTxt.color = timerTheme.normalText || gameTimerTxt.__baseColor;
+        }
+    }
 }
+
+function buildHowToPlayOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "HowToPlayOverlay";
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#FFF4DB", "#FFD8A4"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 44);
+    pattern.alpha = 0.32;
+    overlay.addChild(pattern);
+
+    var header = createHowToPlayHeader();
+    overlay.addChild(header);
+
+    var instructions = createHowToPlayInstructions();
+    overlay.addChild(instructions);
+
+    var progress = createHowToPlayProgressBar();
+    progress.x = 330;
+    progress.y = 520;
+    overlay.addChild(progress);
+
+    overlay.progressFill = progress.progressFill;
+    overlay.progressLabel = progress.progressLabel;
+    overlay.progressPercent = progress.progressPercent;
+
+    var proceedButton = createLoaderProceedButton();
+    proceedButton.x = 640;
+    proceedButton.y = 640;
+    overlay.addChild(proceedButton);
+
+    overlay.proceedButton = proceedButton;
+
+    var accentLarge = new createjs.Shape();
+    accentLarge.graphics.beginFill("rgba(255,255,255,0.18)").drawCircle(1080, 160, 46);
+    overlay.addChild(accentLarge);
+
+    var accentSmall = new createjs.Shape();
+    accentSmall.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(220, 140, 32);
+    overlay.addChild(accentSmall);
+
+    return overlay;
+}
+
+function createHowToPlayInstructions() {
+    var container = new createjs.Container();
+    container.x = 330;
+    container.y = 210;
+
+    var card = new createjs.Shape();
+    card.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 270, 36);
+    card.shadow = new createjs.Shadow("rgba(211, 132, 43, 0.35)", 0, 20, 34);
+    container.addChild(card);
+
+    var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
+    title.x = 40;
+    title.y = 34;
+    container.addChild(title);
+
+    var steps = [
+        "See the How to Play properly.",
+        "After understood start the game.",
+        "The score is awarded based on correct answer and time taken.",
+        "Once answered you can't go back."
+    ];
+
+    for (var i = 0; i < steps.length; i++) {
+        var itemY = 90 + i * 44;
+
+        var badge = new createjs.Shape();
+        badge.graphics
+            .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -20, -20, 20, 20)
+            .drawCircle(0, 0, 20);
+        badge.x = 62;
+        badge.y = itemY;
+        container.addChild(badge);
+
+        var badgeText = new createjs.Text((i + 1).toString(), "700 20px 'Baloo 2'", "#FFFFFF");
+        badgeText.textAlign = "center";
+        badgeText.textBaseline = "middle";
+        badgeText.x = badge.x;
+        badgeText.y = badge.y;
+        container.addChild(badgeText);
+
+        var stepText = new createjs.Text(steps[i], "500 22px 'Baloo 2'", "#6B3A15");
+        stepText.lineHeight = 28;
+        stepText.lineWidth = 480;
+        stepText.x = 102;
+        stepText.y = itemY - 18;
+        container.addChild(stepText);
+    }
+
+    return container;
+}
+
+
+
+function drawHoneycombPattern(width, height, radius) {
+    var shape = new createjs.Shape();
+    var graphics = shape.graphics;
+    var hexHeight = Math.sqrt(3) * radius;
+    var horizontalSpacing = radius * 1.5;
+    var row = 0;
+
+    for (var y = radius; y < height + hexHeight; y += hexHeight, row++) {
+        var offsetX = (row % 2) ? horizontalSpacing / 2 : 0;
+        for (var x = radius; x < width + radius; x += horizontalSpacing) {
+            var centerX = x + offsetX;
+            var fill = row % 2 === 0 ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.22)";
+            graphics.beginFill(fill).drawPolyStar(centerX, y, radius, 6, 0, 30);
+        }
+    }
+
+    return shape;
+}
+
+function createHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 280;
+    container.y = 70;
+
+    var card = new createjs.Shape();
+    card.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 720, 0)
+        .drawRoundRect(0, 0, 720, 120, 48);
+    card.shadow = new createjs.Shadow("rgba(227, 138, 45, 0.35)", 0, 20, 36);
+    container.addChild(card);
+
+    var iconBackground = new createjs.Shape();
+    iconBackground.graphics.beginFill("rgba(255,255,255,0.95)").drawCircle(96, 60, 44);
+    container.addChild(iconBackground);
+
+    var icon = new createjs.Text("\u2139", "700 54px 'Baloo 2'", "#FF8D3C");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 96;
+    icon.y = 60;
+    container.addChild(icon);
+
+    var title = new createjs.Text("HOW TO PLAY", "700 44px 'Baloo 2'", "#FFFFFF");
+    title.x = 160;
+    title.y = 28;
+    container.addChild(title);
+
+    var subtitle = new createjs.Text("Get ready with these quick steps", "500 24px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 160;
+    subtitle.y = 68;
+    container.addChild(subtitle);
+
+    return container;
+}
+
+function createHowToPlayProgressBar() {
+    var container = new createjs.Container();
+
+    var shadow = new createjs.Shape();
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(6, 6, 628, 88, 26);
+    shadow.alpha = 0.75;
+    container.addChild(shadow);
+
+    var frame = new createjs.Shape();
+    frame.graphics.beginFill("rgba(255,255,255,0.94)").drawRoundRect(0, 0, 620, 80, 24);
+    container.addChild(frame);
+
+    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "#A25C1D");
+    status.x = 30;
+    status.y = 20;
+    status.lineWidth = 420;
+    container.addChild(status);
+
+    var percent = new createjs.Text("0%", "700 28px 'Baloo 2'", "#FF8D3C");
+    percent.textAlign = "right";
+    percent.x = 590;
+    percent.y = 18;
+    container.addChild(percent);
+
+    var track = new createjs.Shape();
+    track.graphics.beginFill("rgba(255, 212, 170, 0.55)").drawRoundRect(0, 0, 560, 16, 10);
+    track.x = 30;
+    track.y = 50;
+    container.addChild(track);
+
+    var fill = new createjs.Shape();
+    fill.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 560, 0)
+        .drawRoundRect(0, 0, 560, 16, 10);
+    fill.x = 30;
+    fill.y = 50;
+    fill.scaleX = 0;
+    container.addChild(fill);
+
+    container.progressFill = fill;
+    container.progressLabel = status;
+    container.progressPercent = percent;
+
+    return container;
+}
+
+
+function createLoaderProceedButton() {
+    var button = new createjs.Container();
+    button.visible = false;
+    button.alpha = 0;
+    button.scaleX = button.scaleY = 0.92;
+    button.mouseEnabled = false;
+    button.mouseChildren = false;
+
+    var shadow = new createjs.Shape();
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(-110, -32, 220, 64, 24);
+    shadow.alpha = 0.75;
+    shadow.y = 4;
+    button.addChild(shadow);
+
+    var frame = new createjs.Shape();
+    frame.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -110, 0, 110, 0)
+        .drawRoundRect(-110, -36, 220, 72, 24);
+    button.addChild(frame);
+
+    var label = new createjs.Text("Proceed", "700 28px 'Baloo 2'", "#FFFFFF");
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    button.addChild(label);
+
+    button.cursor = "pointer";
+
+    return button;
+}
+
+function buildGameIntroOverlay() {
+    var overlay = new createjs.Container();
+    overlay.name = "GameIntroOverlay";
+    overlay.mouseEnabled = false;
+    overlay.mouseChildren = false;
+
+    var background = new createjs.Shape();
+    background.graphics
+        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
+        .drawRect(0, 0, 1280, 720);
+    overlay.addChild(background);
+
+    var pattern = drawHoneycombPattern(1280, 720, 34);
+    pattern.alpha = 0.14;
+    overlay.addChild(pattern);
+
+    var header = createIntroHowToPlayHeader();
+    overlay.addChild(header);
+
+    var accent = new createjs.Shape();
+    accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
+    overlay.addChild(accent);
+
+    return overlay;
+}
+
+function createIntroHowToPlayHeader() {
+    var container = new createjs.Container();
+    container.x = 90;
+    container.y = 44;
+
+    var frame = new createjs.Shape();
+    frame.graphics
+        .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], 0, 0, 360, 0)
+        .drawRoundRect(0, 0, 360, 96, 48);
+    frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.45)", 0, 18, 32);
+    container.addChild(frame);
+
+    var iconBg = new createjs.Shape();
+    iconBg.graphics.beginFill("rgba(255,255,255,0.16)").drawCircle(72, 48, 34);
+    container.addChild(iconBg);
+
+    var icon = new createjs.Text("\u2139", "700 46px 'Baloo 2'", "#FFFFFF");
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = 72;
+    icon.y = 48;
+    container.addChild(icon);
+
+    var title = new createjs.Text("How to Play", "700 34px 'Baloo 2'", "#FFFFFF");
+    title.x = 128;
+    title.y = 22;
+    container.addChild(title);
+
+    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 22px 'Baloo 2'", "rgba(255,255,255,0.88)");
+    subtitle.x = 128;
+    subtitle.y = 56;
+    container.addChild(subtitle);
+
+    return container;
+}
+
+function createIntroActionButton() {
+    var button = new createjs.Container();
+    button.name = "IntroActionButton";
+    button.mouseChildren = false;
+    button.mouseEnabled = false;
+    button.cursor = "pointer";
+    button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
+
+    var glow = new createjs.Shape();
+    glow.name = "glow";
+    button.addChild(glow);
+
+    var base = new createjs.Shape();
+    base.name = "base";
+    button.addChild(base);
+
+    var highlight = new createjs.Shape();
+    highlight.name = "highlight";
+    button.addChild(highlight);
+
+    var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
+    icon.name = "icon";
+    icon.textAlign = "center";
+    icon.textBaseline = "middle";
+    icon.x = -96;
+    icon.y = 0;
+    button.addChild(icon);
+
+    var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
+    label.name = "label";
+    label.textAlign = "left";
+    label.textBaseline = "middle";
+    label.x = -34;
+    label.y = 0;
+    button.addChild(label);
+
+    var hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRoundRect(-170, -48, 340, 96, 32);
+    button.hitArea = hit;
+
+    applyHowToPlayButtonState(button, "skip");
+
+    button.scaleX = button.scaleY = 0.96;
+
+    return button;
+}
+
+function applyHowToPlayButtonState(button, state) {
+    if (!button) {
+        return;
+    }
+
+    var base = button.getChildByName("base");
+    var highlight = button.getChildByName("highlight");
+    var label = button.getChildByName("label");
+    var icon = button.getChildByName("icon");
+    var glow = button.getChildByName("glow");
+
+    if (base) {
+        base.graphics.clear();
+    }
+    if (highlight) {
+        highlight.graphics.clear();
+    }
+    if (glow) {
+        glow.graphics.clear();
+    }
+
+    if (state === "start") {
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255, 166, 94, 0.45)", "rgba(255, 166, 94, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    180
+                )
+                .drawCircle(0, 0, 170);
+            glow.alpha = 0.95;
+        }
+        if (base) {
+            base.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(245, 107, 32, 0.85)")
+                .beginLinearGradientFill(["#FFB760", "#FF7A2F"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(
+                    ["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    14
+                )
+                .drawRoundRect(-160, -44, 320, 58, 28);
+        }
+        if (icon) {
+            icon.text = "\u25B6";
+            icon.font = "700 34px 'Baloo 2'";
+            icon.color = "#FFFFFF";
+        }
+        if (label) {
+            label.text = "Start";
+            label.font = "700 28px 'Baloo 2'";
+            label.color = "#FFFFFF";
+        }
+        button.shadow = new createjs.Shadow("rgba(8, 17, 38, 0.38)", 0, 18, 34);
+    } else {
+        if (glow) {
+            glow.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255, 170, 115, 0.55)", "rgba(255, 170, 115, 0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    165
+                )
+                .drawCircle(0, 0, 165);
+            glow.alpha = 0.9;
+        }
+        if (base) {
+            base.graphics
+                .setStrokeStyle(2)
+                .beginStroke("rgba(240, 102, 37, 0.75)")
+                .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-160, -44, 320, 88, 30);
+        }
+        if (highlight) {
+            highlight.graphics
+                .beginLinearGradientFill(
+                    [
+                        "rgba(255, 255, 255, 0.72)",
+                        "rgba(255, 255, 255, 0.18)",
+                        "rgba(255, 255, 255, 0)"
+                    ],
+                    [0, 0.55, 1],
+                    -160,
+                    -44,
+                    160,
+                    16
+                )
+                .drawRoundRect(-160, -44, 320, 60, 28);
+        }
+        if (icon) {
+            icon.text = "\u279C";
+            icon.font = "700 30px 'Baloo 2'";
+            icon.color = "#FFFFFF";
+        }
+        if (label) {
+            label.text = "Skip";
+            label.font = "700 26px 'Baloo 2'";
+            label.color = "#FFFFFF";
+        }
+        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.32)", 0, 16, 32);
+    }
+
+    button.state = state;
+}
+
+function attachProceedButtonListeners(button) {
+    if (!button || button._loaderProceedHooked) {
+        return;
+    }
+
+    button._loaderProceedHooked = true;
+
+    button.on("click", function () {
+        hideLoaderProceedButton();
+
+        var globalContext = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : null);
+
+        var toggleInvoked = false;
+        if (typeof togglefullscreen === "function") {
+            try {
+                togglefullscreen();
+                toggleInvoked = true;
+            } catch (e) {
+                console.log("togglefullscreen invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.togglefullscreen === "function") {
+            try {
+                globalContext.togglefullscreen();
+                toggleInvoked = true;
+            } catch (e) {
+                console.log("window.togglefullscreen invocation failed", e);
+            }
+        }
+
+        if (!toggleInvoked) {
+            if (typeof toggleFullScreen === "function") {
+                try {
+                    toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("toggleFullScreen unavailable", e);
+                }
+            } else if (globalContext && typeof globalContext.toggleFullScreen === "function") {
+                try {
+                    globalContext.toggleFullScreen();
+                    toggleInvoked = true;
+                } catch (e) {
+                    console.log("window.toggleFullScreen unavailable", e);
+                }
+            }
+        }
+
+        var howToPlayInvoked = false;
+        if (typeof createhowtoplay === "function") {
+            try {
+                createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("createhowtoplay invocation failed", e);
+            }
+        } else if (globalContext && typeof globalContext.createhowtoplay === "function") {
+            try {
+                globalContext.createhowtoplay();
+                howToPlayInvoked = true;
+            } catch (e) {
+                console.log("window.createhowtoplay invocation failed", e);
+            }
+        }
+
+        if (!howToPlayInvoked) {
+            if (typeof createHowToPlay === "function") {
+                try {
+                    createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("createHowToPlay invocation failed", e);
+                }
+            } else if (globalContext && typeof globalContext.createHowToPlay === "function") {
+                try {
+                    globalContext.createHowToPlay();
+                    howToPlayInvoked = true;
+                } catch (e) {
+                    console.log("window.createHowToPlay invocation failed", e);
+                }
+            }
+        }
+    });
+
+    button.on("rollover", function () {
+        createjs.Tween.get(button, { override: true }).to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut);
+    });
+
+    button.on("rollout", function () {
+        createjs.Tween.get(button, { override: true }).to({ scaleX: 0.94, scaleY: 0.94 }, 200, createjs.Ease.quadOut);
+    });
+
+    button.scaleX = button.scaleY = 0.94;
+}
+
+function showLoaderProceedButton() {
+    if (!HowToPlayScreenImg || !HowToPlayScreenImg.proceedButton) {
+        return;
+    }
+
+    var button = HowToPlayScreenImg.proceedButton;
+    attachProceedButtonListeners(button);
+    button.visible = true;
+    button.mouseEnabled = true;
+    button.mouseChildren = true;
+    if (button.alpha < 1) {
+        button.alpha = 0;
+    }
+    if (button.scaleX < 1 || button.scaleY < 1) {
+        button.scaleX = button.scaleY = 0.92;
+    }
+    createjs.Tween.get(button, { override: true })
+        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut);
+
+    // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
+    button.alpha = 1;
+    button.scaleX = button.scaleY = 1;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
+}
+
+function hideLoaderProceedButton() {
+    if (!HowToPlayScreenImg || !HowToPlayScreenImg.proceedButton) {
+        return;
+    }
+
+    var button = HowToPlayScreenImg.proceedButton;
+    if (button.visible || button.alpha > 0) {
+        createjs.Tween.get(button, { override: true }).to({ alpha: 0, scaleX: 0.92, scaleY: 0.92 }, 160, createjs.Ease.quadIn);
+    }
+    button.alpha = 0;
+    button.scaleX = button.scaleY = 0.92;
+    button.mouseEnabled = false;
+    button.mouseChildren = false;
+    button.visible = false;
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
+}
+
 
 //==========================================================================//
 function createHowToPlay() {
-    handCursor.visible = false;
-    HowToPlayScreenImg.visible = false;
+    if (typeof handCursor !== "undefined" && handCursor) {
+        handCursor.visible = false;
+    }
+    hideLoaderProceedButton();
+
+    if (HowToPlayScreenImg) {
+        HowToPlayScreenImg.visible = false;
+    }
 
     createGameIntroAnimationPlay(true)
 }
