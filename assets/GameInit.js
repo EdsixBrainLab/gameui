@@ -264,6 +264,15 @@ function resizeCanvas() {
 
     lastW = iw; lastH = ih; lastS = sRatio;
 
+    if (typeof updateGameUiLayout === "function") {
+        try {
+            updateGameUiLayout();
+        }
+        catch (e) {
+            console.log("updateGameUiLayout error", e);
+        }
+    }
+
 
 
     return 'success'

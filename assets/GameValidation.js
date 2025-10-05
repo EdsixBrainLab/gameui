@@ -59,6 +59,9 @@ function isVisibleSkipBtn() {
     }
 
     applyHowToPlayButtonState(SkipBtnMc, "skip");
+    if (typeof updateGameUiLayout === "function") {
+        updateGameUiLayout();
+    }
     SkipBtnMc.visible = true;
     SkipBtnMc.mouseEnabled = true;
     container.parent.addChild(SkipBtnMc);
@@ -77,6 +80,9 @@ function isVisibleStartBtn() {
     }
 
     applyHowToPlayButtonState(SkipBtnMc, "start");
+    if (typeof updateGameUiLayout === "function") {
+        updateGameUiLayout();
+    }
     container.parent.addChild(SkipBtnMc);
     container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
