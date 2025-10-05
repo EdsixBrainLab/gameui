@@ -220,6 +220,36 @@ var HUD_THEME_PRESETS = {
     }
 };
 
+function getCanvasScale(axis) {
+    if (typeof stage !== "undefined" && stage) {
+        var scale = axis === "y" ? stage.scaleY : stage.scaleX;
+        if (typeof scale === "number" && !isNaN(scale) && scale !== 0) {
+            return scale;
+        }
+    }
+    return 1;
+}
+
+function getLogicalCanvasWidth() {
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.width === "number") {
+        var scaleX = getCanvasScale("x");
+        return canvas.width / scaleX;
+    }
+    return 1280;
+}
+
+function getLogicalCanvasHeight() {
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.height === "number") {
+        var scaleY = getCanvasScale("y");
+        return canvas.height / scaleY;
+    }
+    return 720;
+}
+
+function getCanvasCenterX() {
+    return getLogicalCanvasWidth() / 2;
+}
+
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
 }
@@ -1040,7 +1070,7 @@ function doneLoading(event) {
                 //Title = new createjs.Bitmap(preload.getResult('Title'));
                 Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
 				Title.textAlign = "center";		
-				Title.x = canvas.width/ 2;
+                           Title.x = getCanvasCenterX();
 				Title.y = 40;  
 				Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
@@ -1195,7 +1225,7 @@ function doneLoading(event) {
             if (id == "SkipBtn") {
                 SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                var stageWidth = (typeof canvas !== "undefined" && canvas) ? canvas.width : 1280;
+                var stageWidth = getLogicalCanvasWidth();
                 SkipBtnMc.x = stageWidth - 220;
                 SkipBtnMc.y = 74;
                 SkipBtnMc.visible = false;
@@ -1568,7 +1598,7 @@ function buildHudLayout() {
     var hudTheme = getHudThemeConfig();
 
     hudContainer = new createjs.Container();
-    hudContainer.x = canvas.width / 2;
+    hudContainer.x = getCanvasCenterX();
     hudContainer.y = 8;
     hudContainer.alpha = 1;
     hudContainer.visible = true;
