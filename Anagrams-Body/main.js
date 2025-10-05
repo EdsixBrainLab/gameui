@@ -217,7 +217,7 @@ var borderPadding = 10,
   barHeight = 20;
 
 var loadProgressLabel, progresPrecentage, loaderWidth;
-var confettiContainer,
+var 
   ambientGradientLayer,
   ambientOrbs = [];
 ///////////////////////////////////////////////////////////////////
@@ -225,8 +225,7 @@ window.onload = function (e) {
   checkBrowserSupport();
 };
 ///////////////////////////////////////////////////////////////////
-const confettiColors = ["#FFD700", "#FF6F61", "#4CAF50", "#2196F3", "#FFEB3B", "#FF9800"];
-
+ 
 var QUESTION_CARD_WIDTH = 600;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
@@ -240,43 +239,7 @@ var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"]
 var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
 
-function launchConfetti(count = 50) {
-    for (let i = 0; i < count; i++) {
-        const size = Math.random() * 6 + 4;
-        const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-        const shape = new createjs.Shape();
-
-        shape.graphics.beginFill(color).drawRect(-size / 2, -size / 2, size, size);
-        shape.x = canvas.width / 2;
-        shape.y = 0;
-        shape.rotation = Math.random() * 360;
-        shape.alpha = 0.9;
-
-        confettiContainer.addChild(shape);
-        const duration = Math.random() * 1000 + 1500;
-        const targetX = Math.random() * canvas.width;
-        const targetY = canvas.height + 50;
-        createjs.Tween.get(shape)
-            .to({ x: targetX, y: targetY, rotation: shape.rotation + 360 }, duration, createjs.Ease.quadOut)
-            .call(() => confettiContainer.removeChild(shape));
-    }
-}
-
-function showStarburst(x, y) {
-    const star = new createjs.Shape();
-    const g = star.graphics;
-    g.beginFill("#FFD700").drawPolyStar(0, 0, 30, 5, 0.6, -90);
-    star.x = x;
-    star.y = y;
-        star.visible=true;
-    star.alpha = 0;
-    star.scaleX = star.scaleY = 0.5;
-    container.addChild(star);
-
-    createjs.Tween.get(star)
-        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut)
-        .to({ alpha: 0, scaleX: 1.5, scaleY: 1.5 }, 300);
-}
+ 
 
 
 function drawChoiceTileBackground(targetShape, colors) {
@@ -409,13 +372,7 @@ function init() {
   callLoader();
   createLoader();
   createCanvasResize();
-confettiContainer = new createjs.Container();
-overlayLayer.addChild(confettiContainer);
-confettiContainer.x = 0;
-confettiContainer.y = 0;
-confettiContainer.visible = true;
-confettiContainer.mask = null;
-confettiContainer.alpha = 1;
+ 
 
 createAmbientBackground();
 
@@ -1387,8 +1344,7 @@ e.currentTarget.visible=false;
 }
 
 function correct() {
-	//launchConfetti(20); // number of pieces
-	//showStarburst(canvas.width / 2, canvas.height / 2);
+ 	//showStarburst(canvas.width / 2, canvas.height / 2);
 
    getValidation("correct");
    disablechoices();
