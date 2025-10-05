@@ -29,7 +29,8 @@ var hudContainer,
 
 var HowToPlayScreenImg,
     howToPlayImageMc,
-    loadProgressPercentLabel;
+    loadProgressPercentLabel,
+    loaderBar;
 var lastDisplayedScore = null,
     lastDisplayedTime = null,
     lastDisplayedQuestion = null;
@@ -1074,8 +1075,9 @@ function doneLoading(event) {
 				Title.y = 40;  
 				Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
-				
+
                 Title.visible = false;
+                refreshResponsiveLayout(true);
                 continue;
             }
 
@@ -1229,6 +1231,7 @@ function doneLoading(event) {
                 SkipBtnMc.x = stageWidth - 220;
                 SkipBtnMc.y = 74;
                 SkipBtnMc.visible = false;
+                refreshResponsiveLayout(true);
 
                 continue;
             }
@@ -1244,6 +1247,7 @@ function doneLoading(event) {
                 howToPlayImageMc = buildGameIntroOverlay();
                 container.parent.addChild(howToPlayImageMc);
                 howToPlayImageMc.visible = false;
+                refreshResponsiveLayout(true);
                 continue;
             }
 
@@ -1350,6 +1354,8 @@ function watchRestart() {
         }
         HowToPlayScreenImg.visible = true;
     }
+
+    refreshResponsiveLayout(true);
 
 
 
@@ -1579,6 +1585,23 @@ card.addChild(accentBorder);
     card.__cornerRadius = cornerRadius;
     card.__accentWidth = HUD_CARD_ACCENT_WIDTH;
 
+    var measuredLabelWidth = labelText && labelText.getMeasuredWidth ? labelText.getMeasuredWidth() : 0;
+    var layoutLeft = Math.min(-halfWidth, icon.x - 24);
+    var layoutRight = Math.max(
+        halfWidth,
+        -halfWidth + HUD_CARD_ACCENT_WIDTH,
+        labelText.x + measuredLabelWidth + 28,
+        valueHolder.x + 140
+    );
+    var layoutWidth = layoutRight - layoutLeft;
+    if (layoutWidth < 220) {
+        layoutWidth = 220;
+    }
+
+    card.__layoutLeft = layoutLeft;
+    card.__layoutRight = layoutRight;
+    card.__layoutWidth = layoutWidth;
+
     return card;
 }
 
@@ -1604,18 +1627,12 @@ function buildHudLayout() {
     hudContainer.visible = true;
 
     scoreCardContainer = createHudCard("Score", "score");
-    scoreCardContainer.x = -680;
-    scoreCardContainer.baseX = scoreCardContainer.x;
-	hudContainer.addChild(scoreCardContainer);
+    hudContainer.addChild(scoreCardContainer);
 
     timerCardContainer = createHudCard("Seconds Left", "timer");
-    timerCardContainer.x = -530;
-    timerCardContainer.baseX = timerCardContainer.x;
     hudContainer.addChild(timerCardContainer);
 
     hudQuestionCardContainer = createHudCard("Question", "question");
-    hudQuestionCardContainer.x = 280;
-    hudQuestionCardContainer.baseX = hudQuestionCardContainer.x;
     hudContainer.addChild(hudQuestionCardContainer);
 
     if (scoreCardContainer.valueHolder) {
@@ -1657,8 +1674,6 @@ function buildHudLayout() {
     hudQuestionCardContainer.addChild(questionProgressBarFill);
 
     controlContainer = new createjs.Container();
-    controlContainer.x = 420 + HUD_CARD_WIDTH * 0.85;
-    controlContainer.baseX = controlContainer.x;
 
     var controlBg = new createjs.Shape();
     var controlWidth = 120;
@@ -1673,6 +1688,7 @@ function buildHudLayout() {
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
+    controlContainer.__layoutWidth = controlWidth + 64;
 
     var controlPalette = hudTheme.controlPalette || {};
     var volumePalette = controlPalette.volume || {};
@@ -1746,6 +1762,8 @@ function buildHudLayout() {
     updateQuestionProgress();
 
     startHudAmbientAnimations();
+
+    refreshResponsiveLayout(true);
 }
 
 function refreshHudValues() {
@@ -1850,7 +1868,9 @@ function revealHud() {
         return;
     }
 
-    var targetY = 60;
+    layoutHudElements();
+
+    var targetY = hudContainer.y;
     hudContainer.alpha = 0;
     hudContainer.y = targetY - 12;
 
@@ -2288,6 +2308,10 @@ function buildHowToPlayOverlay() {
     accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
     overlay.accentLarge = accentLarge;
     overlay.accentSmall = accentSmall;
+
+    overlay.__baseWidth = 1280;
+    overlay.__baseHeight = 720;
+    layoutOverlayToCanvas(overlay, overlay.__baseWidth, overlay.__baseHeight);
 
     return overlay;
 }
@@ -3025,6 +3049,10 @@ function buildGameIntroOverlay() {
     accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
     overlay.addChild(accent);
 
+    overlay.__baseWidth = 1280;
+    overlay.__baseHeight = 720;
+    layoutOverlayToCanvas(overlay, overlay.__baseWidth, overlay.__baseHeight);
+
     return overlay;
 }
 
@@ -3150,6 +3178,8 @@ function createIntroActionButton() {
     applyHowToPlayButtonState(button, "skip");
 
     button.scaleX = button.scaleY = 0.96;
+    button.__layoutHalfWidth = 160;
+    button.__layoutHalfHeight = 44;
 
     return button;
 }
@@ -3274,6 +3304,13 @@ function applyHowToPlayButtonState(button, state) {
     }
 
     button.state = state;
+    var layoutHalfWidth = 160;
+    var layoutHalfHeight = 44;
+    if (state === "start") {
+        layoutHalfHeight = 44;
+    }
+    button.__layoutHalfWidth = layoutHalfWidth;
+    button.__layoutHalfHeight = layoutHalfHeight;
 }
 
 function attachProceedButtonListeners(button) {
