@@ -43,6 +43,9 @@ var feedbackContainer,
   feedbackIconShape,
   feedbackTitleTxt,
   feedbackMessageTxt;
+
+var confettiLayer;
+var confettiColors = ["#f9d342", "#ff6f61", "#50c878", "#4fc3f7", "#af7ac5", "#ffd1dc"]; // soft vibrant palette
 function randomSort1(a, b) {
     if (Math.random() < 0.5) return -1;
     else return 1;
@@ -1435,6 +1438,79 @@ function playSound(id, loop) {
 
     return createjs.Sound.play(id, loop);
 
+}
+
+function ensureConfettiLayer() {
+    if (confettiLayer && confettiLayer.parent) {
+        if (typeof stage !== "undefined" && stage) {
+            stage.setChildIndex(confettiLayer, stage.numChildren - 1);
+        }
+        return confettiLayer;
+    }
+
+    if (typeof stage === "undefined" || !stage) {
+        return null;
+    }
+
+    confettiLayer = new createjs.Container();
+    confettiLayer.mouseEnabled = false;
+    confettiLayer.mouseChildren = false;
+    confettiLayer.name = "confettiLayer";
+
+    stage.addChild(confettiLayer);
+    stage.setChildIndex(confettiLayer, stage.numChildren - 1);
+
+    return confettiLayer;
+}
+
+function launchConfetti(particleCount) {
+    var layer = ensureConfettiLayer();
+    if (!layer) {
+        return;
+    }
+
+    var count = particleCount != null ? particleCount : 30;
+    var centerX = typeof canvas !== "undefined" && canvas ? canvas.width / 2 : 640;
+    var centerY = 180;
+
+    for (var i = 0; i < count; i++) {
+        var confetti = new createjs.Shape();
+        var size = 6 + Math.random() * 6;
+        var color = confettiColors[(Math.random() * confettiColors.length) | 0];
+        confetti.graphics.beginFill(color).drawRect(-size / 2, -size / 2, size, size);
+        confetti.x = centerX + (Math.random() * 320 - 160);
+        confetti.y = centerY + (Math.random() * 40 - 20);
+        confetti.rotation = Math.random() * 360;
+        confetti.alpha = 0.9;
+        layer.addChild(confetti);
+
+        (function (shape) {
+            var driftX = (Math.random() - 0.5) * 380;
+            var fallDistance = 420 + Math.random() * 260;
+            var duration = 1200 + Math.random() * 900;
+            var spin = (Math.random() > 0.5 ? 360 : -360) * (1 + Math.random());
+
+            createjs.Tween.get(shape)
+                .to({
+                    x: shape.x + driftX,
+                    y: shape.y + fallDistance,
+                    rotation: shape.rotation + spin,
+                    alpha: 0.2
+                }, duration, createjs.Ease.quadIn)
+                .call(function () {
+                    if (shape.parent) {
+                        shape.parent.removeChild(shape);
+                    }
+                    if (typeof stage !== "undefined" && stage) {
+                        stage.update();
+                    }
+                });
+        })(confetti);
+    }
+
+    if (typeof stage !== "undefined" && stage) {
+        stage.update();
+    }
 }
 
 //------------------------------------------------------------------------------------------//
