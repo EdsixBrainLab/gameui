@@ -49,25 +49,26 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(248,251,255,0.96)", "rgba(213,231,255,0.96)"],
                 accent: ["rgba(142,196,255,0.75)", "rgba(142,196,255,0.35)"],
                 iconStyle: {
-                    fill: "#30578F",
+                    //fill: "#30578F",
+					fill: "#FFD166",
                     strokeColor: "rgba(255,255,255,0.65)",
                     strokeWidth: 2
                 }
             },
-            timer: {
+            question: {
                 background: ["rgba(244,250,255,0.96)", "rgba(214,236,255,0.96)"],
                 accent: ["rgba(129,209,255,0.65)", "rgba(129,209,255,0.3)"],
-                iconStyle: {
+                iconStyle: {fill: "#1F6F5A",
                     strokeColor: "#2F6CB7",
                     strokeWidth: 3
                 }
             },
-            question: {
+            timer: {
                 background: ["rgba(245,255,250,0.96)", "rgba(220,246,236,0.96)"],
                 accent: ["rgba(110,231,183,0.65)", "rgba(110,231,183,0.3)"],
                 iconStyle: {
-                    fill: "#1F6F5A",
-                    strokeColor: "rgba(255,255,255,0.6)",
+                    
+                    strokeColor: "#1F6F5A",
                     strokeWidth: 3
                 }
             }
@@ -141,20 +142,20 @@ var HUD_THEME_PRESETS = {
                     strokeWidth: 2
                 }
             },
-            timer: {
+            question: {
                 background: ["rgba(22,45,83,0.94)", "rgba(33,70,120,0.94)"],
                 accent: ["rgba(104,181,255,0.55)", "rgba(104,181,255,0.22)"],
-                iconStyle: {
+                iconStyle: {fill: "#6EE7B7",
                     strokeColor: "#8CD0FF",
                     strokeWidth: 3
                 }
             },
-            question: {
+            timer: {
                 background: ["rgba(19,58,52,0.94)", "rgba(33,95,88,0.94)"],
                 accent: ["rgba(95,234,212,0.55)", "rgba(95,234,212,0.22)"],
                 iconStyle: {
-                    fill: "#6EE7B7",
-                    strokeColor: "rgba(7,28,26,0.6)",
+                    
+                    strokeColor: "rgba(7,28,26,1)",
                     strokeWidth: 3
                 }
             }
@@ -1025,7 +1026,7 @@ function doneLoading(event) {
                     } else {
                         container.parent.addChildAt(uniquebackGround, 0);
                     }
-                    uniquebackGround.alpha = 0.35;
+                    uniquebackGround.alpha = 1;
                     uniquebackGround.visible = true;
                     continue;
                 }
@@ -1039,8 +1040,7 @@ function doneLoading(event) {
                 //Title = new createjs.Bitmap(preload.getResult('Title'));
                 Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
 				Title.textAlign = "center";		
-                           var canvasDimensions = getCanvasDimensions();
-                           Title.x = canvasDimensions.width / 2;
+				Title.x = canvas.width/ 2;
 				Title.y = 40;  
 				Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
@@ -1195,9 +1195,9 @@ function doneLoading(event) {
             if (id == "SkipBtn") {
                 SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                var canvasSize = getCanvasDimensions();
-                SkipBtnMc.x = canvasSize.width - 190;
-                SkipBtnMc.y = 164;
+                var stageWidth = (typeof canvas !== "undefined" && canvas) ? canvas.width : 1280;
+                SkipBtnMc.x = stageWidth - 220;
+                SkipBtnMc.y = 74;
                 SkipBtnMc.visible = false;
 
                 continue;
@@ -1342,7 +1342,6 @@ function watchRestart() {
         }
     }
 
-    hideLoaderProceedButton();
 
 
     stage.update(); //update the stage to show text;
@@ -1460,6 +1459,19 @@ function createHudCard(label, type) {
         .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
     var backgroundAlpha = typeof baseCardTheme.backgroundAlpha === "number" ? baseCardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
     background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : 0.96;
+	
+	
+	var borderColor = baseCardTheme.borderColor || "#000"; // Customize or use from theme
+var borderThickness = .5; // Change thickness as needed
+
+var border = new createjs.Shape();
+border.graphics
+    .setStrokeStyle(borderThickness)
+    .beginStroke(borderColor)
+    .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+card.addChild(border); // Add after background so it appears on top (or before to appear behind)
+
+
     card.addChild(background);
 
     var accentShape = new createjs.Shape();
@@ -1468,7 +1480,23 @@ function createHudCard(label, type) {
         .drawRoundRect(-halfWidth, -halfHeight, HUD_CARD_ACCENT_WIDTH, cardHeight, cornerRadius);
     var accentAlpha = typeof baseCardTheme.accentAlpha === "number" ? baseCardTheme.accentAlpha : theme.cardAccentAlpha;
     accentShape.alpha = typeof accentAlpha === "number" ? accentAlpha : 0.9;
+	
+	
+
     card.addChild(accentShape);
+	
+	// ✅ Add border to the accent shape
+var accentBorderColor = baseCardTheme.accentBorderColor || "#000"; // Or pick a theme-based color
+var accentBorderThickness = .2;
+
+var accentBorder = new createjs.Shape();
+accentBorder.graphics
+    .setStrokeStyle(accentBorderThickness)
+    .beginStroke(accentBorderColor)
+    .drawRoundRect(-halfWidth, -halfHeight, HUD_CARD_ACCENT_WIDTH, cardHeight, cornerRadius);
+card.addChild(accentBorder);
+
+
 
     var highlight = new createjs.Shape();
     highlight.graphics
@@ -1540,8 +1568,7 @@ function buildHudLayout() {
     var hudTheme = getHudThemeConfig();
 
     hudContainer = new createjs.Container();
-    var hudCanvasDimensions = getCanvasDimensions();
-    hudContainer.x = hudCanvasDimensions.width / 2;
+    hudContainer.x = canvas.width / 2;
     hudContainer.y = 8;
     hudContainer.alpha = 1;
     hudContainer.visible = true;
@@ -1549,7 +1576,7 @@ function buildHudLayout() {
     scoreCardContainer = createHudCard("Score", "score");
     scoreCardContainer.x = -680;
     scoreCardContainer.baseX = scoreCardContainer.x;
-    hudContainer.addChild(scoreCardContainer);
+	hudContainer.addChild(scoreCardContainer);
 
     timerCardContainer = createHudCard("Seconds Left", "timer");
     timerCardContainer.x = -530;
@@ -2178,8 +2205,6 @@ function setTimerCriticalState(isCritical) {
 function buildHowToPlayOverlay() {
     var overlay = new createjs.Container();
     overlay.name = "HowToPlayOverlay";
-    overlay.baseWidth = 1280;
-    overlay.baseHeight = 720;
 
     var background = new createjs.Shape();
     background.graphics
@@ -2200,18 +2225,6 @@ function buildHowToPlayOverlay() {
     var progress = createHowToPlayProgressBar();
     overlay.addChild(progress);
 
-    var stageDimensions = getCanvasDimensions();
-    var stageWidth = stageDimensions.width;
-    var stageCenterX = stageWidth / 2;
-    header.x = stageCenterX;
-    header.y = 118;
-
-    instructions.x = stageCenterX;
-    instructions.y = header.y + header.cardHeight + 48 + instructions.regY;
-
-    progress.x = stageCenterX;
-    progress.y = instructions.y - instructions.regY + instructions.cardHeight + 52 + progress.regY;
-
     overlay.backgroundShape = background;
     overlay.honeycombPattern = pattern;
     overlay.header = header;
@@ -2224,14 +2237,8 @@ function buildHowToPlayOverlay() {
     overlay.progressContainer = progress;
 
     var proceedButton = createLoaderProceedButton();
-    proceedButton.x = stageCenterX;
-    var proceedExpandedY = progress.y + progress.regY + 84;
-    var proceedCompactY = instructions.y - instructions.regY + instructions.cardHeight + 72;
-    proceedButton.y = proceedExpandedY;
-    proceedButton.expandedY = proceedExpandedY;
-    proceedButton.compactY = proceedCompactY;
-    proceedButton.expandedYBase = proceedExpandedY;
-    proceedButton.compactYBase = proceedCompactY;
+    proceedButton.x = 640;
+    proceedButton.y = 610;
     overlay.addChild(proceedButton);
 
     overlay.proceedButton = proceedButton;
@@ -2249,14 +2256,8 @@ function buildHowToPlayOverlay() {
     progress.baseY = progress.y;
     accentLarge.baseScale = accentLarge.scaleX = accentLarge.scaleY = 1;
     accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
-    accentLarge.baseX = accentLarge.x;
-    accentLarge.baseY = accentLarge.y;
-    accentSmall.baseX = accentSmall.x;
-    accentSmall.baseY = accentSmall.y;
     overlay.accentLarge = accentLarge;
     overlay.accentSmall = accentSmall;
-
-    layoutHowToPlayOverlay(overlay);
 
     return overlay;
 }
@@ -2266,7 +2267,7 @@ function createHowToPlayInstructions() {
     container.regX = 324;
     container.regY = 146;
     container.x = 640;
-    container.y = 214 + container.regY;
+    container.y = 244 + container.regY;
 
     var card = new createjs.Shape();
     card.graphics
@@ -2293,9 +2294,8 @@ function createHowToPlayInstructions() {
     container.glowShape = glow;
 
     var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#B36B1C");
-    title.x = 114;
+    title.x = 46;
     title.y = 38;
-    title.lineWidth = 420;
     container.addChild(title);
 
     var steps = [
@@ -2323,23 +2323,21 @@ function createHowToPlayInstructions() {
         badgeText.y = badge.y;
         container.addChild(badgeText);
 
-        var stepText = new createjs.Text(steps[i], "500 22px 'Baloo 2'", "#6B3A15");
+        var stepText = new createjs.Text(steps[i], "500 18px 'Baloo 2'", "#6B3A15");
         stepText.lineHeight = 30;
         stepText.lineWidth = 496;
         stepText.x = 114;
-        stepText.y = itemY - 20;
+        stepText.y = itemY-8;
         container.addChild(stepText);
 
         if (i < steps.length - 1) {
             var divider = new createjs.Shape();
-            divider.graphics.beginFill("rgba(255, 200, 150, 0.32)").drawRoundRect(114, itemY + 28, 484, 2, 1);
+            divider.graphics.beginFill("rgba(255, 200, 150, 0.32)").drawRoundRect(114, itemY + 18, 484, 2, 1);
             container.addChild(divider);
         }
     }
 
     container.cardShape = card;
-    container.cardWidth = 648;
-    container.cardHeight = 292;
 
     return container;
 }
@@ -2367,12 +2365,10 @@ function drawHoneycombPattern(width, height, radius) {
 
 function createHowToPlayHeader() {
     var container = new createjs.Container();
-    var cardWidth = 648;
-    var cardHeight = 120;
-    container.regX = cardWidth / 2;
+    container.regX = 260;
     container.regY = 0;
     container.x = 640;
-    container.y = 118;
+    container.y = 78;
 
     var glow = new createjs.Shape();
     glow.graphics
@@ -2384,25 +2380,24 @@ function createHowToPlayHeader() {
             0,
             0,
             0,
-            300
+            260
         )
-        .drawCircle(0, 0, 300);
-    glow.alpha = 0.82;
-    glow.x = cardWidth / 2;
-    glow.y = 64;
+        .drawCircle(0, 0, 240);
+    glow.alpha = 0.8;
+    glow.x = 252;
+    glow.y = 60;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
     container.glowShape = glow;
 
     var card = new createjs.Shape();
     card.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, cardWidth, 0)
-        .drawRoundRect(0, 0, cardWidth, cardHeight, 42);
+        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 520, 0)
+        .drawRoundRect(0, 0, 520, 120, 42);
     card.shadow = new createjs.Shadow("rgba(170, 74, 16, 0.28)", 0, 18, 32);
     container.addChild(card);
     container.cardShape = card;
-    container.cardWidth = cardWidth;
-    container.cardHeight = cardHeight;
+    container.cardWidth = 520;
 
     var cardHighlight = new createjs.Shape();
     cardHighlight.graphics
@@ -2411,20 +2406,19 @@ function createHowToPlayHeader() {
             [0, 0.5, 1],
             0,
             0,
-            cardWidth,
+            520,
             0
         )
-        .drawRoundRect(16, 8, cardWidth - 32, 52, 28);
+        .drawRoundRect(12, 8, 496, 52, 28);
     cardHighlight.alpha = 0.85;
-    container.addChild(cardHighlight);
+    //container.addChild(cardHighlight);
 
     var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(0, 0, cardWidth, cardHeight, 42);
+    highlightMask.graphics.drawRoundRect(0, 0, 520, 120, 42);
     highlightMask.visible = false;
     container.addChild(highlightMask);
 
     var animatedHighlight = new createjs.Shape();
-    var highlightSpan = cardWidth * 0.62;
     animatedHighlight.graphics
         .beginLinearGradientFill(
             [
@@ -2433,23 +2427,22 @@ function createHowToPlayHeader() {
                 "rgba(255, 255, 255, 0)"
             ],
             [0, 0.5, 1],
-            -highlightSpan / 2,
+            -120,
             0,
-            highlightSpan / 2,
+            120,
             0
         )
-        .drawRoundRect(-highlightSpan / 2, -16, highlightSpan, cardHeight + 32, 60);
+        .drawRoundRect(-120, -16, 240, 152, 60);
     animatedHighlight.alpha = 0;
-    animatedHighlight.x = -highlightSpan / 2;
+    animatedHighlight.x = -160;
     animatedHighlight.y = -16;
     animatedHighlight.mask = highlightMask;
     animatedHighlight.compositeOperation = "lighter";
     container.addChild(animatedHighlight);
     container.highlightSweep = animatedHighlight;
 
-    var tildeWidth = cardWidth - 240;
-    var tildeWave = createHowToPlayTildeWave(tildeWidth, 16);
-    tildeWave.x = cardWidth - tildeWidth - 48;
+    var tildeWave = createHowToPlayTildeWave(260, 16);
+    tildeWave.x = 180;
     tildeWave.y = 94;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
@@ -2467,8 +2460,8 @@ function createHowToPlayHeader() {
             74
         )
         .drawCircle(0, 0, 70);
-    iconHalo.x = 104;
-    iconHalo.y = 60;
+    iconHalo.x = 8;
+    iconHalo.y = 5;
     iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
 
@@ -2476,8 +2469,8 @@ function createHowToPlayHeader() {
     iconBackground.graphics
         .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -36, -36, 36, 36)
         .drawCircle(0, 0, 42);
-    iconBackground.x = iconHalo.x;
-    iconBackground.y = iconHalo.y;
+    iconBackground.x = 98;
+    iconBackground.y = 60;
     container.addChild(iconBackground);
 
     var icon = new createjs.Text("\u2139", "700 50px 'Baloo 2'", "#FF8D3C");
@@ -2488,19 +2481,19 @@ function createHowToPlayHeader() {
     container.addChild(icon);
 
     var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#FFFFFF");
-    label.x = 212;
+    label.x = 182;
     label.y = 26;
     container.addChild(label);
 
-    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 24px 'Baloo 2'", "rgba(255,255,255,0.9)");
-    subtitle.x = label.x;
+    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 18px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 182;
     subtitle.y = 70;
     container.addChild(subtitle);
 
     var accent = new createjs.Shape();
     accent.graphics
         .beginLinearGradientFill(["rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0)"], [0, 0.6, 1], 0, 18, 0, 102)
-        .drawRoundRect(cardWidth - 120, 18, 84, 84, 34);
+        .drawRoundRect(420, 18, 72, 84, 34);
     accent.alpha = 0.35;
     container.addChild(accent);
 
@@ -2512,7 +2505,7 @@ function createHowToPlayProgressBar() {
     container.regX = 324;
     container.regY = 54;
     container.x = 640;
-    container.y = 520 + container.regY;
+    container.y = 580 + container.regY;
 
     var shadow = new createjs.Shape();
     shadow.graphics
@@ -2602,8 +2595,6 @@ function createHowToPlayProgressBar() {
     container.progressShine = shine;
     container.progressMask = fillMask;
     container.progressPulse = pulse;
-    container.cardWidth = 648;
-    container.cardHeight = 108;
 
     return container;
 }
@@ -2922,15 +2913,6 @@ function resetHowToPlayProgressBar(overlay) {
     if (overlay.progressShine || overlay.progressPulse) {
         startProgressFillShimmer(overlay.progressShine, overlay.progressPulse);
     }
-    if (overlay.proceedButton) {
-        var button = overlay.proceedButton;
-        if (typeof button.expandedY === "number") {
-            button.y = button.expandedY;
-        }
-        if (stage && typeof stage.update === "function") {
-            stage.update();
-        }
-    }
 }
 
 function prepareHowToPlayOverlayForLoading(overlay) {
@@ -2938,7 +2920,6 @@ function prepareHowToPlayOverlayForLoading(overlay) {
         return;
     }
 
-    layoutHowToPlayOverlay(overlay);
     overlay.visible = true;
     animateHowToPlayOverlayEntry(overlay);
     resetHowToPlayProgressBar(overlay);
@@ -2964,16 +2945,6 @@ function hideHowToPlayProgressBar() {
         });
 
     stopProgressFillShimmer(HowToPlayScreenImg.progressShine, HowToPlayScreenImg.progressPulse);
-
-    if (HowToPlayScreenImg.proceedButton) {
-        var button = HowToPlayScreenImg.proceedButton;
-        var targetY = typeof button.compactY === "number" ? button.compactY : button.y;
-        createjs.Tween.get(button, { override: false }).to({ y: targetY }, 360, createjs.Ease.quadOut);
-        button.y = targetY;
-        if (stage && typeof stage.update === "function") {
-            stage.update();
-        }
-    }
 }
 
 
@@ -2984,174 +2955,27 @@ function createLoaderProceedButton() {
     button.scaleX = button.scaleY = 0.92;
     button.mouseEnabled = false;
     button.mouseChildren = false;
-    button._ambientActive = false;
-
-    var body = new createjs.Container();
-    button.addChild(body);
-    button.body = body;
 
     var shadow = new createjs.Shape();
-    shadow.graphics.beginFill("rgba(211, 132, 43, 0.24)").drawRoundRect(-110, -32, 220, 64, 24);
-    shadow.alpha = 0.85;
-    shadow.y = 6;
-    body.addChild(shadow);
-    button.shadowShape = shadow;
-
-    var halo = new createjs.Shape();
-    halo.graphics
-        .beginRadialGradientFill([
-            "rgba(255, 189, 120, 0.0)",
-            "rgba(255, 189, 120, 0.26)",
-            "rgba(255, 189, 120, 0.0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 108)
-        .drawCircle(0, 0, 108);
-    halo.alpha = 0.55;
-    halo.compositeOperation = "lighter";
-    body.addChild(halo);
-    button.haloShape = halo;
+    shadow.graphics.beginFill("rgba(211, 132, 43, 0.28)").drawRoundRect(-110, -32, 220, 64, 24);
+    shadow.alpha = 0.75;
+    shadow.y = 4;
+    button.addChild(shadow);
 
     var frame = new createjs.Shape();
     frame.graphics
-        .setStrokeStyle(2)
-        .beginStroke("rgba(255, 255, 255, 0.45)")
         .beginLinearGradientFill(["#FFB760", "#FF8D3C"], [0, 1], -110, 0, 110, 0)
         .drawRoundRect(-110, -36, 220, 72, 24);
-    body.addChild(frame);
-    button.frameShape = frame;
-
-    var gloss = new createjs.Shape();
-    gloss.graphics
-        .beginLinearGradientFill(
-            ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.24)", "rgba(255,255,255,0)"],
-            [0, 0.55, 1],
-            -110,
-            -36,
-            110,
-            -8
-        )
-        .drawRoundRect(-110, -36, 220, 54, 24);
-    gloss.alpha = 0.92;
-    body.addChild(gloss);
-
-    var highlight = new createjs.Shape();
-    highlight.graphics
-        .beginLinearGradientFill([
-            "rgba(255,255,255,0)",
-            "rgba(255,255,255,0.95)",
-            "rgba(255,255,255,0)"
-        ], [0, 0.5, 1], -96, 0, 96, 0)
-        .drawRoundRect(-96, -30, 192, 60, 26);
-    highlight.alpha = 0;
-    highlight.compositeOperation = "lighter";
-    highlight.x = -150;
-    var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(-110, -36, 220, 72, 24);
-    highlight.mask = highlightMask;
-    body.addChild(highlight);
-    button.highlightShape = highlight;
-    button.highlightMask = highlightMask;
-
-    var content = new createjs.Container();
-    content.y = 2;
-    body.addChild(content);
-    button.contentWrapper = content;
-
-    var icon = new createjs.Shape();
-    icon.graphics.beginFill("rgba(255,255,255,0.95)")
-        .moveTo(-16, -10)
-        .lineTo(10, 0)
-        .lineTo(-16, 10)
-        .closePath();
-    icon.x = -42;
-    icon.y = 0;
-    icon.alpha = 0.92;
-    content.addChild(icon);
-    button.iconShape = icon;
+    button.addChild(frame);
 
     var label = new createjs.Text("Proceed", "700 28px 'Baloo 2'", "#FFFFFF");
-    label.textAlign = "left";
+    label.textAlign = "center";
     label.textBaseline = "middle";
-    label.x = -12;
-    label.y = 0;
-    label.shadow = new createjs.Shadow("rgba(0,0,0,0.32)", 0, 4, 10);
-    content.addChild(label);
-    button.labelText = label;
+    button.addChild(label);
 
     button.cursor = "pointer";
 
     return button;
-}
-
-function startProceedButtonAmbientAnimation(button) {
-    if (!button || button._ambientActive) {
-        return;
-    }
-
-    button._ambientActive = true;
-
-    if (button.body) {
-        button.body.scaleX = button.body.scaleY = 1;
-        createjs.Tween.get(button.body, { loop: true })
-            .to({ scaleX: 1.035, scaleY: 1.035 }, 760, createjs.Ease.sineInOut)
-            .to({ scaleX: 1, scaleY: 1 }, 760, createjs.Ease.sineInOut);
-    }
-
-    if (button.haloShape) {
-        button.haloShape.alpha = 0.5;
-        button.haloShape.scaleX = button.haloShape.scaleY = 1;
-        createjs.Tween.get(button.haloShape, { loop: true })
-            .to({ scaleX: 1.14, scaleY: 1.14, alpha: 0.82 }, 920, createjs.Ease.sineOut)
-            .to({ scaleX: 1, scaleY: 1, alpha: 0.5 }, 880, createjs.Ease.sineInOut);
-    }
-
-    if (button.highlightShape) {
-        button.highlightShape.alpha = 0;
-        button.highlightShape.x = -160;
-        createjs.Tween.get(button.highlightShape, { loop: true })
-            .wait(240)
-            .to({ alpha: 0.9, x: 0 }, 520, createjs.Ease.quadOut)
-            .to({ alpha: 0, x: 160 }, 520, createjs.Ease.quadIn)
-            .wait(360)
-            .set({ alpha: 0, x: -160 });
-    }
-
-    if (button.contentWrapper) {
-        button.contentWrapper.y = 2;
-        createjs.Tween.get(button.contentWrapper, { loop: true })
-            .to({ y: -1 }, 420, createjs.Ease.sineOut)
-            .to({ y: 2 }, 420, createjs.Ease.sineIn)
-            .wait(280);
-    }
-}
-
-function stopProceedButtonAmbientAnimation(button) {
-    if (!button || !button._ambientActive) {
-        return;
-    }
-
-    button._ambientActive = false;
-
-    if (button.body) {
-        createjs.Tween.removeTweens(button.body);
-        button.body.scaleX = button.body.scaleY = 1;
-    }
-
-    if (button.haloShape) {
-        createjs.Tween.removeTweens(button.haloShape);
-        button.haloShape.alpha = 0.5;
-        button.haloShape.scaleX = button.haloShape.scaleY = 1;
-    }
-
-    if (button.highlightShape) {
-        createjs.Tween.removeTweens(button.highlightShape);
-        button.highlightShape.alpha = 0;
-        button.highlightShape.x = -160;
-    }
-
-    if (button.contentWrapper) {
-        createjs.Tween.removeTweens(button.contentWrapper);
-        button.contentWrapper.y = 2;
-    }
 }
 
 function buildGameIntroOverlay() {
@@ -3160,15 +2984,7 @@ function buildGameIntroOverlay() {
     overlay.mouseEnabled = false;
     overlay.mouseChildren = false;
 
-    var background = new createjs.Shape();
-    background.graphics
-        .beginLinearGradientFill(["#071329", "#0E2142"], [0, 1], 0, 0, 0, 720)
-        .drawRect(0, 0, 1280, 720);
-    overlay.addChild(background);
-
-    var pattern = drawHoneycombPattern(1280, 720, 34);
-    pattern.alpha = 0.14;
-    overlay.addChild(pattern);
+   
 
     var header = createIntroHowToPlayHeader();
     overlay.addChild(header);
@@ -3185,8 +3001,8 @@ function buildGameIntroOverlay() {
 function createIntroHowToPlayHeader() {
     var container = new createjs.Container();
     container.name = "IntroHowToPlayBadge";
-    container.x = 120;
-    container.y = 62;
+    container.x = 50;
+    container.y = 32;
 
     var glow = new createjs.Shape();
     glow.graphics
@@ -3194,10 +3010,10 @@ function createIntroHowToPlayHeader() {
             "rgba(255, 174, 102, 0.38)",
             "rgba(255, 174, 102, 0.12)",
             "rgba(255, 174, 102, 0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 220)
-        .drawCircle(0, 0, 210);
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 180)
+        .drawCircle(0, 0, 180);
     glow.alpha = 0.85;
-    glow.x = 184;
+    glow.x = 154;
     glow.y = 52;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
@@ -3205,22 +3021,22 @@ function createIntroHowToPlayHeader() {
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 420, 0)
-        .drawRoundRect(0, 0, 420, 104, 40);
+        .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 280, 0)
+        .drawRoundRect(0, 0, 280, 85, 40);
     frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.38)", 0, 14, 28);
     container.addChild(frame);
     container.cardShape = frame;
 
-    var highlight = new createjs.Shape();
+    /*var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill([
             "rgba(255,255,255,0.75)",
             "rgba(255,255,255,0.22)",
             "rgba(255,255,255,0)"
-        ], [0, 0.52, 1], 0, 0, 420, 0)
+        ], [0, 0.52, 1], 0, 0, 320, 0)
         .drawRoundRect(16, 10, 388, 46, 24);
     highlight.alpha = 0.88;
-    container.addChild(highlight);
+    container.addChild(highlight);*/
 
     var wave = createHowToPlayTildeWave(210, 14);
     wave.x = 160;
@@ -3236,8 +3052,8 @@ function createIntroHowToPlayHeader() {
             "rgba(255, 230, 195, 0)"
         ], [0, 0.55, 1], 0, 0, 0, 0, 0, 68)
         .drawCircle(0, 0, 64);
-    iconHalo.x = 84;
-    iconHalo.y = 52;
+    iconHalo.x = 40;
+    iconHalo.y = 43;
     container.addChild(iconHalo);
 
     var iconBackground = new createjs.Shape();
@@ -3256,12 +3072,12 @@ function createIntroHowToPlayHeader() {
     container.addChild(icon);
 
     var title = new createjs.Text("How to Play", "700 32px 'Baloo 2'", "#FFFFFF");
-    title.x = 144;
-    title.y = 22;
+    title.x = 84;
+    title.y = 18;
     container.addChild(title);
 
-    var subtitle = new createjs.Text("Follow these tips before you begin", "500 22px 'Baloo 2'", "rgba(255,255,255,0.9)");
-    subtitle.x = 144;
+    var subtitle = new createjs.Text("Watch animation carefully", "500 16px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 84;
     subtitle.y = 58;
     container.addChild(subtitle);
 
@@ -3276,37 +3092,30 @@ function createIntroActionButton() {
     button.cursor = "pointer";
     button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.26)", 0, 14, 28);
 
-    var glow = new createjs.Shape();
-    glow.name = "glow";
-    button.addChild(glow);
+     
 
     var base = new createjs.Shape();
     base.name = "base";
     button.addChild(base);
-
-    var highlight = new createjs.Shape();
-    highlight.name = "highlight";
-    button.addChild(highlight);
+ 
 
     var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
     icon.textAlign = "center";
     icon.textBaseline = "middle";
-    icon.x = -88;
-    icon.y = 0;
+    icon.x = -128;
+    icon.y = 5;
     button.addChild(icon);
 
     var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
     label.name = "label";
     label.textAlign = "left";
     label.textBaseline = "middle";
-    label.x = -24;
-    label.y = 0;
+    label.x = -95;
+    label.y = 5;
     button.addChild(label);
 
-    var hit = new createjs.Shape();
-    hit.graphics.beginFill("#000").drawRoundRect(-170, -48, 340, 96, 32);
-    button.hitArea = hit;
+ 
 
     applyHowToPlayButtonState(button, "skip");
 
@@ -3357,7 +3166,7 @@ function applyHowToPlayButtonState(button, state) {
                 .setStrokeStyle(2)
                 .beginStroke("rgba(245, 107, 32, 0.85)")
                 .beginLinearGradientFill(["#FFB760", "#FF7A2F"], [0, 1], -160, 0, 160, 0)
-                .drawRoundRect(-160, -44, 320, 88, 30);
+                .drawRoundRect(-160, -44, 150, 88, 30);
         }
         if (highlight) {
             highlight.graphics
@@ -3403,7 +3212,7 @@ function applyHowToPlayButtonState(button, state) {
                 .setStrokeStyle(2)
                 .beginStroke("rgba(240, 102, 37, 0.75)")
                 .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
-                .drawRoundRect(-160, -44, 320, 88, 30);
+                .drawRoundRect(-160, -44, 150, 88, 30);
         }
         if (highlight) {
             highlight.graphics
@@ -3435,234 +3244,6 @@ function applyHowToPlayButtonState(button, state) {
     }
 
     button.state = state;
-}
-
-function getCanvasDimensions() {
-    var defaultWidth = 1280;
-    var defaultHeight = 720;
-    var targetCanvas = typeof canvas !== "undefined" && canvas ? canvas : (stage && stage.canvas ? stage.canvas : null);
-
-    var width = defaultWidth;
-    var height = defaultHeight;
-
-    if (targetCanvas) {
-        var widthSource = "attr";
-        var heightSource = "attr";
-        var rawWidth = targetCanvas.width;
-        var rawHeight = targetCanvas.height;
-
-        if (typeof rawWidth === "string") {
-            rawWidth = parseFloat(rawWidth);
-        }
-
-        if (typeof rawHeight === "string") {
-            rawHeight = parseFloat(rawHeight);
-        }
-
-        if (!rawWidth || rawWidth <= 0) {
-            rawWidth = targetCanvas.clientWidth || targetCanvas.offsetWidth || 0;
-            widthSource = "css";
-            if (typeof rawWidth === "string") {
-                rawWidth = parseFloat(rawWidth);
-            }
-        }
-
-        if (!rawHeight || rawHeight <= 0) {
-            rawHeight = targetCanvas.clientHeight || targetCanvas.offsetHeight || 0;
-            heightSource = "css";
-            if (typeof rawHeight === "string") {
-                rawHeight = parseFloat(rawHeight);
-            }
-        }
-
-        if ((!rawWidth || rawWidth <= 0 || !rawHeight || rawHeight <= 0) && typeof targetCanvas.getBoundingClientRect === "function") {
-            var bounds = targetCanvas.getBoundingClientRect();
-            if (bounds) {
-                if (!rawWidth || rawWidth <= 0) {
-                    rawWidth = bounds.width;
-                    widthSource = "css";
-                }
-                if (!rawHeight || rawHeight <= 0) {
-                    rawHeight = bounds.height;
-                    heightSource = "css";
-                }
-            }
-        }
-
-        var scaleX = stage && typeof stage.scaleX === "number" && stage.scaleX > 0 ? stage.scaleX : (window.devicePixelRatio || 1);
-        var scaleY = stage && typeof stage.scaleY === "number" && stage.scaleY > 0 ? stage.scaleY : (window.devicePixelRatio || 1);
-
-        if (!scaleX || scaleX <= 0) {
-            scaleX = 1;
-        }
-
-        if (!scaleY || scaleY <= 0) {
-            scaleY = 1;
-        }
-
-        if (rawWidth && rawWidth > 0) {
-            width = widthSource === "attr" ? rawWidth / scaleX : rawWidth;
-        }
-
-        if (rawHeight && rawHeight > 0) {
-            height = heightSource === "attr" ? rawHeight / scaleY : rawHeight;
-        }
-    } else {
-        var innerWidth = window.innerWidth || (document.documentElement && document.documentElement.clientWidth) || (document.body && document.body.clientWidth);
-        var innerHeight = window.innerHeight || (document.documentElement && document.documentElement.clientHeight) || (document.body && document.body.clientHeight);
-
-        if (innerWidth && innerWidth > 0) {
-            width = innerWidth;
-        }
-
-        if (innerHeight && innerHeight > 0) {
-            height = innerHeight;
-        }
-    }
-
-    if (!width || width <= 0) {
-        width = defaultWidth;
-    }
-
-    if (!height || height <= 0) {
-        height = defaultHeight;
-    }
-
-    return {
-        width: width,
-        height: height
-    };
-}
-
-function layoutHowToPlayOverlay(overlay) {
-    if (!overlay) {
-        return;
-    }
-
-    var dimensions = getCanvasDimensions();
-    var stageWidth = dimensions.width;
-    var stageHeight = dimensions.height;
-
-    if (!stageWidth || stageWidth <= 0) {
-        stageWidth = overlay.baseWidth || 1280;
-    }
-
-    if (!stageHeight || stageHeight <= 0) {
-        stageHeight = overlay.baseHeight || 720;
-    }
-
-    var stageCenterX = stageWidth / 2;
-    var widthRatio = stageWidth / (overlay.baseWidth || 1280);
-    var heightRatio = stageHeight / (overlay.baseHeight || 720);
-
-    if (!widthRatio || !isFinite(widthRatio)) {
-        widthRatio = 1;
-    }
-
-    if (!heightRatio || !isFinite(heightRatio)) {
-        heightRatio = 1;
-    }
-
-    if (overlay.header) {
-        if (typeof overlay.header.baseY !== "number") {
-            overlay.header.baseY = overlay.header.y;
-        }
-        overlay.header.x = stageCenterX;
-        overlay.header.y = overlay.header.baseY * heightRatio;
-    }
-
-    if (overlay.instructionsCard) {
-        if (typeof overlay.instructionsCard.baseY !== "number") {
-            overlay.instructionsCard.baseY = overlay.instructionsCard.y;
-        }
-        overlay.instructionsCard.x = stageCenterX;
-        overlay.instructionsCard.y = overlay.instructionsCard.baseY * heightRatio;
-    }
-
-    if (overlay.progressContainer) {
-        if (typeof overlay.progressContainer.baseY !== "number") {
-            overlay.progressContainer.baseY = overlay.progressContainer.y;
-        }
-        overlay.progressContainer.x = stageCenterX;
-        overlay.progressContainer.y = overlay.progressContainer.baseY * heightRatio;
-    }
-
-    if (overlay.proceedButton) {
-        overlay.proceedButton.x = stageCenterX;
-
-        if (typeof overlay.proceedButton.expandedYBase !== "number" && typeof overlay.proceedButton.expandedY === "number") {
-            overlay.proceedButton.expandedYBase = overlay.proceedButton.expandedY;
-        }
-
-        if (typeof overlay.proceedButton.compactYBase !== "number" && typeof overlay.proceedButton.compactY === "number") {
-            overlay.proceedButton.compactYBase = overlay.proceedButton.compactY;
-        }
-
-        if (typeof overlay.proceedButton.expandedYBase === "number") {
-            overlay.proceedButton.expandedY = overlay.proceedButton.expandedYBase * heightRatio;
-        }
-
-        if (typeof overlay.proceedButton.compactYBase === "number") {
-            overlay.proceedButton.compactY = overlay.proceedButton.compactYBase * heightRatio;
-        }
-
-        if (typeof overlay.proceedButton.expandedY === "number" && typeof overlay.proceedButton.compactY === "number") {
-            var currentY = overlay.proceedButton.y;
-            if (typeof currentY === "number") {
-                var distanceToExpanded = Math.abs(currentY - overlay.proceedButton.expandedY);
-                var distanceToCompact = Math.abs(currentY - overlay.proceedButton.compactY);
-                overlay.proceedButton.y = distanceToExpanded <= distanceToCompact ? overlay.proceedButton.expandedY : overlay.proceedButton.compactY;
-            } else {
-                overlay.proceedButton.y = overlay.proceedButton.expandedY;
-            }
-        }
-    }
-
-    if (overlay.accentLarge) {
-        if (typeof overlay.accentLarge.baseX !== "number") {
-            overlay.accentLarge.baseX = overlay.accentLarge.x || 0;
-        }
-        if (typeof overlay.accentLarge.baseY !== "number") {
-            overlay.accentLarge.baseY = overlay.accentLarge.y || 0;
-        }
-        overlay.accentLarge.x = overlay.accentLarge.baseX * widthRatio;
-        overlay.accentLarge.y = overlay.accentLarge.baseY * heightRatio;
-    }
-
-    if (overlay.accentSmall) {
-        if (typeof overlay.accentSmall.baseX !== "number") {
-            overlay.accentSmall.baseX = overlay.accentSmall.x || 0;
-        }
-        if (typeof overlay.accentSmall.baseY !== "number") {
-            overlay.accentSmall.baseY = overlay.accentSmall.y || 0;
-        }
-        overlay.accentSmall.x = overlay.accentSmall.baseX * widthRatio;
-        overlay.accentSmall.y = overlay.accentSmall.baseY * heightRatio;
-    }
-}
-
-function updateGameUiLayout() {
-    var dimensions = getCanvasDimensions();
-
-    if (SkipBtnMc) {
-        SkipBtnMc.x = dimensions.width - 190;
-    }
-
-    if (typeof Title !== "undefined" && Title) {
-        Title.x = dimensions.width / 2;
-    }
-
-    if (hudContainer) {
-        hudContainer.x = dimensions.width / 2;
-    }
-
-    if (HowToPlayScreenImg) {
-        layoutHowToPlayOverlay(HowToPlayScreenImg);
-    }
-
-    if (stage && typeof stage.update === "function") {
-        stage.update();
-    }
 }
 
 function attachProceedButtonListeners(button) {
@@ -3764,9 +3345,7 @@ function showLoaderProceedButton() {
         return;
     }
 
-    layoutHowToPlayOverlay(HowToPlayScreenImg);
     var button = HowToPlayScreenImg.proceedButton;
-    stopProceedButtonAmbientAnimation(button);
     attachProceedButtonListeners(button);
     button.visible = true;
     button.mouseEnabled = true;
@@ -3778,16 +3357,16 @@ function showLoaderProceedButton() {
         button.scaleX = button.scaleY = 0.92;
     }
     createjs.Tween.get(button, { override: true })
-        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut)
-        .call(function () {
-            startProceedButtonAmbientAnimation(button);
-        });
+        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut);
 
     // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
     button.alpha = 1;
     button.scaleX = button.scaleY = 1;
-    startProceedButtonAmbientAnimation(button);
-
+setInterval(() => {
+    createjs.Tween.get(button, { override: true })
+        .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut)
+        .to({ scaleX: 0.94, scaleY: 0.94 }, 200, createjs.Ease.quadOut);
+}, 1000);
     if (stage && typeof stage.update === "function") {
         stage.update();
     }
@@ -3802,7 +3381,6 @@ function hideLoaderProceedButton() {
     if (button.visible || button.alpha > 0) {
         createjs.Tween.get(button, { override: true }).to({ alpha: 0, scaleX: 0.92, scaleY: 0.92 }, 160, createjs.Ease.quadIn);
     }
-    stopProceedButtonAmbientAnimation(button);
     button.alpha = 0;
     button.scaleX = button.scaleY = 0.92;
     button.mouseEnabled = false;
