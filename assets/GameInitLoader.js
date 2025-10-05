@@ -1039,7 +1039,8 @@ function doneLoading(event) {
                 //Title = new createjs.Bitmap(preload.getResult('Title'));
                 Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
 				Title.textAlign = "center";		
-				Title.x = canvas.width/ 2;
+                           var canvasDimensions = getCanvasDimensions();
+                           Title.x = canvasDimensions.width / 2;
 				Title.y = 40;  
 				Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
@@ -1194,8 +1195,8 @@ function doneLoading(event) {
             if (id == "SkipBtn") {
                 SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                var stageWidth = (typeof canvas !== "undefined" && canvas) ? canvas.width : 1280;
-                SkipBtnMc.x = stageWidth - 190;
+                var canvasSize = getCanvasDimensions();
+                SkipBtnMc.x = canvasSize.width - 190;
                 SkipBtnMc.y = 164;
                 SkipBtnMc.visible = false;
 
@@ -1539,7 +1540,8 @@ function buildHudLayout() {
     var hudTheme = getHudThemeConfig();
 
     hudContainer = new createjs.Container();
-    hudContainer.x = canvas.width / 2;
+    var hudCanvasDimensions = getCanvasDimensions();
+    hudContainer.x = hudCanvasDimensions.width / 2;
     hudContainer.y = 8;
     hudContainer.alpha = 1;
     hudContainer.visible = true;
@@ -2176,6 +2178,8 @@ function setTimerCriticalState(isCritical) {
 function buildHowToPlayOverlay() {
     var overlay = new createjs.Container();
     overlay.name = "HowToPlayOverlay";
+    overlay.baseWidth = 1280;
+    overlay.baseHeight = 720;
 
     var background = new createjs.Shape();
     background.graphics
@@ -2196,7 +2200,8 @@ function buildHowToPlayOverlay() {
     var progress = createHowToPlayProgressBar();
     overlay.addChild(progress);
 
-    var stageWidth = typeof canvas !== "undefined" && canvas && canvas.width ? canvas.width : 1280;
+    var stageDimensions = getCanvasDimensions();
+    var stageWidth = stageDimensions.width;
     var stageCenterX = stageWidth / 2;
     header.x = stageCenterX;
     header.y = 118;
@@ -2225,6 +2230,8 @@ function buildHowToPlayOverlay() {
     proceedButton.y = proceedExpandedY;
     proceedButton.expandedY = proceedExpandedY;
     proceedButton.compactY = proceedCompactY;
+    proceedButton.expandedYBase = proceedExpandedY;
+    proceedButton.compactYBase = proceedCompactY;
     overlay.addChild(proceedButton);
 
     overlay.proceedButton = proceedButton;
@@ -2242,8 +2249,14 @@ function buildHowToPlayOverlay() {
     progress.baseY = progress.y;
     accentLarge.baseScale = accentLarge.scaleX = accentLarge.scaleY = 1;
     accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
+    accentLarge.baseX = accentLarge.x;
+    accentLarge.baseY = accentLarge.y;
+    accentSmall.baseX = accentSmall.x;
+    accentSmall.baseY = accentSmall.y;
     overlay.accentLarge = accentLarge;
     overlay.accentSmall = accentSmall;
+
+    layoutHowToPlayOverlay(overlay);
 
     return overlay;
 }
@@ -2925,6 +2938,7 @@ function prepareHowToPlayOverlayForLoading(overlay) {
         return;
     }
 
+    layoutHowToPlayOverlay(overlay);
     overlay.visible = true;
     animateHowToPlayOverlayEntry(overlay);
     resetHowToPlayProgressBar(overlay);
@@ -3423,6 +3437,234 @@ function applyHowToPlayButtonState(button, state) {
     button.state = state;
 }
 
+function getCanvasDimensions() {
+    var defaultWidth = 1280;
+    var defaultHeight = 720;
+    var targetCanvas = typeof canvas !== "undefined" && canvas ? canvas : (stage && stage.canvas ? stage.canvas : null);
+
+    var width = defaultWidth;
+    var height = defaultHeight;
+
+    if (targetCanvas) {
+        var widthSource = "attr";
+        var heightSource = "attr";
+        var rawWidth = targetCanvas.width;
+        var rawHeight = targetCanvas.height;
+
+        if (typeof rawWidth === "string") {
+            rawWidth = parseFloat(rawWidth);
+        }
+
+        if (typeof rawHeight === "string") {
+            rawHeight = parseFloat(rawHeight);
+        }
+
+        if (!rawWidth || rawWidth <= 0) {
+            rawWidth = targetCanvas.clientWidth || targetCanvas.offsetWidth || 0;
+            widthSource = "css";
+            if (typeof rawWidth === "string") {
+                rawWidth = parseFloat(rawWidth);
+            }
+        }
+
+        if (!rawHeight || rawHeight <= 0) {
+            rawHeight = targetCanvas.clientHeight || targetCanvas.offsetHeight || 0;
+            heightSource = "css";
+            if (typeof rawHeight === "string") {
+                rawHeight = parseFloat(rawHeight);
+            }
+        }
+
+        if ((!rawWidth || rawWidth <= 0 || !rawHeight || rawHeight <= 0) && typeof targetCanvas.getBoundingClientRect === "function") {
+            var bounds = targetCanvas.getBoundingClientRect();
+            if (bounds) {
+                if (!rawWidth || rawWidth <= 0) {
+                    rawWidth = bounds.width;
+                    widthSource = "css";
+                }
+                if (!rawHeight || rawHeight <= 0) {
+                    rawHeight = bounds.height;
+                    heightSource = "css";
+                }
+            }
+        }
+
+        var scaleX = stage && typeof stage.scaleX === "number" && stage.scaleX > 0 ? stage.scaleX : (window.devicePixelRatio || 1);
+        var scaleY = stage && typeof stage.scaleY === "number" && stage.scaleY > 0 ? stage.scaleY : (window.devicePixelRatio || 1);
+
+        if (!scaleX || scaleX <= 0) {
+            scaleX = 1;
+        }
+
+        if (!scaleY || scaleY <= 0) {
+            scaleY = 1;
+        }
+
+        if (rawWidth && rawWidth > 0) {
+            width = widthSource === "attr" ? rawWidth / scaleX : rawWidth;
+        }
+
+        if (rawHeight && rawHeight > 0) {
+            height = heightSource === "attr" ? rawHeight / scaleY : rawHeight;
+        }
+    } else {
+        var innerWidth = window.innerWidth || (document.documentElement && document.documentElement.clientWidth) || (document.body && document.body.clientWidth);
+        var innerHeight = window.innerHeight || (document.documentElement && document.documentElement.clientHeight) || (document.body && document.body.clientHeight);
+
+        if (innerWidth && innerWidth > 0) {
+            width = innerWidth;
+        }
+
+        if (innerHeight && innerHeight > 0) {
+            height = innerHeight;
+        }
+    }
+
+    if (!width || width <= 0) {
+        width = defaultWidth;
+    }
+
+    if (!height || height <= 0) {
+        height = defaultHeight;
+    }
+
+    return {
+        width: width,
+        height: height
+    };
+}
+
+function layoutHowToPlayOverlay(overlay) {
+    if (!overlay) {
+        return;
+    }
+
+    var dimensions = getCanvasDimensions();
+    var stageWidth = dimensions.width;
+    var stageHeight = dimensions.height;
+
+    if (!stageWidth || stageWidth <= 0) {
+        stageWidth = overlay.baseWidth || 1280;
+    }
+
+    if (!stageHeight || stageHeight <= 0) {
+        stageHeight = overlay.baseHeight || 720;
+    }
+
+    var stageCenterX = stageWidth / 2;
+    var widthRatio = stageWidth / (overlay.baseWidth || 1280);
+    var heightRatio = stageHeight / (overlay.baseHeight || 720);
+
+    if (!widthRatio || !isFinite(widthRatio)) {
+        widthRatio = 1;
+    }
+
+    if (!heightRatio || !isFinite(heightRatio)) {
+        heightRatio = 1;
+    }
+
+    if (overlay.header) {
+        if (typeof overlay.header.baseY !== "number") {
+            overlay.header.baseY = overlay.header.y;
+        }
+        overlay.header.x = stageCenterX;
+        overlay.header.y = overlay.header.baseY * heightRatio;
+    }
+
+    if (overlay.instructionsCard) {
+        if (typeof overlay.instructionsCard.baseY !== "number") {
+            overlay.instructionsCard.baseY = overlay.instructionsCard.y;
+        }
+        overlay.instructionsCard.x = stageCenterX;
+        overlay.instructionsCard.y = overlay.instructionsCard.baseY * heightRatio;
+    }
+
+    if (overlay.progressContainer) {
+        if (typeof overlay.progressContainer.baseY !== "number") {
+            overlay.progressContainer.baseY = overlay.progressContainer.y;
+        }
+        overlay.progressContainer.x = stageCenterX;
+        overlay.progressContainer.y = overlay.progressContainer.baseY * heightRatio;
+    }
+
+    if (overlay.proceedButton) {
+        overlay.proceedButton.x = stageCenterX;
+
+        if (typeof overlay.proceedButton.expandedYBase !== "number" && typeof overlay.proceedButton.expandedY === "number") {
+            overlay.proceedButton.expandedYBase = overlay.proceedButton.expandedY;
+        }
+
+        if (typeof overlay.proceedButton.compactYBase !== "number" && typeof overlay.proceedButton.compactY === "number") {
+            overlay.proceedButton.compactYBase = overlay.proceedButton.compactY;
+        }
+
+        if (typeof overlay.proceedButton.expandedYBase === "number") {
+            overlay.proceedButton.expandedY = overlay.proceedButton.expandedYBase * heightRatio;
+        }
+
+        if (typeof overlay.proceedButton.compactYBase === "number") {
+            overlay.proceedButton.compactY = overlay.proceedButton.compactYBase * heightRatio;
+        }
+
+        if (typeof overlay.proceedButton.expandedY === "number" && typeof overlay.proceedButton.compactY === "number") {
+            var currentY = overlay.proceedButton.y;
+            if (typeof currentY === "number") {
+                var distanceToExpanded = Math.abs(currentY - overlay.proceedButton.expandedY);
+                var distanceToCompact = Math.abs(currentY - overlay.proceedButton.compactY);
+                overlay.proceedButton.y = distanceToExpanded <= distanceToCompact ? overlay.proceedButton.expandedY : overlay.proceedButton.compactY;
+            } else {
+                overlay.proceedButton.y = overlay.proceedButton.expandedY;
+            }
+        }
+    }
+
+    if (overlay.accentLarge) {
+        if (typeof overlay.accentLarge.baseX !== "number") {
+            overlay.accentLarge.baseX = overlay.accentLarge.x || 0;
+        }
+        if (typeof overlay.accentLarge.baseY !== "number") {
+            overlay.accentLarge.baseY = overlay.accentLarge.y || 0;
+        }
+        overlay.accentLarge.x = overlay.accentLarge.baseX * widthRatio;
+        overlay.accentLarge.y = overlay.accentLarge.baseY * heightRatio;
+    }
+
+    if (overlay.accentSmall) {
+        if (typeof overlay.accentSmall.baseX !== "number") {
+            overlay.accentSmall.baseX = overlay.accentSmall.x || 0;
+        }
+        if (typeof overlay.accentSmall.baseY !== "number") {
+            overlay.accentSmall.baseY = overlay.accentSmall.y || 0;
+        }
+        overlay.accentSmall.x = overlay.accentSmall.baseX * widthRatio;
+        overlay.accentSmall.y = overlay.accentSmall.baseY * heightRatio;
+    }
+}
+
+function updateGameUiLayout() {
+    var dimensions = getCanvasDimensions();
+
+    if (SkipBtnMc) {
+        SkipBtnMc.x = dimensions.width - 190;
+    }
+
+    if (typeof Title !== "undefined" && Title) {
+        Title.x = dimensions.width / 2;
+    }
+
+    if (hudContainer) {
+        hudContainer.x = dimensions.width / 2;
+    }
+
+    if (HowToPlayScreenImg) {
+        layoutHowToPlayOverlay(HowToPlayScreenImg);
+    }
+
+    if (stage && typeof stage.update === "function") {
+        stage.update();
+    }
+}
+
 function attachProceedButtonListeners(button) {
     if (!button || button._loaderProceedHooked) {
         return;
@@ -3522,6 +3764,7 @@ function showLoaderProceedButton() {
         return;
     }
 
+    layoutHowToPlayOverlay(HowToPlayScreenImg);
     var button = HowToPlayScreenImg.proceedButton;
     stopProceedButtonAmbientAnimation(button);
     attachProceedButtonListeners(button);
