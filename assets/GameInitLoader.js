@@ -29,7 +29,8 @@ var hudContainer,
 
 var HowToPlayScreenImg,
     howToPlayImageMc,
-    loadProgressPercentLabel;
+    loadProgressPercentLabel,
+    loaderBar;
 var lastDisplayedScore = null,
     lastDisplayedTime = null,
     lastDisplayedQuestion = null;
@@ -219,6 +220,262 @@ var HUD_THEME_PRESETS = {
         }
     }
 };
+
+function getCanvasScale(axis) {
+    if (typeof stage !== "undefined" && stage) {
+        var scale = axis === "y" ? stage.scaleY : stage.scaleX;
+        if (typeof scale === "number" && !isNaN(scale) && scale !== 0) {
+            return scale;
+        }
+    }
+    return 1;
+}
+
+function getLogicalCanvasWidth() {
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.width === "number") {
+        var scaleX = getCanvasScale("x");
+        return canvas.width / scaleX;
+    }
+    return 1280;
+}
+
+function getLogicalCanvasHeight() {
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.height === "number") {
+        var scaleY = getCanvasScale("y");
+        return canvas.height / scaleY;
+    }
+    return 720;
+}
+
+function getCanvasCenterX() {
+    return getLogicalCanvasWidth() / 2;
+}
+
+var lastResponsiveLayoutWidth = null,
+    lastResponsiveLayoutHeight = null,
+    responsiveResizeListenerAttached = false;
+
+function getCanvasMetrics() {
+    var width = getLogicalCanvasWidth();
+    var height = getLogicalCanvasHeight();
+
+    return {
+        width: width,
+        height: height,
+        centerX: width / 2,
+        centerY: height / 2
+    };
+}
+
+function getHudElementWidth(element, fallbackWidth) {
+    if (!element) {
+        return fallbackWidth || 0;
+    }
+
+    if (typeof element.__layoutWidth === "number") {
+        return element.__layoutWidth;
+    }
+
+    if (element.backgroundShape && typeof element.backgroundShape.__width === "number") {
+        return element.backgroundShape.__width;
+    }
+
+    if (element.cardShape && element.cardShape.getBounds) {
+        var cardBounds = element.cardShape.getBounds();
+        if (cardBounds) {
+            return cardBounds.width;
+        }
+    }
+
+    if (element.getBounds) {
+        var bounds = element.getBounds();
+        if (bounds) {
+            return bounds.width;
+        }
+    }
+
+    if (element.nominalBounds) {
+        return element.nominalBounds.width;
+    }
+
+    return fallbackWidth || 0;
+}
+
+function layoutOverlayToCanvas(overlay, baseWidth, baseHeight) {
+    if (!overlay) {
+        return;
+    }
+
+    var metrics = getCanvasMetrics();
+    var stageWidth = metrics.width;
+    var stageHeight = metrics.height;
+
+    var referenceWidth = baseWidth || overlay.__baseWidth || stageWidth;
+    var referenceHeight = baseHeight || overlay.__baseHeight || stageHeight;
+
+    if (!referenceWidth || !referenceHeight) {
+        return;
+    }
+
+    var scaleX = stageWidth / referenceWidth;
+    var scaleY = stageHeight / referenceHeight;
+    var scale = Math.min(scaleX, scaleY);
+
+    overlay.scaleX = overlay.scaleY = scale;
+
+    var offsetX = (stageWidth - referenceWidth * scale) / 2;
+    var offsetY = (stageHeight - referenceHeight * scale) / 2;
+
+    overlay.x = offsetX;
+    overlay.y = offsetY;
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.layoutOverlayToCanvas = layoutOverlayToCanvas;
+}
+
+function ensureResponsiveResizeListener() {
+    if (responsiveResizeListenerAttached) {
+        return;
+    }
+
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+        window.addEventListener("resize", function () {
+            refreshResponsiveLayout(true);
+            if (stage && typeof stage.update === "function") {
+                stage.update();
+            }
+        });
+        responsiveResizeListenerAttached = true;
+    }
+}
+
+function layoutHudElements(canvasWidth, canvasHeight) {
+    if (!hudContainer) {
+        return;
+    }
+
+    var metrics = getCanvasMetrics();
+    var stageWidth = typeof canvasWidth === "number" ? canvasWidth : metrics.width;
+    var stageHeight = typeof canvasHeight === "number" ? canvasHeight : metrics.height;
+
+    var safeMargin = Math.max(36, stageWidth * 0.045);
+    var availableWidth = Math.max(stageWidth - safeMargin * 2, 320);
+
+    var scoreWidth = getHudElementWidth(scoreCardContainer, 220);
+    var timerWidth = getHudElementWidth(timerCardContainer, 220);
+    var questionWidth = getHudElementWidth(hudQuestionCardContainer, 240);
+    var controlWidth = getHudElementWidth(controlContainer, 160);
+
+    var baseGap = Math.max(24, Math.min(64, stageWidth * 0.04));
+    var layoutWidth = scoreWidth + timerWidth + questionWidth + controlWidth + baseGap * 3;
+
+    if (layoutWidth > availableWidth) {
+        var overflow = layoutWidth - availableWidth;
+        var gapReduction = Math.min(baseGap - 16, overflow / 3);
+        if (gapReduction > 0) {
+            baseGap -= gapReduction;
+            layoutWidth = scoreWidth + timerWidth + questionWidth + controlWidth + baseGap * 3;
+        }
+    }
+
+    var scale = 1;
+    if (layoutWidth > availableWidth) {
+        scale = Math.max(0.72, availableWidth / layoutWidth);
+    }
+
+    hudContainer.scaleX = hudContainer.scaleY = scale;
+
+    var positions = [];
+    var cursor = -layoutWidth / 2 + scoreWidth / 2;
+    positions.push(cursor);
+
+    cursor += scoreWidth / 2 + baseGap + timerWidth / 2;
+    positions.push(cursor);
+
+    cursor += timerWidth / 2 + baseGap + questionWidth / 2;
+    positions.push(cursor);
+
+    cursor += questionWidth / 2 + baseGap + controlWidth / 2;
+    positions.push(cursor);
+
+    if (scoreCardContainer) {
+        scoreCardContainer.x = positions[0];
+        scoreCardContainer.baseX = positions[0];
+    }
+    if (timerCardContainer) {
+        timerCardContainer.x = positions[1];
+        timerCardContainer.baseX = positions[1];
+    }
+    if (hudQuestionCardContainer) {
+        hudQuestionCardContainer.x = positions[2];
+        hudQuestionCardContainer.baseX = positions[2];
+    }
+    if (controlContainer) {
+        controlContainer.x = positions[3];
+        controlContainer.baseX = positions[3];
+    }
+
+    var topPadding = Math.max(48, stageHeight * 0.055);
+    hudContainer.y = topPadding;
+
+    var desiredCenter = stageWidth / 2;
+    var halfLayout = layoutWidth / 2;
+    var leftGlobal = desiredCenter + (-halfLayout) * scale;
+    var rightGlobal = desiredCenter + halfLayout * scale;
+    var leftLimit = safeMargin;
+    var rightLimit = stageWidth - safeMargin;
+
+    if (leftGlobal < leftLimit) {
+        desiredCenter += (leftLimit - leftGlobal);
+    }
+    if (rightGlobal > rightLimit) {
+        desiredCenter -= (rightGlobal - rightLimit);
+    }
+
+    hudContainer.x = desiredCenter;
+}
+
+function layoutIntroElements(canvasWidth, canvasHeight) {
+    var metrics = getCanvasMetrics();
+    var stageWidth = typeof canvasWidth === "number" ? canvasWidth : metrics.width;
+    var stageHeight = typeof canvasHeight === "number" ? canvasHeight : metrics.height;
+    var safeMargin = Math.max(36, stageWidth * 0.05);
+
+    if (typeof Title !== "undefined" && Title) {
+        Title.x = stageWidth / 2;
+        Title.y = Math.max(36, stageHeight * 0.05);
+    }
+
+    if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
+        var halfWidth = typeof SkipBtnMc.__layoutHalfWidth === "number" ? SkipBtnMc.__layoutHalfWidth : 160;
+        var halfHeight = typeof SkipBtnMc.__layoutHalfHeight === "number" ? SkipBtnMc.__layoutHalfHeight : 44;
+        SkipBtnMc.x = stageWidth - safeMargin - halfWidth;
+        SkipBtnMc.y = Math.max(halfHeight + safeMargin * 0.35, stageHeight * 0.12);
+    }
+}
+
+function refreshResponsiveLayout(force) {
+    ensureResponsiveResizeListener();
+
+    var metrics = getCanvasMetrics();
+    var width = metrics.width;
+    var height = metrics.height;
+
+    if (!force && width === lastResponsiveLayoutWidth && height === lastResponsiveLayoutHeight) {
+        return;
+    }
+
+    lastResponsiveLayoutWidth = width;
+    lastResponsiveLayoutHeight = height;
+
+    layoutHudElements(width, height);
+    layoutIntroElements(width, height);
+
+    layoutOverlayToCanvas(HowToPlayScreenImg, 1280, 720);
+    layoutOverlayToCanvas(howToPlayImageMc, 1280, 720);
+    layoutOverlayToCanvas(loaderBar, 1280, 720);
+}
 
 function cloneArray(source) {
     return source && source.slice ? source.slice() : source;
@@ -1039,13 +1296,14 @@ function doneLoading(event) {
             if (id == "Title") {
                 //Title = new createjs.Bitmap(preload.getResult('Title'));
                 Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
-				Title.textAlign = "center";		
-				Title.x = canvas.width/ 2;
-				Title.y = 40;  
-				Title.shadow = new createjs.Shadow("red", 1, 1, 1);
+                                Title.textAlign = "center";
+                           Title.x = getCanvasCenterX();
+                                Title.y = 40;
+                                Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
-				
+
                 Title.visible = false;
+                refreshResponsiveLayout(true);
                 continue;
             }
 
@@ -1195,10 +1453,8 @@ function doneLoading(event) {
             if (id == "SkipBtn") {
                 SkipBtnMc = createIntroActionButton();
                 container.parent.addChild(SkipBtnMc);
-                var stageWidth = (typeof canvas !== "undefined" && canvas) ? canvas.width : 1280;
-                SkipBtnMc.x = stageWidth - 220;
-                SkipBtnMc.y = 74;
                 SkipBtnMc.visible = false;
+                refreshResponsiveLayout(true);
 
                 continue;
             }
@@ -1214,6 +1470,7 @@ function doneLoading(event) {
                 howToPlayImageMc = buildGameIntroOverlay();
                 container.parent.addChild(howToPlayImageMc);
                 howToPlayImageMc.visible = false;
+                refreshResponsiveLayout(true);
                 continue;
             }
 
@@ -1320,6 +1577,8 @@ function watchRestart() {
         }
         HowToPlayScreenImg.visible = true;
     }
+
+    refreshResponsiveLayout(true);
 
 
 
@@ -1549,6 +1808,23 @@ card.addChild(accentBorder);
     card.__cornerRadius = cornerRadius;
     card.__accentWidth = HUD_CARD_ACCENT_WIDTH;
 
+    var measuredLabelWidth = labelText && labelText.getMeasuredWidth ? labelText.getMeasuredWidth() : 0;
+    var layoutLeft = Math.min(-halfWidth, icon.x - 24);
+    var layoutRight = Math.max(
+        halfWidth,
+        -halfWidth + HUD_CARD_ACCENT_WIDTH,
+        labelText.x + measuredLabelWidth + 28,
+        valueHolder.x + 140
+    );
+    var layoutWidth = layoutRight - layoutLeft;
+    if (layoutWidth < 220) {
+        layoutWidth = 220;
+    }
+
+    card.__layoutLeft = layoutLeft;
+    card.__layoutRight = layoutRight;
+    card.__layoutWidth = layoutWidth;
+
     return card;
 }
 
@@ -1568,24 +1844,16 @@ function buildHudLayout() {
     var hudTheme = getHudThemeConfig();
 
     hudContainer = new createjs.Container();
-    hudContainer.x = canvas.width / 2;
-    hudContainer.y = 8;
     hudContainer.alpha = 1;
     hudContainer.visible = true;
 
     scoreCardContainer = createHudCard("Score", "score");
-    scoreCardContainer.x = -680;
-    scoreCardContainer.baseX = scoreCardContainer.x;
-	hudContainer.addChild(scoreCardContainer);
+    hudContainer.addChild(scoreCardContainer);
 
     timerCardContainer = createHudCard("Seconds Left", "timer");
-    timerCardContainer.x = -530;
-    timerCardContainer.baseX = timerCardContainer.x;
     hudContainer.addChild(timerCardContainer);
 
     hudQuestionCardContainer = createHudCard("Question", "question");
-    hudQuestionCardContainer.x = 280;
-    hudQuestionCardContainer.baseX = hudQuestionCardContainer.x;
     hudContainer.addChild(hudQuestionCardContainer);
 
     if (scoreCardContainer.valueHolder) {
@@ -1627,8 +1895,6 @@ function buildHudLayout() {
     hudQuestionCardContainer.addChild(questionProgressBarFill);
 
     controlContainer = new createjs.Container();
-    controlContainer.x = 420 + HUD_CARD_WIDTH * 0.85;
-    controlContainer.baseX = controlContainer.x;
 
     var controlBg = new createjs.Shape();
     var controlWidth = 120;
@@ -1643,6 +1909,7 @@ function buildHudLayout() {
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
+    controlContainer.__layoutWidth = controlWidth + 64;
 
     var controlPalette = hudTheme.controlPalette || {};
     var volumePalette = controlPalette.volume || {};
@@ -1716,6 +1983,8 @@ function buildHudLayout() {
     updateQuestionProgress();
 
     startHudAmbientAnimations();
+
+    refreshResponsiveLayout(true);
 }
 
 function refreshHudValues() {
@@ -1820,7 +2089,9 @@ function revealHud() {
         return;
     }
 
-    var targetY = 60;
+    layoutHudElements();
+
+    var targetY = hudContainer.y;
     hudContainer.alpha = 0;
     hudContainer.y = targetY - 12;
 
@@ -2258,6 +2529,10 @@ function buildHowToPlayOverlay() {
     accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
     overlay.accentLarge = accentLarge;
     overlay.accentSmall = accentSmall;
+
+    overlay.__baseWidth = 1280;
+    overlay.__baseHeight = 720;
+    layoutOverlayToCanvas(overlay, overlay.__baseWidth, overlay.__baseHeight);
 
     return overlay;
 }
@@ -2995,6 +3270,10 @@ function buildGameIntroOverlay() {
     accent.graphics.beginFill("rgba(255,255,255,0.12)").drawCircle(1150, 120, 52);
     overlay.addChild(accent);
 
+    overlay.__baseWidth = 1280;
+    overlay.__baseHeight = 720;
+    layoutOverlayToCanvas(overlay, overlay.__baseWidth, overlay.__baseHeight);
+
     return overlay;
 }
 
@@ -3120,6 +3399,8 @@ function createIntroActionButton() {
     applyHowToPlayButtonState(button, "skip");
 
     button.scaleX = button.scaleY = 0.96;
+    button.__layoutHalfWidth = 160;
+    button.__layoutHalfHeight = 44;
 
     return button;
 }
@@ -3244,6 +3525,13 @@ function applyHowToPlayButtonState(button, state) {
     }
 
     button.state = state;
+    var layoutHalfWidth = 160;
+    var layoutHalfHeight = 44;
+    if (state === "start") {
+        layoutHalfHeight = 44;
+    }
+    button.__layoutHalfWidth = layoutHalfWidth;
+    button.__layoutHalfHeight = layoutHalfHeight;
 }
 
 function attachProceedButtonListeners(button) {
