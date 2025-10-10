@@ -228,9 +228,8 @@ else
 <script async type="text/javascript" src="ErrorLog.js"></script>
 
 <script async type="text/javascript" src="assets/GetJsonData.js"></script>
-<script async type="text/javascript" src="<?php echo $gamename; ?>/main.js"></script>
 
-<script async type="text/javascript" src="<?php echo $gamename;?>/<?php echo $gamename;?>Intro.js"></script>
+
 
 <script async type="text/javascript" src="assets/answerLoader.js"></script>
 <script async type="text/javascript" src="assets/GameInit.js"></script>
@@ -244,6 +243,10 @@ else
 <script async type="text/javascript" src="assets/ScoreValidation.js"></script>
 <script async type="text/javascript" src="assets/pleaserotate.js"></script>
 <script async type="text/javascript" src="assets/GameTitle.js"></script>
+<script async type="text/javascript" src="assets/GameUI.js"></script>
+<script async type="text/javascript" src="<?php echo $gamename;?>/<?php echo $gamename;?>Intro.js"></script>
+<script async type="text/javascript" src="<?php echo $gamename; ?>/main.js"></script>
+
 <!--<script src="https://website-widgets.pages.dev/dist/sienna.min.js" defer=""></script>-->
 <script>
 //msg.text = 'Add the number of objects in both the circles.  Select the right answer from the options given';

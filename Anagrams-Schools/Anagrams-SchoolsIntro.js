@@ -4,22 +4,24 @@ var TempIntroVal;
 var highlightTweenArr = []
 var cluegotoArr = []
 var setIntroCnt = 0
-var removeIntraval =0
+var removeIntraval = 0
 var introQuestxtX = 636; introQuestxtY = 120;
-var introQues1X = 630, introQues1Y = 280
-var introChoice1X = 280, introChoice1Y = 610;
-var introChoice2X = 500, introChoice2Y = 610;
-var introChoice3X = 720, introChoice3Y = 610;
-var introChoice4X = 940, introChoice4Y = 610;
+var introQues1X = 635, introQues1Y = 280
+var introChoice1X = 280, introChoice1Y = 590;
+var introChoice2X = 500, introChoice2Y = 590;
+var introChoice3X = 720, introChoice3Y = 590;
+var introChoice4X = 940, introChoice4Y = 590;
 var introClu1X = 465, introClu1Y = 460;
 var introClu2X = 575, introClu2Y = 460;
 var introClu3X = 685, introClu3Y = 460;
 var introClu4X = 795, introClu4Y = 460;
 var introArrowX = 210, introArrowY = 350;
 var introfingureX = 220, introfingureY = 520;
-var ArrowXArr = [, 503, 943, 723, 283], FingXArr =[, 535, 975, 750, 310]
-var ArrowYArr = [, 480, 480, 480, 480], FingYArr = [, 585, 585, 585, 585]
+var ArrowXArr = [, 500, 940, 720, 280],FingXArr = [, 525, 965, 745, 305]
+var ArrowYArr = [, 490, 490, 490, 490], FingYArr = [, 600, 600, 600, 600]
 var introClueArr = []
+
+
 function commongameintro() {
     introClueArr = []
     introTitle = Title.clone()
@@ -33,30 +35,27 @@ function commongameintro() {
     introChoice4 = choice1.clone()
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-  
-
-    introHolder = chHolderMC.clone()
+console.log("container.width ::"+container.width)
+console.log("stage.width ::"+stage.width)
+console.log("canvas.width ::"+canvas.width)
     container.parent.addChild(introTitle)
     introTitle.visible = true;
-    container.parent.addChild(introHolder)
-    introHolder.visible = false;
+    introTitle.textAlign = "center";
+    introTitle.textBaseline = "middle";
+    introTitle.x = 650;
+    introTitle.y = INTRO_TITLE_Y;
 
 
-
-    introQues1 = new createjs.Text("ward", "60px lato-Bold", "#2f8c62");
-    container.parent.addChild(introQues1)
-    introQues1.x = introQues1X;
-    introQues1.y = introQues1Y;
-    introQues1.textAlign = "center";
-    introQues1.textBaseline = "middle";
-    introQues1.visible = false;
-
+    call_UI_introQuestionCardContainer(container,"ward");
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
     introQuestxt.visible = true;
-
-
+    introQuestxt.textAlign = "center";
+    introQuestxt.textBaseline = "middle";
+    introQuestxt.lineWidth = 760;
+    introQuestxt.x = 635;
+    introQuestxt.y = INTRO_PROMPT_Y-50;
 
     container.parent.addChild(introChoice1)
     introChoice1.x = introChoice1X;
@@ -64,6 +63,7 @@ function commongameintro() {
     introChoice1.scaleX = introChoice1.scaleY = .8;
     introChoice1.visible = false;
     introChoice1.gotoAndStop(22);
+
     container.parent.addChild(introChoice2)
     introChoice2.visible = false;
     introChoice2.x = introChoice2X;
@@ -86,26 +86,26 @@ function commongameintro() {
     container.parent.addChild(introClu1)
     introClu1.x = introClu1X;
     introClu1.y = introClu1Y;
-    // introClu1.scaleX = introClu1.scaleY = 1.3;
+    introClu1.scaleX = introClu1.scaleY = 1;
     introClu1.visible = false;
     introClu1.gotoAndStop(26);
     container.parent.addChild(introClu2)
     introClu2.visible = false;
     introClu2.x = introClu2X;
     introClu2.y = introClu2Y;
-    // introClu2.scaleX = introClu2.scaleY = 1.3;
+    introClu2.scaleX = introClu2.scaleY = 1;
     introClu2.gotoAndStop(26)
     container.parent.addChild(introClu3)
     introClu3.visible = false;
     introClu3.x = introClu3X;
     introClu3.y = introClu3Y;
-    // introClu3.scaleX = introClu3.scaleY = 1.3;
+    introClu3.scaleX = introClu3.scaleY = 1;
     introClu3.gotoAndStop(26)
     container.parent.addChild(introClu4)
     introClu4.visible = false;
     introClu4.x = introClu4X;
     introClu4.y = introClu4Y;
-    // introClu4.scaleX = introClu4.scaleY = 1.3;
+    introClu4.scaleX = introClu4.scaleY = 1;
     introClu4.gotoAndStop(26)
     introClueArr.push("", introClu1, introClu2, introClu3, introClu4)
 
@@ -114,26 +114,27 @@ function commongameintro() {
 
 
 }
+
+
+
+
+
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
     quesTween()
 }
 
 function quesTween() {
-    
-    introHolder.visible = true;
-    introHolder.alpha = 0
-    createjs.Tween.get(introHolder).to({ alpha: 1 }, 500)
 
-    introQues1.visible = true;
-    introQues1.alpha = 0
-    createjs.Tween.get(introQues1).wait(1000).to({ alpha: 1 }, 500).call(handleComplete2_1);
+
+    questionCardContainer_htp.visible = true;
+    questionCardContainer_htp.alpha = 0
+    createjs.Tween.get(questionCardContainer_htp).wait(1000).to({ alpha: 1 }, 500).call(handleComplete2_1);
 
 
 
 }
 function handleComplete2_1() {
-    createjs.Tween.removeAllTweens();
     choiceTween()
 }
 function choiceTween() {
@@ -142,21 +143,19 @@ function choiceTween() {
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = true;
         introClueArr[i].gotoAndStop(26)
-        this["introChoice" + i].y = 605,
+        this["introChoice" + i].y = 590, this["introChoice" + i].x = this["introChoice" + i].x;
         this["introChoice" + i].visible = true;
         this["introChoice" + i].alpha = 0;
         if (i == 4) {
-            createjs.Tween.get(this["introChoice" + i]).wait(val).to({ alpha: 1 }, val).call(handleComplete4_1);
+            createjs.Tween.get(this["introChoice" + i]).wait(val).to({ y: 620, scaleX: .8, scaleY: .8, alpha: 1 }, val).call(handleComplete4_1);
         }
         else {
-            createjs.Tween.get(this["introChoice" + i]).wait(val).to({alpha: 1 }, val);
+            createjs.Tween.get(this["introChoice" + i]).wait(val).to({ y: 620, scaleX: .8, scaleY: .8, alpha: 1 }, val);
         }
 
         val = val + 150
-    
     }
     TempIntroVal = 0;
-  
 }
 
 function handleComplete4_1() {
@@ -199,6 +198,7 @@ function setArrowTween() {
     }
     else {
         container.parent.addChild(introArrow);
+
         introArrow.visible = true;
         introfingure.visible = false;
         introArrow.x = ArrowXArr[TempIntroVal];
@@ -223,6 +223,7 @@ function setFingureTween() {
         container.parent.removeChild(introArrow);
         introArrow.visible = false;
         container.parent.addChild(introfingure);
+   
         introfingure.visible = true;
         introfingure.x = FingXArr[TempIntroVal];
         introfingure.y = FingYArr[TempIntroVal];
@@ -309,18 +310,13 @@ function setCallDelay() {
 }
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
-
-
-
-
-    // container.parent.removeChild(introTitle)
-    // introTitle.visible = false;
+ 
     container.parent.removeChild(introArrow)
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQues1)
-    introQues1.visible = false
+    container.parent.removeChild(questionCardContainer_htp)
+    questionCardContainer_htp.visible = false
     container.parent.removeChild(introQuestxt)
     introQuestxt.visible = false
     container.parent.removeChild(introChoice1)
@@ -331,8 +327,7 @@ function removeGameIntro() {
     introChoice3.visible = false
     container.parent.removeChild(introChoice4)
     introChoice4.visible = false
-    container.parent.removeChild(introHolder)
-    introHolder.visible = false;
+
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = false;
     }

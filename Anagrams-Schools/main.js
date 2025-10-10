@@ -11,8 +11,12 @@ var getChar = [];
 var quesMcArr = []
 
 var clueMcArr = [];
-var clueArr = []
+var choiceBgArr = [];
+var choiceGlowArr = [];
 
+
+var clueArr = []
+var clueBgArr = [];
 var choiceArrScale
 var cnt = -1, ans, qscnt = -1, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
 var startBtn, introScrn, container, question, circleOutline, chHolderMC, choice1, choice2, choice3, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
@@ -75,6 +79,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+	call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
 
     loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
@@ -105,9 +110,7 @@ function init() {
         manifest.push(
 
            
-            { id: "chHolder",src: questionTextPath + "Anagrams-Schools-QT1.png" },
             { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },
-            { id: "QusTxtString", src: questionTextPath + "Anagrams-Schools-QT.png" },
             { id: "clueMc", src: gameAssetsPath + "clueImages.png" }
 
 
@@ -126,12 +129,8 @@ function doneLoading1(event) {
     loaderBar.visible = false;
     stage.update();
 
-    if (id == "QusTxtString") {
-        QusTxtString = new createjs.Bitmap(preload.getResult('QusTxtString'));
-        container.parent.addChild(QusTxtString)
-        QusTxtString.visible = false;
-    }
-  
+    call_UI_gameQuestion(container,"Find the word related to school that is an anagram of");
+
 
     if (id == "choice1") {
         var choiceSpriteSheet = new createjs.SpriteSheet({
@@ -161,11 +160,7 @@ function doneLoading1(event) {
 
     }
 
-    if (id == "chHolder") {
-        chHolderMC = new createjs.Bitmap(preload.getResult('chHolder'));
-        container.parent.addChild(chHolderMC)
-        chHolderMC.visible = false;
-    }
+
 
 
 }
@@ -179,7 +174,7 @@ function tick(e) {
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========///////////////////////////////////////////////////////////////////
 
 function handleClick(e) {
-    qno = between(0, 14);
+    qno = between(0, nameArr.length-1);
     qno.splice(qno.indexOf(9), 1)
     CreateGameStart()
     if (gameType == 0) {
@@ -200,32 +195,79 @@ function CreateGameElements() {
     container.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
 
-    chHolderMC.visible = false;
-    chHolderMC.y = chHolderMC.y - 7
-    container.parent.addChild(chHolderMC, question);
+
+	ensureQuestionCard();
     for (i = 0; i < maxLetterCnt; i++) {
-        clueMcArr[i] = new createjs.MovieClip();
-        container.parent.addChild(clueMcArr[i]);
-        clueArr[i] = clueMc.clone();
-        clueMcArr[i].addChild(clueArr[i])
-        clueArr[i].gotoAndStop(26);
-        clueArr[i].visible = false;
-        clueArr[i].x = 355 + (i * 70) - 14;
-        clueArr[i].y = 490;
+		
+		if (!clueBgArr[i]) {
+      clueBgArr[i] = new createjs.Shape();
+      drawClueSlotBackground(clueBgArr[i]);
+      clueBgArr[i].alpha = 0;
+      clueBgArr[i].visible = false;
+      clueBgArr[i].shadow = new createjs.Shadow("rgba(6,14,30,0.45)", 0, 10, 28);
+      clueBgArr[i].__baseScale = 1;
+      clueBgArr[i].mouseEnabled = false;
+      clueBgArr[i].mouseChildren = false;
+      container.parent.addChild(clueBgArr[i]);
+    }
+	
+	clueMcArr[i] = new createjs.MovieClip();
+    container.parent.addChild(clueMcArr[i]);
+    clueArr[i] = clueMc.clone();
+    clueMcArr[i].addChild(clueArr[i]);
+    clueArr[i].gotoAndStop(26);
+    clueArr[i].visible = false;
+    clueArr[i].x = 355 + i * 70 - 14;
+    clueArr[i].y = 490;
+	
+ 
     }
 
     container.parent.addChild(choice1);
     choice1.visible = false;
 
     for (i = 0; i < maxLetterCnt; i++) {
-        choiceArr[i] = choice1.clone()
-        choiceArr[i].scaleX = choiceArr[i].scaleY = .8;
-        choiceArr[i].visible = false;
-        container.parent.addChild(choiceArr[i]);
-        choiceArr[i].x = 205 + (i * 120);
-        choiceArr[i].y = 620;
+		
+		if (!choiceBgArr[i]) {
+      choiceBgArr[i] = new createjs.Shape();
+      drawChoiceTileBackground(choiceBgArr[i]);
+      choiceBgArr[i].alpha = 0;
+      choiceBgArr[i].visible = false;
+      choiceBgArr[i].shadow = new createjs.Shadow("rgba(9,18,36,0.4)", 0, 18, 36);
+      choiceBgArr[i].__baseScale = 1;
+      choiceBgArr[i].mouseEnabled = false;
+      choiceBgArr[i].mouseChildren = false;
+      container.parent.addChild(choiceBgArr[i]);
     }
 
+    if (!choiceGlowArr[i]) {
+      choiceGlowArr[i] = new createjs.Shape();
+      choiceGlowArr[i].graphics
+        .beginRadialGradientFill([
+          "rgba(104,174,255,0.4)",
+          "rgba(104,174,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 120)
+        .drawCircle(0, 0, 120);
+      choiceGlowArr[i].alpha = 0;
+      choiceGlowArr[i].visible = false;
+      choiceGlowArr[i].mouseEnabled = false;
+      choiceGlowArr[i].mouseChildren = false;
+      container.parent.addChild(choiceGlowArr[i]);
+    }
+
+    choiceArr[i] = choice1.clone();
+    choiceArr[i].scaleX = choiceArr[i].scaleY = 0.8;
+    choiceArr[i].visible = false;
+    container.parent.addChild(choiceArr[i]);
+    choiceArr[i].x = 205 + i * 120;
+    choiceArr[i].y = 620;
+	
+	 
+    }
+
+  if (questionCardContainer && container.parent) {
+    container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
+  }
 
 }
 
@@ -250,6 +292,12 @@ function pickques() {
     //db
     cnt++;
     quesCnt++;
+	  if (typeof refreshHudValues === "function") {
+    refreshHudValues();
+  } else if (typeof gameQCntTxt !== "undefined" && gameQCntTxt) {
+    gameQCntTxt.text = quesCnt + "/" + String(totalQuestions);
+  }
+  
     chpos = [];
     strArr = [];
     getChar = []
@@ -259,21 +307,31 @@ function pickques() {
     panelVisibleFn()
 
     //==========================================================================================//
-    chHolderMC.visible = true;
     QusTxtString.visible = true;
     wrdCnt = -1;
 
     isCorrect = "";
-    chHolderMC.visible = true;
+
     correctAnswer = words_arry[qno[cnt]];
 
-    question = new createjs.Text(nameArr[qno[cnt]], "70px Lato-Bold", "#2f8c62");
-    question.textAlign = "center";
-    question.textBaseline = "middle";
-    question.x = 640;
-    question.y = 270;
+    if (question) {
+    question.text = nameArr[qno[cnt]].toUpperCase();
     question.visible = true;
-    container.parent.addChild(question);
+  }
+
+  if (questionSubtitle) {
+
+    questionSubtitle.text = "";
+  }
+
+  layoutQuestionCardContents();
+
+
+  if (questionCardContainer) {
+    questionCardContainer.visible = true;
+    questionCardContainer.alpha = 0;
+    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.5;
+  }
 
     ans = correctAnswer;
 
@@ -292,6 +350,35 @@ function enablechoices() {
 
     cLen = getStr.length;
     rand1 = between(0, cLen - 1)
+	
+	for (i = 0; i < maxLetterCnt; i++) {
+    if (choiceArr[i]) {
+      choiceArr[i].visible = i < cLen;
+      choiceArr[i].alpha = 0;
+      choiceArr[i].mouseEnabled = false;
+      detachChoiceInteractions(i);
+    }
+    if (choiceBgArr[i]) {
+      drawChoiceTileBackground(choiceBgArr[i]);
+      choiceBgArr[i].visible = false;
+      choiceBgArr[i].alpha = 0;
+    }
+    if (choiceGlowArr[i]) {
+      choiceGlowArr[i].visible = false;
+      choiceGlowArr[i].alpha = 0;
+    }
+    if (clueArr[i]) {
+      clueArr[i].visible = false;
+      clueArr[i].gotoAndStop(26);
+    }
+    if (clueBgArr[i]) {
+      drawClueSlotBackground(clueBgArr[i]);
+      clueBgArr[i].visible = false;
+      clueBgArr[i].alpha = 0;
+    }
+  }
+  
+  
     for (i = 0; i < cLen; i++) {
         getChar[i] = getStr.charAt(i).toString().toUpperCase();
 
@@ -395,15 +482,57 @@ function enablechoices() {
             choiceArr[i].x = 27 + (i * 97);
 
         }
+		
+		if (clueBgArr[i]) {
+      drawClueSlotBackground(clueBgArr[i]);
+      clueBgArr[i].x = clueArr[i].x;
+      clueBgArr[i].y = clueArr[i].y;
+      clueBgArr[i].visible = true;
+      clueBgArr[i].alpha = 0;
+      clueBgArr[i].__baseScale = 1;
     }
 
-    for (i = 0; i < cLen; i++) {
-        choiceArr[i].visible = true
-        choiceArr[i].id = i
-        choiceArr[i].alpha = 1;
-        choiceArr[i].mouseEnabled = true;
-        choiceArr[i].cursor = "pointer";
+    if (choiceBgArr[i]) {
+      var tileScale = choiceArr[i].scaleX || choiceArrScale;
+      choiceBgArr[i].x = choiceArr[i].x;
+      choiceBgArr[i].y = choiceArr[i].y;
+      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.18;
+      choiceBgArr[i].__baseScale = tileScale * 1.18;
+      choiceBgArr[i].visible = true;
+      choiceBgArr[i].alpha = 0;
     }
+
+    if (choiceGlowArr[i]) {
+      choiceGlowArr[i].x = choiceArr[i].x;
+      choiceGlowArr[i].y = choiceArr[i].y + 6;
+      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = (choiceArr[i].scaleX || choiceArrScale) * 1.3;
+      choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
+      choiceGlowArr[i].visible = true;
+      choiceGlowArr[i].alpha = 0;
+    }
+
+    choiceArr[i].visible = true;
+    choiceArr[i].id = i;
+    choiceArr[i].mouseEnabled = true;
+    choiceArr[i].cursor = "pointer";
+    choiceArr[i].__baseScale = choiceArr[i].scaleX;
+    }
+
+    if (questionCardContainer) {
+    var targetCenterX = canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
+
+    if (cLen > 0 && clueArr[0] && clueArr[cLen - 1]) {
+      var firstSlotX = clueArr[0].x;
+      var lastSlotX = clueArr[cLen - 1].x;
+
+      if (!isNaN(firstSlotX) && !isNaN(lastSlotX)) {
+        targetCenterX = (firstSlotX + lastSlotX) / 2;
+      }
+    }
+
+    questionCardContainer.x = targetCenterX;
+    layoutQuestionCardContents();
+  }
 
 
     createTween()
@@ -413,34 +542,75 @@ function enablechoices() {
 }
 function createTween() {
 
-    chHolderMC.visible = true;
-    chHolderMC.alpha = 0
-    createjs.Tween.get(chHolderMC).wait(300).to({ alpha: 1 }, 300)
 
     ////////////////////////////////holder//////////////////////
-    question.visible = true;
-    question.alpha = 0
-    createjs.Tween.get(question).wait(1000)
-        .to({ alpha: 1 }, 1000)
+    if (questionCardContainer) {
+    questionCardContainer.visible = true;
+    questionCardContainer.alpha = 0;
+    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.5;
+    createjs.Tween.get(questionCardContainer, { override: true })
+      .wait(180)
+      .to({ alpha: 1, scaleX: .5, scaleY: .5 }, 380, createjs.Ease.quadOut);
+  }
 
-    for (i = 0; i < cLen; i++) {
-        clueArr[i].visible = true;
-        clueArr[i].alpha = 0
-        createjs.Tween.get(clueArr[i]).wait(1000)
-            .to({ alpha: 1 }, 1000)
+
+  if (question) {
+    question.alpha = 0;
+    createjs.Tween.get(question, { override: true })
+      .wait(260)
+      .to({ alpha: 1 }, 320, createjs.Ease.quadOut);
+  }
+
+ 
+  var clueDelay = 360;
+  for (i = 0; i < cLen; i++) {
+    if (clueBgArr[i]) {
+      clueBgArr[i].alpha = 0;
+      clueBgArr[i].visible = true;
+      createjs.Tween.get(clueBgArr[i], { override: true })
+        .wait(clueDelay + i * 90)
+        .to({ alpha: 0.95, scaleX: clueBgArr[i].__baseScale, scaleY: clueBgArr[i].__baseScale }, 260, createjs.Ease.quadOut);
     }
 
-    ///////////////////////////choice tween////////////////////////////////////
+    clueArr[i].visible = true;
+    clueArr[i].alpha = 0;
+    createjs.Tween.get(clueArr[i], { override: true })
+      .wait(clueDelay + i * 90 + 140)
+      .to({ alpha: 1 }, 240, createjs.Ease.quadOut);
+  }
 
+  var val = 420;
+  for (i = 0; i < cLen; i++) {
+    var targetScale = choiceArr[i].__baseScale || choiceArrScale;
 
-    var val = 700
-    for (i = 0; i < cLen; i++) {
-        choiceArr[i].y = 570, choiceArr[i].x = choiceArr[i].x + 10;
-        choiceArr[i].visible = true;
-        choiceArr[i].alpha = 0;
-        createjs.Tween.get(choiceArr[i]).wait(val).to({ y: 600, scaleX: choiceArrScale, scaleY: choiceArrScale, alpha: 1 }, val)
-        val = val + 150
+    var bgTargetScale = choiceBgArr[i] ? choiceBgArr[i].__baseScale || targetScale * 1.18 : null;
+    if (choiceBgArr[i]) {
+      choiceBgArr[i].alpha = 0;
+      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = bgTargetScale * 0.9;
+      createjs.Tween.get(choiceBgArr[i], { override: true })
+        .wait(val)
+        .to({ alpha: 0.95, scaleX: bgTargetScale, scaleY: bgTargetScale }, 300, createjs.Ease.quadOut);
     }
+
+    var glowTargetScale = choiceGlowArr[i] ? choiceGlowArr[i].__targetScale || targetScale * 1.3 : null;
+    if (choiceGlowArr[i]) {
+      choiceGlowArr[i].alpha = 0;
+      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = glowTargetScale * 0.9;
+      createjs.Tween.get(choiceGlowArr[i], { override: true })
+        .wait(val + 80)
+        .to({ alpha: 0.38, scaleX: glowTargetScale, scaleY: glowTargetScale }, 260, createjs.Ease.quadOut);
+    }
+
+    choiceArr[i].visible = true;
+    choiceArr[i].alpha = 0;
+    choiceArr[i].y = 570;
+    choiceArr[i].scaleX = choiceArr[i].scaleY = targetScale * 1.12;
+    createjs.Tween.get(choiceArr[i], { override: true })
+      .wait(val)
+      .to({ y: 600, scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut);
+
+    val += 140;
+  }
 
     repTimeClearInterval = setTimeout(AddListenerFn, 3000)
 
@@ -452,6 +622,7 @@ function AddListenerFn() {
     clearTimeout(repTimeClearInterval)
     for (i = 0; i < cLen; i++) {
         choiceArr[i].addEventListener("click", answerSelected);
+		attachChoiceInteractions(i);
     }
 
 
@@ -477,14 +648,27 @@ function getCompareArray(aArr, aArr1) {
 function disablechoices() {
     for (i = 0; i < cLen; i++) {
         choiceArr[i].removeEventListener("click", answerSelected)
+detachChoiceInteractions(i);
 
         choiceArr[i].cursor = "default";
-        clueArr[i].visible = false;
-        choiceArr[i].visible = false;
+    choiceArr[i].mouseEnabled = false;
+    clueArr[i].visible = false;
+    choiceArr[i].visible = false;
+	
+	if (choiceBgArr[i]) {
+      createjs.Tween.get(choiceBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
+    }
+    if (choiceGlowArr[i]) {
+      createjs.Tween.get(choiceGlowArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
+    }
+    if (clueBgArr[i]) {
+      createjs.Tween.get(clueBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
+    }
 
     }
-    question.visible = false
-    chHolderMC.visible = false;
+ if (questionCardContainer) {
+    questionCardContainer.visible = false;
+  }
 
     //============================================//
     closeBtn.mouseEnabled = false;
@@ -494,36 +678,35 @@ function disablechoices() {
 
 
 function answerSelected(e) {
-    e.preventDefault();
-    lCnt++;
-    uans = e.currentTarget.name;
-    console.log("uans= " + uans)
-    e.currentTarget.mouseEnabled = false;
-    e.currentTarget.alpha = 0.5;
-    e.currentTarget.cursor = "default";
+  e.preventDefault();
+  lCnt++;
+  uans = e.currentTarget.name;
+  console.log("uans= " + uans);
+  var selectedIndex = e.currentTarget.id;
+  e.currentTarget.mouseEnabled = false;
+  e.currentTarget.cursor = "default";
+  detachChoiceInteractions(selectedIndex);
+e.currentTarget.visible=false;
+  strArr.push(uans);
+  var str1 = uans;
+  var indAnsVal = alphabetArr.indexOf(str1);
+  clueArr[lCnt].gotoAndStop(indAnsVal);
+  animateClueSlotFill(lCnt, getChar[lCnt] == str1);
+  markChoiceResult(selectedIndex, getChar[lCnt] == str1);
 
-    strArr.push(uans);
-    var str1 = uans;
-    var indAnsVal = alphabetArr.indexOf(str1);
-    clueArr[lCnt].gotoAndStop(indAnsVal);
+  gameResponseTimerStop();
+  // pauseTimer();
 
+  if (getChar[lCnt] == str1) {
+    currentObj[lCnt] = e.currentTarget.id;
 
-    gameResponseTimerStop();
-    // pauseTimer();
-
-    if (getChar[lCnt] == str1) {
-
-        currentObj[lCnt] = e.currentTarget.id;
-
-        if (cLen == strArr.length) {
-            setTimeout(correct,500)
-        }
+    if (cLen == strArr.length) {
+      setTimeout(correct, 500);
     }
-    else {
-        disablechoices();
-        getValidation("wrong");
-
-    }
+  } else {
+    disablechoices();
+    getValidation("wrong");
+  }
 }
 
 function correct() {

@@ -21,8 +21,7 @@ var ArrowXArr = [, 500, 940, 720, 280],FingXArr = [, 525, 965, 745, 305]
 var ArrowYArr = [, 490, 490, 490, 490], FingYArr = [, 600, 600, 600, 600]
 var introClueArr = []
 
-var INTRO_TITLE_Y = 96;
-var INTRO_PROMPT_Y = 224;
+
 function commongameintro() {
     introClueArr = []
     introTitle = Title.clone()
@@ -39,60 +38,17 @@ function commongameintro() {
 console.log("container.width ::"+container.width)
 console.log("stage.width ::"+stage.width)
 console.log("canvas.width ::"+canvas.width)
-    introHolder = chHolderMC.clone()
+
     container.parent.addChild(introTitle)
     introTitle.visible = true;
     introTitle.textAlign = "center";
     introTitle.textBaseline = "middle";
     introTitle.x = 650;
     introTitle.y = INTRO_TITLE_Y;
-    container.parent.addChild(introHolder)
-    introHolder.visible = false;
 
-    questionCardContainer_htp = new createjs.Container();
-    questionCardContainer_htp.x = introQues1X;
-    questionCardContainer_htp.y = introQues1Y;
-    questionCardContainer_htp.alpha = 0;
-    questionCardContainer_htp.visible = false;
-    questionCardContainer_htp.mouseEnabled = false;
-    questionCardContainer_htp.mouseChildren = false;
-	
-	questionCardShadow_htp = new createjs.Shape();
-    var shadowWidth_htp = QUESTION_CARD_WIDTH + 64;
-    var shadowHeight_htp = QUESTION_CARD_HEIGHT + 26;
-    var shadowHalfWidth_htp = shadowWidth_htp / 2;
-    var shadowHalfHeight_htp = shadowHeight_htp / 2;
-    questionCardShadow_htp.graphics
-      .beginFill("rgba(8,18,36,0.32)")
-      .drawRoundRect(
-        -shadowHalfWidth_htp,
-        -shadowHalfHeight_htp,
-        shadowWidth_htp,
-        shadowHeight_htp,
-        QUESTION_CARD_CORNER_RADIUS + 10
-      );
-    questionCardShadow_htp.y = 1;
-    questionCardShadow_htp.alpha = 0.32;
-    questionCardContainer_htp.addChild(questionCardShadow_htp);
 
-    questionCardBackground_htp = new createjs.Shape();
-    questionCardContainer_htp.addChild(questionCardBackground_htp);
-
-    questionCardHighlight_htp = new createjs.Shape();
-    questionCardContainer_htp.addChild(questionCardHighlight_htp);
-	
-	renderQuestionCardBackground_htp();
-	
-    introQues1 = new createjs.Text("sink", "800 60px 'Baloo 2'", "#F4FAFF");
-    introQues1.x = 0;
-    introQues1.y = 0;
-    introQues1.textAlign = "center";
-    introQues1.textBaseline = "middle";
-	introQues1.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
-    introQues1.visible = true;
-	
-	 questionCardContainer_htp.addChild(introQues1)
-container.parent.addChild(questionCardContainer_htp);
+    //call_UI_introQuestionCardContainer(container,"Find the name of a part of the body that is an anagram of","sink");
+    call_UI_introQuestionCardContainer(container,"sink");
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
@@ -162,63 +118,7 @@ container.parent.addChild(questionCardContainer_htp);
 }
 
 
-function renderQuestionCardBackground_htp() {
-  if (!questionCardBackground_htp) {
-    return;
-  }
 
-  var halfWidth = QUESTION_CARD_WIDTH / 2;
-  var halfHeight = QUESTION_CARD_HEIGHT / 2;
-
-  questionCardBackground_htp.graphics
-    .clear()
-    .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
-      [0, 1],
-      -halfWidth,
-      -halfHeight,
-      halfWidth,
-      halfHeight
-    )
-    .drawRoundRect(
-      -halfWidth,
-      -halfHeight,
-      QUESTION_CARD_WIDTH,
-      QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
-    );
-
-  if (questionCardHighlight_htp) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
-    var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
-    var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
-    var highlightHalfWidth = highlightWidth / 2;
-    var highlightHalfHeight = highlightHeight / 2;
-
-    questionCardHighlight_htp.graphics
-      .clear()
-      .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
-        [0, 1],
-        -highlightHalfWidth,
-        -highlightHalfHeight,
-        highlightHalfWidth,
-        highlightHalfHeight
-      )
-      .drawRoundRect(
-        -highlightHalfWidth,
-        -highlightHalfHeight,
-        highlightWidth,
-        highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
-      );
-    questionCardHighlight_htp.alpha = 0.45;
-  }
-}
 
 
 function handleComplete1_1() {
@@ -227,9 +127,7 @@ function handleComplete1_1() {
 }
 
 function quesTween() {
-    introHolder.visible = false;
-    introHolder.alpha = 0
-    createjs.Tween.get(introHolder).to({ alpha: 1 }, 500)
+
 
     questionCardContainer_htp.visible = true;
     questionCardContainer_htp.alpha = 0
@@ -431,8 +329,6 @@ function removeGameIntro() {
     introChoice3.visible = false
     container.parent.removeChild(introChoice4)
     introChoice4.visible = false
-    container.parent.removeChild(introHolder)
-    introHolder.visible = false;
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = false;
     }
