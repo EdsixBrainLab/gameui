@@ -210,7 +210,7 @@ function ensureFeedbackContainer() {
     feedbackTitleTxt.y = -20;
     feedbackContainer.addChild(feedbackTitleTxt);
 
-    feedbackMessageTxt = new createjs.Text("", "400 18px 'Baloo 2'", "#E3ECFF");
+    feedbackMessageTxt = new createjs.Text("", "400 16px 'Baloo 2'", "#E3ECFF");
     feedbackMessageTxt.textAlign = "left";
     feedbackMessageTxt.lineWidth = 320;
     feedbackMessageTxt.x = -120;
@@ -266,7 +266,7 @@ function showFeedbackBanner(isCorrect) {
 
     createjs.Tween.removeTweens(feedbackContainer);
     createjs.Tween.get(feedbackContainer)
-        .to({ alpha: 1, y: 140 }, 240, createjs.Ease.quadOut)
+        .to({ alpha: 1, y: 340 }, 240, createjs.Ease.quadOut)
         .wait(1400)
         .to({ alpha: 0, y: 100 }, 320, createjs.Ease.quadIn)
         .call(function () {
@@ -1478,7 +1478,8 @@ function launchConfetti(particleCount) {
         var size = 6 + Math.random() * 6;
         var color = confettiColors[(Math.random() * confettiColors.length) | 0];
         confetti.graphics.beginFill(color).drawRect(-size / 2, -size / 2, size, size);
-        confetti.x = centerX + (Math.random() * 320 - 160);
+        confetti.x = centerX ;
+        confetti.x = centerX -360 - (Math.random() * 320 - 160);
         confetti.y = centerY + (Math.random() * 40 - 20);
         confetti.rotation = Math.random() * 360;
         confetti.alpha = 0.9;

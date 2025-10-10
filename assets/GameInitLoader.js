@@ -398,22 +398,22 @@ function layoutHudElements(canvasWidth, canvasHeight) {
 
     cursor += questionWidth / 2 + baseGap + controlWidth / 2;
     positions.push(cursor);
-
+console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
-        scoreCardContainer.x = positions[0];
-        scoreCardContainer.baseX = positions[0];
+        scoreCardContainer.x = positions[0]-200;
+        scoreCardContainer.baseX = positions[0]-200;
     }
     if (timerCardContainer) {
-        timerCardContainer.x = positions[1];
-        timerCardContainer.baseX = positions[1];
+        timerCardContainer.x = positions[1]-300;
+        timerCardContainer.baseX = positions[1]-300;
     }
     if (hudQuestionCardContainer) {
-        hudQuestionCardContainer.x = positions[2];
-        hudQuestionCardContainer.baseX = positions[2];
+        hudQuestionCardContainer.x = positions[2]+200;
+        hudQuestionCardContainer.baseX = positions[2]+200;
     }
     if (controlContainer) {
-        controlContainer.x = positions[3];
-        controlContainer.baseX = positions[3];
+        controlContainer.x = positions[3]+150;
+        controlContainer.baseX = positions[3]+150;
     }
 
     var topPadding = Math.max(48, stageHeight * 0.055);
@@ -440,11 +440,11 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var metrics = getCanvasMetrics();
     var stageWidth = typeof canvasWidth === "number" ? canvasWidth : metrics.width;
     var stageHeight = typeof canvasHeight === "number" ? canvasHeight : metrics.height;
-    var safeMargin = Math.max(36, stageWidth * 0.05);
+    var safeMargin = Math.max(20, stageWidth * 0.05);
 
     if (typeof Title !== "undefined" && Title) {
         Title.x = stageWidth / 2;
-        Title.y = Math.max(36, stageHeight * 0.05);
+        Title.y = Math.max(20, stageHeight * 0.00001);
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -1298,7 +1298,7 @@ function doneLoading(event) {
                 Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
                                 Title.textAlign = "center";
                            Title.x = getCanvasCenterX();
-                                Title.y = 40;
+                                Title.y = 20;
                                 Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
 
@@ -1850,7 +1850,7 @@ function buildHudLayout() {
     scoreCardContainer = createHudCard("Score", "score");
     hudContainer.addChild(scoreCardContainer);
 
-    timerCardContainer = createHudCard("Seconds Left", "timer");
+    timerCardContainer = createHudCard("Time Left", "timer");
     hudContainer.addChild(timerCardContainer);
 
     hudQuestionCardContainer = createHudCard("Question", "question");
@@ -2692,7 +2692,7 @@ function createHowToPlayHeader() {
     highlightMask.graphics.drawRoundRect(0, 0, 520, 120, 42);
     highlightMask.visible = false;
     container.addChild(highlightMask);
-
+/*
     var animatedHighlight = new createjs.Shape();
     animatedHighlight.graphics
         .beginLinearGradientFill(
@@ -2715,7 +2715,7 @@ function createHowToPlayHeader() {
     animatedHighlight.compositeOperation = "lighter";
     container.addChild(animatedHighlight);
     container.highlightSweep = animatedHighlight;
-
+*/
     var tildeWave = createHowToPlayTildeWave(260, 16);
     tildeWave.x = 180;
     tildeWave.y = 94;
@@ -3280,8 +3280,8 @@ function buildGameIntroOverlay() {
 function createIntroHowToPlayHeader() {
     var container = new createjs.Container();
     container.name = "IntroHowToPlayBadge";
-    container.x = 50;
-    container.y = 32;
+    container.x = 25;
+    container.y = 15;
 
     var glow = new createjs.Shape();
     glow.graphics
@@ -3289,7 +3289,7 @@ function createIntroHowToPlayHeader() {
             "rgba(255, 174, 102, 0.38)",
             "rgba(255, 174, 102, 0.12)",
             "rgba(255, 174, 102, 0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 180)
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 100)
         .drawCircle(0, 0, 180);
     glow.alpha = 0.85;
     glow.x = 154;
@@ -3301,7 +3301,7 @@ function createIntroHowToPlayHeader() {
     var frame = new createjs.Shape();
     frame.graphics
         .beginLinearGradientFill(["#FFB760", "#FF924A"], [0, 1], 0, 0, 280, 0)
-        .drawRoundRect(0, 0, 280, 85, 40);
+        .drawRoundRect(0, 0, 200, 60, 30);
     frame.shadow = new createjs.Shadow("rgba(5, 12, 28, 0.38)", 0, 14, 28);
     container.addChild(frame);
     container.cardShape = frame;
@@ -3329,35 +3329,35 @@ function createIntroHowToPlayHeader() {
             "rgba(255, 255, 255, 0.95)",
             "rgba(255, 230, 195, 0.15)",
             "rgba(255, 230, 195, 0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 68)
-        .drawCircle(0, 0, 64);
-    iconHalo.x = 40;
-    iconHalo.y = 43;
+        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 30)
+        .drawCircle(0, 0, 30);
+    iconHalo.x = 25;
+    iconHalo.y = 30;
     container.addChild(iconHalo);
 
     var iconBackground = new createjs.Shape();
     iconBackground.graphics
-        .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -34, -34, 34, 34)
-        .drawCircle(0, 0, 36);
+        .beginLinearGradientFill(["#FFFFFF", "#FFE7C8"], [0, 1], -16, -16, 16, 16)
+        .drawCircle(0, 0, 16);
     iconBackground.x = iconHalo.x;
     iconBackground.y = iconHalo.y;
     container.addChild(iconBackground);
 
-    var icon = new createjs.Text("\u2139", "700 44px 'Baloo 2'", "#FF8D3C");
+    var icon = new createjs.Text("\u2139", "700 26px 'Baloo 2'", "#FF8D3C");
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = iconBackground.x;
-    icon.y = iconBackground.y;
+    icon.y = iconBackground.y+5;
     container.addChild(icon);
 
-    var title = new createjs.Text("How to Play", "700 32px 'Baloo 2'", "#FFFFFF");
-    title.x = 84;
-    title.y = 18;
+    var title = new createjs.Text("How to Play", "700 24px 'Baloo 2'", "#FFFFFF");
+    title.x = 54;
+    title.y = 10;
     container.addChild(title);
 
-    var subtitle = new createjs.Text("Watch animation carefully", "500 16px 'Baloo 2'", "rgba(255,255,255,0.9)");
-    subtitle.x = 84;
-    subtitle.y = 58;
+    var subtitle = new createjs.Text("Watch animation carefully", "500 12px 'Baloo 2'", "rgba(255,255,255,0.9)");
+    subtitle.x = 54;
+    subtitle.y = 38;
     container.addChild(subtitle);
 
     return container;
@@ -3382,16 +3382,16 @@ function createIntroActionButton() {
     icon.name = "icon";
     icon.textAlign = "center";
     icon.textBaseline = "middle";
-    icon.x = -128;
-    icon.y = 5;
+    icon.x = -78;
+    icon.y = -25;
     button.addChild(icon);
 
     var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
     label.name = "label";
     label.textAlign = "left";
     label.textBaseline = "middle";
-    label.x = -95;
-    label.y = 5;
+    label.x = -45;
+    label.y = -25;
     button.addChild(label);
 
  
@@ -3399,7 +3399,7 @@ function createIntroActionButton() {
     applyHowToPlayButtonState(button, "skip");
 
     button.scaleX = button.scaleY = 0.96;
-    button.__layoutHalfWidth = 160;
+    button.__layoutHalfWidth = 100;
     button.__layoutHalfHeight = 44;
 
     return button;
@@ -3437,17 +3437,17 @@ function applyHowToPlayButtonState(button, state) {
                     0,
                     0,
                     0,
-                    180
+                    165
                 )
-                .drawCircle(0, 0, 170);
+                .drawCircle(0, 0, 165);
             glow.alpha = 0.95;
         }
         if (base) {
             base.graphics
                 .setStrokeStyle(2)
                 .beginStroke("rgba(245, 107, 32, 0.85)")
-                .beginLinearGradientFill(["#FFB760", "#FF7A2F"], [0, 1], -160, 0, 160, 0)
-                .drawRoundRect(-160, -44, 150, 88, 30);
+                .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
+                .drawRoundRect(-120, -70, 190, 75, 30);
         }
         if (highlight) {
             highlight.graphics
@@ -3455,11 +3455,11 @@ function applyHowToPlayButtonState(button, state) {
                     ["rgba(255,255,255,0.7)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
                     [0, 0.55, 1],
                     -160,
-                    -44,
+                    -50,
                     160,
-                    14
+                    16
                 )
-                .drawRoundRect(-160, -44, 320, 58, 28);
+                .drawRoundRect(-120, -70, 200, 75, 28);
         }
         if (icon) {
             icon.text = "\u25B6";
@@ -3471,7 +3471,7 @@ function applyHowToPlayButtonState(button, state) {
             label.font = "700 28px 'Baloo 2'";
             label.color = "#FFFFFF";
         }
-        button.shadow = new createjs.Shadow("rgba(8, 17, 38, 0.38)", 0, 18, 34);
+        button.shadow = new createjs.Shadow("rgba(6, 14, 33, 0.32)", 0, 16, 32);
     } else {
         if (glow) {
             glow.graphics
@@ -3493,7 +3493,7 @@ function applyHowToPlayButtonState(button, state) {
                 .setStrokeStyle(2)
                 .beginStroke("rgba(240, 102, 37, 0.75)")
                 .beginLinearGradientFill(["#FFB06A", "#FF7C3A"], [0, 1], -160, 0, 160, 0)
-                .drawRoundRect(-160, -44, 150, 88, 30);
+                .drawRoundRect(-120, -70, 190, 75, 30);
         }
         if (highlight) {
             highlight.graphics
@@ -3505,11 +3505,11 @@ function applyHowToPlayButtonState(button, state) {
                     ],
                     [0, 0.55, 1],
                     -160,
-                    -44,
+                    -50,
                     160,
                     16
                 )
-                .drawRoundRect(-160, -44, 320, 60, 28);
+                .drawRoundRect(-120, -70, 200, 75, 28);
         }
         if (icon) {
             icon.text = "\u279C";
@@ -3525,10 +3525,10 @@ function applyHowToPlayButtonState(button, state) {
     }
 
     button.state = state;
-    var layoutHalfWidth = 160;
-    var layoutHalfHeight = 44;
+    var layoutHalfWidth = 10;
+    var layoutHalfHeight = 4;
     if (state === "start") {
-        layoutHalfHeight = 44;
+        layoutHalfHeight = 4;
     }
     button.__layoutHalfWidth = layoutHalfWidth;
     button.__layoutHalfHeight = layoutHalfHeight;
