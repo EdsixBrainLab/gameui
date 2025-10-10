@@ -58,6 +58,13 @@ var borderPadding = 10, barHeight = 20;
 
 var loadProgressLabel, progresPrecentage, loaderWidth;
 
+var CHOICE_BASE_Y = 620;
+var CHOICE_SPACING = 165;
+var CHOICE_SCALE = 0.7;
+var QUESTION_CENTER_X = 512;
+var QUESTION_BASE_Y = 470;
+var QUESTION_LETTER_SPACING = 120;
+
 
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -192,31 +199,49 @@ function handleClick(e) {
 function CreateGameElements() {
     chHolderMC.visible = false;
     container.parent.addChild(chHolderMC);
-    chHolderMC.x=  chHolderMC.x+5
+    var holderBounds = chHolderMC.getBounds ? chHolderMC.getBounds() : null;
+    if (holderBounds) {
+        chHolderMC.regX = holderBounds.width / 2;
+        chHolderMC.regY = holderBounds.height / 2;
+    } else if (chHolderMC.image) {
+        chHolderMC.regX = chHolderMC.image.width / 2;
+        chHolderMC.regY = chHolderMC.image.height / 2;
+    }
+    chHolderMC.x = QUESTION_CENTER_X;
+    chHolderMC.y = QUESTION_BASE_Y - 200 + (chHolderMC.regY || 0);
+
     container.parent.addChild(question);
     question.visible = false;
-    question.x = 600;
-    question.y = 250;
-    question.visible = false;
+    question.x = QUESTION_CENTER_X;
+    question.y = QUESTION_BASE_Y - 160;
+    var questionBounds = question.getBounds ? question.getBounds() : null;
+    if (questionBounds) {
+        question.regX = questionBounds.width / 2;
+        question.regY = questionBounds.height / 2;
+    } else if (question.getTransformedBounds) {
+        var transformed = question.getTransformedBounds();
+        if (transformed) {
+            question.regX = transformed.width / 2;
+            question.regY = transformed.height / 2;
+        }
+    }
     question.scaleX = question.scaleY = .8;
     container.parent.addChild(choice1);
     choice1.visible = false;
     //maxLetterCnt
     for (i = 0; i < 3; i++) {
         choiceArr[i] = choice1.clone()
-        choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
+        choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_SCALE;
         choiceArr[i].visible = false;
         container.parent.addChild(choiceArr[i]);
-        choiceArr[i].x = 465 + (i * 160);
-        choiceArr[i].y = 620;
+        positionChoice(choiceArr[i], i);
     }
- 
+
     for (i = 0; i < 11; i++) {
         quesArr[i] = question1.clone()
         quesArr[i].visible = false;
         container.parent.addChild(quesArr[i]);
-        quesArr[i].x = 105 + (i * 120);
-        quesArr[i].y = 490;
+        quesArr[i].y = QUESTION_BASE_Y;
     }
     if (isQuestionAllVariations) {
         //createGameWiseQuestions()
@@ -227,6 +252,38 @@ function CreateGameElements() {
         chposArr.sort(randomSort)
         //pickques()
     }
+}
+
+function positionChoice(choiceMc, index) {
+    var startX = QUESTION_CENTER_X - CHOICE_SPACING;
+    choiceMc.x = startX + (index * CHOICE_SPACING);
+    choiceMc.y = CHOICE_BASE_Y;
+}
+
+function layoutQuestionLetters(letterCount) {
+    var spacing = getLetterSpacing(letterCount);
+    var totalWidth = (letterCount - 1) * spacing;
+    var startX = QUESTION_CENTER_X - totalWidth / 2;
+    for (i = 0; i < letterCount; i++) {
+        quesArr[i].x = startX + (i * spacing);
+        quesArr[i].y = QUESTION_BASE_Y;
+    }
+}
+
+function getLetterSpacing(letterCount) {
+    if (letterCount <= 4) {
+        return 150;
+    }
+    if (letterCount <= 6) {
+        return 130;
+    }
+    if (letterCount <= 8) {
+        return 115;
+    }
+    if (letterCount <= 10) {
+        return 100;
+    }
+    return 90;
 }
 
 function helpDisable() {
@@ -296,37 +353,9 @@ function pickques() {
     }
     ans = indexArr2[rand]
     console.log("correct3Answer= " + correctAnswer)
-    for (i = 0; i < cLen; i++) {
-
-        if (cLen == 3) {
-            quesArr[i].x = 480 + (i * 150);
-        }
-        if (cLen == 4) {
-            quesArr[i].x = 405 + (i * 150);
-        }
-        if (cLen == 5) {
-            quesArr[i].x = 390 + (i * 120);
-        }
-        if (cLen == 6) {
-            quesArr[i].x = 330 + (i * 120);
-        }
-        if (cLen == 7) {
-            quesArr[i].x = 273 + (i * 120);
-        }
-        if (cLen == 8) {
-            quesArr[i].x = 215 + (i * 120);
-        }
-        if (cLen == 9) {
-            quesArr[i].x = 145 + (i * 120);
-        }
-        if (cLen == 10) {
-            quesArr[i].x = 95 + (i * 120);
-        }
-        if (cLen == 11) {
-            quesArr[i].x = 85 + (i * 110);
-          
-        }
-
+    layoutQuestionLetters(cLen);
+    for (i = 0; i < 3; i++) {
+        positionChoice(choiceArr[i], i);
     }
     createTween()
     question.Text = "";
@@ -335,70 +364,54 @@ function pickques() {
 }
 function createTween() {
 
-chHolderMC.visible = true;
-chHolderMC.alpha = 0
-chHolderMC.y=-100
-    createjs.Tween.get(chHolderMC).wait(300).to({ y:10,alpha: 1 }, 300)
+    var targetHolderY = chHolderMC.y;
+    chHolderMC.visible = true;
+    chHolderMC.alpha = 0;
+    chHolderMC.y = targetHolderY - 40;
+    createjs.Tween.get(chHolderMC)
+        .wait(150)
+        .to({ alpha: 1, y: targetHolderY }, 350, createjs.Ease.quadOut);
 
     ////////////////////////////////holder//////////////////////
     question.visible = true;
-    question.alpha = 0
-    question.regX=50;
-    question.regY=50;
-    createjs.Tween.get(question).wait(500)
-   .to({ scaleX:.75,scaleY :.75,alpha: 1 }, 250)
-        .to({ scaleX:.8,scaleY :.8,alpha: 1 }, 250)
-var time=1000
+    question.alpha = 0;
+    question.scaleX = question.scaleY = .6;
+    createjs.Tween.get(question)
+        .wait(350)
+        .to({ scaleX: .82, scaleY: .82, alpha: 1 }, 350, createjs.Ease.backOut)
+        .to({ scaleX: .8, scaleY: .8 }, 200, createjs.Ease.quadOut);
+
+    var time = 700;
     for (i = 0; i < cLen; i++) {
-        console.log("clen111"+cLen)
-        if(i==cLen-1)
-        {
         quesArr[i].visible = true;
-        quesArr[i].alpha = 0
-        createjs.Tween.get(quesArr[i]).wait(time)
-            .to({ alpha: 1 },500, createjs.Ease.bounceInOut)
-        }
-        else
-        {
-            quesArr[i].visible = true;
-        quesArr[i].alpha = 0
-        createjs.Tween.get(quesArr[i]).wait(time)
-            .to({ alpha: 1 },500, createjs.Ease.bounceInOut) 
-        }
-            time=time+100
+        quesArr[i].alpha = 0;
+        var originalY = quesArr[i].y;
+        quesArr[i].y = originalY - 20;
+        createjs.Tween.get(quesArr[i])
+            .wait(time + (i * 70))
+            .to({ alpha: 1, y: originalY }, 280, createjs.Ease.quadOut);
     }
 
     ///////////////////////////choice tween////////////////////////////////////
-    var val =1800
+    var val = 1000;
     for (i = 0; i < 3; i++) {
-        choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-        choiceArr[i].y = 600, 
+        choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_SCALE - 0.08;
+        choiceArr[i].y = CHOICE_BASE_Y + 80;
         choiceArr[i].visible = true;
-         choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].alpha = 0;
-        if(i==2)
-        {
-        createjs.Tween.get(choiceArr[i]).wait(val)
-        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
-        }
-        else{
-        createjs.Tween.get(choiceArr[i]).wait(val)
-        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
-        }
-        val = val + 150
+        createjs.Tween.get(choiceArr[i])
+            .wait(val + (i * 120))
+            .to({ alpha: 1, y: CHOICE_BASE_Y, scaleX: CHOICE_SCALE + 0.08, scaleY: CHOICE_SCALE + 0.08 }, 280, createjs.Ease.quadOut)
+            .to({ scaleX: CHOICE_SCALE, scaleY: CHOICE_SCALE }, 160, createjs.Ease.quadOut);
     }
 
-    repTimeClearInterval = setTimeout(AddListenerFn, 3000)
-
-
+    repTimeClearInterval = setTimeout(AddListenerFn, 1800)
 
 }
 function AddListenerFn() {
 
     clearTimeout(repTimeClearInterval)
-  
+
 
 
     for (i = 0; i < 3; i++) {
@@ -408,7 +421,11 @@ function AddListenerFn() {
         choiceArr[i].alpha = 1;
         choiceArr[i].mouseEnabled = true;
         choiceArr[i].cursor = "pointer";
+        choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_SCALE;
+        createjs.Tween.removeTweens(choiceArr[i]);
         choiceArr[i].addEventListener("click", answerSelected);
+        choiceArr[i].addEventListener("mouseover", onChoiceOver);
+        choiceArr[i].addEventListener("mouseout", onChoiceOut);
 
     }
 
@@ -421,8 +438,12 @@ function AddListenerFn() {
 function disablechoices() {
     for (i = 0; i < 3; i++) {
         choiceArr[i].removeEventListener("click", answerSelected)
+        choiceArr[i].removeEventListener("mouseover", onChoiceOver)
+        choiceArr[i].removeEventListener("mouseout", onChoiceOut)
         choiceArr[i].cursor = "default";
         choiceArr[i].visible = false;
+        createjs.Tween.removeTweens(choiceArr[i]);
+        choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_SCALE;
     }
     for (i = 0; i < cLen; i++) {
         quesArr[i].visible = false
@@ -445,11 +466,15 @@ function answerSelected(e) {
         currentX = e.currentTarget.x - 30
         currentY = e.currentTarget.y - 20
         disableMouse()
-      
+
         quesArr[rand].gotoAndStop(indexArr2[rand])
         for (i = 0; i < 3; i++) {
             choiceArr[i].removeEventListener("click", answerSelected)
         }
+        createjs.Tween.removeTweens(e.currentTarget);
+        createjs.Tween.get(e.currentTarget)
+            .to({ scaleX: CHOICE_SCALE + 0.18, scaleY: CHOICE_SCALE + 0.18, alpha: 1 }, 220, createjs.Ease.backOut)
+            .to({ scaleX: CHOICE_SCALE, scaleY: CHOICE_SCALE }, 180, createjs.Ease.quadOut);
         setTimeout(correct, 500)
     }
     else {
@@ -463,6 +488,21 @@ function correct() {
     disablechoices();
 }
 
+
+function onChoiceOver(e) {
+    if (!e.currentTarget.mouseEnabled) {
+        return;
+    }
+    createjs.Tween.removeTweens(e.currentTarget);
+    createjs.Tween.get(e.currentTarget)
+        .to({ scaleX: CHOICE_SCALE + 0.12, scaleY: CHOICE_SCALE + 0.12 }, 160, createjs.Ease.quadOut);
+}
+
+function onChoiceOut(e) {
+    createjs.Tween.removeTweens(e.currentTarget);
+    createjs.Tween.get(e.currentTarget)
+        .to({ scaleX: CHOICE_SCALE, scaleY: CHOICE_SCALE }, 180, createjs.Ease.quadOut);
+}
 
 function disableMouse() {
     for (i = 0; i < 3; i++) {
