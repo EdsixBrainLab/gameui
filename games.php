@@ -138,7 +138,7 @@ else
     margin: 0;
     padding: 0;
     font-family: 'Baloo 2', sans-serif;
-    background-color: #0e0b24;
+    background-color: #0c081d;
     color: #ffffff;
   }
 
@@ -152,9 +152,10 @@ else
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top left, rgba(255, 161, 223, 0.5), transparent 55%),
-                radial-gradient(circle at bottom right, rgba(114, 191, 255, 0.45), transparent 60%),
-                linear-gradient(135deg, #120835 0%, #1a0f4b 35%, #2a1e62 68%, #3a2c7a 100%);
+    background: radial-gradient(circle at 18% 12%, rgba(255, 170, 107, 0.42), transparent 55%),
+                radial-gradient(circle at 85% 82%, rgba(246, 107, 198, 0.38), transparent 60%),
+                radial-gradient(circle at 55% 40%, rgba(108, 107, 255, 0.32), transparent 65%),
+                linear-gradient(135deg, #140a2c 0%, #190d32 32%, #230f3c 68%, #2c1044 100%);
   }
 
   .loading-wrapper {
@@ -169,9 +170,9 @@ else
     position: absolute;
     border-radius: 50%;
     filter: blur(0);
-    opacity: 0.65;
+    opacity: 0.7;
     pointer-events: none;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0));
     animation: float 12s ease-in-out infinite;
     z-index: 0;
   }
@@ -179,28 +180,28 @@ else
   .orb-one {
     top: -60px;
     right: -50px;
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 111, 220, 0.15));
+    width: 190px;
+    height: 190px;
+    background: radial-gradient(circle at 35% 30%, rgba(255, 214, 178, 0.88), rgba(255, 170, 107, 0.12), rgba(255, 170, 107, 0));
     animation-delay: 0s;
   }
 
   .orb-two {
     bottom: -70px;
     left: -80px;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.8), rgba(106, 152, 255, 0.2));
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle at 65% 70%, rgba(255, 211, 238, 0.85), rgba(246, 107, 198, 0.16), rgba(246, 107, 198, 0));
     animation-delay: 2s;
   }
 
   .orb-three {
     top: 40%;
-    left: 50%;
+    left: 52%;
     transform: translate(-50%, -50%);
-    width: 160px;
-    height: 160px;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle at 50% 50%, rgba(222, 225, 255, 0.75), rgba(108, 107, 255, 0.2), rgba(108, 107, 255, 0));
     mix-blend-mode: screen;
     animation-delay: 4s;
   }
@@ -250,8 +251,8 @@ else
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #140939;
-    background: linear-gradient(135deg, #ffffff 0%, #ffe5ff 100%);
+    color: #351320;
+    background: linear-gradient(135deg, #ffe5cc 0%, #ffd2f0 50%, #d8d3ff 100%);
     font-weight: 700;
   }
 
@@ -264,8 +265,8 @@ else
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    background: rgba(20, 9, 57, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(53, 19, 61, 0.55);
+    border: 1px solid rgba(255, 212, 241, 0.35);
   }
 
   .status-pill .dot {
@@ -273,8 +274,8 @@ else
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #63ffa7;
-    box-shadow: 0 0 12px rgba(99, 255, 167, 0.85);
+    background: #ffb47d;
+    box-shadow: 0 0 12px rgba(255, 180, 125, 0.85);
     animation: blink 1.6s ease-in-out infinite;
   }
 
@@ -298,7 +299,7 @@ else
     margin: 12px 0 32px;
     font-size: clamp(0.95rem, 2.4vw, 1.1rem);
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.82);
+    color: rgba(255, 234, 252, 0.85);
   }
 
   .progress-visual {
@@ -322,8 +323,8 @@ else
 
   .pulse-core {
     inset: 24px;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 147, 226, 0.65) 45%, rgba(123, 102, 255, 0.4) 100%);
-    box-shadow: 0 0 28px rgba(255, 255, 255, 0.65);
+    background: radial-gradient(circle at 50% 50%, rgba(255, 220, 199, 0.95) 0%, rgba(246, 107, 198, 0.7) 45%, rgba(108, 107, 255, 0.48) 100%);
+    box-shadow: 0 0 32px rgba(255, 192, 233, 0.65);
     animation: glow 2.8s ease-in-out infinite;
   }
 
@@ -343,7 +344,7 @@ else
     width: 100%;
     height: 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 214, 244, 0.18);
     overflow: hidden;
     margin-bottom: 18px;
   }
@@ -353,7 +354,7 @@ else
     inset: 0;
     width: 45%;
     border-radius: inherit;
-    background: linear-gradient(90deg, rgba(255, 147, 226, 0.95) 0%, rgba(123, 102, 255, 0.95) 100%);
+    background: linear-gradient(90deg, #ffaa6b 0%, #f66bc6 55%, #6c6bff 100%);
     animation: load 2.8s ease-in-out infinite;
   }
 
@@ -361,9 +362,9 @@ else
     position: absolute;
     inset: -25px;
     border-radius: inherit;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
-    opacity: 0.35;
-    filter: blur(12px);
+    background: radial-gradient(circle, rgba(246, 107, 198, 0.45) 0%, transparent 70%);
+    opacity: 0.4;
+    filter: blur(14px);
   }
 
   @keyframes load {
@@ -381,7 +382,7 @@ else
     font-size: clamp(0.75rem, 2vw, 0.9rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 229, 249, 0.8);
   }
 
   .meta-item {
@@ -394,8 +395,8 @@ else
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 0 14px rgba(255, 255, 255, 0.75);
+    background: rgba(255, 214, 244, 0.9);
+    box-shadow: 0 0 14px rgba(255, 170, 226, 0.8);
     opacity: 0.75;
     animation: drift 6s linear infinite;
     pointer-events: none;
@@ -426,7 +427,7 @@ else
 
     .meta-item {
       padding: 6px 0;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(246, 107, 198, 0.16);
       border-radius: 12px;
     }
   }
