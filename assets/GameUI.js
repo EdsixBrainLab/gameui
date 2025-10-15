@@ -1,8 +1,7 @@
 var ambientLayer,overlayLayer,ambientGradientLayer,ambientOrbs = [];
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
-var INTRO_TITLE_Y = 50;
+var INTRO_TITLE_Y = 75;
 var INTRO_PROMPT_Y = 184;
-var INTRO_TITLE_Y,INTRO_PROMPT_Y;
 var QUESTION_CARD_WIDTH = 600;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
@@ -35,14 +34,21 @@ function call_UI_gameQuestion(incontainer,in_questiontext)
     QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.28)", 0, 10, 20);
     QusTxtString.textAlign = "center";
     QusTxtString.textBaseline = "middle";
-    QusTxtString.lineWidth = 760;
-    QusTxtString.lineHeight = 42;
+    QusTxtString.lineWidth = 1000;
+    QusTxtString.lineHeight = 30;
     QusTxtString.x = 635;
-    QusTxtString.y = INTRO_PROMPT_Y-50;
+    QusTxtString.y = INTRO_PROMPT_Y-55;
     QusTxtString.alpha = 0.96;
-
+QusTxtString.shadow = new createjs.Shadow("black", 1, 1, 1);
     incontainer.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
+	QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
+    padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22
+  });
+	
+	
+	
+	
 }
 
 function call_UI_introQuestionCardContainer(incontainer,in_question)
@@ -638,4 +644,267 @@ function animateAmbientOrb(orb) {
   };
 
   animate();
+}
+
+
+
+
+
+/* ===== ChoiceFX Helpers (CreateJS) - injected ===== */
+function ChoiceFX_startIdleBob(displayObj){
+	createjs.Tween.removeTweens(displayObj);
+  //const baseY = displayObj.y;
+  createjs.Tween.get(displayObj, { loop: true })
+    .to({ scaleX: 0.72, scaleY: 0.72}, 900, createjs.Ease.quadOut)
+    .to({ scaleX: 0.74, scaleY: 0.74 }, 900, createjs.Ease.quadIn);
+	
+}
+
+function ChoiceFX_addGlow(ch, on){
+  ch.shadow = on
+    ? new createjs.Shadow("rgba(255,182,72,0.9)", 0, 0, 28)
+    : new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
+}
+
+function ChoiceFX_pressRipple(parent, x, y){
+  const r = new createjs.Shape();
+  r.alpha = 0.25;
+  r.graphics.setStrokeStyle(6).beginStroke("#2EC4B6").drawCircle(0,0,1);
+  r.x = x; r.y = y;
+  parent.addChild(r);
+  createjs.Tween.get(r)
+    .to({ scaleX: 28, scaleY: 28, alpha: 0 }, 420, createjs.Ease.quadOut)
+    .call(()=> parent.removeChild(r));
+}
+
+function ChoiceFX_randomConfetti(){
+  const colors = ["#FF9F1C","#2EC4B6","#E71D36","#FDFFFC","#7F5AF0"];
+  return colors[(Math.random()*colors.length)|0];
+}
+
+function ChoiceFX_confettiBurst(container, x, y){
+  for (let i=0; i<16; i++){
+    const p = new createjs.Shape();
+    const sz = 6 + Math.random()*6;
+    p.graphics.beginFill(ChoiceFX_randomConfetti()).drawRect(-sz/2, -sz/2, sz, sz);
+    p.x = x; p.y = y; p.rotation = Math.random()*360;
+    container.addChild(p);
+    const dx = (-80 + Math.random()*160);
+    const dy = (-140 + Math.random()*100);
+    const tt = 500 + Math.random()*400;
+    createjs.Tween.get(p)
+      .to({ x: x+dx, y: y+dy, alpha: 0, rotation: p.rotation+360 }, tt, createjs.Ease.quadOut)
+      .call(()=> container.removeChild(p));
+  }
+}
+
+function ChoiceFX_wrongShake(target){
+  const baseX = target.x;
+  createjs.Tween.get(target)
+    .to({ x: baseX - 10 }, 60)
+    .to({ x: baseX + 10 }, 60)
+    .to({ x: baseX - 6 }, 50)
+    .to({ x: baseX + 6 }, 50)
+    .to({ x: baseX }, 50);
+}
+
+function ChoiceFX_redFlash(obj){
+  const old = obj.alpha;
+  createjs.Tween.get(obj)
+    .to({ alpha: 0.3 }, 70)
+    .to({ alpha: old }, 120);
+}
+
+function ChoiceFX_drawFocusRing(target, on){
+  if (!target) return;
+
+  if (on){
+    if (!target._ring){
+      const ring = new createjs.Shape();
+      ring.mouseEnabled = false;
+      ring.mouseChildren = false;
+      ring.graphics.setStrokeStyle(4)
+        .beginStroke("#7F5AF0")
+        .drawCircle(0, 0, 40);
+      ring.alpha = 0.8;
+
+      // Align the ring with the target
+      ring.x = target.x;
+      ring.y = target.y;
+      ring.regX = target.regX || 0;
+      ring.regY = target.regY || 0;
+
+      // Insert just below the target in the parent's display list
+      const parent = target.parent;
+      if (parent){
+        const idx = parent.getChildIndex(target);
+        if (typeof parent.addChildAt === "function"){
+          parent.addChildAt(ring, Math.max(0, idx));
+        } else {
+          parent.addChild(ring);
+        }
+      }
+      target._ring = ring;
+    } else {
+      // keep ring in sync if target moved
+      target._ring.x = target.x;
+      target._ring.y = target.y;
+    }
+  } else if (target._ring){
+    const r = target._ring;
+    if (r.parent) r.parent.removeChild(r);
+    target._ring = null;
+  }
+}
+
+function ChoiceFX_addGlowPulse(obj){
+  const offShadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
+  obj.shadow = new createjs.Shadow("rgba(255,200,0,0.8)", 0, 0, 20);
+  createjs.Tween.get(obj).wait(100).call(()=> obj.shadow = offShadow);
+}
+
+/* Entrance animation for a passed array of choices */
+function ChoiceFX_entrance(choiceArr, baseDelay){
+  var startDelay = typeof baseDelay === "number" ? baseDelay : 1600;
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
+    if(!ch) continue;
+    if (typeof ch.scaleX === "undefined") continue;
+    if (!ch.shadow) ch.shadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
+    ch.scaleX = ch.scaleY = 0.55;
+    ch.alpha = 0;
+    const baseY = ch.y || 620;
+   // ch.y = baseY + 20;
+
+    createjs.Tween.get(ch)
+      .wait(startDelay + i*120)
+      .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: baseY, rotation: 15 }, 220, createjs.Ease.quadOut)
+      .to({ rotation: 0 }, 180, createjs.Ease.quadOut)
+      .call(()=> ChoiceFX_startIdleBob(ch));
+  }
+}
+
+/* Hover/HitArea wiring */
+function ChoiceFX_bindHover(choiceArr){
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
+    if(!ch) continue;
+
+    const hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRoundRect(-70, -70, 140, 140, 20);
+    ch.hitArea = hit;
+
+    ch.cursor = "pointer";
+    ch.mouseEnabled = true;
+
+    ch.addEventListener("mouseover", function(e){
+      const t = e.currentTarget;
+      createjs.Tween.get(t, { override:true })
+        .to({ scaleX: 0.78, scaleY: 0.78 }, 160, createjs.Ease.quadOut);
+      ChoiceFX_addGlow(t, true);
+      //ChoiceFX_drawFocusRing(t, true);
+    });
+    ch.addEventListener("mouseout", function(e){
+      const t = e.currentTarget;
+      createjs.Tween.get(t, { override:true })
+        .to({ scaleX: 0.72, scaleY: 0.72}, 160, createjs.Ease.quadIn);
+      ChoiceFX_addGlow(t, false);
+     //ChoiceFX_drawFocusRing(t, false);
+	 //t.y = t.y +4;
+	 ChoiceFX_startIdleBob(t);
+    });
+  }
+}
+
+/* Reveal pop animation helper */
+function ChoiceFX_revealPop(displayObj, style){
+  const qObj = displayObj;
+  if(!qObj) return;
+  switch(style){
+    case "spin":
+      qObj.alpha = 0;
+      qObj.rotation = -180;
+      qObj.scaleX = qObj.scaleY = 0.4;
+      createjs.Tween.get(qObj)
+        .to({ alpha: 1, rotation: 0, scaleX: 1.3, scaleY: 1.3 }, 280, createjs.Ease.backOut)
+        .to({ scaleX: 1, scaleY: 1 }, 120)
+        .call(() => ChoiceFX_addGlowPulse(qObj));
+      break;
+    case "soft":
+      qObj.alpha = 0.2;
+      qObj.scaleX = qObj.scaleY = 0.7;
+      createjs.Tween.get(qObj)
+        .to({ alpha: 1, scaleX: 1.1, scaleY: 1.1 }, 200, createjs.Ease.sineOut)
+        .to({ scaleX: 1, scaleY: 1 }, 180, createjs.Ease.sineInOut)
+        .call(() => ChoiceFX_addGlowPulse(qObj));
+      break;
+    default: // "pop"
+      qObj.scaleX = qObj.scaleY = 0;
+      qObj.alpha = 0;
+      createjs.Tween.get(qObj)
+        .to({ alpha: 1, scaleX: 1.4, scaleY: 1.4 }, 200, createjs.Ease.backOut)
+        .to({ scaleX: 1, scaleY: 1 }, 150, createjs.Ease.quadOut)
+        .call(() => ChoiceFX_addGlowPulse(qObj));
+  }
+}
+/* ===== End ChoiceFX Helpers ===== */
+
+/**
+ * SAUI_attachQuestionLabelBG
+ * Draws a centered, auto-sized rounded rectangle behind a Text for contrast.
+ * Keeps your original Text (QusTxtString) untouched; mirrors visibility/alpha.
+ */
+function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
+  const cfg = Object.assign({
+    padX: 24, padY: 12,
+    fill: "rgba(0,0,0,0.55)",
+    stroke: "rgba(255,255,255,0.12)", strokeW: 2,
+    maxRadius: 20, addShadow: true, autoTick: true
+  }, opts || {});
+
+  const bg = new createjs.Shape();
+  const idx = parent.getChildIndex(textObj);
+  parent.addChildAt(bg, Math.max(0, idx)); // directly under the text
+
+  function measure() {
+    let b = textObj.getBounds();
+    if (!b) { textObj.cache(0,0,1,1); textObj.uncache(); b = textObj.getBounds(); }
+    return b;
+  }
+
+  function draw() {
+    const b = measure(); if (!b) return;
+    const w = b.width + cfg.padX * 2, h = b.height + cfg.padY * 2;
+    const r = Math.min(cfg.maxRadius, h/2);
+    const left = textObj.x - w/2, top = textObj.y - h/2;
+
+    bg.graphics.clear()
+      .setStrokeStyle(cfg.strokeW)
+      .beginStroke(cfg.stroke)
+      .beginFill(cfg.fill)
+      .drawRoundRect(left, top, w, h, r)
+      .endFill().endStroke();
+
+    bg.visible = textObj.visible;
+    bg.alpha = textObj.alpha;
+    bg.shadow = cfg.addShadow ? new createjs.Shadow("rgba(0,0,0,0.35)", 0, 4, 10) : null;
+  }
+
+  draw();
+
+  let tickH = null;
+  if (cfg.autoTick) {
+    tickH = createjs.Ticker.on("tick", () => {
+      if (!bg.parent || !textObj.parent) { if (tickH) createjs.Ticker.off("tick", tickH); tickH = null; return; }
+      bg.visible = textObj.visible;
+      bg.alpha = textObj.alpha;
+      draw();
+    });
+  }
+
+  return {
+    bg,
+    refresh: draw,
+    destroy: () => { if (tickH) createjs.Ticker.off("tick", tickH); if (bg.parent) bg.parent.removeChild(bg); }
+  };
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////======LOADER=======///////////////////////////////////////////////////////////////////////
 var wrongSnd, gameOverSnd, timeOverSnd, correctSnd, BetterLuck, Excellent, Nice, Good, Super, TryAgain;
-var scoreImgMc, ResponseImgMc, questionImgMc, AttemptsImgMc, CorrectImgMc;
+var scoreImgMc, ResponseImgMc, questionImgMc, AttemptsImgMc, CorrectImgMc,uniquebackGround;
 var intChkVar = -1
 var gamename = "gname=" + getJSName;
 //var introStartCnt = -1;
@@ -82,15 +82,15 @@ var HUD_THEME_PRESETS = {
         },
         textStyles: {
             label: {
-                color: "#2D517C",
-                shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
+                color: "#fff",
+                //shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
             },
             value: {
                 color: "#133559",
                 shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
             },
             timerValue: {
-                color: "#214874",
+                color: "#133559",
                 shadow: { color: "rgba(255,255,255,0.5)", x: 0, y: 3, blur: 8 }
             }
         },
@@ -129,11 +129,100 @@ var HUD_THEME_PRESETS = {
                 text: "#881421"
             },
             normalIcon: "#2F6CB7",
-            normalText: "#214874"
+            normalText: "#133559"
         }
     },
     light: {
+        
+		
         cards: {
+            score: {
+                background: ["rgba(248,251,255,0.96)", "rgba(213,231,255,0.96)"],
+                accent: ["rgba(142,196,255,0.75)", "rgba(142,196,255,0.35)"],
+                iconStyle: {
+                    //fill: "#30578F",
+					fill: "#FFD166",
+                    strokeColor: "rgba(255,255,255,0.65)",
+                    strokeWidth: 2
+                }
+            },
+            question: {
+                background: ["rgba(244,250,255,0.96)", "rgba(214,236,255,0.96)"],
+                accent: ["rgba(129,209,255,0.65)", "rgba(129,209,255,0.3)"],
+                iconStyle: {fill: "#1F6F5A",
+                    strokeColor: "#2F6CB7",
+                    strokeWidth: 3
+                }
+            },
+            timer: {
+                background: ["rgba(245,255,250,0.96)", "rgba(220,246,236,0.96)"],
+                accent: ["rgba(110,231,183,0.65)", "rgba(110,231,183,0.3)"],
+                iconStyle: {
+                    
+                    strokeColor: "#1F6F5A",
+                    strokeWidth: 3
+                }
+            }
+        },
+        cardBackgroundAlpha: 1,
+        cardAccentAlpha: 0.9,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
+            alpha: 0.35
+        },
+        textStyles: {
+            label: {
+                color: "#000",
+                //shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
+            },
+            value: {
+                color: "#133559",
+                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
+            },
+            timerValue: {
+                color: "#133559",
+                shadow: { color: "rgba(255,255,255,0.5)", x: 0, y: 3, blur: 8 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(32,71,115,0.18)",
+            fill: ["#2f7ceb", "#3dd88c"]
+        },
+        controlBackground: {
+            colors: ["rgba(234,244,255,0.9)", "rgba(210,229,255,0.9)"],
+            alpha: 0.95
+        },
+        controlPalette: {
+            volume: { primary: "rgba(76,143,233,0.9)", glow: "rgba(76,143,233,0.55)" },
+            fullscreen: { primary: "rgba(133,111,240,0.9)", glow: "rgba(133,111,240,0.55)" },
+            close: { primary: "rgba(238,87,102,0.92)", glow: "rgba(238,87,102,0.6)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(49,95,160,0.55)",
+            ringAlpha: 0.65,
+            hoverRingAlpha: 0.92,
+            glowAlpha: 0.45,
+            hoverGlowAlpha: 0.65,
+            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(226,239,255,0.95)"]
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,228,173,0.96)", "rgba(255,200,118,0.96)"],
+                accent: ["rgba(255,187,92,0.65)", "rgba(255,187,92,0.28)"],
+                icon: "#BA4B2F",
+                text: "#9C3C20"
+            },
+            danger: {
+                background: ["rgba(255,212,212,0.96)", "rgba(254,153,153,0.96)"],
+                accent: ["rgba(253,116,116,0.65)", "rgba(253,116,116,0.28)"],
+                icon: "#B42332",
+                text: "#881421"
+            },
+            normalIcon: "#2F6CB7",
+            normalText: "#133559"
+        }
+		
+		/*cards: {
             score: {
                 background: ["rgba(24,41,74,0.94)", "rgba(36,67,118,0.94)"],
                 accent: ["rgba(74,126,213,0.6)", "rgba(74,126,213,0.25)"],
@@ -169,8 +258,8 @@ var HUD_THEME_PRESETS = {
         },
         textStyles: {
             label: {
-                color: "#D6E6FF",
-                shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
+                color: "#000",
+                //shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
             },
             value: {
                 color: "#FFFFFF",
@@ -217,7 +306,7 @@ var HUD_THEME_PRESETS = {
             },
             normalIcon: "#66B9FF",
             normalText: "#F6FBFF"
-        }
+        }*/
     }
 };
 
@@ -444,7 +533,7 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
 
     if (typeof Title !== "undefined" && Title) {
         Title.x = stageWidth / 2;
-        Title.y = Math.max(20, stageHeight * 0.00001);
+        Title.y = Math.max(25, stageHeight * 0.00001);
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -475,6 +564,9 @@ function refreshResponsiveLayout(force) {
     layoutOverlayToCanvas(HowToPlayScreenImg, 1280, 720);
     layoutOverlayToCanvas(howToPlayImageMc, 1280, 720);
     layoutOverlayToCanvas(loaderBar, 1280, 720);
+
+    // SAUIX: reflow tooltip positions
+    SAUIX_refreshTooltipsPositions(false);
 }
 
 function cloneArray(source) {
@@ -725,6 +817,17 @@ function applyHudThemeToControls(theme) {
     updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
     updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
     updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
+
+var borderColor1 = "#000"; // Customize or use from theme
+var borderThickness1 = .5; // Change thickness as needed
+
+var border1 = new createjs.Shape();
+border1.graphics
+    .setStrokeStyle(borderThickness1)
+    .beginStroke(borderColor1)
+    .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+controlContainer.addChild(border1); // Add after background so it appears on top (or before to appear behind)
+
 }
 
 function applyHudThemeToTexts(theme) {
@@ -1295,10 +1398,10 @@ function doneLoading(event) {
 
             if (id == "Title") {
                 //Title = new createjs.Bitmap(preload.getResult('Title'));
-                Title = new createjs.Text(GameName, "bold 58px 'Baloo 2'", "#b40deb");
+                Title = new createjs.Text(GameNameWithLvl.replace(/-/g, " ").replace(/(?!^)([A-Z])/g, " $1").toUpperCase().split("LEVEL")[0].trim(), "bold 48px 'Baloo 2'", "#b40deb");
                                 Title.textAlign = "center";
                            Title.x = getCanvasCenterX();
-                                Title.y = 20;
+                                Title.y = 25;
                                 Title.shadow = new createjs.Shadow("red", 1, 1, 1);
                 container.parent.addChild(Title);
 
@@ -1539,7 +1642,7 @@ function watchRestart() {
     gameScoreTxt.__baseColor = gameScoreTxt.color;
     gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
 
-    gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 28px 'Digital'", (timerTextStyle && timerTextStyle.color) || "#F6FBFF");
+    gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 32px 'Digital'", (timerTextStyle && timerTextStyle.color) || "#F6FBFF");
     gameTimerTxt.textAlign = "left";
     gameTimerTxt.textBaseline = "middle";
     applyTextStyle(gameTimerTxt, timerTextStyle);
@@ -1783,14 +1886,16 @@ card.addChild(accentBorder);
     var labelColor = (labelStyle && labelStyle.color) || "#C4DBFF";
     var labelText = new createjs.Text(label.toUpperCase(), "600 12px 'Baloo 2'", labelColor);
     labelText.textAlign = "left";
-    labelText.x = icon.x + 42;
-    labelText.y = -18;
+    //labelText.x = icon.x + 42;
+    labelText.x = icon.x-20;
+    //labelText.y = -18;
+    labelText.y = -38;
     applyTextStyle(labelText, labelStyle);
     card.addChild(labelText);
 
     var valueHolder = new createjs.Container();
-    valueHolder.x = labelText.x;
-    valueHolder.y = 10;
+    valueHolder.x = icon.x + 42;
+    valueHolder.y = 5;
     card.addChild(valueHolder);
 
     card.background = background;
@@ -1850,7 +1955,7 @@ function buildHudLayout() {
     scoreCardContainer = createHudCard("Score", "score");
     hudContainer.addChild(scoreCardContainer);
 
-    timerCardContainer = createHudCard("Time Left", "timer");
+    timerCardContainer = createHudCard("Time Left (in seconds)", "timer");
     hudContainer.addChild(timerCardContainer);
 
     hudQuestionCardContainer = createHudCard("Question", "question");
@@ -1867,7 +1972,7 @@ function buildHudLayout() {
         timerCardContainer.valueHolder.addChild(gameTimerTxt);
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
-        gameTimerTxt.y = -2;
+        gameTimerTxt.y = -5;
     }
 
     if (hudQuestionCardContainer.valueHolder) {
@@ -1917,7 +2022,7 @@ function buildHudLayout() {
     var closePalette = controlPalette.close || {};
 
     volumeBtnWrapper = createHudIconWrapper(volumePalette.primary, volumePalette.glow);
-    volumeBtnWrapper.x = -30;
+    volumeBtnWrapper.x = -40;
     volumeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(volumeBtnWrapper);
     controlContainer.volumeWrapper = volumeBtnWrapper;
@@ -1929,7 +2034,7 @@ function buildHudLayout() {
     controlContainer.fullscreenWrapper = fullScreenBtnWrapper;
 
     closeBtnWrapper = createHudIconWrapper(closePalette.primary, closePalette.glow);
-    closeBtnWrapper.x = 30;
+    closeBtnWrapper.x = 40;
     closeBtnWrapper.cursor = "pointer";
     controlContainer.addChild(closeBtnWrapper);
     controlContainer.closeWrapper = closeBtnWrapper;
@@ -1971,6 +2076,12 @@ function buildHudLayout() {
         closeBtn.y = 0;
         closeBtnWrapper.addChild(closeBtn);
     }
+closeBtnWrapper.scaleX=closeBtnWrapper.scaleY=1.2
+fullScreenBtnWrapper.scaleX=fullScreenBtnWrapper.scaleY=1.2
+volumeBtnWrapper.scaleX=volumeBtnWrapper.scaleY=1.2
+
+// SAUIX: attach HUD tooltips
+SAUIX_attachControlTooltips();
 
     hudContainer.addChild(controlContainer);
 
@@ -2104,7 +2215,7 @@ function animateIconWrapper(wrapper, isHover) {
         return;
     }
 
-    var targetScale = isHover ? 1.12 : 1;
+    var targetScale = isHover ? 1.32 : 1.2;
     createjs.Tween.get(wrapper, { override: true })
         .to({ scaleX: targetScale, scaleY: targetScale }, 150, createjs.Ease.quadOut);
 
@@ -2752,7 +2863,7 @@ function createHowToPlayHeader() {
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = iconBackground.x;
-    icon.y = iconBackground.y;
+    icon.y = iconBackground.y+8;
     container.addChild(icon);
 
     var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#FFFFFF");
@@ -3246,6 +3357,7 @@ function createLoaderProceedButton() {
     var label = new createjs.Text("Proceed", "700 28px 'Baloo 2'", "#FFFFFF");
     label.textAlign = "center";
     label.textBaseline = "middle";
+    label.y = label.y+4;
     button.addChild(label);
 
     button.cursor = "pointer";
@@ -3383,7 +3495,7 @@ function createIntroActionButton() {
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = -78;
-    icon.y = -25;
+    icon.y = -28;
     button.addChild(icon);
 
     var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
@@ -3391,7 +3503,7 @@ function createIntroActionButton() {
     label.textAlign = "left";
     label.textBaseline = "middle";
     label.x = -45;
-    label.y = -25;
+    label.y = -28;
     button.addChild(label);
 
  
@@ -3826,6 +3938,10 @@ function panelVisibleFn() {
     if (hudContainer) {
         hudContainer.visible = true;
         revealHud();
+        // SAUIX tooltip refs
+        var __tipVol = controlContainer && controlContainer.getChildByName("saux_tip_vol");
+        var __tipFS = controlContainer && controlContainer.getChildByName("saux_tip_fs");
+        var __tipClose = controlContainer && controlContainer.getChildByName("saux_tip_close");
     }
 
     if (volumeBtn) {
@@ -3837,9 +3953,12 @@ function panelVisibleFn() {
         volumeBtn.removeAllEventListeners("pressup");
         volumeBtn.on("mouseover", function () {
             animateIconWrapper(volumeBtnWrapper, true);
+            SAUIX_refreshTooltipsPositions();
+            SAUIX_showTooltip(__tipVol);
         });
         volumeBtn.on("mouseout", function () {
             animateIconWrapper(volumeBtnWrapper, false);
+            SAUIX_hideTooltip(__tipVol);
         });
         volumeBtn.on("mousedown", function () {
             pressIconWrapper(volumeBtnWrapper);
@@ -3859,10 +3978,13 @@ function panelVisibleFn() {
         fullScreenBtn.on("mouseover", function () {
             animateIconWrapper(fullScreenBtnWrapper, true);
             fullScreenBtn.shadow = new createjs.Shadow("#9CC5FF", 0, 0, 16);
+            SAUIX_refreshTooltipsPositions();
+            SAUIX_showTooltip(__tipFS);
         });
         fullScreenBtn.on("mouseout", function () {
             animateIconWrapper(fullScreenBtnWrapper, false);
             fullScreenBtn.shadow = null;
+            SAUIX_hideTooltip(__tipFS);
         });
         fullScreenBtn.on("mousedown", function () {
             pressIconWrapper(fullScreenBtnWrapper);
@@ -3881,10 +4003,13 @@ function panelVisibleFn() {
         closeBtn.removeAllEventListeners("pressup");
         closeBtn.on("mouseover", function () {
             animateIconWrapper(closeBtnWrapper, true);
+            SAUIX_refreshTooltipsPositions();
+            SAUIX_showTooltip(__tipClose);
             closeBtn.shadow = new createjs.Shadow("rgba(255,138,128,0.6)", 0, 0, 18);
         });
         closeBtn.on("mouseout", function () {
             animateIconWrapper(closeBtnWrapper, false);
+            SAUIX_hideTooltip(__tipClose);
             closeBtn.shadow = null;
         });
         closeBtn.on("mousedown", function () {
@@ -4004,3 +4129,76 @@ function internetErrorFn() {
     intChkVar = -1
 
 }
+
+
+// ===== SAUIX: HUD tooltips (responsive, theme-aware) =====
+function SAUIX_clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+function SAUIX_getStageMetrics() {
+  var w = getLogicalCanvasWidth ? getLogicalCanvasWidth() : 1280;
+  var h = getLogicalCanvasHeight ? getLogicalCanvasHeight() : 720;
+  return { w: w, h: h, scale: SAUIX_clamp(w / 1280, 0.75, 1.25) };
+}
+function SAUIX_themeInfo() {
+  var isDark=false, bgCols=null, labelColor=null, theme=null;
+  try{ theme=getHudThemeConfig?getHudThemeConfig():null; }catch(e){}
+  if (theme){
+    isDark = !!(theme.isDark || theme.mode==="dark" || theme.appearance==="dark");
+    if (theme.controlBackground && theme.controlBackground.colors && theme.controlBackground.colors.length>=2) bgCols=theme.controlBackground.colors.slice(0,2);
+    if (theme.textStyles && theme.textStyles.label && theme.textStyles.label.color) labelColor = theme.textStyles.label.color;
+  }
+  if (!bgCols) bgCols = isDark ? ["rgba(18,26,40,0.98)","rgba(8,12,22,0.98)"] : ["rgba(255,255,255,0.98)","rgba(226,239,255,0.98)"];
+  if (!labelColor) labelColor = isDark ? "#EAF2FF" : "#133559";
+  return { isDark:isDark, bgCols:bgCols, labelColor:labelColor };
+}
+function SAUIX_createHudTooltip(text) {
+  var t=SAUIX_themeInfo();
+  var tip=new createjs.Container(); tip.mouseEnabled=false; tip.mouseChildren=false; tip.alpha=0; tip.visible=false; tip.name="saux_tip";
+  var padX=12,padY=8,radius=10;
+  var bg=new createjs.Shape();
+  bg.graphics.beginLinearGradientFill(t.bgCols,[0,1],-100,-40,100,40).drawRoundRect(0,0,100,36,radius);
+  bg.shadow=new createjs.Shadow("rgba(6,16,38,0.22)",0,6,14); tip.addChild(bg);
+  var caretUp=new createjs.Shape(); caretUp.graphics.beginFill(t.bgCols[1]).moveTo(0,0).lineTo(12,0).lineTo(6,8).closePath(); caretUp.x=18; caretUp.y=36; caretUp.shadow=new createjs.Shadow("rgba(6,16,38,0.18)",0,4,8); tip.addChild(caretUp);
+  var caretDn=new createjs.Shape(); caretDn.graphics.beginFill(t.bgCols[1]).moveTo(0,8).lineTo(12,8).lineTo(6,0).closePath(); caretDn.x=18; caretDn.y=-8; caretDn.shadow=new createjs.Shadow("rgba(6,16,38,0.18)",0,4,8); caretDn.visible=false; tip.addChild(caretDn);
+  var label=new createjs.Text(String(text||""),"600 16px 'Baloo 2'", t.labelColor); label.textBaseline="middle"; label.x=padX; label.y=18; tip.addChild(label);
+  var w=Math.max(60,Math.ceil(label.getMeasuredWidth())+padX*2), h=Math.max(32,Math.ceil(label.getMeasuredLineHeight())+padY*2);
+  bg.graphics.clear().beginLinearGradientFill(t.bgCols,[0,1],-w/2,-h/2,w/2,h/2).drawRoundRect(0,0,w,h,radius); caretUp.y=h-2;
+  tip.__w=w; tip.__h=h; tip.__caretUp=caretUp; tip.__caretDn=caretDn;
+  return tip;
+}
+function SAUIX_positionTooltip(tip, anchor, align){
+  if(!tip||!anchor) return;
+  var M=SAUIX_getStageMetrics(), s=SAUIX_clamp(M.scale,0.85,1.2), margin=8;
+  var w=tip.__w*s, h=tip.__h*s;
+  tip.scaleX=tip.scaleY=s;
+  var x=(anchor.x - w/2) + (align==="right"?-8:(align==="left"?8:0));
+  var y=anchor.y - h - 20;
+  var band=Math.max(240, Math.min(420, M.w*0.35));
+  if (x < -band) x = -band;
+  if (x + w > band) x = band - w;
+  var topLimit=-M.h/2+margin, bottomLimit=M.h/2-margin;
+  var flipBelow = (y < topLimit);
+  if (flipBelow){ y = anchor.y + 20; if (y + h > bottomLimit) y = bottomLimit - h; tip.__caretUp.visible=false; tip.__caretDn.visible=true; tip.__caretDn.y=0; }
+  else { if (y < topLimit) y = topLimit; tip.__caretUp.visible=true; tip.__caretDn.visible=false; tip.__caretUp.y=tip.__h-2; }
+  tip.x=x; tip.y=y;
+}
+function SAUIX_attachControlTooltips(){
+  if (!controlContainer) return;
+  ["saux_tip_vol","saux_tip_fs","saux_tip_close"].forEach(function(n){ var old=controlContainer.getChildByName(n); if(old) controlContainer.removeChild(old); });
+  var tipVol=SAUIX_createHudTooltip("Volume"); tipVol.name="saux_tip_vol"; controlContainer.addChild(tipVol);
+  var tipFS=SAUIX_createHudTooltip("Fullscreen"); tipFS.name="saux_tip_fs"; controlContainer.addChild(tipFS);
+  var tipClose=SAUIX_createHudTooltip("Close"); tipClose.name="saux_tip_close"; controlContainer.addChild(tipClose);
+  if (controlContainer.setChildIndex){ controlContainer.setChildIndex(tipVol, controlContainer.getNumChildren()-1); controlContainer.setChildIndex(tipFS, controlContainer.getNumChildren()-1); controlContainer.setChildIndex(tipClose, controlContainer.getNumChildren()-1); }
+  SAUIX_refreshTooltipsPositions(true);
+}
+function SAUIX_refreshTooltipsPositions(forceHide){
+  if (!controlContainer) return;
+  var tipVol=controlContainer.getChildByName("saux_tip_vol");
+  var tipFS=controlContainer.getChildByName("saux_tip_fs");
+  var tipClose=controlContainer.getChildByName("saux_tip_close");
+  if (tipVol && volumeBtnWrapper) SAUIX_positionTooltip(tipVol, volumeBtnWrapper, "left");
+  if (tipFS && fullScreenBtnWrapper) SAUIX_positionTooltip(tipFS, fullScreenBtnWrapper, "center");
+  if (tipClose && closeBtnWrapper) SAUIX_positionTooltip(tipClose, closeBtnWrapper, "right");
+  if (forceHide) [tipVol, tipFS, tipClose].forEach(function(t){ if(t){ t.visible=false; t.alpha=0; }});
+}
+function SAUIX_showTooltip(tip){ if(!tip) return; tip.visible=true; createjs.Tween.get(tip,{override:true}).to({alpha:1, y:tip.y-2},140,createjs.Ease.quadOut); }
+function SAUIX_hideTooltip(tip){ if(!tip) return; createjs.Tween.get(tip,{override:true}).to({alpha:0, y:tip.y+2},120,createjs.Ease.quadIn).call(function(){ tip.visible=false; }); }
