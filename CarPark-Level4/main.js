@@ -42,12 +42,12 @@ var isResp = true;
 var respDim = 'both'
 var isScale = true
 var scaleType = 1;
-/*
+
 var headerPanelThemeMode = "light";
 if (typeof window !== "undefined") {
     window.headerPanelThemeMode = headerPanelThemeMode;
 }
-*/
+
 var lastW, lastH, lastS = 1;
 var borderPadding = 10,
     barHeight = 20;
@@ -276,7 +276,6 @@ function init() {
             id: "choice1", src: gameAssetsPath + "CarQuestionImage.png"
         },
             { id: "holder", src: gameAssetsPath + "CarIntroHolder.png" },
-            { id: "BGTitle", src: gameAssetsPath + "BGTitle.png" },
             { id: "DirPosTrack", src: questionTextPath + "CarPark-Level4-QT5.png" }, { id: "DirPosArrow", src: gameAssetsPath + "ClueDirPosArrow.png" }, { id: "questionText", src: questionTextPath + "CarPark-Level4-QT1.png" }, { id: "car", src: questionTextPath + "CarPark-Level4-QT2.png" }, { id: "Buttons", src: gameAssetsPath + "question.png" }, { id: "question1", src: questionTextPath + "CarPark-Level4-QT4.png" }, { id: "DirPosCar", src: gameAssetsPath + "ClueDirPosCar.png" }, { id: "DirPosQuestionText", src: questionTextPath + "CarPark-Level4-QT3.png" }
 
         )
@@ -311,11 +310,7 @@ const boxX = (canvas.width - boxWidth) / 2;
         container.parent.addChild(car1);
         car1.visible = false;
     }
-    if (id == "BGTitle") {
-        BGTitle = new createjs.Bitmap(preload.getResult('BGTitle'));
-        container.parent.addChild(BGTitle);
-        BGTitle.visible = false;
-    }
+    
     if (id == "holder") {
         holder = new createjs.Bitmap(preload.getResult('holder'));
         container.parent.addChild(holder);
@@ -433,8 +428,11 @@ const boxX = (canvas.width - boxWidth) / 2;
         buttons.visible = false;
         container.parent.addChild(buttons);
     };
-
-
+Title.x = 120;
+    Title.y = 220;
+introTitle = Title.clone();
+introTitle.visible = true;
+    container.parent.addChild(introTitle)
 
 }
 
@@ -600,8 +598,7 @@ function ensureQuestionCard() {
 
 function CreateGameElements() {
     interval = setInterval(countTime, 1000);
-    container.parent.addChild(BGTitle);
-    BGTitle.visible = true;
+    
     questionText.x = 0
     questionText.y = 0;
     DirPosQuestionText.visible = false

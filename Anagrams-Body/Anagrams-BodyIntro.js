@@ -41,10 +41,7 @@ console.log("canvas.width ::"+canvas.width)
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
-    introTitle.textAlign = "center";
-    introTitle.textBaseline = "middle";
-    introTitle.x = 650;
-    introTitle.y = INTRO_TITLE_Y;
+     
 
 
     //call_UI_introQuestionCardContainer(container,"Find the name of a part of the body that is an anagram of","sink");
@@ -52,12 +49,7 @@ console.log("canvas.width ::"+canvas.width)
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
-    introQuestxt.visible = true;
-    introQuestxt.textAlign = "center";
-    introQuestxt.textBaseline = "middle";
-    introQuestxt.lineWidth = 760;
-    introQuestxt.x = 635;
-    introQuestxt.y = INTRO_PROMPT_Y-50;
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, {padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke:"rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22});
 
     container.parent.addChild(introChoice1)
     introChoice1.x = introChoice1X;
@@ -319,8 +311,12 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(questionCardContainer_htp)
     questionCardContainer_htp.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt && introQuestxt.__labelBG) {
+  introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
+}
+introQuestxt.visible = false;
+container.parent.removeChild(introQuestxt);
+introQuestxt = null;
     container.parent.removeChild(introChoice1)
     introChoice1.visible = false
     container.parent.removeChild(introChoice2)

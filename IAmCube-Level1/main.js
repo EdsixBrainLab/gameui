@@ -4,6 +4,14 @@ var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 5, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
 var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, chHolder, circleOutline, circle1Outline, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var ambientLayer,
+  overlayLayer,
+  questionSubtitle,
+  questionCardContainer,
+  questionCardBackground,
+  questionCardHighlight,
+  questionCardShadow;
+  
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -43,9 +51,7 @@ var correctCnt
 var introImg, introImg1, introImg2, introImg3
 //register key functions
  var QusTxtString;
-var 
-  ambientGradientLayer,
-  ambientOrbs = [];
+ 
   ///////////////////////////////////////////////////////////////////
  
 ///////////////////////////////////////////////////////////////////
@@ -54,128 +60,7 @@ window.onload = function (e) {
 }
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
-var QUESTION_CARD_WIDTH = 600;
-var QUESTION_CARD_HEIGHT = 168;
-var QUESTION_CARD_CORNER_RADIUS = 44;
-
-var CHOICE_TILE_BASE_COLORS = ["rgba(28,52,92,0.95)", "rgba(15,32,66,0.95)"];
-var CHOICE_TILE_HOVER_COLORS = ["rgba(70,118,210,0.98)", "rgba(40,72,148,0.98)"];
-var CHOICE_TILE_CORRECT_COLORS = ["rgba(58,196,150,0.98)", "rgba(30,128,96,0.98)"];
-var CHOICE_TILE_WRONG_COLORS = ["rgba(236,118,135,0.98)", "rgba(160,58,92,0.98)"];
-var CLUE_SLOT_BASE_COLORS = ["rgba(32,58,104,0.92)", "rgba(19,36,74,0.92)"];
-var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"];
-var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
-var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
-
  
- 
-function drawChoiceTileBackground(targetShape, colors) {
-  if (!targetShape) {
-    return;
-  }
-
-  var gradient = colors || CHOICE_TILE_BASE_COLORS;
-  targetShape.graphics
-    .clear()
-    .beginLinearGradientFill(gradient, [0, 1], -90, -90, 90, 90)
-    .drawRoundRect(-32, -45, 130, 130, 30);
-}
-
-function drawClueSlotBackground(targetShape, colors) {
-  if (!targetShape) {
-    return;
-  }
-
-  var gradient = colors || CLUE_SLOT_BASE_COLORS;
-  targetShape.graphics
-    .clear()
-    .beginLinearGradientFill(gradient, [0, 1], -60, -60, 60, 60)
-    .drawRoundRect(-42, -50, 100, 100, 20);
-}
-
-
-function createAmbientBackground() {
-  if (!ambientLayer || !canvas) {
-    return;
-  }
-
-  ambientLayer.removeAllChildren();
-  ambientLayer.mouseEnabled = false;
-  ambientLayer.mouseChildren = false;
-
-  if (!ambientGradientLayer) {
-    ambientGradientLayer = new createjs.Container();
-  } else {
-    ambientGradientLayer.removeAllChildren();
-  }
-
-  ambientLayer.addChild(ambientGradientLayer);
-
-  var gradientShape = new createjs.Shape();
-  gradientShape.graphics
-    .beginLinearGradientFill(
-      ["#0d1b2a", "#1a3a7a", "#0b1425"],
-      [0, 0.65, 1],
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    )
-    .drawRect(0, 0, canvas.width, canvas.height);
-  gradientShape.alpha = 0.92;
-  ambientGradientLayer.addChild(gradientShape);
-
-  ambientOrbs = [];
-  var orbColors = [
-    ["rgba(99, 179, 237, 0.45)", "rgba(99, 179, 237, 0)"],
-    ["rgba(158, 108, 237, 0.4)", "rgba(158, 108, 237, 0)"],
-    ["rgba(109, 226, 183, 0.4)", "rgba(109, 226, 183, 0)"]
-  ];
-
-  for (var i = 0; i < 5; i++) {
-    var orb = new createjs.Shape();
-    var radius = 160 + Math.random() * 140;
-    var palette = orbColors[i % orbColors.length];
-    orb.graphics
-      .beginRadialGradientFill(["rgba(255,255,255,0.2)", palette[0], palette[1]], [0, 0.45, 1], 0, 0, 0, 0, 0, radius)
-      .drawCircle(0, 0, radius);
-    orb.x = Math.random() * canvas.width;
-    orb.y = Math.random() * canvas.height;
-    orb.alpha = 0.55;
-    ambientGradientLayer.addChild(orb);
-    ambientOrbs.push(orb);
-    animateAmbientOrb(orb);
-  }
-
-  var grid = new createjs.Shape();
-  var spacing = 140;
-  grid.graphics.setStrokeStyle(1).beginStroke("rgba(255, 255, 255, 0.06)");
-  for (var x = -spacing; x < canvas.width + spacing; x += spacing) {
-    grid.graphics.moveTo(x, -spacing).lineTo(x + canvas.height + spacing, canvas.height + spacing);
-  }
-  grid.alpha = 0.35;
-  ambientGradientLayer.addChild(grid);
-}
-
-function animateAmbientOrb(orb) {
-  if (!orb) {
-    return;
-  }
-
-  var animate = function () {
-    var targetX = Math.random() * canvas.width;
-    var targetY = Math.random() * canvas.height;
-    var targetAlpha = 0.35 + Math.random() * 0.3;
-    var duration = 6000 + Math.random() * 5000;
-
-    createjs.Tween.get(orb, { override: true })
-      .to({ x: targetX, y: targetY, alpha: targetAlpha }, duration, createjs.Ease.sineInOut)
-      .call(animate);
-  };
-
-  animate();
-}
-
 
 
 function init() {
@@ -185,10 +70,7 @@ function init() {
 
     container = new createjs.Container();
     stage.addChild(container)
-ambientLayer = new createjs.Container();
-  container.addChild(ambientLayer);
-	overlayLayer = new createjs.Container();
-  stage.addChild(overlayLayer);
+ call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
 	loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
   loaderBar = new createjs.Container();
@@ -201,8 +83,7 @@ ambientLayer = new createjs.Container();
     callLoader();
     createLoader()
     createCanvasResize()
-  createAmbientBackground();
-
+ 
     stage.update();
     stage.enableMouseOver(40);
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
@@ -243,7 +124,7 @@ ambientLayer = new createjs.Container();
 
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
-Title.x=650;
+ 
     loaderBar.visible = false;
     stage.update();
     var event = assets[i];
@@ -255,30 +136,14 @@ Title.x=650;
 
 
     // }
-if (id == "QusTxtString") {
-	  
-	  const boxWidth = 400;
-const boxX = (canvas.width - boxWidth) / 2;  
-		QusTxtString = new createjs.Text("Find the name of a part of the body that is an anagram of ", "bold 32px 'Baloo 2'", "#b40deb");
-		QusTxtString.shadow = new createjs.Shadow("red", 1, 1, 1);
-		QusTxtString.textAlign = "center";
-		QusTxtString.x = canvas.width / 2; // center of the custom width box
-		QusTxtString.y = 180; 
-		
-		
-    //QusTxtString = new createjs.Bitmap(preload.getResult("QusTxtString"));
-    container.parent.addChild(QusTxtString);
-    QusTxtString.visible = false;
-  }
+	
+	
+	
+	
+ 
   
   
-    if (id == "questionText") {
-        questionText = new createjs.Bitmap(preload.getResult('questionText'));
-        container.parent.addChild(questionText);
-        questionText.visible = false;
-
-
-    }
+     
     if (id == "introImg") {
         var spriteSheet1 = new createjs.SpriteSheet({
             framerate: 30,
@@ -401,7 +266,7 @@ const boxX = (canvas.width - boxWidth) / 2;
 
     };
 
-
+call_UI_gameQuestion(container,"What lies opposite           when this sheet is folded into a cube?");
 
 }
 
@@ -428,149 +293,14 @@ function handleClick(e) {
 }
 
 
-function renderQuestionCardBackground() {
-  if (!questionCardBackground) {
-    return;
-  }
-
-  var halfWidth = QUESTION_CARD_WIDTH / 2;
-  var halfHeight = QUESTION_CARD_HEIGHT / 2;
-
-  questionCardBackground.graphics
-    .clear()
-    .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
-      [0, 1],
-      -halfWidth,
-      -halfHeight,
-      halfWidth,
-      halfHeight
-    )
-    .drawRoundRect(
-      -halfWidth,
-      -halfHeight,
-      QUESTION_CARD_WIDTH,
-      QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
-    );
-
-  if (questionCardHighlight) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
-    var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
-    var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
-    var highlightHalfWidth = highlightWidth / 2;
-    var highlightHalfHeight = highlightHeight / 2;
-
-    questionCardHighlight.graphics
-      .clear()
-      .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
-        [0, 1],
-        -highlightHalfWidth,
-        -highlightHalfHeight,
-        highlightHalfWidth,
-        highlightHalfHeight
-      )
-      .drawRoundRect(
-        -highlightHalfWidth,
-        -highlightHalfHeight,
-        highlightWidth,
-        highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
-      );
-    questionCardHighlight.alpha = 0.45;
-  }
-}
-
-function ensureQuestionCard() {
-  if (!container || !container.parent) {
-    return;
-  }
-
-  if (!questionCardContainer) {
-    questionCardContainer = new createjs.Container();
-    questionCardContainer.x = canvas.width / 2;
-    questionCardContainer.y = 250;
-    questionCardContainer.alpha = 0;
-    questionCardContainer.visible = false;
-    questionCardContainer.mouseEnabled = false;
-    questionCardContainer.mouseChildren = false;
-
-    questionCardShadow = new createjs.Shape();
-    var shadowWidth = QUESTION_CARD_WIDTH + 64;
-    var shadowHeight = QUESTION_CARD_HEIGHT + 26;
-    var shadowHalfWidth = shadowWidth / 2;
-    var shadowHalfHeight = shadowHeight / 2;
-    questionCardShadow.graphics
-      .beginFill("rgba(8,18,36,0.32)")
-      .drawRoundRect(
-        -shadowHalfWidth,
-        -shadowHalfHeight,
-        shadowWidth,
-        shadowHeight,
-        QUESTION_CARD_CORNER_RADIUS + 10
-      );
-    questionCardShadow.y = 1;
-    questionCardShadow.alpha = 0.32;
-    questionCardContainer.addChild(questionCardShadow);
-
-    questionCardBackground = new createjs.Shape();
-    questionCardContainer.addChild(questionCardBackground);
-
-    questionCardHighlight = new createjs.Shape();
-    questionCardContainer.addChild(questionCardHighlight);
-
-    renderQuestionCardBackground();
-
-    question = new createjs.Text("", "800 60px 'Baloo 2'", "#F4FAFF");
-    question.textAlign = "center";
-    question.textBaseline = "middle";
-    question.x = 0;
-    question.y = 0;
-    question.lineWidth = QUESTION_CARD_WIDTH - 120;
-    question.lineHeight = 62;
-    question.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
-
-    questionCardContainer.addChild(question);
-
-    questionSubtitle = new createjs.Text(
-      "",
-      "500 26px 'Baloo 2'",
-      "#C6D7FF"
-    );
-    questionSubtitle.textAlign = "center";
-    questionSubtitle.textBaseline = "middle";
-    questionSubtitle.x = 0;
-
-    questionSubtitle.y = 0;
-    questionSubtitle.lineWidth = QUESTION_CARD_WIDTH - 160;
-    questionSubtitle.alpha = 0.9;
-    questionSubtitle.shadow = new createjs.Shadow("rgba(5,12,28,0.32)", 0, 6, 14);
-    questionCardContainer.addChild(questionSubtitle);
-
-    layoutQuestionCardContents();
-
-  }
-
-  if (!questionCardContainer.parent || questionCardContainer.parent !== container.parent) {
-    container.parent.addChild(questionCardContainer);
-  }
-
-
-  layoutQuestionCardContents();
-
-}
+ 
 
 
 function CreateGameElements() {
 
     interval = setInterval(countTime, 1000);
-    container.parent.addChild(questionText);
-    questionText.visible = false;
+     
+    QusTxtString.visible = false;
     // questionText.x = 50; questionText.y = 110;
     // container.parent.addChild(chHolder);
     // chHolder.visible = false;
@@ -578,19 +308,19 @@ function CreateGameElements() {
     container.parent.addChild(question);
     question.visible = false;
     if (lang == "ArabicQuestionText/") {
-        question.x = 850; question.y = 130;
-        question.scaleX = question.scaleY = .7
+        question.x = 512; question.y = 130;
+        question.scaleX = question.scaleY = .55
     }
     else {
-        question.x = 860; question.y = 120;
-        question.scaleX = question.scaleY = 1
+        question.x = 512; question.y = 130;
+        question.scaleX = question.scaleY = .55
     }
     container.parent.addChild(question1);
     question1.visible = false;
     question1.x = 450;
     question1.y = 320;
     question1.scaleX = question1.scaleY = 1.5;
-ensureQuestionCard();
+ 
     container.parent.addChild(choice1, choice2, choice3, choice4, choice5)
     choice1.visible = choice2.visible = false;
     choice3.visible = choice4.visible = choice5.visible = false;
@@ -620,6 +350,7 @@ function helpEnable() {
         this["choice" + i].mouseEnabled = true;
     }
 }
+
 
 //=================================================================================================================================//
 function pickques() {
@@ -655,9 +386,9 @@ function pickques() {
 
 
 function createTween() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 500)
+    QusTxtString.visible = true;
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 500)
     // chHolder.visible = true;
 
     question1.visible = true;

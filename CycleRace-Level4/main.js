@@ -68,6 +68,7 @@ window.onload = function (e) {
 	checkBrowserSupport();
 
 }
+var QusTxtString;
 ///////////////////////////////////////////////////////////////=========INITIALIZATION==========///////////////////////////////////////////////////////////////
 function init() {
 	canvas = document.getElementById("gameCanvas");
@@ -101,8 +102,7 @@ function init() {
 
 	{ id: "tMc", src: gameAssetsPath + "targetPanel.png" },
 			{ id: "track1", src: gameAssetsPath + "Background.png" },
-			{ id: "questiontext", src: questionTextPath + "CycleRace-Level4-QT1.png" },
-
+ 
 			{ id: "cycle1", src: gameAssetsPath + "BlueBoyCycle.png" },
 			{ id: "cycle2", src: gameAssetsPath + "RedBoyCycle.png" },
 			{ id: "cycle3", src: gameAssetsPath + "VioletBoyCycle.png" },
@@ -131,6 +131,8 @@ function init() {
 function doneLoading1(event) {
 	var event = assets[i];
 	var id = event.item.id;
+	uniquebackGround.alpha = 0;
+	uniquebackGround.visible=false;
 	if (id == "introImg") {
 
 		introImg = new createjs.Bitmap(preload.getResult('introImg'));
@@ -143,20 +145,8 @@ function doneLoading1(event) {
 		container.parent.addChild(introHintTextMc);
 		introHintTextMc.visible = false;
 	}
-
-	if (id == "questiontext") {
-// Define your desired box
-const boxWidth = 400;
-const boxX = (canvas.width - boxWidth) / 2;  
-		questionText = new createjs.Text("Watch the animation carefully and answer the question", "bold 28px 'Baloo 2'", "#b40deb");
-		questionText.shadow = new createjs.Shadow("#000000", 2, 2, 5);
-		questionText.textAlign = "center";
-		questionText.x = boxX + boxWidth / 2; // center of the custom width box
-		questionText.y = 100;  
-		
-		container.parent.addChild(questionText);
-		questionText.visible = false;
-	}
+call_UI_gameQuestion(container,"Watch the animation carefully and answer the question");
+	 
 
 	if (id == "cycle1" || id == "cycle2" || id == "cycle3" || id == "cycle4" || id == "cycle5" || id == "cycle6" || id == "cycle7" || id == "cycle8" || id == "cycle9") {
 
@@ -438,9 +428,11 @@ function CreateGameElements() {
 		track1[i] = track1.clone()
 		container.parent.addChild(track1[i])
 		track1[i].visible = true;
-		track1[i].alpha=.5
+		//track1[i].alpha=.1  
+		stage.setChildIndex(track1[i], 1); // bring red to top
+  stage.update();
 	}
-	container.parent.addChild(questionText);
+	container.parent.addChild(QusTxtString);
 	// questionText.visible = true;
 	container.parent.addChild(targetMc);
 	targetMc.visible = false;
@@ -525,8 +517,8 @@ function pickques() {
 	track1[0].x = 0;
 	track1[1].x = 1280;
 
-	container.parent.addChild(questionText);
-	questionText.visible = true;
+	container.parent.addChild(QusTxtString);
+	QusTxtString.visible = true;
 
 	targetMc.visible = false;
 	//speed_arry_1 = [1.4, 1.3, 1.2, 1, 0.9, 0.8];
@@ -680,7 +672,7 @@ function roadMove(event) {
 function createQuestions() {
 	clearInterval(quesIntervel)
 
-	questionText.visible = false;
+	QusTxtString.visible = false;
 
 	container.parent.addChild(chHolderMc);
 	container.parent.addChild(question1, question2)

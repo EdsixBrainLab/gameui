@@ -7,23 +7,36 @@ var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
 var introQuesTextX = 0, introQuesTextY = -50;
-var introQuesX = QUESTION_CENTER_X, introQuesY = QUESTION_BASE_Y - 160;
-var introArrowX = QUESTION_CENTER_X + 165, introArrowY = CHOICE_BASE_Y - 20;
-var introfingureX = QUESTION_CENTER_X + 210, introfingureY = CHOICE_BASE_Y + 35;
+var introQuesX = 555, introQuesY = 200
+var introArrowX = 765, introArrowY = 520;
+var introfingureX = 810, introfingureY = 600;
 function commongameintro() {
     introTitle = Title.clone()
     container.parent.addChild(introTitle)
     introTitle.visible = true;
+    introTitle.textAlign = "center";
+    introTitle.textBaseline = "middle";
+    introTitle.x = 650;
+    introTitle.y = INTRO_TITLE_Y;
+	
     introQues = question.clone();
-    introQuestxt = chHolderMC.clone();
-    introArrow = arrow1.clone();
-    introfingure = fingure.clone()
-
-    container.parent.addChild(introQues)
+	container.parent.addChild(introQues)
     introQues.x = introQuesX;
     introQues.y = introQuesY;
     introQues.visible = false;
     introQues.gotoAndStop(4);
+	
+    
+    introArrow = arrow1.clone();
+    introfingure = fingure.clone()
+	
+	introQuestxt = QusTxtString.clone();
+    container.parent.addChild(introQuestxt);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, {padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke:"rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22});
+	
+	
+
+    
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -32,37 +45,24 @@ function commongameintro() {
         introChoiceQues[i] = question1.clone()
         container.parent.addChild(introChoiceQues[i])
         introChoiceQues[i].visible = false
-        introChoiceQues[i].y = QUESTION_BASE_Y;
+        introChoiceQues[i].x = 455 + (i * 120);
+        introChoiceQues[i].y = 490;
         introChoiceQues[i].gotoAndStop(i);
         introChoiceQues[i].scaleX = introChoiceQues[i].scaleY = 1.1;
     }
     for (i = 0; i < 3; i++) {
         introchoiceArr[i] = choice1.clone()
-        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = CHOICE_SCALE;
+        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = .8;
         introchoiceArr[i].visible = false;
         container.parent.addChild(introchoiceArr[i]);
-        introchoiceArr[i].x = QUESTION_CENTER_X - CHOICE_SPACING + (i * CHOICE_SPACING);
-        introchoiceArr[i].y = CHOICE_BASE_Y;
+        introchoiceArr[i].x = 460 + (i * 160);
+        introchoiceArr[i].y = 615;
     }
+createjs.Tween.get(introQuestxt).to({ x: 635, y: INTRO_PROMPT_Y-50, visible: true, alpha: 1 }, 1500) .call(handleComplete1_1);
 
-    positionIntroLetters(4);
+		////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////////
-    container.parent.addChild(introQuestxt)
-    introQuestxt.alpha = 0;
-    introQuestxt.y = introQuesTextY
-    createjs.Tween.get(introQuestxt).to({ x: introQuesTextX, y: 0, visible: true, alpha: 1 }, 800, createjs.Ease.quadOut)
-        .call(handleComplete1_1);
 
-}
-
-function positionIntroLetters(letterCount) {
-    var spacing = getLetterSpacing ? getLetterSpacing(letterCount) : QUESTION_LETTER_SPACING;
-    var totalWidth = (letterCount - 1) * spacing;
-    var startX = QUESTION_CENTER_X - totalWidth / 2;
-    for (i = 0; i < letterCount; i++) {
-        introChoiceQues[i].x = startX + (i * spacing);
-    }
 }
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
@@ -71,9 +71,8 @@ function handleComplete1_1() {
 function quesTween() {
     introQues.visible = true;
     introQues.alpha = 0;
-    introQues.scaleX = introQues.scaleY = .6
-    createjs.Tween.get(introQues).wait(200).to({ alpha: 1, scaleX: .82, scaleY: .82 }, 320, createjs.Ease.backOut)
-        .to({ scaleX: .8, scaleY: .8 }, 180)
+    introQues.scaleX = introQues.scaleY = .75
+    createjs.Tween.get(introQues).wait(500).to({ alpha: 1, scaleX: .8, scaleY: .8 }, 250)
         .call(handleComplete2_1)
 
 }
@@ -82,7 +81,7 @@ function handleComplete2_1() {
     QueschoiceTween()
 }
 function QueschoiceTween() {
-    var time1 = 350
+    var time1 = 500
     for (i = 0; i < 4; i++) {
         introChoiceQues[i].visible = true
         introChoiceQues[i].alpha = 0;
@@ -90,20 +89,19 @@ function QueschoiceTween() {
         introChoiceQues[1].gotoAndStop(17);
         introChoiceQues[2].gotoAndStop(26);
         introChoiceQues[3].gotoAndStop(22);
-        introChoiceQues[i].y = QUESTION_BASE_Y - 25;
         if (i == 3) {
 
             createjs.Tween.get(introChoiceQues[i]).wait(time1)
-                .to({ alpha: 1, y: QUESTION_BASE_Y }, 250, createjs.Ease.quadOut)
+                .to({ alpha: 1 }, time1, createjs.Ease.bounceInOut)
 
                 .call(handleComplete3_1)
         }
         else {
             createjs.Tween.get(introChoiceQues[i]).wait(time1)
-                .to({ alpha: 1, y: QUESTION_BASE_Y }, 250, createjs.Ease.quadOut)
+                .to({ alpha: 1 }, time1, createjs.Ease.bounceInOut)
 
         }
-        time1 = time1 + 120
+        time1 = time1 + 200
     }
 
 }
@@ -112,21 +110,20 @@ function handleComplete3_1() {
     choiceTween()
 }
 function choiceTween() {
-    var val = 650
+    var val = 500
     for (i = 0; i < 3; i++) {
         introchoiceArr[i].visible = true;
         introchoiceArr[i].alpha = 0
         introchoiceArr[i].gotoAndStop(i + 7);
         introchoiceArr[2].gotoAndStop(14);
-        introchoiceArr[i].scaleX = CHOICE_SCALE - 0.08;
-        introchoiceArr[i].y = CHOICE_BASE_Y + 80;
+        introchoiceArr[i].scaleX = introchoiceArr.scaleY = .65
         if (i == 2) {
-            createjs.Tween.get(introchoiceArr[i]).wait(val).to({ y: CHOICE_BASE_Y, scaleX: CHOICE_SCALE + 0.08, scaleY: CHOICE_SCALE + 0.08, alpha: 1 }, 260, createjs.Ease.quadOut)
-                .to({ scaleX: CHOICE_SCALE, scaleY: CHOICE_SCALE }, 180, createjs.Ease.quadOut)
+            createjs.Tween.get(introchoiceArr[i]).wait(val).to({ y: 620, rotation: 180, scaleX: .65, scaleY: .65, alpha: .5 }, 200)
+                .to({ y: 620, rotation: 360, scaleX: .7, scaleY: .7, alpha: 1 }, 200)
                 .call(handleComplete3_2)
         } else {
-            createjs.Tween.get(introchoiceArr[i]).wait(val).to({ y: CHOICE_BASE_Y, scaleX: CHOICE_SCALE + 0.08, scaleY: CHOICE_SCALE + 0.08, alpha: 1 }, 260, createjs.Ease.quadOut)
-                .to({ scaleX: CHOICE_SCALE, scaleY: CHOICE_SCALE }, 180, createjs.Ease.quadOut)
+            createjs.Tween.get(introchoiceArr[i]).wait(val).to({ y: 620, rotation: 180, scaleX: .65, scaleY: .65, alpha: .5 }, 200)
+                .to({ y: 620, rotation: 360, scaleX: .7, scaleY: .7, alpha: 1 }, 200)
         }
         val = val + 150
     }
@@ -212,11 +209,11 @@ this.onComplete2 = function (e) {
         introChoiceQues[2].visible = true
         introChoiceQues[2].gotoAndStop(14);
         createjs.Tween.get(introChoiceQues[2])
-            .to({ alpha: 1 }, 500)
-            .wait(400)
+            .to({ alpha: 1 }, 1000)
+            .wait(500)
         createjs.Tween.get(introchoiceArr[2])
-            .to({ alpha: 1, scaleX: CHOICE_SCALE + 0.12, scaleY: CHOICE_SCALE + 0.12 }, 350, createjs.Ease.backOut)
-            .wait(350)
+            .to({ alpha: 1, scaleX: .9, scaleY: .9 }, 1000)
+            .wait(500)
             .call(setCallDelay)
     }
     // setTimeout(setCallDelay, 1000)
@@ -250,8 +247,7 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(introQues)
     introQues.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+
     for (i = 0; i < 4; i++) {
         introChoiceQues[i].visible = false
         container.parent.removeChild(introChoiceQues[i])

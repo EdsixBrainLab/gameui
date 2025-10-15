@@ -44,6 +44,8 @@ var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
 
 function commongameintro() {
+	Title.x = 120;
+    Title.y = 320;
     Questxt = 0;
     IntroBackground = holder.clone();
     introTitle = Title.clone();

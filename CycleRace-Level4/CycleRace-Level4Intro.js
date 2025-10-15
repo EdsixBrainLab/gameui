@@ -16,12 +16,16 @@ var value = [0, 2, 1, 8]
 var introHintTextMc;
 function commongameintro() {
     Title.visible=true;
-    introQuestxt = questionText.clone();
+     
     introQuestxt1 = questionText1.clone();
     introcycle1 = cycle1.clone();
     introcycle2 = cycle2.clone();
     introcycle3 = cycle3.clone();
-  
+	
+  	introQuestxt = QusTxtString.clone();
+    container.parent.addChild(introQuestxt);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, {padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke:"rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22});
+	
     introcycle9 = cycle9.clone();
     introChoice = choice2.clone();
     introChHolder = chHolderMc.clone();
@@ -236,7 +240,15 @@ function setIntroDelay() {
 
     }
     else {
-    container.parent.removeChild(introQuestxt)
+    //container.parent.removeChild(introQuestxt)
+	if (introQuestxt && introQuestxt.__labelBG) 
+	{
+		introQuestxt.__labelBG.destroy();           
+	}
+		introQuestxt.visible = false;
+		container.parent.removeChild(introQuestxt);
+		//introQuestxt = null;
+
     container.parent.removeChild(introTarget)
     introTarget.visible = false;
     for (i = 0; i < 4; i++) {
@@ -419,12 +431,18 @@ function setCallDelay() {
 function removeGameIntro() {
     Title.visible=false;
     createjs.Tween.removeAllTweens();
-    container.parent.removeChild(introArrow)
+    container.parent.removeChild(introTarget)
+    introTarget.visible = false
+	container.parent.removeChild(introArrow)
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt && introQuestxt.__labelBG) {
+  introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
+}
+introQuestxt.visible = false;
+container.parent.removeChild(introQuestxt);
+introQuestxt = null;
     container.parent.addChild(introQuestxt1);
     introQuestxt1.visible = false
     container.parent.removeChild(introcycle1)

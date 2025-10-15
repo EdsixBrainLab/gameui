@@ -20,7 +20,7 @@ function commongameintro() {
     // introHolder = chHolder.clone()
     introArrow = arrow1.clone();
     introfingure = fingure.clone();
-    introQuestxt = questionText.clone();
+    introQuestxt = QusTxtString.clone();
     container.parent.addChild(introTitle)
     introTitle.visible = true;
 
@@ -29,15 +29,16 @@ function commongameintro() {
 var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
     if (lang == "ArabicQuestionText/") {
-        introQues1.x = 850; introQues1.y = 130;
-        introQues1.scaleX = introQues1.scaleY = .7
+        introQues1.x = 512; introQues1.y = 130;
+        introQues1.scaleX = introQues1.scaleY = .55
     }
     else {
-        introQues1.x = 860
-        introQues1.y = 120
-        introQues1.scaleX = introQues1.scaleY = 1
+        introQues1.x = 512
+        introQues1.y = 130
+        introQues1.scaleX = introQues1.scaleY = .55
     }
     introQues1.gotoAndStop(2)
+	
     // container.parent.addChild(introHolder)
     container.parent.addChild(introQues)
     introQues.visible = false;
@@ -86,6 +87,7 @@ var INTRO_PROMPT_Y = 224;
     container.parent.addChild(introQuestxt);
     introQuestxt.visible = true;
     introQuestxt.alpha = 0;
+	introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, {padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke:"rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22});
     createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
 }
 function handleComplete1_1() {
@@ -102,8 +104,12 @@ function quesTween() {
     // introHolder.visible = true
     introQues.visible = true;
     introQues.x = -400;
+	
+	
     createjs.Tween.get(introQues).wait(500).to({ x: 1200, scaleX: .85, scaleY: .85, alpha: 1 }, 300)
         .to({ x: 510, scaleX: 1, scaleY: 1, alpha: 1 }, createjs.Ease.bounceInOut).call(handleComplete2_1)
+  	container.parent.setChildIndex(introQues1, container.parent.getNumChildren() - 1);
+  	container.parent.setChildIndex(introQues, container.parent.getNumChildren() - 1);
 
 }
 function handleComplete2_1() {
@@ -348,8 +354,12 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt && introQuestxt.__labelBG) {
+  introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
+}
+introQuestxt.visible = false;
+container.parent.removeChild(introQuestxt);
+introQuestxt = null;
     container.parent.removeChild(introQues);
     introQues.visible = false
     container.parent.removeChild(introQues1);
