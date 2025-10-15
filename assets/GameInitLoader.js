@@ -2687,6 +2687,9 @@ function buildHowToPlayOverlay() {
     orbThree.alpha = 0.7;
     overlay.addChild(orbThree);
 
+    var particleLayer = createHowToPlayParticleField(1280, 720, 24);
+    overlay.addChild(particleLayer);
+
     var header = createHowToPlayHeader();
     overlay.addChild(header);
 
@@ -2757,12 +2760,78 @@ function buildHowToPlayOverlay() {
     overlay.accentLarge = accentLarge;
     overlay.accentSmall = accentSmall;
     overlay.ambientOrbs = [orbOne, orbTwo, orbThree];
+    overlay.particleLayer = particleLayer;
 
     overlay.__baseWidth = 1280;
     overlay.__baseHeight = 720;
     layoutOverlayToCanvas(overlay, overlay.__baseWidth, overlay.__baseHeight);
 
     return overlay;
+}
+
+function createHowToPlayParticleField(width, height, count) {
+    var layer = new createjs.Container();
+    layer.name = "HowToPlayParticleLayer";
+    layer.mouseEnabled = false;
+    layer.mouseChildren = false;
+
+    for (var i = 0; i < count; i++) {
+        var radius = 3 + Math.random() * 4;
+        var particle = new createjs.Shape();
+        particle.graphics
+            .beginRadialGradientFill(
+                [
+                    "rgba(255, 255, 255, 0.95)",
+                    "rgba(255, 202, 236, 0.5)",
+                    "rgba(255, 202, 236, 0)"
+                ],
+                [0, 0.6, 1],
+                0,
+                0,
+                0,
+                0,
+                0,
+                radius
+            )
+            .drawCircle(0, 0, radius);
+        particle.compositeOperation = "lighter";
+        particle.alpha = 0;
+        particle.__particleBounds = { width: width, height: height };
+        layer.addChild(particle);
+    }
+
+    return layer;
+}
+
+function startHowToPlayParticleFloat(particle, immediate) {
+    if (!particle || !particle.__particleBounds) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(particle);
+
+    var bounds = particle.__particleBounds;
+    var startX = Math.random() * bounds.width;
+    var startY = immediate ? Math.random() * bounds.height : bounds.height + Math.random() * 80;
+    var driftX = startX + (Math.random() * 160 - 80);
+    var endY = -60 - Math.random() * 160;
+    var startScale = 0.45 + Math.random() * 0.35;
+    var endScale = startScale * (0.6 + Math.random() * 0.5);
+    var floatDuration = 4600 + Math.random() * 2800;
+    var delay = immediate ? Math.random() * 1200 : Math.random() * 400;
+
+    particle.x = startX;
+    particle.y = startY;
+    particle.scaleX = particle.scaleY = startScale;
+    particle.alpha = 0;
+
+    createjs.Tween.get(particle, { override: true })
+        .wait(delay)
+        .to({ alpha: 0.75 }, 520, createjs.Ease.quadOut)
+        .to({ x: driftX, y: endY, alpha: 0, scaleX: endScale, scaleY: endScale }, floatDuration, createjs.Ease.quadIn)
+        .call(function () {
+            startHowToPlayParticleFloat(particle, false);
+        });
 }
 
 function createHowToPlayInstructions() {
@@ -3398,6 +3467,12 @@ function applyHowToPlayAmbientAnimations(overlay) {
         createjs.Tween.get(small, { loop: true })
             .to({ scaleX: 1.15, scaleY: 1.15, alpha: 0.2 }, 2400, createjs.Ease.quadInOut)
             .to({ scaleX: 0.9, scaleY: 0.9, alpha: 0.1 }, 2400, createjs.Ease.quadInOut);
+    }
+
+    if (overlay.particleLayer && overlay.particleLayer.children && overlay.particleLayer.children.length) {
+        for (var p = 0; p < overlay.particleLayer.children.length; p++) {
+            startHowToPlayParticleFloat(overlay.particleLayer.children[p], true);
+        }
     }
 
     if (overlay.ambientOrbs && overlay.ambientOrbs.length) {
