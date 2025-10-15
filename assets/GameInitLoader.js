@@ -2980,31 +2980,31 @@ function drawHoneycombPattern(width, height, radius) {
 }
 
 function createHowToPlayHeader() {
-    var cardWidth = 384;
-    var cardHeight = 100;
+    var cardWidth = 312;
+    var cardHeight = 104;
 
     var container = new createjs.Container();
-    container.regX = cardWidth / 2;
+    container.regX = 0;
     container.regY = 0;
-    container.x = 640;
-    container.y = 78;
+    container.x = 118;
+    container.y = 72;
 
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
-            ["rgba(117, 94, 255, 0.46)", "rgba(203, 94, 255, 0.25)", "rgba(32, 26, 82, 0)"],
+            ["rgba(143, 119, 255, 0.55)", "rgba(230, 122, 255, 0.32)", "rgba(34, 24, 83, 0)"],
             [0, 0.6, 1],
             0,
             0,
             0,
             0,
             0,
-            cardWidth * 0.82
+            cardWidth * 0.9
         )
-        .drawCircle(0, 0, cardWidth * 0.72);
-    glow.alpha = 0.78;
-    glow.x = cardWidth * 0.46;
-    glow.y = cardHeight * 0.62;
+        .drawCircle(0, 0, cardWidth * 0.86);
+    glow.alpha = 0.65;
+    glow.x = cardWidth * 0.48;
+    glow.y = cardHeight * 0.74;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
     container.glowShape = glow;
@@ -3012,15 +3012,15 @@ function createHowToPlayHeader() {
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(
-            ["rgba(66, 52, 165, 0.96)", "rgba(120, 60, 208, 0.94)", "rgba(174, 74, 231, 0.92)"],
-            [0, 0.52, 1],
+            ["rgba(64, 43, 150, 0.95)", "rgba(103, 58, 186, 0.94)", "rgba(156, 78, 214, 0.92)"] ,
+            [0, 0.48, 1],
             0,
             0,
             cardWidth,
             0
         )
-        .drawRoundRect(0, 0, cardWidth, cardHeight, cardHeight / 1.8);
-    card.shadow = new createjs.Shadow("rgba(9, 12, 32, 0.5)", 0, 20, 40);
+        .drawRoundRect(0, 0, cardWidth, cardHeight, 36);
+    card.shadow = new createjs.Shadow("rgba(10, 12, 34, 0.45)", 0, 16, 36);
     container.addChild(card);
     container.cardShape = card;
     container.cardWidth = cardWidth;
@@ -3028,12 +3028,12 @@ function createHowToPlayHeader() {
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(247, 233, 255, 0.42)")
-        .drawRoundRect(1, 1, cardWidth - 2, cardHeight - 2, cardHeight / 1.85);
+        .beginStroke("rgba(247, 236, 255, 0.5)")
+        .drawRoundRect(1, 1, cardWidth - 2, cardHeight - 2, 34);
     container.addChild(cardStroke);
 
     var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(0, 0, cardWidth, cardHeight, cardHeight / 1.8);
+    highlightMask.graphics.drawRoundRect(0, 0, cardWidth, cardHeight, 36);
     highlightMask.visible = false;
     container.addChild(highlightMask);
 
@@ -3042,71 +3042,71 @@ function createHowToPlayHeader() {
         .beginLinearGradientFill(
             [
                 "rgba(255, 255, 255, 0)",
-                "rgba(255, 255, 255, 0.55)",
+                "rgba(255, 255, 255, 0.6)",
                 "rgba(255, 255, 255, 0)"
             ],
             [0, 0.5, 1],
-            -cardWidth * 0.3,
+            -cardWidth * 0.25,
             0,
-            cardWidth * 0.3,
+            cardWidth * 0.25,
             0
         )
-        .drawRoundRect(-cardWidth * 0.3, -16, cardWidth * 0.6, cardHeight + 32, cardHeight / 1.6);
+        .drawRoundRect(-cardWidth * 0.25, -20, cardWidth * 0.5, cardHeight + 40, 42);
     animatedHighlight.alpha = 0;
-    animatedHighlight.x = -cardWidth * 0.55;
-    animatedHighlight.y = -12;
+    animatedHighlight.x = -cardWidth * 0.45;
+    animatedHighlight.y = -14;
     animatedHighlight.mask = highlightMask;
     animatedHighlight.compositeOperation = "lighter";
     container.addChild(animatedHighlight);
     container.highlightSweep = animatedHighlight;
 
-    var tildeWave = createHowToPlayTildeWave(cardWidth * 0.46, 14);
-    tildeWave.x = cardWidth * 0.58;
-    tildeWave.y = cardHeight - 10;
+    var tildeWave = createHowToPlayTildeWave(cardWidth * 0.52, 12);
+    tildeWave.x = cardWidth - 72;
+    tildeWave.y = cardHeight - 8;
     container.addChild(tildeWave);
     container.tildeWave = tildeWave;
 
     var iconHalo = new createjs.Shape();
     iconHalo.graphics
         .beginRadialGradientFill(
-            ["rgba(161, 125, 255, 0.85)", "rgba(120, 90, 240, 0.3)", "rgba(60, 43, 150, 0)"],
+            ["rgba(170, 139, 255, 0.9)", "rgba(117, 94, 255, 0.32)", "rgba(60, 43, 150, 0)"],
             [0, 0.55, 1],
             0,
             0,
             0,
             0,
             0,
-            58
+            46
         )
-        .drawCircle(0, 0, 56);
-    iconHalo.x = 68;
+        .drawCircle(0, 0, 46);
+    iconHalo.x = 60;
     iconHalo.y = cardHeight / 2;
-    iconHalo.alpha = 0.92;
+    iconHalo.alpha = 0.9;
     container.addChild(iconHalo);
 
     var iconBackground = new createjs.Shape();
     iconBackground.graphics
-        .beginRadialGradientFill(["#f48aff", "#7b7dff"], [0, 1], 0, 0, 0, 0, 0, 36)
-        .drawCircle(0, 0, 34);
+        .beginRadialGradientFill(["#ff8bd6", "#7f7dff"], [0, 1], 0, 0, 0, 0, 0, 30)
+        .drawCircle(0, 0, 28);
     iconBackground.x = iconHalo.x;
     iconBackground.y = iconHalo.y;
     container.addChild(iconBackground);
 
-    var icon = new createjs.Text("\u2139", "700 42px 'Baloo 2'", "#FFFFFF");
+    var icon = new createjs.Text("\u2139", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = iconBackground.x;
-    icon.y = iconBackground.y + 6;
+    icon.y = iconBackground.y + 4;
     container.addChild(icon);
 
-    var label = new createjs.Text("How to Play", "700 34px 'Baloo 2'", "#fdf3ff");
-    label.x = 132;
-    label.y = 24;
+    var label = new createjs.Text("How to Play", "700 28px 'Baloo 2'", "#fff7ff");
+    label.x = 112;
+    label.y = 26;
     container.addChild(label);
 
-    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 18px 'Baloo 2'", "rgba(236, 225, 255, 0.85)");
+    var subtitle = new createjs.Text("Watch animation carefully", "500 18px 'Baloo 2'", "rgba(239, 228, 255, 0.9)");
     subtitle.x = label.x;
-    subtitle.y = 60;
+    subtitle.y = 58;
     container.addChild(subtitle);
 
     return container;
