@@ -3572,6 +3572,23 @@ function createLoaderProceedButton() {
     shadow.y = 6;
     button.addChild(shadow);
 
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255, 210, 176, 0.55)", "rgba(246, 107, 198, 0.28)", "rgba(108, 107, 255, 0)"],
+            [0, 0.6, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            160
+        )
+        .drawCircle(0, 0, 160);
+    glow.alpha = 0.75;
+    glow.compositeOperation = "lighter";
+    button.addChild(glow);
+
     var frame = new createjs.Shape();
     frame.graphics
         .beginLinearGradientFill(["#f5b18d", "#f18ac7", "#a7b0ff"], [0, 0.5, 1], -118, 0, 118, 0)
