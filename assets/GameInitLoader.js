@@ -2928,7 +2928,7 @@ function createHowToPlayHeader() {
             260
         )
         .drawCircle(0, 0, 240);
-    glow.alpha = 0.8;
+    glow.alpha = 0.78;
     glow.x = 252;
     glow.y = 60;
     glow.compositeOperation = "lighter";
