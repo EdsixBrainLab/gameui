@@ -34,6 +34,7 @@ var HowToPlayScreenImg,
 var lastDisplayedScore = null,
     lastDisplayedTime = null,
     lastDisplayedQuestion = null;
+var howToPlayWaveTransferred = false;
 
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
@@ -1254,6 +1255,7 @@ function doneLoading(event) {
     }
     hideHowToPlayProgressBar();
     showLoaderProceedButton();
+    transferHowToPlayTildeWaveToProceedButton();
     stage.update();
     var len = assets.length;
     for (i = 0; i < len; i++) {
@@ -3235,6 +3237,8 @@ function createHowToPlayTildeWave(width, strokeHeight) {
     container.wavePatternWidth = patternWidth;
     container.waveWavelength = wavelength;
     container.waveHighlight = highlight;
+    container.waveBaseX = waveContent.x;
+    container.waveHighlightBaseAlpha = highlight.alpha;
 
     return container;
 }
@@ -3248,7 +3252,8 @@ function startHowToPlayTildeWaveAnimation(waveContainer) {
 
     var waveContent = waveContainer.waveContent;
     if (waveContent) {
-        var baseX = waveContent.x;
+        var baseX = typeof waveContainer.waveBaseX === "number" ? waveContainer.waveBaseX : waveContent.x;
+        waveContent.x = baseX;
         var waveShift = waveContainer.waveWavelength || 60;
         createjs.Tween.get(waveContent, { loop: true })
             .to({ x: baseX - waveShift }, 2200, createjs.Ease.linear)
@@ -3256,7 +3261,10 @@ function startHowToPlayTildeWaveAnimation(waveContainer) {
     }
 
     if (waveContainer.waveHighlight) {
-        var highlightBaseAlpha = waveContainer.waveHighlight.alpha;
+        var highlightBaseAlpha = typeof waveContainer.waveHighlightBaseAlpha === "number"
+            ? waveContainer.waveHighlightBaseAlpha
+            : waveContainer.waveHighlight.alpha;
+        waveContainer.waveHighlight.alpha = highlightBaseAlpha;
         createjs.Tween.get(waveContainer.waveHighlight, { loop: true })
             .to({ alpha: Math.min(1, highlightBaseAlpha + 0.1) }, 1800, createjs.Ease.sineInOut)
             .to({ alpha: Math.max(0.2, highlightBaseAlpha - 0.15) }, 1800, createjs.Ease.sineInOut);
@@ -3269,6 +3277,33 @@ function startHowToPlayTildeWaveAnimation(waveContainer) {
     createjs.Tween.get(waveContainer, { loop: true })
         .to({ alpha: highAlpha }, 2000, createjs.Ease.sineInOut)
         .to({ alpha: lowAlpha }, 2000, createjs.Ease.sineInOut);
+}
+
+function stopHowToPlayTildeWaveAnimation(waveContainer) {
+    if (!waveContainer) {
+        return;
+    }
+
+    createjs.Tween.removeTweens(waveContainer);
+    if (typeof waveContainer.baseAlpha === "number") {
+        waveContainer.alpha = waveContainer.baseAlpha;
+    }
+
+    if (waveContainer.waveContent) {
+        createjs.Tween.removeTweens(waveContainer.waveContent);
+        if (typeof waveContainer.waveBaseX === "number") {
+            waveContainer.waveContent.x = waveContainer.waveBaseX;
+        }
+    }
+
+    if (waveContainer.waveHighlight) {
+        createjs.Tween.removeTweens(waveContainer.waveHighlight);
+        if (typeof waveContainer.waveHighlightBaseAlpha === "number") {
+            waveContainer.waveHighlight.alpha = waveContainer.waveHighlightBaseAlpha;
+        }
+    }
+
+    waveContainer.__tildeAnimationAttached = false;
 }
 
 function startProgressFillShimmer(shineShape, pulseShape) {
@@ -3531,8 +3566,32 @@ function prepareHowToPlayOverlayForLoading(overlay) {
     }
 
     overlay.visible = true;
+    resetHowToPlayWaveStates(overlay);
     animateHowToPlayOverlayEntry(overlay);
     resetHowToPlayProgressBar(overlay);
+}
+
+function resetHowToPlayWaveStates(overlay) {
+    howToPlayWaveTransferred = false;
+
+    if (!overlay) {
+        return;
+    }
+
+    if (overlay.header && overlay.header.tildeWave) {
+        var headerWave = overlay.header.tildeWave;
+        headerWave.visible = true;
+        stopHowToPlayTildeWaveAnimation(headerWave);
+        if (overlay.__ambientAnimationAttached) {
+            startHowToPlayTildeWaveAnimation(headerWave);
+        }
+    }
+
+    if (overlay.proceedButton && overlay.proceedButton.tildeWave) {
+        var buttonWave = overlay.proceedButton.tildeWave;
+        stopHowToPlayTildeWaveAnimation(buttonWave);
+        buttonWave.visible = false;
+    }
 }
 
 function hideHowToPlayProgressBar() {
@@ -3591,7 +3650,7 @@ function createLoaderProceedButton() {
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["#7f6bff", "#b45eff", "#ff82d6"], [0, 0.5, 1], -118, 0, 118, 0)
+        .beginLinearGradientFill(["#6c79ff", "#a369ff", "#ff88d8"], [0, 0.5, 1], -118, 0, 118, 0)
         .drawRoundRect(-112, -36, 224, 72, 26);
     frame.shadow = new createjs.Shadow("rgba(6, 8, 24, 0.45)", 0, 20, 36);
     button.addChild(frame);
@@ -3599,7 +3658,7 @@ function createLoaderProceedButton() {
     var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0.78)", "rgba(232, 219, 255, 0.35)", "rgba(255, 255, 255, 0)"],
+            ["rgba(255, 255, 255, 0.88)", "rgba(230, 219, 255, 0.42)", "rgba(255, 255, 255, 0)"],
             [0, 0.65, 1],
             -112,
             -44,
@@ -3612,10 +3671,17 @@ function createLoaderProceedButton() {
     highlight.y = -6;
     button.addChild(highlight);
 
+    var wave = createHowToPlayTildeWave(204, 12);
+    wave.x = -102;
+    wave.y = 10;
+    wave.visible = false;
+    button.addChild(wave);
+    button.tildeWave = wave;
+
     var frameStroke = new createjs.Shape();
     frameStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(149, 126, 255, 0.58)")
+        .beginStroke("rgba(255, 255, 255, 0.6)")
         .drawRoundRect(-112, -36, 224, 72, 26);
     button.addChild(frameStroke);
 
@@ -4046,6 +4112,10 @@ function showLoaderProceedButton() {
         button.highlightShape.__glimmerTweenAttached = false;
     }
 
+    if (button.tildeWave) {
+        button.tildeWave.visible = howToPlayWaveTransferred;
+    }
+
     createjs.Tween.get(button, { override: true })
         .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadOut)
         .call(function () {
@@ -4059,6 +4129,32 @@ function showLoaderProceedButton() {
     if (stage && typeof stage.update === "function") {
         stage.update();
     }
+}
+
+function transferHowToPlayTildeWaveToProceedButton() {
+    if (howToPlayWaveTransferred) {
+        return;
+    }
+
+    if (!HowToPlayScreenImg) {
+        return;
+    }
+
+    var headerWave = HowToPlayScreenImg.header && HowToPlayScreenImg.header.tildeWave
+        ? HowToPlayScreenImg.header.tildeWave
+        : null;
+    if (headerWave) {
+        stopHowToPlayTildeWaveAnimation(headerWave);
+        headerWave.visible = false;
+    }
+
+    var proceedButton = HowToPlayScreenImg.proceedButton;
+    if (proceedButton && proceedButton.tildeWave) {
+        proceedButton.tildeWave.visible = true;
+        startHowToPlayTildeWaveAnimation(proceedButton.tildeWave);
+    }
+
+    howToPlayWaveTransferred = true;
 }
 
 function hideLoaderProceedButton() {
@@ -4085,6 +4181,11 @@ function hideLoaderProceedButton() {
     button.mouseEnabled = false;
     button.mouseChildren = false;
     button.visible = false;
+
+    if (button.tildeWave) {
+        stopHowToPlayTildeWaveAnimation(button.tildeWave);
+        button.tildeWave.visible = false;
+    }
 
     if (stage && typeof stage.update === "function") {
         stage.update();
