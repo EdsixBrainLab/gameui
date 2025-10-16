@@ -1074,7 +1074,6 @@ function layoutHudElements(canvasWidth, canvasHeight) {
 
     cursor += questionWidth / 2 + baseGap + controlWidth / 2;
     positions.push(cursor);
-console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
         scoreCardContainer.x = positions[0]-200;
         scoreCardContainer.baseX = positions[0]-200;
@@ -1416,13 +1415,13 @@ function applyHudThemeToControls(theme) {
     var controlTheme = theme.controlBackground || {};
     var controlPalette = theme.controlPalette || {};
 
-    if (controlContainer.backgroundShape) {
-        var controlBg = controlContainer.backgroundShape;
-        var controlWidth = controlBg.__width || 120;
-        var controlHeight = controlBg.__height || 53;
-        var controlRadius = controlBg.__radius || 24;
-        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+    var controlBg = controlContainer.backgroundShape || null;
+    var controlWidth = controlBg ? (controlBg.__width || 120) : 120;
+    var controlHeight = controlBg ? (controlBg.__height || 53) : 53;
+    var controlRadius = controlBg ? (controlBg.__radius || 24) : 24;
+    var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
 
+    if (controlBg) {
         controlBg.graphics
             .clear()
             .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
@@ -1435,15 +1434,25 @@ function applyHudThemeToControls(theme) {
     updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
     updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
 
-var borderColor1 = "#000"; // Customize or use from theme
-var borderThickness1 = .5; // Change thickness as needed
+    var outline = controlContainer.__outlineShape;
+    if (!outline) {
+        outline = new createjs.Shape();
+        outline.name = "controlOutline";
+        controlContainer.__outlineShape = outline;
+        controlContainer.addChild(outline);
+    }
 
-var border1 = new createjs.Shape();
-border1.graphics
-    .setStrokeStyle(borderThickness1)
-    .beginStroke(borderColor1)
-    .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
-controlContainer.addChild(border1); // Add after background so it appears on top (or before to appear behind)
+    var outlineColor = (controlTheme.outlineColor) || "rgba(0,0,0,0.25)";
+    outline.graphics
+        .clear()
+        .setStrokeStyle(0.5)
+        .beginStroke(outlineColor)
+        .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+    outline.alpha = typeof controlTheme.outlineAlpha === "number" ? controlTheme.outlineAlpha : 1;
+
+    if (controlContainer.setChildIndex) {
+        controlContainer.setChildIndex(outline, controlContainer.getNumChildren() - 1);
+    }
 
 }
 
@@ -1882,8 +1891,6 @@ function doneLoading(event) {
 
             var id = event.item.id;
 
-            console.log(id)
-
             if (id == "Grid") {
                 Grid = new createjs.Bitmap(preload.getResult('Grid'));
                 container.parent.addChild(Grid);
@@ -2318,10 +2325,8 @@ function doneLoading(event) {
 
             if (id == "domainPath") {
                 var json = preload.getResult("domainPath");
-                console.log(json); // true
                 url = json.path;
                 url1 = json.scoreupdate;
-                console.log("check= " + url1)
                 url2 = json.get_info;
                 nav = json.nav;
                 continue;
@@ -3581,7 +3586,10 @@ function createHowToPlayParticleField(width, height, count) {
         }
     ];
 
-    for (var i = 0; i < count; i++) {
+    var requestedCount = typeof count === "number" ? count : 24;
+    var safeCount = Math.max(0, Math.min(requestedCount, 40));
+
+    for (var i = 0; i < safeCount; i++) {
         var radius = 3 + Math.random() * 4;
         var palette = palettes[Math.floor(Math.random() * palettes.length)];
         var particle = new createjs.Container();
@@ -5684,14 +5692,12 @@ function createGameIntroAnimationPlay() {
 }
 //===========================================================================================//
 function setStopRotation() {
-    console.log("Stop Rotation 1 " + isScreenRotation + " ======== " + isGamePlay)
     if (isGamePlay) {
         pauseTimer()
     }
 }
 
 function setResumeRotation() {
-    console.log("get value of = " + isGamePlay)
     if (isScreenRotation == "0" && !isGamePlay) {
         isScreenRotation = "5";
     }
