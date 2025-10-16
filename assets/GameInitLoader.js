@@ -4177,6 +4177,10 @@ function createIntroActionButton() {
     button.cursor = "pointer";
     button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.38)", 0, 18, 36);
 
+    var BUTTON_WIDTH = 232;
+    var BUTTON_HEIGHT = 70;
+    var BUTTON_CORNER = 32;
+
     var glow = new createjs.Shape();
     glow.name = "glow";
     glow.alpha = 0.8;
@@ -4187,9 +4191,19 @@ function createIntroActionButton() {
     base.name = "base";
     button.addChild(base);
 
+    var outline = new createjs.Shape();
+    outline.name = "outline";
+    button.addChild(outline);
+
     var highlightMask = new createjs.Shape();
     highlightMask.name = "highlightMask";
-    highlightMask.graphics.drawRoundRect(-120, -66, 200, 66, 26);
+    highlightMask.graphics.drawRoundRect(
+        -BUTTON_WIDTH / 2 + 4,
+        -BUTTON_HEIGHT / 2 + 4,
+        BUTTON_WIDTH - 8,
+        BUTTON_HEIGHT - 8,
+        BUTTON_CORNER - 6
+    );
     highlightMask.visible = false;
     button.addChild(highlightMask);
 
@@ -4198,45 +4212,54 @@ function createIntroActionButton() {
     highlight.alpha = 0;
     highlight.mask = highlightMask;
     highlight.compositeOperation = "lighter";
-    highlight.baseX = -210;
+    highlight.baseX = -216;
     highlight.x = highlight.baseX;
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255,255,255,0)", "rgba(255,255,255,0.9)", "rgba(255,255,255,0)"],
-            [0, 0.5, 1],
-            -60,
+            ["rgba(255,255,255,0)", "rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
+            [0, 0.52, 1],
+            -70,
             0,
-            60,
+            70,
             0
         )
-        .drawRoundRect(-60, -58, 120, 56, 24);
+        .drawRoundRect(-70, -48, 140, 54, 26);
     button.addChild(highlight);
     button.highlightSweep = highlight;
     button.highlightMask = highlightMask;
 
-    var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
+    var iconBadge = new createjs.Shape();
+    iconBadge.name = "iconBadge";
+    iconBadge.x = -78;
+    iconBadge.y = 0;
+    button.addChild(iconBadge);
+
+    var icon = new createjs.Text("", "700 30px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = -78;
-    icon.y = -28;
+    icon.y = 0;
     button.addChild(icon);
 
     var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
     label.name = "label";
     label.textAlign = "left";
     label.textBaseline = "middle";
-    label.x = -45;
-    label.y = -28;
+    label.x = -36;
+    label.y = 0;
     button.addChild(label);
 
     button.__glowTweenAttached = false;
     button.__highlightTweenAttached = false;
+    button.__outlineWidth = BUTTON_WIDTH;
+    button.__outlineHeight = BUTTON_HEIGHT;
+    button.__outlineCorner = BUTTON_CORNER;
     applyHowToPlayButtonState(button, "skip");
 
     button.scaleX = button.scaleY = 0.96;
-    button.__layoutHalfWidth = 118;
-    button.__layoutHalfHeight = 44;
+    button.__layoutHalfWidth = BUTTON_WIDTH / 2;
+    button.__layoutHalfHeight = BUTTON_HEIGHT / 2;
 
     return button;
 }
@@ -4250,6 +4273,8 @@ function applyHowToPlayButtonState(button, state) {
     var highlight = button.getChildByName("highlight");
     var label = button.getChildByName("label");
     var icon = button.getChildByName("icon");
+    var iconBadge = button.getChildByName("iconBadge");
+    var outline = button.getChildByName("outline");
     var glow = button.getChildByName("glow");
     if (base) {
         base.graphics.clear();
@@ -4272,94 +4297,167 @@ function applyHowToPlayButtonState(button, state) {
     button.__glowTweenAttached = false;
     button.__highlightTweenAttached = false;
 
+    var outlineWidth = typeof button.__outlineWidth === "number" ? button.__outlineWidth : 232;
+    var outlineHeight = typeof button.__outlineHeight === "number" ? button.__outlineHeight : 70;
+    var outlineCorner = typeof button.__outlineCorner === "number" ? button.__outlineCorner : 32;
+
+    if (outline) {
+        outline.graphics.clear();
+        outline.graphics
+            .setStrokeStyle(2)
+            .beginStroke("rgba(255, 255, 255, 0.22)")
+            .drawRoundRect(
+                -outlineWidth / 2,
+                -outlineHeight / 2,
+                outlineWidth,
+                outlineHeight,
+                outlineCorner
+            );
+    }
+
+    button.__glowTweenAttached = false;
+    button.__highlightTweenAttached = false;
+
     if (state === "start") {
         if (glow) {
             glow.graphics
                 .beginRadialGradientFill(
-                    ["rgba(126, 210, 255, 0.48)", "rgba(126, 210, 255, 0)"],
+                    ["rgba(134, 223, 255, 0.5)", "rgba(134, 223, 255, 0)"] ,
                     [0, 1],
                     0,
                     0,
                     0,
                     0,
                     0,
-                    165
+                    170
                 )
-                .drawCircle(0, 0, 165);
-            glow.alpha = 0.9;
+                .drawCircle(0, 0, 170);
+            glow.alpha = 0.92;
         }
         if (base) {
             base.graphics
-                .setStrokeStyle(2)
-                .beginStroke("rgba(135, 214, 255, 0.55)")
-                .beginLinearGradientFill(["#6D7BFF", "#9A6BFF", "#FF8EF2"], [0, 0.55, 1], -160, 0, 160, 0)
-                .drawRoundRect(-120, -70, 190, 75, 30);
+                .beginLinearGradientStroke([
+                    "rgba(162, 231, 255, 0.95)",
+                    "rgba(220, 196, 255, 0.82)"
+                ], [0, 1], -outlineWidth / 2, -outlineHeight / 2, outlineWidth / 2, outlineHeight / 2)
+                .setStrokeStyle(4)
+                .beginLinearGradientFill([
+                    "rgba(85, 123, 255, 0.94)",
+                    "rgba(143, 84, 255, 0.94)",
+                    "rgba(255, 142, 242, 0.92)"
+                ], [0, 0.58, 1], -outlineWidth / 2, 0, outlineWidth / 2, 0)
+                .drawRoundRect(-outlineWidth / 2, -outlineHeight / 2, outlineWidth, outlineHeight, outlineCorner);
         }
         if (highlight) {
             highlight.graphics
                 .beginLinearGradientFill(
-                    ["rgba(255,255,255,0)", "rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
-                    [0, 0.55, 1],
-                    -60,
+                    ["rgba(255,255,255,0)", "rgba(255,255,255,0.96)", "rgba(255,255,255,0)"],
+                    [0, 0.52, 1],
+                    -70,
                     0,
-                    60,
+                    70,
                     0
                 )
-                .drawRoundRect(-60, -58, 120, 56, 24);
-            highlight.baseX = -220;
+                .drawRoundRect(-70, -48, 140, 54, 26);
+            highlight.baseX = -230;
             highlight.x = highlight.baseX;
+        }
+        if (iconBadge) {
+            iconBadge.graphics.clear();
+            iconBadge.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    36
+                )
+                .drawCircle(0, 0, 36);
+            iconBadge.graphics
+                .beginLinearGradientFill([
+                    "rgba(115, 195, 255, 0.95)",
+                    "rgba(173, 152, 255, 0.92)"
+                ], [0, 1], -32, -32, 32, 32)
+                .drawCircle(0, 0, 28);
         }
         if (icon) {
             icon.text = "\u25B6";
-            icon.font = "700 34px 'Baloo 2'";
+            icon.font = "700 32px 'Baloo 2'";
             icon.color = "#FFFFFF";
         }
         if (label) {
             label.text = "Start";
             label.font = "700 28px 'Baloo 2'";
-            label.color = "#FFFFFF";
+            label.color = "#F7FAFF";
         }
         button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.42)", 0, 20, 36);
     } else {
         if (glow) {
             glow.graphics
                 .beginRadialGradientFill(
-                    ["rgba(126, 210, 255, 0.35)", "rgba(126, 210, 255, 0)"],
+                    ["rgba(132, 210, 255, 0.4)", "rgba(132, 210, 255, 0)"] ,
                     [0, 1],
                     0,
                     0,
                     0,
                     0,
                     0,
-                    165
+                    160
                 )
-                .drawCircle(0, 0, 165);
-            glow.alpha = 0.75;
+                .drawCircle(0, 0, 160);
+            glow.alpha = 0.8;
         }
         if (base) {
             base.graphics
-                .setStrokeStyle(2)
-                .beginStroke("rgba(143, 205, 255, 0.38)")
+                .beginLinearGradientStroke([
+                    "rgba(153, 208, 255, 0.8)",
+                    "rgba(214, 180, 255, 0.7)"
+                ], [0, 1], -outlineWidth / 2, -outlineHeight / 2, outlineWidth / 2, outlineHeight / 2)
+                .setStrokeStyle(3)
                 .beginLinearGradientFill([
-                    "rgba(54, 47, 112, 0.95)",
-                    "rgba(80, 58, 145, 0.9)",
-                    "rgba(118, 72, 173, 0.88)"
-                ], [0, 0.55, 1], -160, 0, 160, 0)
-                .drawRoundRect(-120, -70, 190, 75, 30);
+                    "rgba(58, 66, 152, 0.92)",
+                    "rgba(96, 74, 173, 0.9)",
+                    "rgba(142, 83, 196, 0.9)"
+                ], [0, 0.55, 1], -outlineWidth / 2, 0, outlineWidth / 2, 0)
+                .drawRoundRect(-outlineWidth / 2, -outlineHeight / 2, outlineWidth, outlineHeight, outlineCorner);
         }
         if (highlight) {
             highlight.graphics
                 .beginLinearGradientFill(
-                    ["rgba(255,255,255,0)", "rgba(255,255,255,0.75)", "rgba(255,255,255,0)"],
+                    ["rgba(255,255,255,0)", "rgba(255,255,255,0.78)", "rgba(255,255,255,0)"],
                     [0, 0.5, 1],
-                    -60,
+                    -70,
                     0,
-                    60,
+                    70,
                     0
                 )
-                .drawRoundRect(-60, -58, 120, 56, 24);
-            highlight.baseX = -208;
+                .drawRoundRect(-70, -48, 140, 54, 26);
+            highlight.baseX = -218;
             highlight.x = highlight.baseX;
+        }
+        if (iconBadge) {
+            iconBadge.graphics.clear();
+            iconBadge.graphics
+                .beginRadialGradientFill(
+                    ["rgba(255,255,255,0.22)", "rgba(255,255,255,0)"],
+                    [0, 1],
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    34
+                )
+                .drawCircle(0, 0, 34);
+            iconBadge.graphics
+                .beginLinearGradientFill([
+                    "rgba(108, 160, 255, 0.96)",
+                    "rgba(159, 120, 255, 0.9)"
+                ], [0, 1], -28, -28, 28, 28)
+                .drawCircle(0, 0, 26);
         }
         if (icon) {
             icon.text = "\u279C";
@@ -4371,7 +4469,18 @@ function applyHowToPlayButtonState(button, state) {
             label.font = "700 26px 'Baloo 2'";
             label.color = "#E8ECFF";
         }
-        button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.32)", 0, 18, 32);
+        button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.34)", 0, 18, 34);
+    }
+
+    if (glow) {
+        glow.alpha = state === "start" ? 0.92 : 0.8;
+    }
+    if (button.highlightMask && highlight) {
+        highlight.mask = button.highlightMask;
+    }
+
+    if (label) {
+        label.x = icon ? icon.x + 38 : -24;
     }
 
     if (glow) {
@@ -4382,8 +4491,8 @@ function applyHowToPlayButtonState(button, state) {
     }
 
     button.state = state;
-    button.__layoutHalfWidth = 118;
-    button.__layoutHalfHeight = 44;
+    button.__layoutHalfWidth = outlineWidth / 2;
+    button.__layoutHalfHeight = outlineHeight / 2;
 }
 
 function startIntroActionButtonAnimations(button) {
@@ -4408,8 +4517,10 @@ function startIntroActionButtonAnimations(button) {
 
     if (highlight && !button.__highlightTweenAttached) {
         var startX = typeof highlight.baseX === "number" ? highlight.baseX : -210;
-        var travelSpan = state === "start" ? 340 : 300;
+        var travelSpan = state === "start" ? 360 : 320;
         var endX = startX + travelSpan;
+        var sweepAlpha = state === "start" ? 0.95 : 0.84;
+        var travelDuration = state === "start" ? 1260 : 1180;
 
         createjs.Tween.removeTweens(highlight);
         highlight.x = startX;
@@ -4418,11 +4529,11 @@ function startIntroActionButtonAnimations(button) {
         button.__highlightTweenAttached = true;
 
         createjs.Tween.get(highlight, { loop: true })
-            .to({ alpha: state === "start" ? 0.95 : 0.82 }, 240, createjs.Ease.quadOut)
-            .to({ x: endX }, 980, createjs.Ease.cubicInOut)
-            .to({ alpha: 0 }, 200, createjs.Ease.quadIn)
+            .to({ alpha: sweepAlpha }, 280, createjs.Ease.quadOut)
+            .to({ x: endX }, travelDuration, createjs.Ease.quadInOut)
+            .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
             .set({ x: startX })
-            .wait(360);
+            .wait(420);
     }
 }
 
