@@ -984,6 +984,8 @@ function disablechoices() {
 
     stopChoiceIdleAnimation(i);
 
+    stopChoiceIdleAnimation(i);
+
     if (choiceBgArr[i]) {
       createjs.Tween.get(choiceBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
     }

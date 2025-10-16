@@ -2968,16 +2968,18 @@ function doneLoading(event) {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (id == "arrow1") {
 
-                arrow1 = new createjs.Bitmap(preload.getResult('arrow1'));
+                arrow1 = buildVectorArrowIcon();
                 container.parent.addChild(arrow1);
                 arrow1.visible = false;
+                arrow1.scaleX = arrow1.scaleY = 0.78;
                 continue;
             }
             if (id == "fingure") {
 
-                fingure = new createjs.Bitmap(preload.getResult('fingure'));
+                fingure = buildVectorHandIcon();
                 container.parent.addChild(fingure);
                 fingure.visible = false;
+                fingure.scaleX = fingure.scaleY = 0.62;
                 continue;
             }
             ///////////////////////////////////////////////////////bg////////////////////////////
