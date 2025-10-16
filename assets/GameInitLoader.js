@@ -48,268 +48,258 @@ var HUD_THEME_PRESETS = {
     dark: {
         cards: {
             score: {
-                background: ["rgba(248,251,255,0.96)", "rgba(213,231,255,0.96)"],
-                accent: ["rgba(142,196,255,0.75)", "rgba(142,196,255,0.35)"],
+                background: ["rgba(104,122,255,0.98)", "rgba(162,108,255,0.96)"],
+                accent: ["rgba(255,210,158,0.86)", "rgba(255,162,132,0.45)"],
                 iconStyle: {
-                    //fill: "#30578F",
-					fill: "#FFD166",
-                    strokeColor: "rgba(255,255,255,0.65)",
-                    strokeWidth: 2
+                    fill: "#FFE68D",
+                    strokeColor: "rgba(38,30,92,0.46)",
+                    strokeWidth: 2.4
+                },
+                ambient: {
+                    halo: "rgba(255,230,170,0.85)",
+                    haloAlpha: 0.72,
+                    ring: "rgba(255,188,120,0.82)",
+                    ringAlpha: 0.74,
+                    spark: "#FFF8C7",
+                    sparkAlpha: 0.92
                 }
             },
             question: {
-                background: ["rgba(244,250,255,0.96)", "rgba(214,236,255,0.96)"],
-                accent: ["rgba(129,209,255,0.65)", "rgba(129,209,255,0.3)"],
-                iconStyle: {fill: "#1F6F5A",
-                    strokeColor: "#2F6CB7",
-                    strokeWidth: 3
+                background: ["rgba(92,150,255,0.97)", "rgba(148,126,255,0.95)"],
+                accent: ["rgba(156,228,255,0.74)", "rgba(132,184,255,0.4)"],
+                iconStyle: {
+                    fill: "#6EE7FF",
+                    strokeColor: "#98E2FF",
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(148,220,255,0.9)",
+                    haloAlpha: 0.7,
+                    ring: "rgba(132,184,255,0.86)",
+                    ringAlpha: 0.76,
+                    spark: "#6EE7FF",
+                    sparkAlpha: 0.9
                 }
             },
             timer: {
-                background: ["rgba(245,255,250,0.96)", "rgba(220,246,236,0.96)"],
-                accent: ["rgba(110,231,183,0.65)", "rgba(110,231,183,0.3)"],
+                background: ["rgba(74,206,230,0.97)", "rgba(112,158,255,0.95)"],
+                accent: ["rgba(134,244,216,0.76)", "rgba(144,202,255,0.42)"],
                 iconStyle: {
-                    
-                    strokeColor: "#1F6F5A",
-                    strokeWidth: 3
+                    strokeColor: "#6BE0C3",
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(134,244,216,0.88)",
+                    haloAlpha: 0.7,
+                    ring: "rgba(136,208,255,0.84)",
+                    ringAlpha: 0.74,
+                    spark: "#A5FFE8",
+                    sparkAlpha: 0.9
                 }
             }
         },
         cardBackgroundAlpha: 1,
-        cardAccentAlpha: 0.9,
+        cardAccentAlpha: 1,
         cardHighlight: {
-            colors: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
-            alpha: 0.35
+            colors: ["rgba(255,255,255,0.52)", "rgba(255,255,255,0.08)"],
+            alpha: 0.48
+        },
+        cardDecor: {
+            outline: { color: "rgba(202,218,255,0.82)", alpha: 0.96, width: 1.2 },
+            accentOutline: { color: "rgba(226,208,255,0.88)", alpha: 0.94, width: 1.1 },
+            glass: { colors: ["rgba(255,255,255,0.86)", "rgba(255,255,255,0.16)"], alpha: 0.78, heightRatio: 0.64 },
+            bottomGlow: { colors: ["rgba(124,156,255,0.1)", "rgba(208,140,255,0.5)"], alpha: 0.72 }
         },
         textStyles: {
             label: {
-                color: "#fff",
-                //shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
-            },
-            value: {
-                color: "#133559",
-                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
-            },
-            timerValue: {
-                color: "#133559",
-                shadow: { color: "rgba(255,255,255,0.5)", x: 0, y: 3, blur: 8 }
-            }
-        },
-        questionProgress: {
-            background: "rgba(32,71,115,0.18)",
-            fill: ["#2f7ceb", "#3dd88c"]
-        },
-        controlBackground: {
-            colors: ["rgba(234,244,255,0.9)", "rgba(210,229,255,0.9)"],
-            alpha: 0.95
-        },
-        controlPalette: {
-            volume: { primary: "rgba(76,143,233,0.9)", glow: "rgba(76,143,233,0.55)" },
-            fullscreen: { primary: "rgba(133,111,240,0.9)", glow: "rgba(133,111,240,0.55)" },
-            close: { primary: "rgba(238,87,102,0.92)", glow: "rgba(238,87,102,0.6)" }
-        },
-        iconWrapper: {
-            ringColor: "rgba(49,95,160,0.55)",
-            ringAlpha: 0.65,
-            hoverRingAlpha: 0.92,
-            glowAlpha: 0.45,
-            hoverGlowAlpha: 0.65,
-            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(226,239,255,0.95)"]
-        },
-        timerCritical: {
-            warning: {
-                background: ["rgba(255,228,173,0.96)", "rgba(255,200,118,0.96)"],
-                accent: ["rgba(255,187,92,0.65)", "rgba(255,187,92,0.28)"],
-                icon: "#BA4B2F",
-                text: "#9C3C20"
-            },
-            danger: {
-                background: ["rgba(255,212,212,0.96)", "rgba(254,153,153,0.96)"],
-                accent: ["rgba(253,116,116,0.65)", "rgba(253,116,116,0.28)"],
-                icon: "#B42332",
-                text: "#881421"
-            },
-            normalIcon: "#2F6CB7",
-            normalText: "#133559"
-        }
-    },
-    light: {
-        
-		
-        cards: {
-            score: {
-                background: ["rgba(248,251,255,0.96)", "rgba(213,231,255,0.96)"],
-                accent: ["rgba(142,196,255,0.75)", "rgba(142,196,255,0.35)"],
-                iconStyle: {
-                    //fill: "#30578F",
-					fill: "#FFD166",
-                    strokeColor: "rgba(255,255,255,0.65)",
-                    strokeWidth: 2
-                }
-            },
-            question: {
-                background: ["rgba(244,250,255,0.96)", "rgba(214,236,255,0.96)"],
-                accent: ["rgba(129,209,255,0.65)", "rgba(129,209,255,0.3)"],
-                iconStyle: {fill: "#1F6F5A",
-                    strokeColor: "#2F6CB7",
-                    strokeWidth: 3
-                }
-            },
-            timer: {
-                background: ["rgba(245,255,250,0.96)", "rgba(220,246,236,0.96)"],
-                accent: ["rgba(110,231,183,0.65)", "rgba(110,231,183,0.3)"],
-                iconStyle: {
-                    
-                    strokeColor: "#1F6F5A",
-                    strokeWidth: 3
-                }
-            }
-        },
-        cardBackgroundAlpha: 1,
-        cardAccentAlpha: 0.9,
-        cardHighlight: {
-            colors: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
-            alpha: 0.35
-        },
-        textStyles: {
-            label: {
-                color: "#000",
-                //shadow: { color: "rgba(255,255,255,0.6)", x: 0, y: 2, blur: 4 }
-            },
-            value: {
-                color: "#133559",
-                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
-            },
-            timerValue: {
-                color: "#133559",
-                shadow: { color: "rgba(255,255,255,0.5)", x: 0, y: 3, blur: 8 }
-            }
-        },
-        questionProgress: {
-            background: "rgba(32,71,115,0.18)",
-            fill: ["#2f7ceb", "#3dd88c"]
-        },
-        controlBackground: {
-            colors: ["rgba(234,244,255,0.9)", "rgba(210,229,255,0.9)"],
-            alpha: 0.95
-        },
-        controlPalette: {
-            volume: { primary: "rgba(76,143,233,0.9)", glow: "rgba(76,143,233,0.55)" },
-            fullscreen: { primary: "rgba(133,111,240,0.9)", glow: "rgba(133,111,240,0.55)" },
-            close: { primary: "rgba(238,87,102,0.92)", glow: "rgba(238,87,102,0.6)" }
-        },
-        iconWrapper: {
-            ringColor: "rgba(49,95,160,0.55)",
-            ringAlpha: 0.65,
-            hoverRingAlpha: 0.92,
-            glowAlpha: 0.45,
-            hoverGlowAlpha: 0.65,
-            backgroundGradient: ["rgba(255,255,255,0.95)", "rgba(226,239,255,0.95)"]
-        },
-        timerCritical: {
-            warning: {
-                background: ["rgba(255,228,173,0.96)", "rgba(255,200,118,0.96)"],
-                accent: ["rgba(255,187,92,0.65)", "rgba(255,187,92,0.28)"],
-                icon: "#BA4B2F",
-                text: "#9C3C20"
-            },
-            danger: {
-                background: ["rgba(255,212,212,0.96)", "rgba(254,153,153,0.96)"],
-                accent: ["rgba(253,116,116,0.65)", "rgba(253,116,116,0.28)"],
-                icon: "#B42332",
-                text: "#881421"
-            },
-            normalIcon: "#2F6CB7",
-            normalText: "#133559"
-        }
-		
-		/*cards: {
-            score: {
-                background: ["rgba(24,41,74,0.94)", "rgba(36,67,118,0.94)"],
-                accent: ["rgba(74,126,213,0.6)", "rgba(74,126,213,0.25)"],
-                iconStyle: {
-                    fill: "#FFD166",
-                    strokeColor: "rgba(8,22,45,0.5)",
-                    strokeWidth: 2
-                }
-            },
-            question: {
-                background: ["rgba(22,45,83,0.94)", "rgba(33,70,120,0.94)"],
-                accent: ["rgba(104,181,255,0.55)", "rgba(104,181,255,0.22)"],
-                iconStyle: {fill: "#6EE7B7",
-                    strokeColor: "#8CD0FF",
-                    strokeWidth: 3
-                }
-            },
-            timer: {
-                background: ["rgba(19,58,52,0.94)", "rgba(33,95,88,0.94)"],
-                accent: ["rgba(95,234,212,0.55)", "rgba(95,234,212,0.22)"],
-                iconStyle: {
-                    
-                    strokeColor: "rgba(7,28,26,1)",
-                    strokeWidth: 3
-                }
-            }
-        },
-        cardBackgroundAlpha: 0.96,
-        cardAccentAlpha: 0.92,
-        cardHighlight: {
-            colors: ["rgba(255,255,255,0.1)", "rgba(255,255,255,0)"],
-            alpha: 0.2
-        },
-        textStyles: {
-            label: {
-                color: "#000",
-                //shadow: { color: "rgba(4,14,32,0.8)", x: 0, y: 2, blur: 8 }
+                color: "#F7F9FF",
+                shadow: { color: "rgba(4,10,24,0.72)", x: 0, y: 3, blur: 9 }
             },
             value: {
                 color: "#FFFFFF",
-                shadow: { color: "rgba(4,14,32,0.65)", x: 0, y: 4, blur: 14 }
+                shadow: { color: "rgba(4,12,30,0.76)", x: 0, y: 5, blur: 14 }
             },
             timerValue: {
-                color: "#F6FBFF",
-                shadow: { color: "rgba(4,14,32,0.7)", x: 0, y: 4, blur: 16 }
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,12,30,0.76)", x: 0, y: 5, blur: 14 }
             }
         },
         questionProgress: {
-            background: "rgba(7,19,40,0.42)",
-            fill: ["#34d399", "#60a5fa"]
+            background: "rgba(18,36,76,0.5)",
+            fill: ["#8896FF", "#FF8AF2"]
         },
         controlBackground: {
-            colors: ["rgba(10,25,54,0.75)", "rgba(15,34,70,0.55)"],
-            alpha: 0.85
+            colors: ["rgba(42,62,138,0.78)", "rgba(68,46,128,0.74)"],
+            alpha: 0.96
+        },
+        controlGlass: {
+            highlight: { colors: ["rgba(255,255,255,0.82)", "rgba(255,255,255,0.1)"], alpha: 0.88, heightRatio: 0.62 },
+            glow: { colors: ["rgba(120,104,255,0.12)", "rgba(255,150,230,0.38)"], alpha: 0.74, heightRatio: 0.6 },
+            outline: { color: "rgba(204,220,255,0.58)", alpha: 0.96, width: 1.1 }
         },
         controlPalette: {
-            volume: { primary: "rgba(102,185,255,0.85)", glow: "rgba(102,185,255,0.45)" },
-            fullscreen: { primary: "rgba(158,108,237,0.85)", glow: "rgba(158,108,237,0.45)" },
-            close: { primary: "rgba(255,138,128,0.9)", glow: "rgba(255,138,128,0.5)" }
+            volume: { primary: "rgba(118,182,255,0.94)", glow: "rgba(118,182,255,0.62)" },
+            fullscreen: { primary: "rgba(184,150,255,0.94)", glow: "rgba(184,150,255,0.6)" },
+            close: { primary: "rgba(255,140,170,0.96)", glow: "rgba(255,140,170,0.66)" }
         },
         iconWrapper: {
-            ringColor: "rgba(197,219,255,0.65)",
-            ringAlpha: 0.75,
-            hoverRingAlpha: 0.95,
-            glowAlpha: 0.55,
-            hoverGlowAlpha: 0.75,
-            backgroundGradient: ["rgba(26,46,79,0.9)", "rgba(41,73,122,0.85)"]
+            ringColor: "rgba(204,218,255,0.86)",
+            ringAlpha: 0.94,
+            hoverRingAlpha: 1,
+            glowAlpha: 0.72,
+            hoverGlowAlpha: 0.92,
+            backgroundGradient: ["rgba(74,92,188,0.96)", "rgba(42,50,124,0.82)"],
+            backgroundAlpha: 0.98,
+            highlightGradient: ["rgba(255,255,255,0.94)", "rgba(255,255,255,0.16)"],
+            highlightAlpha: 0.82,
+            stroke: { color: "rgba(216,230,255,0.54)", width: 1.2, alpha: 0.98 }
         },
         timerCritical: {
             warning: {
-                background: ["rgba(255,159,67,0.92)", "rgba(215,118,23,0.92)"],
-                accent: ["rgba(255,198,124,0.45)", "rgba(255,198,124,0.15)"],
-                icon: "#FFE082",
-                text: "#FFF3E0"
+                background: ["rgba(255,213,160,0.9)", "rgba(255,187,124,0.9)"],
+                accent: ["rgba(255,204,140,0.58)", "rgba(255,204,140,0.25)"],
+                icon: "#A4472D",
+                text: "#592716"
             },
             danger: {
-                background: ["rgba(153,27,39,0.92)", "rgba(220,38,38,0.92)"],
-                accent: ["rgba(248,113,113,0.45)", "rgba(248,113,113,0.18)"],
-                icon: "#FFD1DC",
-                text: "#FFE4E6"
+                background: ["rgba(255,184,196,0.92)", "rgba(255,136,156,0.92)"],
+                accent: ["rgba(255,150,170,0.6)", "rgba(255,150,170,0.24)"],
+                icon: "#8F1E2C",
+                text: "#520F18"
             },
-            normalIcon: "#66B9FF",
-            normalText: "#F6FBFF"
-        }*/
+            normalIcon: "#9DE9FF",
+            normalText: "#F7FAFF"
+        }
+    },
+    light: {
+        cards: {
+            score: {
+                background: ["rgba(255,234,214,0.98)", "rgba(255,205,176,0.96)"],
+                accent: ["rgba(255,189,116,0.72)", "rgba(255,173,128,0.32)"],
+                iconStyle: {
+                    fill: "#F97316",
+                    strokeColor: "rgba(184,96,24,0.4)",
+                    strokeWidth: 2.2
+                },
+                ambient: {
+                    halo: "rgba(255,215,170,0.9)",
+                    haloAlpha: 0.78,
+                    ring: "rgba(255,188,140,0.74)",
+                    ringAlpha: 0.72,
+                    spark: "#FDBA74",
+                    sparkAlpha: 0.9
+                }
+            },
+            question: {
+                background: ["rgba(230,238,255,0.98)", "rgba(204,216,255,0.96)"],
+                accent: ["rgba(164,210,255,0.7)", "rgba(178,176,255,0.32)"],
+                iconStyle: {
+                    fill: "#0EA5E9",
+                    strokeColor: "#6366F1",
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(188,214,255,0.88)",
+                    haloAlpha: 0.76,
+                    ring: "rgba(168,192,255,0.78)",
+                    ringAlpha: 0.72,
+                    spark: "#38BDF8",
+                    sparkAlpha: 0.88
+                }
+            },
+            timer: {
+                background: ["rgba(222,246,252,0.98)", "rgba(188,232,242,0.96)"],
+                accent: ["rgba(148,232,208,0.7)", "rgba(156,214,255,0.3)"],
+                iconStyle: {
+                    strokeColor: "#0F766E",
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(178,240,224,0.9)",
+                    haloAlpha: 0.76,
+                    ring: "rgba(164,214,255,0.8)",
+                    ringAlpha: 0.74,
+                    spark: "#2DD4BF",
+                    sparkAlpha: 0.88
+                }
+            }
+        },
+        cardBackgroundAlpha: 1,
+        cardAccentAlpha: 1,
+        cardHighlight: {
+            colors: ["rgba(255,255,255,0.58)", "rgba(255,255,255,0.12)"],
+            alpha: 0.52
+        },
+        cardDecor: {
+            outline: { color: "rgba(78,118,196,0.3)", alpha: 0.96, width: 1.2 },
+            accentOutline: { color: "rgba(98,142,216,0.42)", alpha: 0.9, width: 1.1 },
+            glass: { colors: ["rgba(255,255,255,0.96)", "rgba(255,255,255,0.4)"], alpha: 0.78, heightRatio: 0.64 },
+            bottomGlow: { colors: ["rgba(148,192,255,0.08)", "rgba(250,170,212,0.42)"], alpha: 0.6 }
+        },
+        textStyles: {
+            label: {
+                color: "#2B3E66",
+                shadow: { color: "rgba(18,42,92,0.18)", x: 0, y: 3, blur: 8 }
+            },
+            value: {
+                color: "#15274A",
+                shadow: { color: "rgba(20,46,108,0.26)", x: 0, y: 4, blur: 12 }
+            },
+            timerValue: {
+                color: "#15274A",
+                shadow: { color: "rgba(20,46,108,0.26)", x: 0, y: 4, blur: 12 }
+            }
+        },
+        questionProgress: {
+            background: "rgba(48,92,162,0.2)",
+            fill: ["#6366F1", "#EC4899"]
+        },
+        controlBackground: {
+            colors: ["rgba(255,255,255,0.92)", "rgba(232,242,255,0.9)"],
+            alpha: 0.98
+        },
+        controlGlass: {
+            highlight: { colors: ["rgba(255,255,255,0.96)", "rgba(255,255,255,0.36)"], alpha: 0.92, heightRatio: 0.62 },
+            glow: { colors: ["rgba(125,111,255,0.12)", "rgba(255,164,226,0.34)"], alpha: 0.6, heightRatio: 0.52 },
+            outline: { color: "rgba(126,164,232,0.46)", alpha: 0.95, width: 1.1 }
+        },
+        controlPalette: {
+            volume: { primary: "rgba(92,142,236,0.98)", glow: "rgba(92,142,236,0.64)" },
+            fullscreen: { primary: "rgba(142,118,255,0.98)", glow: "rgba(142,118,255,0.64)" },
+            close: { primary: "rgba(242,124,142,0.98)", glow: "rgba(242,124,142,0.66)" }
+        },
+        iconWrapper: {
+            ringColor: "rgba(112,148,220,0.68)",
+            ringAlpha: 0.86,
+            hoverRingAlpha: 1,
+            glowAlpha: 0.66,
+            hoverGlowAlpha: 0.86,
+            backgroundGradient: ["rgba(248,252,255,0.98)", "rgba(216,228,255,0.92)"],
+            backgroundAlpha: 1,
+            highlightGradient: ["rgba(255,255,255,0.98)", "rgba(255,255,255,0.44)"],
+            highlightAlpha: 0.92,
+            stroke: { color: "rgba(118,162,228,0.52)", width: 1.1, alpha: 0.96 }
+        },
+        timerCritical: {
+            warning: {
+                background: ["rgba(255,235,195,0.97)", "rgba(255,209,150,0.94)"],
+                accent: ["rgba(255,210,150,0.6)", "rgba(255,210,150,0.28)"],
+                icon: "#B45309",
+                text: "#8B4007"
+            },
+            danger: {
+                background: ["rgba(255,212,220,0.97)", "rgba(255,168,186,0.94)"],
+                accent: ["rgba(255,178,194,0.6)", "rgba(255,178,194,0.28)"],
+                icon: "#BE123C",
+                text: "#9F1239"
+            },
+            normalIcon: "#6366F1",
+            normalText: "#1F2F4E"
+        }
     }
 };
+
+
 
 function getCanvasScale(axis) {
     if (typeof stage !== "undefined" && stage) {
@@ -1120,15 +1110,72 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var baseHorizontalMarginRatio = 22 / 1280;
     var baseTopMarginRatio = 16 / 720;
 
+    var titleBottomEdge = 0;
+
     if (typeof Title !== "undefined" && Title) {
         var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
         var topMargin = stageHeight * baseTopMarginRatio;
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 44);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+        var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
+        var titleLift = Math.min(
+            Math.max(Title.y - titleSafeTop, 0),
+            stageHeight * 0.025
+        );
+        if (titleLift > 0) {
+            Title.y -= titleLift;
+        }
         Title.__layoutTargetY = Title.y;
+
+        titleBottomEdge = Title.y + titleHalfHeight;
+    }
+
+    if (!titleBottomEdge && typeof Title !== "undefined" && Title) {
+        var fallbackHalf = typeof Title.__layoutHalfHeight === "number" ? Title.__layoutHalfHeight : 38;
+        var fallbackY = typeof Title.__layoutTargetY === "number" ? Title.__layoutTargetY : Title.y || 0;
+        titleBottomEdge = fallbackY + fallbackHalf;
+    }
+
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        var measuredPromptHeight = 0;
+
+        if (typeof QusTxtString.getMeasuredHeight === "function") {
+            measuredPromptHeight = QusTxtString.getMeasuredHeight() || 0;
+        }
+
+        if (!measuredPromptHeight) {
+            var promptLineHeight = QusTxtString.lineHeight;
+
+            if (!promptLineHeight && typeof QusTxtString.getMeasuredLineHeight === "function") {
+                promptLineHeight = QusTxtString.getMeasuredLineHeight();
+            }
+
+            measuredPromptHeight = promptLineHeight || 34;
+        }
+
+        var promptHalfHeight = measuredPromptHeight / 2;
+        var promptSpacing = Math.max(stageHeight * 0.028, 40);
+        var promptMinY = promptHalfHeight + Math.max(safeMargin * 0.28, 60);
+        var promptBaseline = titleBottomEdge
+            ? titleBottomEdge + promptSpacing + promptHalfHeight
+            : stageHeight * 0.24 + promptHalfHeight;
+
+        QusTxtString.x = stageWidth / 2;
+        var promptTargetY = Math.max(promptBaseline, promptMinY);
+        var promptLift = Math.min(
+            Math.max(promptTargetY - promptMinY, 0),
+            stageHeight * 0.04
+        );
+        QusTxtString.y = promptTargetY - promptLift;
+        QusTxtString.__layoutHalfHeight = promptHalfHeight;
+
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
+            QusTxtString.__labelBG.refresh();
+        }
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -1291,6 +1338,43 @@ function updateHudIconWrapper(wrapper, paletteConfig, theme) {
             .clear()
             .beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28)
             .drawCircle(0, 0, 12);
+
+        if (typeof wrapperTheme.backgroundAlpha === "number") {
+            wrapper.background.alpha = wrapperTheme.backgroundAlpha;
+        }
+    }
+
+    if (wrapper.highlight) {
+        var highlightGradient = wrapperTheme.highlightGradient ? cloneArray(wrapperTheme.highlightGradient) : ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.05)"];
+        wrapper.highlight.graphics
+            .clear()
+            .beginLinearGradientFill(highlightGradient, [0, 1], -12, -16, 12, 4)
+            .drawEllipse(-10, -14, 20, 18);
+
+        var highlightAlpha = typeof wrapperTheme.highlightAlpha === "number" ? wrapperTheme.highlightAlpha : wrapper.highlight.alpha;
+        wrapper.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : 0.75;
+    }
+
+    if (wrapper.strokeOutline) {
+        var strokeConfig = wrapperTheme.stroke || {};
+        if (typeof strokeConfig === "string") {
+            strokeConfig = { color: strokeConfig };
+        }
+
+        wrapper.strokeOutline.graphics.clear();
+        if (strokeConfig.color) {
+            var strokeWidth = typeof strokeConfig.width === "number" ? strokeConfig.width : 1;
+            wrapper.strokeOutline.graphics
+                .setStrokeStyle(strokeWidth)
+                .beginStroke(strokeConfig.color)
+                .drawCircle(0, 0, 10.5);
+
+            var strokeAlpha = typeof strokeConfig.alpha === "number" ? strokeConfig.alpha : wrapper.strokeOutline.alpha;
+            wrapper.strokeOutline.alpha = typeof strokeAlpha === "number" ? strokeAlpha : 0.9;
+            wrapper.strokeOutline.visible = true;
+        } else {
+            wrapper.strokeOutline.visible = false;
+        }
     }
 
     if (wrapper.ring) {
@@ -1307,6 +1391,287 @@ function updateHudIconWrapper(wrapper, paletteConfig, theme) {
         wrapper.ring.alpha = ringAlpha;
         wrapper.ring.baseAlpha = ringAlpha;
         wrapper.ring.hoverAlpha = hoverRingAlpha;
+    }
+}
+
+function applyAlphaToColor(color, alpha) {
+    if (typeof alpha !== "number") {
+        alpha = 1;
+    }
+
+    if (!color || typeof color !== "string") {
+        return "rgba(255,255,255," + alpha + ")";
+    }
+
+    var rgbaMatch = color.match(/rgba?\(([^)]+)\)/i);
+    if (rgbaMatch) {
+        var parts = rgbaMatch[1].split(/\s*,\s*/);
+        var r = parseFloat(parts[0]);
+        var g = parseFloat(parts[1]);
+        var b = parseFloat(parts[2]);
+        if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+            return "rgba(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + "," + alpha + ")";
+        }
+    }
+
+    if (color.charAt(0) === "#") {
+        var hex = color.substring(1);
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length === 6) {
+            var rHex = parseInt(hex.substring(0, 2), 16);
+            var gHex = parseInt(hex.substring(2, 4), 16);
+            var bHex = parseInt(hex.substring(4, 6), 16);
+            if (!isNaN(rHex) && !isNaN(gHex) && !isNaN(bHex)) {
+                return "rgba(" + rHex + "," + gHex + "," + bHex + "," + alpha + ")";
+            }
+        }
+    }
+
+    return color;
+}
+
+function ensureHudIconAmbientDecor(card) {
+    if (!card || !card.effectLayer) {
+        return null;
+    }
+
+    if (!card.__ambientDecor) {
+        var layer = card.effectLayer;
+
+        var halo = new createjs.Shape();
+        halo.name = "ambientHalo";
+        halo.alpha = 0.7;
+        layer.addChild(halo);
+
+        var ring = new createjs.Shape();
+        ring.name = "ambientRing";
+        ring.alpha = 0.7;
+        layer.addChild(ring);
+
+        var orbit = new createjs.Container();
+        orbit.name = "ambientOrbit";
+        var orbitGlow = new createjs.Shape();
+        orbitGlow.name = "ambientOrbitGlow";
+        orbitGlow.alpha = 0.35;
+        orbit.addChild(orbitGlow);
+        var orb = new createjs.Shape();
+        orb.name = "ambientOrb";
+        orb.x = 18;
+        orb.alpha = 0.85;
+        orbit.addChild(orb);
+        layer.addChild(orbit);
+
+        var sparkle = new createjs.Shape();
+        sparkle.name = "ambientSparkle";
+        sparkle.alpha = 0.85;
+        layer.addChild(sparkle);
+
+        card.__ambientDecor = {
+            halo: halo,
+            ring: ring,
+            orbit: orbit,
+            orbitGlow: orbitGlow,
+            orbitOrb: orb,
+            sparkle: sparkle
+        };
+    }
+
+    return card.__ambientDecor;
+}
+
+function updateHudIconAmbientDecor(card, type, theme) {
+    if (!card) {
+        return;
+    }
+
+    var decor = ensureHudIconAmbientDecor(card);
+    if (!decor) {
+        return;
+    }
+
+    var icon = card.icon;
+    var baseX = icon ? icon.x : 0;
+    var baseY = icon ? icon.y : 0;
+
+    var cardsTheme = theme && theme.cards ? theme.cards : {};
+    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
+    var ambient = cardTheme.ambient || {};
+
+    var accentColors = [];
+    if (cardTheme.accent) {
+        accentColors = Array.isArray(cardTheme.accent) ? cardTheme.accent : [cardTheme.accent];
+    }
+
+    var backgroundColors = [];
+    if (cardTheme.background) {
+        backgroundColors = Array.isArray(cardTheme.background) ? cardTheme.background : [cardTheme.background];
+    }
+
+    var haloColor = ambient.halo || (accentColors.length ? accentColors[0] : (backgroundColors.length ? backgroundColors[0] : "rgba(255,255,255,0.85)"));
+    var ringColor = ambient.ring || (accentColors.length ? accentColors[accentColors.length - 1] : haloColor);
+    var sparkColor = ambient.spark || (cardTheme.iconStyle && (cardTheme.iconStyle.fill || cardTheme.iconStyle.strokeColor)) || haloColor;
+
+    var haloAlpha = typeof ambient.haloAlpha === "number" ? ambient.haloAlpha : 0.7;
+    var ringAlpha = typeof ambient.ringAlpha === "number" ? ambient.ringAlpha : 0.72;
+    var sparkAlpha = typeof ambient.sparkAlpha === "number" ? ambient.sparkAlpha : 0.82;
+
+    if (decor.halo) {
+        decor.halo.graphics
+            .clear()
+            .beginRadialGradientFill([applyAlphaToColor(haloColor, haloAlpha), applyAlphaToColor(haloColor, 0)], [0, 1], 0, 0, 0, 0, 0, 34)
+            .drawCircle(0, 0, 28);
+        decor.halo.x = baseX;
+        decor.halo.y = baseY;
+        decor.halo.alpha = haloAlpha;
+        decor.halo.baseAlpha = haloAlpha;
+        decor.halo.scaleX = decor.halo.scaleY = 1;
+    }
+
+    if (decor.ring) {
+        decor.ring.graphics
+            .clear()
+            .setStrokeStyle(1.6)
+            .beginStroke(applyAlphaToColor(ringColor, Math.min(ringAlpha + 0.08, 1)))
+            .drawCircle(0, 0, 18);
+        decor.ring.x = baseX;
+        decor.ring.y = baseY;
+        decor.ring.alpha = ringAlpha;
+        decor.ring.baseAlpha = ringAlpha;
+        decor.ring.scaleX = decor.ring.scaleY = 1;
+    }
+
+    if (decor.orbit) {
+        decor.orbit.x = baseX;
+        decor.orbit.y = baseY;
+        decor.orbit.rotation = 0;
+        if (decor.orbitGlow) {
+            decor.orbitGlow.graphics
+                .clear()
+                .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha * 0.45), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 20)
+                .drawCircle(0, 0, 20);
+            decor.orbitGlow.alpha = sparkAlpha * 0.45;
+        }
+        if (decor.orbitOrb) {
+            decor.orbitOrb.graphics
+                .clear()
+                .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 6)
+                .drawCircle(0, 0, 6);
+            decor.orbitOrb.x = 18;
+            decor.orbitOrb.y = 0;
+            decor.orbitOrb.alpha = sparkAlpha;
+            decor.orbitOrb.baseAlpha = sparkAlpha;
+            decor.orbitOrb.scaleX = decor.orbitOrb.scaleY = 1;
+        }
+    }
+
+    if (decor.sparkle) {
+        decor.sparkle.graphics
+            .clear()
+            .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 12)
+            .drawPolyStar(0, 0, 6, 5, 0.6, -90);
+        decor.sparkle.x = baseX;
+        decor.sparkle.y = baseY - 16;
+        decor.sparkle.alpha = sparkAlpha;
+        decor.sparkle.baseAlpha = sparkAlpha;
+        decor.sparkle.scaleX = decor.sparkle.scaleY = 0.8;
+    }
+
+    card.__ambientDecor = decor;
+    card.__ambientDecor.__colorsApplied = true;
+}
+
+function startHudIconAmbientLoop(card, type) {
+    if (!card) {
+        return;
+    }
+
+    var decor = card.__ambientDecor || ensureHudIconAmbientDecor(card);
+    if (!decor) {
+        return;
+    }
+
+    var icon = card.icon;
+    var baseX = icon ? icon.x : 0;
+    var baseY = icon ? icon.y : 0;
+
+    if (decor.halo) {
+        createjs.Tween.removeTweens(decor.halo);
+        decor.halo.x = baseX;
+        decor.halo.y = baseY;
+        var haloAlpha = typeof decor.halo.baseAlpha === "number" ? decor.halo.baseAlpha : decor.halo.alpha;
+        decor.halo.alpha = haloAlpha;
+        decor.halo.scaleX = decor.halo.scaleY = 1;
+        createjs.Tween.get(decor.halo, { loop: true })
+            .to({ alpha: haloAlpha * 1.15, scaleX: 1.08, scaleY: 1.08 }, 1800, createjs.Ease.sineInOut)
+            .to({ alpha: haloAlpha * 0.85, scaleX: 0.92, scaleY: 0.92 }, 1800, createjs.Ease.sineInOut);
+    }
+
+    if (decor.ring) {
+        createjs.Tween.removeTweens(decor.ring);
+        decor.ring.x = baseX;
+        decor.ring.y = baseY;
+        var ringAlpha = typeof decor.ring.baseAlpha === "number" ? decor.ring.baseAlpha : decor.ring.alpha;
+        decor.ring.alpha = ringAlpha;
+        decor.ring.scaleX = decor.ring.scaleY = 1;
+        createjs.Tween.get(decor.ring, { loop: true })
+            .to({ scaleX: 1.12, scaleY: 1.12, alpha: ringAlpha * 1.05 }, 1600, createjs.Ease.sineInOut)
+            .to({ scaleX: 0.94, scaleY: 0.94, alpha: ringAlpha * 0.7 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (decor.orbit) {
+        createjs.Tween.removeTweens(decor.orbit);
+        decor.orbit.x = baseX;
+        decor.orbit.y = baseY;
+        decor.orbit.rotation = 0;
+        var orbitDuration = type === "timer" ? 5200 : type === "score" ? 6400 : 5600;
+        createjs.Tween.get(decor.orbit, { loop: true })
+            .to({ rotation: 360 }, orbitDuration);
+    }
+
+    if (decor.orbitOrb) {
+        createjs.Tween.removeTweens(decor.orbitOrb);
+        var orbAlpha = typeof decor.orbitOrb.baseAlpha === "number" ? decor.orbitOrb.baseAlpha : decor.orbitOrb.alpha;
+        decor.orbitOrb.alpha = orbAlpha;
+        decor.orbitOrb.scaleX = decor.orbitOrb.scaleY = 1;
+        createjs.Tween.get(decor.orbitOrb, { loop: true })
+            .to({ scaleX: 1.18, scaleY: 1.18, alpha: orbAlpha * 0.8 }, 1500, createjs.Ease.sineInOut)
+            .to({ scaleX: 0.92, scaleY: 0.92, alpha: orbAlpha }, 1500, createjs.Ease.sineInOut);
+    }
+
+    if (decor.sparkle) {
+        createjs.Tween.removeTweens(decor.sparkle);
+        var sparkleAlpha = typeof decor.sparkle.baseAlpha === "number" ? decor.sparkle.baseAlpha : decor.sparkle.alpha;
+        decor.sparkle.alpha = sparkleAlpha;
+        decor.sparkle.x = baseX;
+        decor.sparkle.y = baseY - 16;
+        decor.sparkle.scaleX = decor.sparkle.scaleY = 0.8;
+        createjs.Tween.get(decor.sparkle, { loop: true })
+            .to({ y: baseY - 24, alpha: sparkleAlpha * 0.35, scaleX: 1.05, scaleY: 1.05 }, 1400, createjs.Ease.sineOut)
+            .to({ y: baseY - 14, alpha: sparkleAlpha, scaleX: 0.8, scaleY: 0.8 }, 1200, createjs.Ease.sineIn);
+    }
+}
+
+function burstHudAmbient(card) {
+    if (!card || !card.__ambientDecor) {
+        return;
+    }
+
+    var decor = card.__ambientDecor;
+
+    if (decor.halo) {
+        var haloAlpha = typeof decor.halo.baseAlpha === "number" ? decor.halo.baseAlpha : decor.halo.alpha;
+        createjs.Tween.get(decor.halo, { override: false })
+            .to({ alpha: haloAlpha * 1.45, scaleX: 1.18, scaleY: 1.18 }, 200, createjs.Ease.quadOut)
+            .to({ alpha: haloAlpha, scaleX: 1, scaleY: 1 }, 400, createjs.Ease.quadIn);
+    }
+
+    if (decor.sparkle) {
+        var sparkleAlpha = typeof decor.sparkle.baseAlpha === "number" ? decor.sparkle.baseAlpha : decor.sparkle.alpha;
+        createjs.Tween.get(decor.sparkle, { override: false })
+            .to({ alpha: Math.min(sparkleAlpha * 1.2, 1), scaleX: 1.2, scaleY: 1.2 }, 160, createjs.Ease.quadOut)
+            .to({ alpha: sparkleAlpha, scaleX: 0.85, scaleY: 0.85 }, 360, createjs.Ease.quadIn);
     }
 }
 
@@ -1330,6 +1695,21 @@ function applyHudThemeToCard(card, type, theme) {
     var cornerRadius = card.__cornerRadius || HUD_CARD_CORNER_RADIUS;
     var accentWidth = card.__accentWidth || HUD_CARD_ACCENT_WIDTH;
 
+    var cardDecor = theme.cardDecor || {};
+    var decorDefaults = card.__decorDefaults || {};
+
+    var outlineConfig = normalizeDecorConfig(cardDecor.outline, decorDefaults.outline);
+    outlineConfig = normalizeDecorConfig(cardTheme.outline, outlineConfig);
+
+    var accentOutlineConfig = normalizeDecorConfig(cardDecor.accentOutline || outlineConfig, decorDefaults.accentOutline);
+    accentOutlineConfig = normalizeDecorConfig(cardTheme.accentOutline, accentOutlineConfig);
+
+    var glassConfig = normalizeDecorConfig(cardDecor.glass, decorDefaults.glass);
+    glassConfig = normalizeDecorConfig(cardTheme.glass, glassConfig);
+
+    var bottomGlowConfig = normalizeDecorConfig(cardDecor.bottomGlow, decorDefaults.bottomGlow);
+    bottomGlowConfig = normalizeDecorConfig(cardTheme.bottomGlow, bottomGlowConfig);
+
     if (card.background) {
         card.background.graphics
             .clear()
@@ -1337,7 +1717,9 @@ function applyHudThemeToCard(card, type, theme) {
             .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
 
         var backgroundAlpha = typeof cardTheme.backgroundAlpha === "number" ? cardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
-        card.background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : card.background.alpha;
+        if (typeof backgroundAlpha === "number") {
+            card.background.alpha = backgroundAlpha;
+        }
     }
 
     if (card.iconAccent) {
@@ -1347,7 +1729,37 @@ function applyHudThemeToCard(card, type, theme) {
             .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
 
         var accentAlpha = typeof cardTheme.accentAlpha === "number" ? cardTheme.accentAlpha : theme.cardAccentAlpha;
-        card.iconAccent.alpha = typeof accentAlpha === "number" ? accentAlpha : card.iconAccent.alpha;
+        if (typeof accentAlpha === "number") {
+            card.iconAccent.alpha = accentAlpha;
+        }
+    }
+
+    if (card.bottomGlow) {
+        var glowColors = bottomGlowConfig.colors;
+        card.bottomGlow.graphics.clear();
+        if (glowColors && glowColors.length) {
+            var glowHeightRatio = typeof bottomGlowConfig.heightRatio === "number" ? bottomGlowConfig.heightRatio : 0.55;
+            glowHeightRatio = Math.max(0.2, Math.min(glowHeightRatio, 1));
+            var glowHeight = cardHeight * glowHeightRatio;
+            var glowTop = halfHeight - glowHeight;
+            card.bottomGlow.graphics
+                .beginLinearGradientFill(glowColors, [0, 1], -halfWidth, glowTop, halfWidth, halfHeight)
+                .drawRoundRectComplex(
+                    -halfWidth,
+                    halfHeight - glowHeight,
+                    cardWidth,
+                    glowHeight,
+                    Math.max(cornerRadius * 0.35, 6),
+                    Math.max(cornerRadius * 0.35, 6),
+                    cornerRadius,
+                    cornerRadius
+                );
+            var glowAlpha = typeof bottomGlowConfig.alpha === "number" ? bottomGlowConfig.alpha : card.bottomGlow.alpha;
+            card.bottomGlow.alpha = typeof glowAlpha === "number" ? glowAlpha : 0.5;
+            card.bottomGlow.visible = true;
+        } else {
+            card.bottomGlow.visible = false;
+        }
     }
 
     if (card.highlight) {
@@ -1357,7 +1769,71 @@ function applyHudThemeToCard(card, type, theme) {
             .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
 
         var highlightAlpha = typeof cardTheme.highlightAlpha === "number" ? cardTheme.highlightAlpha : highlightConfig.alpha;
-        card.highlight.alpha = typeof highlightAlpha === "number" ? highlightAlpha : card.highlight.alpha;
+        if (typeof highlightAlpha === "number") {
+            card.highlight.alpha = highlightAlpha;
+            card.highlight.baseAlpha = highlightAlpha;
+        } else if (typeof card.highlight.baseAlpha === "undefined") {
+            card.highlight.baseAlpha = card.highlight.alpha;
+        }
+    }
+
+    if (card.glassOverlay) {
+        var glassColors = glassConfig.colors;
+        card.glassOverlay.graphics.clear();
+        if (glassColors && glassColors.length) {
+            var glassHeightRatio = typeof glassConfig.heightRatio === "number" ? glassConfig.heightRatio : 0.6;
+            glassHeightRatio = Math.max(0.2, Math.min(glassHeightRatio, 1));
+            var glassHeight = cardHeight * glassHeightRatio;
+            card.glassOverlay.graphics
+                .beginLinearGradientFill(glassColors, [0, 1], -halfWidth, -halfHeight, halfWidth, -halfHeight + glassHeight)
+                .drawRoundRectComplex(
+                    -halfWidth,
+                    -halfHeight,
+                    cardWidth,
+                    glassHeight,
+                    cornerRadius,
+                    cornerRadius,
+                    Math.max(cornerRadius * 0.45, 8),
+                    Math.max(cornerRadius * 0.45, 8)
+                );
+            var glassAlpha = typeof glassConfig.alpha === "number" ? glassConfig.alpha : card.glassOverlay.alpha;
+            card.glassOverlay.alpha = typeof glassAlpha === "number" ? glassAlpha : 0.6;
+            card.glassOverlay.visible = true;
+        } else {
+            card.glassOverlay.visible = false;
+        }
+    }
+
+    if (card.outline) {
+        card.outline.graphics.clear();
+        if (outlineConfig.color) {
+            var outlineWidth = typeof outlineConfig.width === "number" ? outlineConfig.width : 1;
+            card.outline.graphics
+                .setStrokeStyle(outlineWidth)
+                .beginStroke(outlineConfig.color)
+                .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+            var outlineAlpha = typeof outlineConfig.alpha === "number" ? outlineConfig.alpha : card.outline.alpha;
+            card.outline.alpha = typeof outlineAlpha === "number" ? outlineAlpha : 0.9;
+            card.outline.visible = true;
+        } else {
+            card.outline.visible = false;
+        }
+    }
+
+    if (card.accentOutline) {
+        card.accentOutline.graphics.clear();
+        if (accentOutlineConfig.color) {
+            var accentOutlineWidth = typeof accentOutlineConfig.width === "number" ? accentOutlineConfig.width : 1;
+            card.accentOutline.graphics
+                .setStrokeStyle(accentOutlineWidth)
+                .beginStroke(accentOutlineConfig.color)
+                .drawRoundRect(-halfWidth, -halfHeight, accentWidth, cardHeight, cornerRadius);
+            var accentOutlineAlpha = typeof accentOutlineConfig.alpha === "number" ? accentOutlineConfig.alpha : card.accentOutline.alpha;
+            card.accentOutline.alpha = typeof accentOutlineAlpha === "number" ? accentOutlineAlpha : 0.8;
+            card.accentOutline.visible = true;
+        } else {
+            card.accentOutline.visible = false;
+        }
     }
 
     if (card.icon) {
@@ -1376,6 +1852,15 @@ function applyHudThemeToCard(card, type, theme) {
 
     card.baseGradient = cloneArray(gradient);
     card.baseAccent = cloneArray(accent);
+    card.__decorDefaults = {
+        outline: outlineConfig,
+        accentOutline: accentOutlineConfig,
+        glass: glassConfig,
+        bottomGlow: bottomGlowConfig
+    };
+
+    updateHudIconAmbientDecor(card, type, theme);
+    restartIconIdleAnimation(card, type);
 }
 
 function applyHudThemeToQuestionProgress(theme) {
@@ -1407,12 +1892,14 @@ function applyHudThemeToControls(theme) {
 
     var controlTheme = theme.controlBackground || {};
     var controlPalette = theme.controlPalette || {};
+    var controlGlass = theme.controlGlass || {};
 
-    if (controlContainer.backgroundShape) {
-        var controlBg = controlContainer.backgroundShape;
-        var controlWidth = controlBg.__width || 120;
-        var controlHeight = controlBg.__height || 53;
-        var controlRadius = controlBg.__radius || 24;
+    var controlBg = controlContainer.backgroundShape || null;
+    var controlWidth = controlBg ? (controlBg.__width || 120) : 120;
+    var controlHeight = controlBg ? (controlBg.__height || 53) : 53;
+    var controlRadius = controlBg ? (controlBg.__radius || 24) : 24;
+
+    if (controlBg) {
         var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
 
         controlBg.graphics
@@ -1420,24 +1907,98 @@ function applyHudThemeToControls(theme) {
             .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
             .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
 
-        controlBg.alpha = typeof controlTheme.alpha === "number" ? controlTheme.alpha : controlBg.alpha;
+        if (typeof controlTheme.alpha === "number") {
+            controlBg.alpha = controlTheme.alpha;
+        }
+    }
+
+    var glassDefaults = controlContainer.__glassDefaults || {};
+    var highlightConfig = normalizeDecorConfig(controlGlass.highlight, glassDefaults.highlight);
+    var glowConfig = normalizeDecorConfig(controlGlass.glow, glassDefaults.glow);
+    var outlineConfig = normalizeDecorConfig(controlGlass.outline, glassDefaults.outline);
+
+    controlContainer.__glassDefaults = {
+        highlight: highlightConfig,
+        glow: glowConfig,
+        outline: outlineConfig
+    };
+
+    if (controlContainer.glowShape) {
+        var glowShape = controlContainer.glowShape;
+        glowShape.graphics.clear();
+        if (glowConfig.colors && glowConfig.colors.length) {
+            var glowHeightRatio = typeof glowConfig.heightRatio === "number" ? glowConfig.heightRatio : 0.55;
+            glowHeightRatio = Math.max(0.2, Math.min(glowHeightRatio, 1));
+            var glowHeight = controlHeight * glowHeightRatio;
+            glowShape.graphics
+                .beginLinearGradientFill(glowConfig.colors, [0, 1], -controlWidth / 2, controlHeight / 2 - glowHeight, controlWidth / 2, controlHeight / 2)
+                .drawRoundRectComplex(
+                    -controlWidth / 2,
+                    controlHeight / 2 - glowHeight,
+                    controlWidth,
+                    glowHeight,
+                    Math.max(controlRadius * 0.4, 10),
+                    Math.max(controlRadius * 0.4, 10),
+                    controlRadius,
+                    controlRadius
+                );
+            var glowAlpha = typeof glowConfig.alpha === "number" ? glowConfig.alpha : glowShape.alpha;
+            glowShape.alpha = typeof glowAlpha === "number" ? glowAlpha : 0.5;
+            glowShape.visible = true;
+        } else {
+            glowShape.visible = false;
+        }
+    }
+
+    if (controlContainer.highlightShape) {
+        var highlightShape = controlContainer.highlightShape;
+        highlightShape.graphics.clear();
+        if (highlightConfig.colors && highlightConfig.colors.length) {
+            var highlightHeightRatio = typeof highlightConfig.heightRatio === "number" ? highlightConfig.heightRatio : 0.58;
+            highlightHeightRatio = Math.max(0.25, Math.min(highlightHeightRatio, 1));
+            var highlightHeight = controlHeight * highlightHeightRatio;
+            highlightShape.graphics
+                .beginLinearGradientFill(highlightConfig.colors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, -controlHeight / 2 + highlightHeight)
+                .drawRoundRectComplex(
+                    -controlWidth / 2,
+                    -controlHeight / 2,
+                    controlWidth,
+                    highlightHeight,
+                    controlRadius,
+                    controlRadius,
+                    Math.max(controlRadius * 0.4, 10),
+                    Math.max(controlRadius * 0.4, 10)
+                );
+            var highlightAlpha = typeof highlightConfig.alpha === "number" ? highlightConfig.alpha : highlightShape.alpha;
+            highlightShape.alpha = typeof highlightAlpha === "number" ? highlightAlpha : 0.75;
+            highlightShape.visible = true;
+        } else {
+            highlightShape.visible = false;
+        }
+    }
+
+    if (controlContainer.outlineShape) {
+        var outlineShape = controlContainer.outlineShape;
+        outlineShape.graphics.clear();
+        if (outlineConfig.color) {
+            var outlineWidth = typeof outlineConfig.width === "number" ? outlineConfig.width : 1;
+            outlineShape.graphics
+                .setStrokeStyle(outlineWidth)
+                .beginStroke(outlineConfig.color)
+                .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+            var outlineAlpha = typeof outlineConfig.alpha === "number" ? outlineConfig.alpha : outlineShape.alpha;
+            outlineShape.alpha = typeof outlineAlpha === "number" ? outlineAlpha : 0.85;
+            outlineShape.visible = true;
+        } else {
+            outlineShape.visible = false;
+        }
     }
 
     updateHudIconWrapper(controlContainer.volumeWrapper, controlPalette.volume || {}, theme);
     updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
     updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
-
-var borderColor1 = "#000"; // Customize or use from theme
-var borderThickness1 = .5; // Change thickness as needed
-
-var border1 = new createjs.Shape();
-border1.graphics
-    .setStrokeStyle(borderThickness1)
-    .beginStroke(borderColor1)
-    .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
-controlContainer.addChild(border1); // Add after background so it appears on top (or before to appear behind)
-
 }
+
 
 function applyHudThemeToTexts(theme) {
     if (!theme || !theme.textStyles) {
@@ -1575,6 +2136,54 @@ function mergeIconStyle(base, override) {
             if (typeof override.strokeWidth !== "undefined") {
                 result.strokeWidth = override.strokeWidth;
             }
+        }
+    }
+
+    return result;
+}
+
+function normalizeDecorConfig(config, fallback) {
+    var result = {};
+
+    if (typeof config === "string") {
+        result.color = config;
+    } else if (config && typeof config === "object") {
+        if (typeof config.color !== "undefined") {
+            result.color = config.color;
+        }
+        if (typeof config.alpha === "number") {
+            result.alpha = config.alpha;
+        }
+        if (typeof config.width === "number") {
+            result.width = config.width;
+        }
+        if (config.colors && config.colors.length) {
+            result.colors = cloneArray(config.colors);
+        }
+        if (typeof config.heightRatio === "number") {
+            result.heightRatio = config.heightRatio;
+        }
+    }
+
+    if (typeof fallback === "string") {
+        fallback = { color: fallback };
+    }
+
+    if (fallback && typeof fallback === "object") {
+        if (typeof result.color === "undefined" && typeof fallback.color !== "undefined") {
+            result.color = fallback.color;
+        }
+        if (typeof result.alpha === "undefined" && typeof fallback.alpha === "number") {
+            result.alpha = fallback.alpha;
+        }
+        if (typeof result.width === "undefined" && typeof fallback.width === "number") {
+            result.width = fallback.width;
+        }
+        if (!result.colors && fallback.colors && fallback.colors.length) {
+            result.colors = cloneArray(fallback.colors);
+        }
+        if (typeof result.heightRatio === "undefined" && typeof fallback.heightRatio === "number") {
+            result.heightRatio = fallback.heightRatio;
         }
     }
 
@@ -1999,13 +2608,42 @@ function doneLoading(event) {
                     .split("LEVEL")[0]
                     .trim();
 
-                var titleLabel = new createjs.Text(formattedTitle, "800 44px 'Baloo 2'", "#F9F7FF");
-                titleLabel.textAlign = "left";
-                titleLabel.textBaseline = "middle";
-                titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+                var fontFamily = "'Baloo 2'";
+                var fontWeight = "800";
+                var badgePadding = 200;
+                var minBadgeWidth = 360;
+                var maxBadgeWidth = 640;
+                var fontSizes = [44, 40, 36, 32, 28];
+                var titleLabel;
 
-                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
-                var badgeHeight = 86;
+                for (var sizeIndex = 0; sizeIndex < fontSizes.length; sizeIndex++) {
+                    var fontSize = fontSizes[sizeIndex];
+                    titleLabel = new createjs.Text(
+                        formattedTitle,
+                        fontWeight + " " + fontSize + "px " + fontFamily,
+                        "#F9F7FF"
+                    );
+                    titleLabel.textAlign = "left";
+                    titleLabel.textBaseline = "middle";
+                    titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+
+                    if (
+                        titleLabel.getMeasuredWidth() + badgePadding <= maxBadgeWidth ||
+                        sizeIndex === fontSizes.length - 1
+                    ) {
+                        break;
+                    }
+                }
+
+                var measuredTitleWidth = titleLabel.getMeasuredWidth();
+                var badgeWidth = Math.max(
+                    minBadgeWidth,
+                    Math.min(maxBadgeWidth, measuredTitleWidth + badgePadding)
+                );
+
+                titleLabel.lineWidth = badgeWidth - 180;
+                var textHeight = titleLabel.getMeasuredHeight();
+                var badgeHeight = Math.max(86, Math.round(textHeight + 48));
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
@@ -2484,21 +3122,29 @@ function createHudIconWrapper(primaryColor, glowColor) {
 
     var background = new createjs.Shape();
     background.graphics.beginLinearGradientFill(gradientColors, [0, 1], -28, -28, 28, 28).drawCircle(0, 0, 12);
+    background.alpha = typeof wrapperTheme.backgroundAlpha === "number" ? wrapperTheme.backgroundAlpha : 1;
     wrapper.addChild(background);
 
+    var highlight = new createjs.Shape();
+    highlight.mouseEnabled = false;
+    highlight.mouseChildren = false;
+    wrapper.addChild(highlight);
+
     var ring = new createjs.Shape();
-    var ringColor = wrapperTheme.ringColor || "rgba(255,255,255,0.5)";
-    var ringAlpha = typeof wrapperTheme.ringAlpha === "number" ? wrapperTheme.ringAlpha : 0.6;
-    var hoverRingAlpha = typeof wrapperTheme.hoverRingAlpha === "number" ? wrapperTheme.hoverRingAlpha : 0.9;
-    ring.graphics.setStrokeStyle(2).beginStroke(ringColor).drawCircle(0, 0, 12);
-    ring.alpha = ringAlpha;
-    ring.baseAlpha = ringAlpha;
-    ring.hoverAlpha = hoverRingAlpha;
     wrapper.addChild(ring);
+
+    var strokeOutline = new createjs.Shape();
+    strokeOutline.mouseEnabled = false;
+    strokeOutline.mouseChildren = false;
+    wrapper.addChild(strokeOutline);
 
     wrapper.background = background;
     wrapper.glow = glow;
     wrapper.ring = ring;
+    wrapper.highlight = highlight;
+    wrapper.strokeOutline = strokeOutline;
+
+    updateHudIconWrapper(wrapper, { primary: resolvedPrimary, glow: resolvedGlowColor }, theme);
 
     return wrapper;
 }
@@ -2555,7 +3201,6 @@ function createHudCard(label, type) {
     var gradient = cloneArray(baseCardTheme.background || []);
     var accent = cloneArray(baseCardTheme.accent || []);
     var highlightConfig = theme.cardHighlight || {};
-    var highlightColors = cloneArray(highlightConfig.colors || ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]);
 
     var cardWidth = HUD_CARD_WIDTH;
     var cardHeight = HUD_CARD_HEIGHT;
@@ -2563,81 +3208,65 @@ function createHudCard(label, type) {
     var halfHeight = cardHeight / 2;
     var cornerRadius = HUD_CARD_CORNER_RADIUS;
 
+    var cardDecor = theme.cardDecor || {};
+    var outlineConfig = normalizeDecorConfig(baseCardTheme.outline, cardDecor.outline);
+    var accentOutlineConfig = normalizeDecorConfig(baseCardTheme.accentOutline, cardDecor.accentOutline || outlineConfig);
+    var glassConfig = normalizeDecorConfig(baseCardTheme.glass, cardDecor.glass);
+    var bottomGlowConfig = normalizeDecorConfig(baseCardTheme.bottomGlow, cardDecor.bottomGlow);
+
     var background = new createjs.Shape();
-    background.graphics
-        .beginLinearGradientFill((gradient && gradient.length ? gradient : ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"]), [0, 1], -halfWidth, 0, halfWidth, 0)
-        .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-    var backgroundAlpha = typeof baseCardTheme.backgroundAlpha === "number" ? baseCardTheme.backgroundAlpha : theme.cardBackgroundAlpha;
-    background.alpha = typeof backgroundAlpha === "number" ? backgroundAlpha : 0.96;
-	
-	
-	var borderColor = baseCardTheme.borderColor || "#000"; // Customize or use from theme
-var borderThickness = .5; // Change thickness as needed
-
-var border = new createjs.Shape();
-border.graphics
-    .setStrokeStyle(borderThickness)
-    .beginStroke(borderColor)
-    .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-card.addChild(border); // Add after background so it appears on top (or before to appear behind)
-
-
+    background.mouseEnabled = false;
+    background.mouseChildren = false;
     card.addChild(background);
 
     var accentShape = new createjs.Shape();
-    accentShape.graphics
-        .beginLinearGradientFill((accent && accent.length ? accent : gradient), [0, 1], -halfWidth, -halfHeight, -halfWidth + HUD_CARD_ACCENT_WIDTH, halfHeight)
-        .drawRoundRect(-halfWidth, -halfHeight, HUD_CARD_ACCENT_WIDTH, cardHeight, cornerRadius);
-    var accentAlpha = typeof baseCardTheme.accentAlpha === "number" ? baseCardTheme.accentAlpha : theme.cardAccentAlpha;
-    accentShape.alpha = typeof accentAlpha === "number" ? accentAlpha : 0.9;
-	
-	
-
+    accentShape.mouseEnabled = false;
+    accentShape.mouseChildren = false;
     card.addChild(accentShape);
-	
-	// ✅ Add border to the accent shape
-var accentBorderColor = baseCardTheme.accentBorderColor || "#000"; // Or pick a theme-based color
-var accentBorderThickness = .2;
 
-var accentBorder = new createjs.Shape();
-accentBorder.graphics
-    .setStrokeStyle(accentBorderThickness)
-    .beginStroke(accentBorderColor)
-    .drawRoundRect(-halfWidth, -halfHeight, HUD_CARD_ACCENT_WIDTH, cardHeight, cornerRadius);
-card.addChild(accentBorder);
-
-
+    var bottomGlow = new createjs.Shape();
+    bottomGlow.mouseEnabled = false;
+    bottomGlow.mouseChildren = false;
+    card.addChild(bottomGlow);
 
     var highlight = new createjs.Shape();
-    highlight.graphics
-        .beginLinearGradientFill((highlightColors && highlightColors.length ? highlightColors : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0)"]), [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
-        .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
-    var highlightAlpha = typeof highlightConfig.alpha === "number" ? highlightConfig.alpha : 0.24;
-    highlight.alpha = highlightAlpha;
-    highlight.baseAlpha = highlightAlpha;
+    highlight.mouseEnabled = false;
+    highlight.mouseChildren = false;
     card.addChild(highlight);
+
+    var glassOverlay = new createjs.Shape();
+    glassOverlay.mouseEnabled = false;
+    glassOverlay.mouseChildren = false;
+    card.addChild(glassOverlay);
+
+    var accentOutline = new createjs.Shape();
+    accentOutline.mouseEnabled = false;
+    accentOutline.mouseChildren = false;
+    card.addChild(accentOutline);
+
+    var outline = new createjs.Shape();
+    outline.mouseEnabled = false;
+    outline.mouseChildren = false;
+    card.addChild(outline);
 
     var icon = new createjs.Shape();
     icon.x = -halfWidth + 26;
     icon.y = 0;
-    var baseIconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, null);
-    drawHudIcon(icon, type, baseIconStyle);
     card.addChild(icon);
+
     var effectLayer = new createjs.Container();
     effectLayer.mouseEnabled = false;
     effectLayer.mouseChildren = false;
-    effectLayer.name = type + "Effects";
-    effectLayer.compositeOperation = "lighter";
+    effectLayer.name = type + 'Effects';
+    effectLayer.compositeOperation = 'lighter';
     card.addChild(effectLayer);
 
     var labelStyle = theme.textStyles ? theme.textStyles.label : null;
-    var labelColor = (labelStyle && labelStyle.color) || "#C4DBFF";
+    var labelColor = (labelStyle && labelStyle.color) || '#C4DBFF';
     var labelText = new createjs.Text(label.toUpperCase(), "600 12px 'Baloo 2'", labelColor);
-    labelText.textAlign = "left";
-    //labelText.x = icon.x + 42;
-    labelText.x = icon.x-20;
-    //labelText.y = -18;
-    labelText.y = -38;
+    labelText.textAlign = 'left';
+    labelText.x = icon.x - 20;
+    labelText.y = -34;
     applyTextStyle(labelText, labelStyle);
     card.addChild(labelText);
 
@@ -2648,14 +3277,24 @@ card.addChild(accentBorder);
 
     card.background = background;
     card.iconAccent = accentShape;
+    card.bottomGlow = bottomGlow;
     card.highlight = highlight;
+    card.glassOverlay = glassOverlay;
+    card.accentOutline = accentOutline;
+    card.outline = outline;
     card.icon = icon;
     card.label = labelText;
     card.valueHolder = valueHolder;
     card.effectLayer = effectLayer;
-    card.baseGradient = cloneArray(gradient && gradient.length ? gradient : ["rgba(21, 45, 86, 0.92)", "rgba(36, 94, 168, 0.92)"]);
-    card.baseAccent = cloneArray(accent && accent.length ? accent : card.baseGradient);
-    card.baseIconStyle = mergeIconStyle(baseIconStyle, null);
+    card.baseGradient = cloneArray((gradient && gradient.length ? gradient : ["rgba(21,45,86,0.9)", "rgba(36,94,168,0.9)"]));
+    card.baseAccent = cloneArray((accent && accent.length ? accent : card.baseGradient));
+    card.baseIconStyle = mergeIconStyle(baseCardTheme.iconStyle || {}, null);
+    card.__decorDefaults = {
+        outline: outlineConfig,
+        accentOutline: accentOutlineConfig,
+        glass: glassConfig,
+        bottomGlow: bottomGlowConfig
+    };
     card.__cardWidth = cardWidth;
     card.__cardHeight = cardHeight;
     card.__cornerRadius = cornerRadius;
@@ -2677,6 +3316,8 @@ card.addChild(accentBorder);
     card.__layoutLeft = layoutLeft;
     card.__layoutRight = layoutRight;
     card.__layoutWidth = layoutWidth;
+
+    applyHudThemeToCard(card, type, theme);
 
     return card;
 }
@@ -2762,6 +3403,34 @@ function buildHudLayout() {
     controlContainer.addChild(controlBg);
     controlBg.mouseEnabled = false;
     controlContainer.backgroundShape = controlBg;
+
+    var controlGlowShape = new createjs.Shape();
+    controlGlowShape.mouseEnabled = false;
+    controlGlowShape.mouseChildren = false;
+    controlGlowShape.compositeOperation = "lighter";
+    controlContainer.addChild(controlGlowShape);
+    controlContainer.glowShape = controlGlowShape;
+
+    var controlHighlightShape = new createjs.Shape();
+    controlHighlightShape.mouseEnabled = false;
+    controlHighlightShape.mouseChildren = false;
+    controlHighlightShape.compositeOperation = "lighter";
+    controlContainer.addChild(controlHighlightShape);
+    controlContainer.highlightShape = controlHighlightShape;
+
+    var controlOutlineShape = new createjs.Shape();
+    controlOutlineShape.mouseEnabled = false;
+    controlOutlineShape.mouseChildren = false;
+    controlContainer.addChild(controlOutlineShape);
+    controlContainer.outlineShape = controlOutlineShape;
+
+    var controlGlassTheme = hudTheme.controlGlass || {};
+    controlContainer.__glassDefaults = {
+        highlight: normalizeDecorConfig(controlGlassTheme.highlight, null),
+        glow: normalizeDecorConfig(controlGlassTheme.glow, null),
+        outline: normalizeDecorConfig(controlGlassTheme.outline, null)
+    };
+
     controlContainer.__layoutWidth = controlWidth + 64;
 
     var controlPalette = hudTheme.controlPalette || {};
@@ -3105,6 +3774,7 @@ function animateHudIconImpact(card, type, options) {
     icon.__impactActive = true;
 
     createjs.Tween.removeTweens(icon);
+    burstHudAmbient(card);
 
     var scaleUp = options && typeof options.scale === "number" ? options.scale : 1.24;
     var overshootScale = options && typeof options.overshoot === "number" ? options.overshoot : 0.94;
@@ -3241,23 +3911,28 @@ function restartIconIdleAnimation(card, type) {
     createjs.Tween.removeTweens(icon);
     icon.scaleX = icon.scaleY = 1;
     icon.rotation = 0;
+    icon.y = 0;
+
+    startHudIconAmbientLoop(card, type);
 
     switch (type) {
         case "score":
             createjs.Tween.get(icon, { loop: true })
-                .wait(800)
-                .to({ rotation: 8 }, 1600, createjs.Ease.sineInOut)
-                .to({ rotation: -8 }, 1600, createjs.Ease.sineInOut);
+                .to({ rotation: 10, y: -3, scaleX: 1.05, scaleY: 1.05 }, 1400, createjs.Ease.sineInOut)
+                .to({ rotation: -10, y: 3, scaleX: 0.96, scaleY: 0.96 }, 1400, createjs.Ease.sineInOut)
+                .to({ rotation: 0, y: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
         case "timer":
             createjs.Tween.get(icon, { loop: true })
-                .to({ rotation: -6 }, 1200, createjs.Ease.sineInOut)
-                .to({ rotation: 6 }, 1200, createjs.Ease.sineInOut);
+                .to({ rotation: -12, scaleX: 0.94, scaleY: 0.94 }, 900, createjs.Ease.sineInOut)
+                .to({ rotation: 14, scaleX: 1.08, scaleY: 1.08 }, 900, createjs.Ease.sineInOut)
+                .to({ rotation: 0, scaleX: 1, scaleY: 1 }, 800, createjs.Ease.sineInOut);
             break;
         case "question":
             createjs.Tween.get(icon, { loop: true })
-                .to({ scaleX: 1.06, scaleY: 1.06 }, 1400, createjs.Ease.sineInOut)
-                .to({ scaleX: 1, scaleY: 1 }, 1400, createjs.Ease.sineInOut);
+                .to({ y: -3, rotation: 4, scaleX: 1.07, scaleY: 1.07 }, 1300, createjs.Ease.sineInOut)
+                .to({ y: 2, rotation: -4, scaleX: 0.96, scaleY: 0.96 }, 1300, createjs.Ease.sineInOut)
+                .to({ y: 0, rotation: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
     }
 }
