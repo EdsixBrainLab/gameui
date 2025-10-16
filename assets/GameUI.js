@@ -1,4 +1,10 @@
-var ambientLayer,overlayLayer,ambientGradientLayer,ambientOrbs = [];
+var ambientLayer,
+  overlayLayer,
+  ambientGradientLayer,
+  ambientAuroraLayer,
+  ambientSparkLayer,
+  ambientOrbs = [],
+  ambientSparkGeneration = 0;
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
 var INTRO_TITLE_Y = 75;
 var INTRO_PROMPT_Y = 184;
@@ -579,52 +585,148 @@ function createAmbientBackground() {
     ambientGradientLayer.removeAllChildren();
   }
 
+  if (!ambientAuroraLayer) {
+    ambientAuroraLayer = new createjs.Container();
+  } else {
+    ambientAuroraLayer.removeAllChildren();
+  }
+
+  if (!ambientSparkLayer) {
+    ambientSparkLayer = new createjs.Container();
+  } else {
+    ambientSparkLayer.removeAllChildren();
+  }
+
   ambientLayer.addChild(ambientGradientLayer);
+  ambientLayer.addChild(ambientAuroraLayer);
+  ambientLayer.addChild(ambientSparkLayer);
+
+  ambientSparkGeneration += 1;
+  var sparkGeneration = ambientSparkGeneration;
 
   var gradientShape = new createjs.Shape();
   gradientShape.graphics
     .beginLinearGradientFill(
-      ["#0d1b2a", "#1a3a7a", "#0b1425"],
-      [0, 0.65, 1],
+      ["#0b0f26", "#182858", "#2b1f68", "#101225"],
+      [0, 0.42, 0.78, 1],
       0,
       0,
-      canvas.width,
+      0,
       canvas.height
     )
     .drawRect(0, 0, canvas.width, canvas.height);
-  gradientShape.alpha = 0.92;
+  gradientShape.alpha = 0.98;
   ambientGradientLayer.addChild(gradientShape);
+
+  var auroraBackdrop = new createjs.Shape();
+  var auroraWidth = canvas.width * 1.4;
+  var auroraHeight = Math.max(canvas.height * 0.72, 420);
+  auroraBackdrop.graphics
+    .beginLinearGradientFill(
+      ["rgba(90, 120, 255, 0.18)", "rgba(183, 95, 255, 0.32)", "rgba(255, 138, 189, 0.26)"],
+      [0, 0.55, 1],
+      -auroraWidth / 2,
+      -auroraHeight / 2,
+      auroraWidth / 2,
+      auroraHeight / 2
+    )
+    .drawEllipse(-auroraWidth / 2, -auroraHeight / 2, auroraWidth, auroraHeight);
+  auroraBackdrop.x = canvas.width * 0.55;
+  auroraBackdrop.y = canvas.height * 0.42;
+  auroraBackdrop.alpha = 0.62;
+  auroraBackdrop.compositeOperation = "lighter";
+  ambientAuroraLayer.addChild(auroraBackdrop);
+  animateAmbientAurora(auroraBackdrop);
+
+  var horizonGlow = new createjs.Shape();
+  var horizonHeight = Math.max(220, canvas.height * 0.26);
+  horizonGlow.graphics
+    .beginLinearGradientFill(
+      ["rgba(20,36,76,0)", "rgba(65,104,214,0.38)", "rgba(255,143,214,0.24)", "rgba(20,36,76,0)"],
+      [0, 0.4, 0.75, 1],
+      0,
+      -horizonHeight / 2,
+      0,
+      horizonHeight / 2
+    )
+    .drawRect(0, -horizonHeight / 2, canvas.width, horizonHeight);
+  horizonGlow.y = canvas.height * 0.62;
+  horizonGlow.alpha = 0.48;
+  horizonGlow.compositeOperation = "screen";
+  ambientAuroraLayer.addChild(horizonGlow);
 
   ambientOrbs = [];
   var orbColors = [
-    ["rgba(99, 179, 237, 0.45)", "rgba(99, 179, 237, 0)"],
-    ["rgba(158, 108, 237, 0.4)", "rgba(158, 108, 237, 0)"],
-    ["rgba(109, 226, 183, 0.4)", "rgba(109, 226, 183, 0)"]
+    ["rgba(103, 191, 255, 0.45)", "rgba(103, 191, 255, 0)"],
+    ["rgba(173, 113, 255, 0.42)", "rgba(173, 113, 255, 0)"],
+    ["rgba(118, 244, 210, 0.38)", "rgba(118, 244, 210, 0)"]
   ];
 
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 6; i++) {
     var orb = new createjs.Shape();
-    var radius = 160 + Math.random() * 140;
+    var radius = 180 + Math.random() * 160;
     var palette = orbColors[i % orbColors.length];
     orb.graphics
-      .beginRadialGradientFill(["rgba(255,255,255,0.2)", palette[0], palette[1]], [0, 0.45, 1], 0, 0, 0, 0, 0, radius)
+      .beginRadialGradientFill(["rgba(255,255,255,0.22)", palette[0], palette[1]], [0, 0.55, 1], 0, 0, 0, 0, 0, radius)
       .drawCircle(0, 0, radius);
     orb.x = Math.random() * canvas.width;
     orb.y = Math.random() * canvas.height;
-    orb.alpha = 0.55;
-    ambientGradientLayer.addChild(orb);
+    orb.alpha = 0.52;
+    orb.compositeOperation = "lighter";
+    ambientAuroraLayer.addChild(orb);
     ambientOrbs.push(orb);
     animateAmbientOrb(orb);
   }
 
+  for (var d = 0; d < 6; d++) {
+    var diamond = new createjs.Shape();
+    var size = 46 + Math.random() * 38;
+    var accentPalette = ["rgba(120,160,255,0.22)", "rgba(255,168,237,0.3)"];
+    diamond.graphics
+      .beginLinearGradientFill(accentPalette, [0, 1], 0, -size / 2, 0, size / 2)
+      .moveTo(0, -size / 2)
+      .lineTo(size / 2, 0)
+      .lineTo(0, size / 2)
+      .lineTo(-size / 2, 0)
+      .closePath();
+    diamond.x = Math.random() * canvas.width;
+    diamond.y = canvas.height * 0.2 + Math.random() * canvas.height * 0.55;
+    diamond.alpha = 0.16 + Math.random() * 0.1;
+    diamond.rotation = Math.random() * 45;
+    diamond.compositeOperation = "lighter";
+    ambientAuroraLayer.addChild(diamond);
+    animateAmbientDiamond(diamond);
+  }
+
   var grid = new createjs.Shape();
-  var spacing = 140;
-  grid.graphics.setStrokeStyle(1).beginStroke("rgba(255, 255, 255, 0.06)");
+  var spacing = 150;
+  grid.graphics.setStrokeStyle(1).beginStroke("rgba(255, 255, 255, 0.05)");
   for (var x = -spacing; x < canvas.width + spacing; x += spacing) {
     grid.graphics.moveTo(x, -spacing).lineTo(x + canvas.height + spacing, canvas.height + spacing);
   }
-  grid.alpha = 0.35;
+  grid.alpha = 0.28;
   ambientGradientLayer.addChild(grid);
+
+  var vignette = new createjs.Shape();
+  var radius = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
+  vignette.graphics
+    .beginRadialGradientFill(
+      ["rgba(0,0,0,0)", "rgba(2,6,18,0.65)"],
+      [0.58, 1],
+      0,
+      0,
+      radius * 0.32,
+      0,
+      0,
+      radius
+    )
+    .drawRect(0, 0, canvas.width, canvas.height);
+  vignette.alpha = 0.9;
+  ambientGradientLayer.addChild(vignette);
+
+  for (var s = 0; s < 8; s++) {
+    spawnAmbientSpark(sparkGeneration);
+  }
 }
 
 function animateAmbientOrb(orb) {
@@ -644,6 +746,99 @@ function animateAmbientOrb(orb) {
   };
 
   animate();
+}
+
+function animateAmbientAurora(target) {
+  if (!target) {
+    return;
+  }
+
+  target.regX = 0;
+  target.regY = 0;
+
+  var drift = function () {
+    var nextScaleX = 1 + Math.random() * 0.18;
+    var nextScaleY = 1 + Math.random() * 0.12;
+    var nextSkew = -5 + Math.random() * 10;
+    var nextAlpha = 0.38 + Math.random() * 0.22;
+    var duration = 5200 + Math.random() * 2400;
+
+    createjs.Tween.get(target, { override: true })
+      .to({ scaleX: nextScaleX, scaleY: nextScaleY, skewX: nextSkew, alpha: nextAlpha }, duration, createjs.Ease.sineInOut)
+      .call(drift);
+  };
+
+  drift();
+}
+
+function animateAmbientDiamond(target) {
+  if (!target) {
+    return;
+  }
+
+  var baseX = target.x;
+  var baseY = target.y;
+  var baseAlpha = target.alpha;
+
+  createjs.Tween.get(target, { loop: true })
+    .to(
+      {
+        rotation: target.rotation + 28,
+        x: baseX + 22,
+        y: baseY + 16,
+        alpha: Math.min(0.36, baseAlpha + 0.12)
+      },
+      4200,
+      createjs.Ease.sineInOut
+    )
+    .to(
+      {
+        rotation: target.rotation + 56,
+        x: baseX - 18,
+        y: baseY - 20,
+        alpha: Math.max(0.12, baseAlpha - 0.06)
+      },
+      4200,
+      createjs.Ease.sineInOut
+    );
+}
+
+function spawnAmbientSpark(generation) {
+  if (!ambientSparkLayer || !canvas) {
+    return;
+  }
+
+  var activeGeneration = typeof generation === "number" ? generation : ambientSparkGeneration;
+
+  var spark = new createjs.Shape();
+  var size = 8 + Math.random() * 10;
+  spark.graphics
+    .beginLinearGradientFill(["rgba(255,255,255,0.05)", "rgba(255,255,255,0.85)", "rgba(255,255,255,0.05)"], [0, 0.5, 1], -size, 0, size, 0)
+    .drawRoundRect(-size / 2, -size / 2, size, size / 2, size / 2);
+  spark.x = Math.random() * canvas.width;
+  spark.y = canvas.height * 0.18 + Math.random() * canvas.height * 0.64;
+  spark.alpha = 0;
+  spark.compositeOperation = "lighter";
+
+  ambientSparkLayer.addChild(spark);
+
+  var travel = 40 + Math.random() * 80;
+  var travelY = -20 + Math.random() * 40;
+  var fadeIn = 320 + Math.random() * 220;
+  var life = 1800 + Math.random() * 1200;
+
+  createjs.Tween.get(spark)
+    .wait(Math.random() * 1200)
+    .to({ alpha: 0.8 }, fadeIn, createjs.Ease.quadOut)
+    .to({ x: spark.x + travel, y: spark.y + travelY, alpha: 0 }, life, createjs.Ease.sineIn)
+    .call(function () {
+      if (spark.parent) {
+        spark.parent.removeChild(spark);
+      }
+      if (activeGeneration === ambientSparkGeneration) {
+        spawnAmbientSpark(activeGeneration);
+      }
+    });
 }
 
 

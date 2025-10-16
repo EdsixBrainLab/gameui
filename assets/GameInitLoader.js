@@ -535,8 +535,13 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var baseTopMarginRatio = 16 / 720;
 
     if (typeof Title !== "undefined" && Title) {
+        var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
+            ? Title.__layoutHalfHeight
+            : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
+        var topMargin = stageHeight * baseTopMarginRatio;
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
         Title.x = stageWidth / 2;
-        Title.y = Math.max(25, stageHeight * 0.00001);
+        Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -1408,13 +1413,148 @@ function doneLoading(event) {
             //////////////////////////////////////////////////////////////////////////////////////////////////////
 
             if (id == "Title") {
-                //Title = new createjs.Bitmap(preload.getResult('Title'));
-                Title = new createjs.Text(GameNameWithLvl.replace(/-/g, " ").replace(/(?!^)([A-Z])/g, " $1").toUpperCase().split("LEVEL")[0].trim(), "bold 48px 'Baloo 2'", "#b40deb");
-                                Title.textAlign = "center";
-                           Title.x = getCanvasCenterX();
-                                Title.y = 25;
-                                Title.shadow = new createjs.Shadow("red", 1, 1, 1);
-                container.parent.addChild(Title);
+                var formattedTitle = GameNameWithLvl.replace(/-/g, " ")
+                    .replace(/(?!^)([A-Z])/g, " $1")
+                    .toUpperCase()
+                    .split("LEVEL")[0]
+                    .trim();
+
+                var titleLabel = new createjs.Text(formattedTitle, "800 44px 'Baloo 2'", "#F9F7FF");
+                titleLabel.textAlign = "left";
+                titleLabel.textBaseline = "middle";
+                titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+
+                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
+                var badgeHeight = 86;
+
+                TitleContaier = new createjs.Container();
+                TitleContaier.mouseEnabled = false;
+                TitleContaier.mouseChildren = false;
+
+                var badgeShadow = new createjs.Shape();
+                badgeShadow.graphics
+                    .beginFill("rgba(6,12,28,0.55)")
+                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2 + 10, badgeWidth, badgeHeight, 44);
+                badgeShadow.alpha = 0.34;
+                TitleContaier.addChild(badgeShadow);
+
+                var badgeGlow = new createjs.Shape();
+                badgeGlow.graphics
+                    .beginRadialGradientFill(
+                        ["rgba(255,255,255,0.65)", "rgba(176,118,255,0.55)", "rgba(176,118,255,0)"],
+                        [0, 0.45, 1],
+                        0,
+                        0,
+                        badgeWidth * 0.35,
+                        0,
+                        0,
+                        badgeWidth
+                    )
+                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
+                badgeGlow.alpha = 0.65;
+                badgeGlow.compositeOperation = "lighter";
+                TitleContaier.addChild(badgeGlow);
+
+                var badgeBackground = new createjs.Shape();
+                badgeBackground.graphics
+                    .beginLinearGradientFill([
+                        "#4528B6",
+                        "#7044E2",
+                        "#FF6FB5"
+                    ], [0, 0.55, 1], -badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, badgeHeight / 2)
+                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
+                TitleContaier.addChild(badgeBackground);
+
+                var badgeOutline = new createjs.Shape();
+                badgeOutline.graphics
+                    .setStrokeStyle(2)
+                    .beginStroke("rgba(255,255,255,0.45)")
+                    .drawRoundRect(-badgeWidth / 2 + 1, -badgeHeight / 2 + 1, badgeWidth - 2, badgeHeight - 2, 40);
+                badgeOutline.alpha = 0.6;
+                TitleContaier.addChild(badgeOutline);
+
+                var badgeHighlight = new createjs.Shape();
+                badgeHighlight.graphics
+                    .beginLinearGradientFill([
+                        "rgba(255,255,255,0.55)",
+                        "rgba(255,255,255,0)"
+                    ], [0, 1], -badgeWidth / 2 + 8, -badgeHeight / 2 + 6, badgeWidth / 2, 0)
+                    .drawRoundRect(-badgeWidth / 2 + 6, -badgeHeight / 2 + 6, badgeWidth - 12, badgeHeight / 2, 32);
+                badgeHighlight.alpha = 0.5;
+                TitleContaier.addChild(badgeHighlight);
+
+                var iconOrb = new createjs.Shape();
+                iconOrb.graphics
+                    .beginRadialGradientFill(
+                        ["rgba(255,255,255,0.9)", "rgba(255,190,128,0.85)", "rgba(255,190,128,0)"],
+                        [0, 0.55, 1],
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        36
+                    )
+                    .drawCircle(0, 0, 30);
+                iconOrb.x = -badgeWidth / 2 + 58;
+                iconOrb.y = 0;
+                iconOrb.alpha = 0.9;
+                iconOrb.compositeOperation = "lighter";
+                TitleContaier.addChild(iconOrb);
+
+                var iconGlyph = new createjs.Shape();
+                iconGlyph.graphics
+                    .setStrokeStyle(3)
+                    .beginStroke("rgba(72,23,143,0.85)")
+                    .beginFill("rgba(255,255,255,0.92)")
+                    .moveTo(0, -10)
+                    .lineTo(10, 0)
+                    .lineTo(0, 10)
+                    .lineTo(-10, 0)
+                    .closePath();
+                iconGlyph.x = iconOrb.x;
+                iconGlyph.y = iconOrb.y;
+                iconGlyph.alpha = 0.9;
+                TitleContaier.addChild(iconGlyph);
+
+                titleLabel.lineWidth = badgeWidth - 180;
+                titleLabel.x = iconOrb.x + 42;
+                titleLabel.y = 2;
+                TitleContaier.addChild(titleLabel);
+
+                var shimmerMask = new createjs.Shape();
+                shimmerMask.graphics.drawRoundRect(-badgeWidth / 2 + 5, -badgeHeight / 2 + 5, badgeWidth - 10, badgeHeight - 10, 38);
+
+                var shimmer = new createjs.Shape();
+                shimmer.graphics
+                    .beginLinearGradientFill([
+                        "rgba(255,255,255,0)",
+                        "rgba(255,255,255,0.75)",
+                        "rgba(255,255,255,0)"
+                    ], [0, 0.5, 1], -badgeWidth, 0, badgeWidth, 0)
+                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
+                shimmer.alpha = 0.45;
+                shimmer.compositeOperation = "lighter";
+                shimmer.mask = shimmerMask;
+                shimmer.x = -badgeWidth;
+                TitleContaier.addChild(shimmer);
+                TitleContaier.__shimmer = shimmer;
+                TitleContaier.__shimmerMask = shimmerMask;
+
+                createjs.Tween.get(shimmer, { loop: true })
+                    .to({ x: badgeWidth * 0.65 }, 2200, createjs.Ease.sineInOut)
+                    .to({ x: badgeWidth }, 420, createjs.Ease.quadOut)
+                    .wait(1600)
+                    .set({ x: -badgeWidth });
+
+                TitleContaier.x = getCanvasCenterX();
+                TitleContaier.y = badgeHeight / 2;
+                TitleContaier.__layoutHalfWidth = badgeWidth / 2;
+                TitleContaier.__layoutHalfHeight = badgeHeight / 2;
+                TitleContaier.__label = titleLabel;
+
+                Title = TitleContaier;
+                container.parent.addChild(TitleContaier);
 
                 Title.visible = false;
                 refreshResponsiveLayout(true);
