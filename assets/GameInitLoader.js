@@ -3971,85 +3971,184 @@ function buildGameIntroOverlay() {
 function createIntroHowToPlayHeader() {
     var container = new createjs.Container();
     container.name = "IntroHowToPlayBadge";
-    container.x = 25;
-    container.y = 15;
+    container.x = 22;
+    container.y = 16;
 
     var glow = new createjs.Shape();
     glow.graphics
-        .beginRadialGradientFill([
-            "rgba(125, 207, 255, 0.38)",
-            "rgba(125, 207, 255, 0.14)",
-            "rgba(125, 207, 255, 0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 120)
+        .beginRadialGradientFill(
+            ["rgba(122, 212, 255, 0.42)", "rgba(162, 130, 255, 0.26)", "rgba(57, 34, 129, 0)"],
+            [0, 0.55, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            148
+        )
         .drawCircle(0, 0, 200);
-    glow.alpha = 0.82;
+    glow.alpha = 0.86;
     glow.x = 154;
-    glow.y = 52;
+    glow.y = 56;
     glow.compositeOperation = "lighter";
     container.addChild(glow);
     container.glowShape = glow;
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["rgba(40, 33, 82, 0.94)", "rgba(77, 47, 141, 0.9)"], [0, 1], 0, 0, 220, 0)
-        .drawRoundRect(0, 0, 200, 60, 30);
-    frame.shadow = new createjs.Shadow("rgba(6, 10, 30, 0.42)", 0, 16, 32);
+        .beginLinearGradientFill(
+            ["rgba(26, 16, 60, 0.96)", "rgba(45, 22, 98, 0.94)", "rgba(78, 31, 142, 0.92)"],
+            [0, 0.52, 1],
+            0,
+            0,
+            236,
+            0
+        )
+        .drawRoundRect(0, 0, 236, 74, 32);
+    frame.shadow = new createjs.Shadow("rgba(10, 12, 36, 0.48)", 0, 18, 36);
     container.addChild(frame);
     container.cardShape = frame;
+    container.cardWidth = 236;
 
-    /*var highlight = new createjs.Shape();
+    var sheen = new createjs.Shape();
+    sheen.graphics
+        .beginLinearGradientFill(
+            ["rgba(255, 255, 255, 0.24)", "rgba(186, 154, 255, 0.08)", "rgba(255, 255, 255, 0)"],
+            [0, 0.5, 1],
+            0,
+            0,
+            236,
+            0
+        )
+        .drawRoundRect(6, 6, 224, 62, 26);
+    sheen.alpha = 0.7;
+    container.addChild(sheen);
+
+    var accent = new createjs.Shape();
+    accent.graphics
+        .beginLinearGradientFill(
+            ["rgba(124, 187, 255, 0.55)", "rgba(255, 148, 220, 0.25)", "rgba(255, 255, 255, 0)"],
+            [0, 0.6, 1],
+            0,
+            10,
+            0,
+            64
+        )
+        .drawRoundRect(182, 10, 50, 54, 24);
+    accent.alpha = 0.65;
+    container.addChild(accent);
+
+    var frameStroke = new createjs.Shape();
+    frameStroke.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(186, 155, 255, 0.55)")
+        .drawRoundRect(1, 1, 234, 72, 30);
+    container.addChild(frameStroke);
+
+    var highlightMask = new createjs.Shape();
+    highlightMask.graphics.drawRoundRect(0, 0, 236, 74, 32);
+    highlightMask.visible = false;
+    container.addChild(highlightMask);
+
+    var highlight = new createjs.Shape();
     highlight.graphics
-        .beginLinearGradientFill([
-            "rgba(255,255,255,0.75)",
-            "rgba(255,255,255,0.22)",
-            "rgba(255,255,255,0)"
-        ], [0, 0.52, 1], 0, 0, 320, 0)
-        .drawRoundRect(16, 10, 388, 46, 24);
-    highlight.alpha = 0.88;
-    container.addChild(highlight);*/
+        .beginLinearGradientFill(
+            ["rgba(255, 255, 255, 0)", "rgba(255, 244, 255, 0.9)", "rgba(255, 255, 255, 0)"],
+            [0, 0.5, 1],
+            -120,
+            0,
+            120,
+            0
+        )
+        .drawRoundRect(-120, -38, 240, 148, 44);
+    highlight.alpha = 0;
+    highlight.mask = highlightMask;
+    highlight.compositeOperation = "lighter";
+    highlight.x = -160;
+    highlight.baseX = -160;
+    container.addChild(highlight);
+    container.highlightSweep = highlight;
+    container.highlightMask = highlightMask;
 
-    var wave = createHowToPlayTildeWave(210, 14);
-    wave.x = 160;
-    wave.y = 84;
+    var sparkle = new createjs.Shape();
+    sparkle.graphics
+        .setStrokeStyle(1.6)
+        .beginStroke("rgba(255, 255, 255, 0.65)")
+        .moveTo(198, 12)
+        .lineTo(214, 20)
+        .moveTo(204, 24)
+        .lineTo(220, 16);
+    sparkle.alpha = 0.7;
+    container.addChild(sparkle);
+
+    var wave = createHowToPlayTildeWave(216, 14);
+    wave.x = 172;
+    wave.y = 86;
     container.addChild(wave);
     container.tildeWave = wave;
 
     var iconHalo = new createjs.Shape();
     iconHalo.graphics
-        .beginRadialGradientFill([
-            "rgba(255, 255, 255, 0.88)",
-            "rgba(255, 214, 233, 0.32)",
-            "rgba(214, 228, 255, 0)"
-        ], [0, 0.55, 1], 0, 0, 0, 0, 0, 32)
-        .drawCircle(0, 0, 30);
-    iconHalo.x = 25;
-    iconHalo.y = 30;
+        .beginRadialGradientFill(
+            ["rgba(255, 255, 255, 0.95)", "rgba(162, 202, 255, 0.32)", "rgba(214, 228, 255, 0)"],
+            [0, 0.55, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            34
+        )
+        .drawCircle(0, 0, 32);
+    iconHalo.x = 38;
+    iconHalo.y = 38;
     container.addChild(iconHalo);
+
+    var iconRing = new createjs.Shape();
+    iconRing.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(124, 188, 255, 0.9)")
+        .drawCircle(0, 0, 26);
+    iconRing.alpha = 0.85;
+    iconRing.x = iconHalo.x;
+    iconRing.y = iconHalo.y;
+    container.addChild(iconRing);
 
     var iconBackground = new createjs.Shape();
     iconBackground.graphics
-        .beginRadialGradientFill(["#ffd2a8", "#dfc5ff"], [0, 1], 0, 0, 0, 0, 0, 18)
-        .drawCircle(0, 0, 18);
+        .beginRadialGradientFill(["#ffd082", "#ff7fc0"], [0, 1], 0, 0, 0, 0, 0, 24)
+        .drawCircle(0, 0, 24);
     iconBackground.x = iconHalo.x;
     iconBackground.y = iconHalo.y;
     container.addChild(iconBackground);
 
-    var icon = new createjs.Text("\u2139", "700 26px 'Baloo 2'", "#FFFFFF");
+    var icon = new createjs.Text("\u2139", "700 30px 'Baloo 2'", "#FFFFFF");
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = iconBackground.x;
     icon.y = iconBackground.y + 4;
     container.addChild(icon);
 
-    var title = new createjs.Text("How to Play", "700 24px 'Baloo 2'", "#5a2e74");
-    title.x = 54;
-    title.y = 10;
+    var title = new createjs.Text("How to Play", "700 24px 'Baloo 2'", "#fef6ff");
+    title.x = 74;
+    title.y = 12;
     container.addChild(title);
 
-    var subtitle = new createjs.Text("Watch animation carefully", "500 12px 'Baloo 2'", "rgba(107, 74, 129, 0.7)");
-    subtitle.x = 54;
-    subtitle.y = 38;
+    var subtitle = new createjs.Text(
+        "Follow the quick guide",
+        "500 12px 'Baloo 2'",
+        "rgba(214, 202, 255, 0.78)"
+    );
+    subtitle.x = 74;
+    subtitle.y = 40;
     container.addChild(subtitle);
+
+    var underline = new createjs.Shape();
+    underline.graphics
+        .beginLinearGradientFill(["rgba(132, 201, 255, 0.85)", "rgba(255, 150, 225, 0.55)"], [0, 1], 0, 0, 80, 0)
+        .drawRoundRect(74, 58, 86, 4, 2);
+    underline.alpha = 0.9;
+    container.addChild(underline);
 
     return container;
 }
