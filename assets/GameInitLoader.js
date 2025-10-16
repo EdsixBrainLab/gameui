@@ -4512,36 +4512,45 @@ function startIntroActionButtonAnimations(button) {
     var highlight = button.highlightSweep || button.getChildByName("highlight");
     var state = button.state || "skip";
 
-    if (glow && !button.__glowTweenAttached) {
-        button.__glowTweenAttached = true;
-        var maxAlpha = state === "start" ? 0.95 : 0.88;
-        var minAlpha = state === "start" ? 0.74 : 0.66;
-        var maxScale = state === "start" ? 1.14 : 1.08;
+    var hasActiveTween = createjs.Tween && typeof createjs.Tween.hasActiveTweens === "function";
 
-        createjs.Tween.get(glow, { loop: true })
-            .to({ alpha: maxAlpha, scaleX: maxScale, scaleY: maxScale }, 640, createjs.Ease.quadOut)
-            .to({ alpha: minAlpha, scaleX: 1, scaleY: 1 }, 680, createjs.Ease.quadInOut);
+    if (glow) {
+        var glowActive = hasActiveTween ? createjs.Tween.hasActiveTweens(glow) : false;
+        if (!button.__glowTweenAttached || !glowActive) {
+            createjs.Tween.removeTweens(glow);
+            button.__glowTweenAttached = true;
+            var maxAlpha = state === "start" ? 0.95 : 0.88;
+            var minAlpha = state === "start" ? 0.74 : 0.66;
+            var maxScale = state === "start" ? 1.14 : 1.08;
+
+            createjs.Tween.get(glow, { loop: true })
+                .to({ alpha: maxAlpha, scaleX: maxScale, scaleY: maxScale }, 640, createjs.Ease.quadOut)
+                .to({ alpha: minAlpha, scaleX: 1, scaleY: 1 }, 680, createjs.Ease.quadInOut);
+        }
     }
 
-    if (highlight && !button.__highlightTweenAttached) {
-        var startX = typeof highlight.baseX === "number" ? highlight.baseX : -148;
-        var travelSpan = 296;
-        var endX = startX + travelSpan;
-        var sweepAlpha = state === "start" ? 0.96 : 0.88;
-        var travelDuration = 1280;
+    if (highlight) {
+        var highlightActive = hasActiveTween ? createjs.Tween.hasActiveTweens(highlight) : false;
+        if (!button.__highlightTweenAttached || !highlightActive) {
+            var startX = typeof highlight.baseX === "number" ? highlight.baseX : -148;
+            var travelSpan = 296;
+            var endX = startX + travelSpan;
+            var sweepAlpha = state === "start" ? 0.96 : 0.88;
+            var travelDuration = 1280;
 
-        createjs.Tween.removeTweens(highlight);
-        highlight.x = startX;
-        highlight.alpha = 0;
+            createjs.Tween.removeTweens(highlight);
+            highlight.x = startX;
+            highlight.alpha = 0;
 
-        button.__highlightTweenAttached = true;
+            button.__highlightTweenAttached = true;
 
-        createjs.Tween.get(highlight, { loop: true })
-            .to({ alpha: sweepAlpha }, 280, createjs.Ease.quadOut)
-            .to({ x: endX }, travelDuration, createjs.Ease.quadInOut)
-            .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
-            .set({ x: startX })
-            .wait(420);
+            createjs.Tween.get(highlight, { loop: true })
+                .to({ alpha: sweepAlpha }, 280, createjs.Ease.quadOut)
+                .to({ x: endX }, travelDuration, createjs.Ease.quadInOut)
+                .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
+                .set({ x: startX })
+                .wait(420);
+        }
     }
 }
 
