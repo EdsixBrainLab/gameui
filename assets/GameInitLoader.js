@@ -150,87 +150,87 @@ var HUD_THEME_PRESETS = {
     light: {
         cards: {
             score: {
-                background: ["rgba(255,248,236,0.96)", "rgba(255,225,210,0.94)"],
-                accent: ["rgba(255,198,94,0.58)", "rgba(255,204,128,0.22)"],
+                background: ["rgba(255,234,214,0.98)", "rgba(255,205,176,0.96)"],
+                accent: ["rgba(255,189,116,0.72)", "rgba(255,173,128,0.32)"],
                 iconStyle: {
-                    fill: "#F59E0B",
-                    strokeColor: "rgba(176,120,34,0.32)",
-                    strokeWidth: 2
+                    fill: "#F97316",
+                    strokeColor: "rgba(184,96,24,0.4)",
+                    strokeWidth: 2.2
                 }
             },
             question: {
-                background: ["rgba(245,247,255,0.96)", "rgba(225,230,255,0.94)"],
-                accent: ["rgba(153,210,255,0.58)", "rgba(175,174,255,0.22)"],
+                background: ["rgba(230,238,255,0.98)", "rgba(204,216,255,0.96)"],
+                accent: ["rgba(164,210,255,0.7)", "rgba(178,176,255,0.32)"],
                 iconStyle: {
-                    fill: "#059669",
+                    fill: "#0EA5E9",
                     strokeColor: "#6366F1",
-                    strokeWidth: 3
+                    strokeWidth: 3.2
                 }
             },
             timer: {
-                background: ["rgba(236,249,253,0.96)", "rgba(214,241,247,0.94)"],
-                accent: ["rgba(138,230,200,0.58)", "rgba(138,210,255,0.22)"],
+                background: ["rgba(222,246,252,0.98)", "rgba(188,232,242,0.96)"],
+                accent: ["rgba(148,232,208,0.7)", "rgba(156,214,255,0.3)"],
                 iconStyle: {
                     strokeColor: "#0F766E",
-                    strokeWidth: 3
+                    strokeWidth: 3.2
                 }
             }
         },
         cardBackgroundAlpha: 1,
         cardAccentAlpha: 1,
         cardHighlight: {
-            colors: ["rgba(255,255,255,0.52)", "rgba(255,255,255,0.1)"],
-            alpha: 0.46
+            colors: ["rgba(255,255,255,0.58)", "rgba(255,255,255,0.12)"],
+            alpha: 0.52
         },
         cardDecor: {
-            outline: { color: "rgba(62,98,166,0.22)", alpha: 0.92, width: 1 },
-            accentOutline: { color: "rgba(86,128,206,0.3)", alpha: 0.88, width: 1 },
-            glass: { colors: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0.32)"], alpha: 0.7, heightRatio: 0.62 },
-            bottomGlow: { colors: ["rgba(132,182,255,0)", "rgba(255,147,226,0.38)"], alpha: 0.54 }
+            outline: { color: "rgba(78,118,196,0.3)", alpha: 0.96, width: 1.2 },
+            accentOutline: { color: "rgba(98,142,216,0.42)", alpha: 0.9, width: 1.1 },
+            glass: { colors: ["rgba(255,255,255,0.96)", "rgba(255,255,255,0.4)"], alpha: 0.78, heightRatio: 0.64 },
+            bottomGlow: { colors: ["rgba(148,192,255,0.08)", "rgba(250,170,212,0.42)"], alpha: 0.6 }
         },
         textStyles: {
             label: {
-                color: "#314368",
-                shadow: { color: "rgba(255,255,255,0.68)", x: 0, y: 2, blur: 4 }
+                color: "#2B3E66",
+                shadow: { color: "rgba(18,42,92,0.18)", x: 0, y: 3, blur: 8 }
             },
             value: {
-                color: "#1F2F4E",
-                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
+                color: "#15274A",
+                shadow: { color: "rgba(20,46,108,0.26)", x: 0, y: 4, blur: 12 }
             },
             timerValue: {
-                color: "#1F2F4E",
-                shadow: { color: "rgba(255,255,255,0.55)", x: 0, y: 3, blur: 8 }
+                color: "#15274A",
+                shadow: { color: "rgba(20,46,108,0.26)", x: 0, y: 4, blur: 12 }
             }
         },
         questionProgress: {
-            background: "rgba(34,86,156,0.16)",
-            fill: ["#7B66FF", "#F472B6"]
+            background: "rgba(48,92,162,0.2)",
+            fill: ["#6366F1", "#EC4899"]
         },
         controlBackground: {
-            colors: ["rgba(255,255,255,0.88)", "rgba(238,246,255,0.86)"],
-            alpha: 0.96
+            colors: ["rgba(255,255,255,0.92)", "rgba(232,242,255,0.9)"],
+            alpha: 0.98
         },
         controlGlass: {
-            highlight: { colors: ["rgba(255,255,255,0.94)", "rgba(255,255,255,0.28)"], alpha: 0.88, heightRatio: 0.62 },
-            glow: { colors: ["rgba(123,102,255,0)", "rgba(255,147,226,0.3)"], alpha: 0.54, heightRatio: 0.5 },
-            outline: { color: "rgba(128,162,226,0.38)", alpha: 0.92, width: 1 }
+            highlight: { colors: ["rgba(255,255,255,0.96)", "rgba(255,255,255,0.36)"], alpha: 0.92, heightRatio: 0.62 },
+            glow: { colors: ["rgba(125,111,255,0.12)", "rgba(255,164,226,0.34)"], alpha: 0.6, heightRatio: 0.52 },
+            outline: { color: "rgba(126,164,232,0.46)", alpha: 0.95, width: 1.1 }
         },
         controlPalette: {
-            volume: { primary: "rgba(92,142,236,0.94)", glow: "rgba(92,142,236,0.56)" },
-            fullscreen: { primary: "rgba(142,118,255,0.94)", glow: "rgba(142,118,255,0.56)" },
-            close: { primary: "rgba(242,124,142,0.95)", glow: "rgba(242,124,142,0.6)" }
+            volume: { primary: "rgba(92,142,236,0.98)", glow: "rgba(92,142,236,0.64)" },
+            fullscreen: { primary: "rgba(142,118,255,0.98)", glow: "rgba(142,118,255,0.64)" },
+            close: { primary: "rgba(242,124,142,0.98)", glow: "rgba(242,124,142,0.66)" }
         },
         iconWrapper: {
-            ringColor: "rgba(96,132,206,0.58)",
-            ringAlpha: 0.78,
-            hoverRingAlpha: 0.98,
-            glowAlpha: 0.58,
-            hoverGlowAlpha: 0.78,
-            backgroundGradient: ["rgba(255,255,255,0.98)", "rgba(222,232,255,0.9)"],
+            ringColor: "rgba(112,148,220,0.68)",
+            ringAlpha: 0.86,
+            hoverRingAlpha: 1,
+            glowAlpha: 0.66,
+            hoverGlowAlpha: 0.86,
+            backgroundGradient: ["rgba(248,252,255,0.98)", "rgba(216,228,255,0.92)"],
             backgroundAlpha: 1,
-            highlightGradient: ["rgba(255,255,255,0.96)", "rgba(255,255,255,0.38)"],
-            highlightAlpha: 0.88,
-            stroke: { color: "rgba(108,150,214,0.45)", width: 1, alpha: 0.92 }
+            highlightGradient: ["rgba(255,255,255,0.98)", "rgba(255,255,255,0.44)"],
+            highlightAlpha: 0.92,
+            stroke: { color: "rgba(118,162,228,0.52)", width: 1.1, alpha: 0.96 }
         },
         timerCritical: {
             warning: {
