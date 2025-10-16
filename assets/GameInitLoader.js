@@ -36,6 +36,198 @@ var lastDisplayedScore = null,
     lastDisplayedQuestion = null;
 var howToPlayWaveTransferred = false;
 
+function buildVectorArrowIcon() {
+    var icon = new createjs.Container();
+
+    var glow = new createjs.Shape();
+    glow.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(245,166,255,0.55)",
+            "rgba(107,33,168,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 92)
+        .drawCircle(0, 0, 92);
+    glow.alpha = 0.75;
+    glow.mouseEnabled = false;
+    glow.mouseChildren = false;
+
+    var arrow = new createjs.Shape();
+    var g = arrow.graphics;
+    g.clear();
+    g.setStrokeStyle(4, "round", "round");
+    g.beginLinearGradientStroke([
+        "rgba(255,255,255,0.9)",
+        "rgba(253,168,255,0.4)"
+    ], [0, 1], -68, -36, 70, 38);
+    g.beginLinearGradientFill([
+        "#F8A1FF",
+        "#C084FC",
+        "#7C3AED"
+    ], [0, 0.45, 1], -72, -32, 78, 36);
+    g.moveTo(-78, -20);
+    g.quadraticCurveTo(-24, -52, -4, -48);
+    g.lineTo(84, 0);
+    g.lineTo(-4, 48);
+    g.quadraticCurveTo(-24, 52, -78, 20);
+    g.closePath();
+
+    var accent = new createjs.Shape();
+    accent.graphics
+        .clear()
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.92)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], -44, -20, 20, 24)
+        .moveTo(-52, -12)
+        .quadraticCurveTo(-4, -32, 18, -6)
+        .lineTo(-8, 16)
+        .quadraticCurveTo(-36, 24, -52, 8)
+        .closePath();
+
+    icon.addChild(glow, arrow, accent);
+    icon.shadow = new createjs.Shadow("rgba(16,12,48,0.35)", 0, 12, 26);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.cache(-120, -90, 240, 180);
+
+    icon.clone = function () {
+        var clone = buildVectorArrowIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
+function buildVectorHandIcon() {
+    var icon = new createjs.Container();
+
+    var shadow = new createjs.Shape();
+    shadow.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(22,16,56,0.35)",
+            "rgba(22,16,56,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 86)
+        .drawEllipse(-58, 180, 116, 64);
+    shadow.alpha = 0.55;
+
+    var cuff = new createjs.Shape();
+    cuff.graphics
+        .clear()
+        .beginLinearGradientFill(["#4338CA", "#7C3AED"], [0, 1], -40, 176, 40, 228)
+        .drawRoundRectComplex(-40, 168, 80, 58, 22, 22, 30, 30);
+
+    var palm = new createjs.Shape();
+    palm.graphics
+        .clear()
+        .beginLinearGradientFill(["#FDBA74", "#FB7185", "#F472B6"], [0, 0.45, 1], -36, 78, 36, 220)
+        .drawRoundRectComplex(-38, 86, 76, 132, 38, 38, 34, 34);
+
+    var finger = new createjs.Shape();
+    finger.graphics
+        .clear()
+        .beginLinearGradientFill(["#FFE7C2", "#F97316", "#EC4899"], [0, 0.35, 1], -20, 0, 20, 160)
+        .drawRoundRect(-20, 0, 40, 158, 26);
+
+    var thumb = new createjs.Shape();
+    thumb.graphics
+        .clear()
+        .beginLinearGradientFill(["#FDBA74", "#FB7185"], [0, 1], -52, 112, 16, 168)
+        .moveTo(-32, 98)
+        .quadraticCurveTo(-64, 128, -40, 160)
+        .quadraticCurveTo(-18, 142, -4, 116)
+        .closePath();
+
+    var nailHighlight = new createjs.Shape();
+    nailHighlight.graphics
+        .clear()
+        .beginLinearGradientFill(["rgba(255,255,255,0.86)", "rgba(255,255,255,0)"] , [0, 1], -10, 14, 10, 90)
+        .drawRoundRect(-10, 16, 20, 84, 18);
+
+    var fingertipGlow = new createjs.Shape();
+    fingertipGlow.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.85)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, 24, 0, 0, 24, 38)
+        .drawCircle(0, 30, 34);
+    fingertipGlow.alpha = 0.9;
+
+    icon.addChild(shadow, cuff, palm, thumb, finger, nailHighlight, fingertipGlow);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.shadow = new createjs.Shadow("rgba(18,16,48,0.28)", 0, 10, 26);
+    icon.cache(-100, -10, 200, 260);
+
+    icon.clone = function () {
+        var clone = buildVectorHandIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
+function buildVectorCursorIcon() {
+    var icon = new createjs.Container();
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(198,181,255,0.55)",
+            "rgba(198,181,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 72)
+        .drawCircle(0, 0, 72);
+    halo.alpha = 0.85;
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .clear()
+        .beginLinearGradientFill(["#22D3EE", "#6366F1"], [0, 1], -32, -32, 36, 36)
+        .drawCircle(0, 0, 32);
+    inner.shadow = new createjs.Shadow("rgba(14,18,48,0.35)", 0, 8, 20);
+
+    var ring = new createjs.Shape();
+    ring.graphics
+        .clear()
+        .setStrokeStyle(4)
+        .beginLinearGradientStroke(["rgba(255,255,255,0.95)", "rgba(255,255,255,0.35)"], [0, 1], -34, -34, 34, 34)
+        .drawCircle(0, 0, 36);
+
+    var tip = new createjs.Shape();
+    tip.graphics
+        .clear()
+        .beginLinearGradientFill(["#F8FAFC", "#C084FC"], [0, 1], -12, -40, 28, 20)
+        .moveTo(-12, -12)
+        .lineTo(28, 12)
+        .lineTo(0, 44)
+        .closePath();
+    tip.shadow = new createjs.Shadow("rgba(18,16,46,0.3)", 0, 6, 16);
+
+    icon.addChild(halo, inner, ring, tip);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.shadow = new createjs.Shadow("rgba(18,16,48,0.22)", 0, 8, 20);
+    icon.cache(-90, -90, 180, 180);
+
+    icon.clone = function () {
+        var clone = buildVectorCursorIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -2650,16 +2842,18 @@ function doneLoading(event) {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (id == "arrow1") {
 
-                arrow1 = new createjs.Bitmap(preload.getResult('arrow1'));
+                arrow1 = buildVectorArrowIcon();
                 container.parent.addChild(arrow1);
                 arrow1.visible = false;
+                arrow1.scaleX = arrow1.scaleY = 0.78;
                 continue;
             }
             if (id == "fingure") {
 
-                fingure = new createjs.Bitmap(preload.getResult('fingure'));
+                fingure = buildVectorHandIcon();
                 container.parent.addChild(fingure);
                 fingure.visible = false;
+                fingure.scaleX = fingure.scaleY = 0.62;
                 continue;
             }
             ///////////////////////////////////////////////////////bg////////////////////////////
@@ -3018,9 +3212,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "handCursor") {
-                handCursor = new createjs.Bitmap(preload.getResult('handCursor'));
+                handCursor = buildVectorCursorIcon();
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
+                handCursor.scaleX = handCursor.scaleY = 0.9;
 
                 continue;
             }
