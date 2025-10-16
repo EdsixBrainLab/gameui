@@ -51,9 +51,11 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(104,122,255,0.98)", "rgba(162,108,255,0.96)"],
                 accent: ["rgba(255,210,158,0.86)", "rgba(255,162,132,0.45)"],
                 iconStyle: {
-                    fill: "#FFE68D",
-                    strokeColor: "rgba(38,30,92,0.46)",
-                    strokeWidth: 2.4
+                    fill: "#FCD34D",
+                    gradient: ["#FFF2C2", "#F59E0B"],
+                    strokeColor: "rgba(24,16,64,0.4)",
+                    strokeWidth: 2.4,
+                    shadow: { color: "rgba(5,10,32,0.55)", x: 0, y: 3, blur: 12 }
                 },
                 ambient: {
                     halo: "rgba(255,230,170,0.85)",
@@ -68,9 +70,11 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(92,150,255,0.97)", "rgba(148,126,255,0.95)"],
                 accent: ["rgba(156,228,255,0.74)", "rgba(132,184,255,0.4)"],
                 iconStyle: {
-                    fill: "#6EE7FF",
-                    strokeColor: "#98E2FF",
-                    strokeWidth: 3.2
+                    fill: "#60A5FA",
+                    gradient: ["#BFE7FF", "#6366F1"],
+                    strokeColor: "#7DD3FC",
+                    strokeWidth: 3.2,
+                    shadow: { color: "rgba(6,14,40,0.5)", x: 0, y: 3, blur: 12 }
                 },
                 ambient: {
                     halo: "rgba(148,220,255,0.9)",
@@ -85,8 +89,9 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(74,206,230,0.97)", "rgba(112,158,255,0.95)"],
                 accent: ["rgba(134,244,216,0.76)", "rgba(144,202,255,0.42)"],
                 iconStyle: {
-                    strokeColor: "#6BE0C3",
-                    strokeWidth: 3.2
+                    strokeColor: "#7CF5DA",
+                    strokeWidth: 3.2,
+                    shadow: { color: "rgba(4,18,36,0.5)", x: 0, y: 3, blur: 10 }
                 },
                 ambient: {
                     halo: "rgba(134,244,216,0.88)",
@@ -178,8 +183,10 @@ var HUD_THEME_PRESETS = {
                 accent: ["rgba(255,189,116,0.72)", "rgba(255,173,128,0.32)"],
                 iconStyle: {
                     fill: "#F97316",
-                    strokeColor: "rgba(184,96,24,0.4)",
-                    strokeWidth: 2.2
+                    gradient: ["#FFE0B3", "#F97316"],
+                    strokeColor: "rgba(191,98,28,0.55)",
+                    strokeWidth: 2.4,
+                    shadow: { color: "rgba(152,64,18,0.3)", x: 0, y: 2, blur: 10 }
                 },
                 ambient: {
                     halo: "rgba(255,215,170,0.9)",
@@ -194,9 +201,11 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(230,238,255,0.98)", "rgba(204,216,255,0.96)"],
                 accent: ["rgba(164,210,255,0.7)", "rgba(178,176,255,0.32)"],
                 iconStyle: {
-                    fill: "#0EA5E9",
-                    strokeColor: "#6366F1",
-                    strokeWidth: 3.2
+                    fill: "#2563EB",
+                    gradient: ["#CFE1FF", "#6366F1"],
+                    strokeColor: "#1E40AF",
+                    strokeWidth: 3.2,
+                    shadow: { color: "rgba(37,99,235,0.28)", x: 0, y: 2, blur: 10 }
                 },
                 ambient: {
                     halo: "rgba(188,214,255,0.88)",
@@ -211,8 +220,9 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(222,246,252,0.98)", "rgba(188,232,242,0.96)"],
                 accent: ["rgba(148,232,208,0.7)", "rgba(156,214,255,0.3)"],
                 iconStyle: {
-                    strokeColor: "#0F766E",
-                    strokeWidth: 3.2
+                    strokeColor: "#0D9488",
+                    strokeWidth: 3.2,
+                    shadow: { color: "rgba(13,148,136,0.24)", x: 0, y: 2, blur: 10 }
                 },
                 ambient: {
                     halo: "rgba(178,240,224,0.9)",
@@ -1653,6 +1663,45 @@ function startHudIconAmbientLoop(card, type) {
     }
 }
 
+function ensureHudCardAmbientPulse(card) {
+    if (!card) {
+        return;
+    }
+
+    if (card.highlight) {
+        var highlight = card.highlight;
+        var baseAlpha = typeof highlight.baseAlpha === "number" ? highlight.baseAlpha : highlight.alpha || 0.6;
+        highlight.baseAlpha = baseAlpha;
+        highlight.alpha = baseAlpha;
+        createjs.Tween.removeTweens(highlight);
+        createjs.Tween.get(highlight, { loop: true })
+            .to({ alpha: baseAlpha * 1.08 }, 1800, createjs.Ease.sineInOut)
+            .to({ alpha: baseAlpha * 0.72 }, 1800, createjs.Ease.sineInOut);
+    }
+
+    if (card.glassOverlay && card.glassOverlay.visible !== false) {
+        var glass = card.glassOverlay;
+        var glassAlpha = typeof glass.__baseAlpha === "number" ? glass.__baseAlpha : (typeof glass.alpha === "number" ? glass.alpha : 0.6);
+        glass.__baseAlpha = glassAlpha;
+        glass.alpha = glassAlpha;
+        createjs.Tween.removeTweens(glass);
+        createjs.Tween.get(glass, { loop: true })
+            .to({ alpha: glassAlpha * 1.12 }, 2200, createjs.Ease.sineInOut)
+            .to({ alpha: glassAlpha * 0.82 }, 2200, createjs.Ease.sineInOut);
+    }
+
+    if (card.bottomGlow && card.bottomGlow.visible !== false) {
+        var glow = card.bottomGlow;
+        var glowAlpha = typeof glow.__baseAlpha === "number" ? glow.__baseAlpha : (typeof glow.alpha === "number" ? glow.alpha : 0.5);
+        glow.__baseAlpha = glowAlpha;
+        glow.alpha = glowAlpha;
+        createjs.Tween.removeTweens(glow);
+        createjs.Tween.get(glow, { loop: true })
+            .to({ alpha: glowAlpha * 1.18 }, 2400, createjs.Ease.sineInOut)
+            .to({ alpha: glowAlpha * 0.68 }, 2400, createjs.Ease.sineInOut);
+    }
+}
+
 function burstHudAmbient(card) {
     if (!card || !card.__ambientDecor) {
         return;
@@ -1861,6 +1910,7 @@ function applyHudThemeToCard(card, type, theme) {
 
     updateHudIconAmbientDecor(card, type, theme);
     restartIconIdleAnimation(card, type);
+    ensureHudCardAmbientPulse(card);
 }
 
 function applyHudThemeToQuestionProgress(theme) {
@@ -2120,6 +2170,17 @@ function mergeIconStyle(base, override) {
         if (typeof base.strokeWidth !== "undefined") {
             result.strokeWidth = base.strokeWidth;
         }
+        if (base.gradient && base.gradient.length) {
+            result.gradient = base.gradient.slice();
+        }
+        if (base.shadow) {
+            result.shadow = {
+                color: base.shadow.color,
+                x: typeof base.shadow.x === "number" ? base.shadow.x : 0,
+                y: typeof base.shadow.y === "number" ? base.shadow.y : 0,
+                blur: typeof base.shadow.blur === "number" ? base.shadow.blur : 0
+            };
+        }
     }
 
     if (override) {
@@ -2136,6 +2197,65 @@ function mergeIconStyle(base, override) {
             if (typeof override.strokeWidth !== "undefined") {
                 result.strokeWidth = override.strokeWidth;
             }
+            if (override.gradient && override.gradient.length) {
+                result.gradient = override.gradient.slice();
+            }
+            if (override.shadow) {
+                result.shadow = {
+                    color: override.shadow.color,
+                    x: typeof override.shadow.x === "number" ? override.shadow.x : 0,
+                    y: typeof override.shadow.y === "number" ? override.shadow.y : 0,
+                    blur: typeof override.shadow.blur === "number" ? override.shadow.blur : 0
+                };
+            }
+        }
+    }
+
+    return result;
+}
+
+function normalizeDecorConfig(config, fallback) {
+    var result = {};
+
+    if (typeof config === "string") {
+        result.color = config;
+    } else if (config && typeof config === "object") {
+        if (typeof config.color !== "undefined") {
+            result.color = config.color;
+        }
+        if (typeof config.alpha === "number") {
+            result.alpha = config.alpha;
+        }
+        if (typeof config.width === "number") {
+            result.width = config.width;
+        }
+        if (config.colors && config.colors.length) {
+            result.colors = cloneArray(config.colors);
+        }
+        if (typeof config.heightRatio === "number") {
+            result.heightRatio = config.heightRatio;
+        }
+    }
+
+    if (typeof fallback === "string") {
+        fallback = { color: fallback };
+    }
+
+    if (fallback && typeof fallback === "object") {
+        if (typeof result.color === "undefined" && typeof fallback.color !== "undefined") {
+            result.color = fallback.color;
+        }
+        if (typeof result.alpha === "undefined" && typeof fallback.alpha === "number") {
+            result.alpha = fallback.alpha;
+        }
+        if (typeof result.width === "undefined" && typeof fallback.width === "number") {
+            result.width = fallback.width;
+        }
+        if (!result.colors && fallback.colors && fallback.colors.length) {
+            result.colors = cloneArray(fallback.colors);
+        }
+        if (typeof result.heightRatio === "undefined" && typeof fallback.heightRatio === "number") {
+            result.heightRatio = fallback.heightRatio;
         }
     }
 
@@ -3163,30 +3283,81 @@ function drawHudIcon(iconShape, type, overrideStyle) {
 
     switch (type) {
         case "score":
-            var starColor = iconStyle.fill || "#FACC6B";
-            iconShape.graphics.beginFill(starColor).drawPolyStar(0, 0, 14, 5, 0.55, -90);
+            var starColors = (iconStyle.gradient && iconStyle.gradient.length) ? iconStyle.gradient : [iconStyle.fill || "#FACC6B", iconStyle.fill || "#FACC6B"];
+            iconShape.graphics
+                .beginLinearGradientFill(starColors, [0, 1], -14, -14, 14, 14)
+                .drawPolyStar(0, 0, 14, 5, 0.55, -90);
+            var starHighlight = starColors[0] || starColors[starColors.length - 1];
+            iconShape.graphics
+                .beginRadialGradientFill([
+                    applyAlphaToColor(starHighlight, 0.85),
+                    applyAlphaToColor(starHighlight, 0)
+                ], [0, 1], 0, 0, 0, 0, 0, 9)
+                .drawPolyStar(0, 0, 9, 5, 0.5, -90);
             if (iconStyle.strokeColor) {
-                iconShape.graphics.setStrokeStyle(iconStyle.strokeWidth || 2).beginStroke(iconStyle.strokeColor).drawPolyStar(0, 0, 14, 5, 0.55, -90);
+                iconShape.graphics
+                    .setStrokeStyle(iconStyle.strokeWidth || 2)
+                    .beginStroke(iconStyle.strokeColor)
+                    .drawPolyStar(0, 0, 14, 5, 0.55, -90);
             }
             break;
         case "timer":
             var strokeColor = iconStyle.strokeColor || iconStyle.fill || "#66B9FF";
             var strokeWidth = iconStyle.strokeWidth || 3;
-            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).drawCircle(0, 0, 14);
-            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).moveTo(0, 0).lineTo(0, -10);
-            iconShape.graphics.setStrokeStyle(strokeWidth).beginStroke(strokeColor).moveTo(0, 0).lineTo(9, 4);
+            iconShape.graphics
+                .beginRadialGradientFill([
+                    applyAlphaToColor(strokeColor, 0.25),
+                    applyAlphaToColor(strokeColor, 0)
+                ], [0, 1], 0, 0, 0, 0, 0, 7)
+                .drawCircle(0, 0, 7);
+            iconShape.graphics
+                .setStrokeStyle(strokeWidth)
+                .beginStroke(strokeColor)
+                .drawCircle(0, 0, 14);
+            iconShape.graphics
+                .setStrokeStyle(strokeWidth)
+                .beginStroke(strokeColor)
+                .moveTo(0, 0)
+                .lineTo(0, -10);
+            iconShape.graphics
+                .setStrokeStyle(strokeWidth)
+                .beginStroke(strokeColor)
+                .moveTo(0, 0)
+                .lineTo(9, 4);
             break;
         case "question":
             var fillColor = iconStyle.fill || "#6EE7B7";
-            iconShape.graphics.beginFill(fillColor).drawRoundRect(-11, -11, 22, 22, 6);
+            var questionColors = (iconStyle.gradient && iconStyle.gradient.length) ? iconStyle.gradient : [fillColor, fillColor];
+            iconShape.graphics
+                .beginLinearGradientFill(questionColors, [0, 1], -11, -11, 11, 11)
+                .drawRoundRect(-11, -11, 22, 22, 6);
+            iconShape.graphics
+                .beginRadialGradientFill([
+                    applyAlphaToColor(questionColors[0], 0.8),
+                    applyAlphaToColor(questionColors[0], 0)
+                ], [0, 1], 0, -6, 0, 0, 0, 10)
+                .drawRoundRect(-9, -9, 18, 18, 5);
             if (iconStyle.strokeColor) {
-                iconShape.graphics.setStrokeStyle(iconStyle.strokeWidth || 3, "round").beginStroke(iconStyle.strokeColor);
+                iconShape.graphics
+                    .setStrokeStyle(iconStyle.strokeWidth || 3, "round")
+                    .beginStroke(iconStyle.strokeColor)
+                    .drawRoundRect(-11, -11, 22, 22, 6);
             }
-            iconShape.graphics.endStroke();
             break;
     }
 
     iconShape.__iconStyle = iconStyle;
+
+    if (iconStyle.shadow) {
+        iconShape.shadow = new createjs.Shadow(
+            iconStyle.shadow.color || "rgba(0,0,0,0.3)",
+            typeof iconStyle.shadow.x === "number" ? iconStyle.shadow.x : 0,
+            typeof iconStyle.shadow.y === "number" ? iconStyle.shadow.y : 0,
+            typeof iconStyle.shadow.blur === "number" ? iconStyle.shadow.blur : 0
+        );
+    } else {
+        iconShape.shadow = null;
+    }
 }
 
 function createHudCard(label, type) {
@@ -3687,7 +3858,10 @@ function flashHudCardHighlight(card) {
 
     createjs.Tween.get(highlight, { override: true })
         .to({ alpha: targetAlpha }, 150, createjs.Ease.quadOut)
-        .to({ alpha: baseAlpha }, 280, createjs.Ease.quadIn);
+        .to({ alpha: baseAlpha }, 280, createjs.Ease.quadIn)
+        .call(function () {
+            ensureHudCardAmbientPulse(card);
+        });
 }
 function animateScoreCelebration() {
     if (!scoreCardContainer) {
