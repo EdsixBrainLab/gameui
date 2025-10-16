@@ -4942,7 +4942,7 @@ function applyHowToPlayButtonState(button, state) {
         if (label) {
             label.text = "Start";
             label.font = "700 28px 'Baloo 2'";
-            label.color = "#FFFFFF";
+            label.color = "#F7FAFF";
         }
 
         button.shadow = new createjs.Shadow("rgba(10, 12, 34, 0.55)", 0, 22, 44);
