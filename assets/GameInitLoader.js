@@ -36,6 +36,149 @@ var lastDisplayedScore = null,
     lastDisplayedQuestion = null;
 var howToPlayWaveTransferred = false;
 
+function buildVectorArrowIcon() {
+    var icon = new createjs.Container();
+    var width = 112;
+    var height = 132;
+    var halfW = width / 2;
+    var halfH = height / 2;
+
+    var arrow = new createjs.Shape();
+    arrow.graphics
+        .clear()
+        .beginLinearGradientFill(["#8B5CF6", "#EC4899"], [0, 1], -halfW, -halfH, halfW, halfH)
+        .moveTo(-halfW * 0.9, -halfH * 0.35)
+        .lineTo(-halfW * 0.15, -halfH * 0.75)
+        .lineTo(halfW, 0)
+        .lineTo(-halfW * 0.15, halfH * 0.75)
+        .lineTo(-halfW * 0.9, halfH * 0.3)
+        .lineTo(-halfW * 0.9, -halfH * 0.35)
+        .closePath()
+        .endFill();
+    arrow.shadow = new createjs.Shadow("rgba(12,18,42,0.35)", 0, 10, 22);
+
+    var accent = new createjs.Shape();
+    accent.graphics
+        .clear()
+        .beginLinearGradientFill(["rgba(255,255,255,0.75)", "rgba(255,255,255,0)", "rgba(255,255,255,0.18)"], [0, 0.5, 1], -halfW, -halfH, halfW, halfH)
+        .moveTo(-halfW * 0.55, -halfH * 0.1)
+        .lineTo(-halfW * 0.05, -halfH * 0.35)
+        .lineTo(halfW * 0.25, -halfH * 0.1)
+        .lineTo(-halfW * 0.25, halfH * 0.4)
+        .closePath()
+        .endFill();
+
+    icon.addChild(arrow, accent);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.regX = 0;
+    icon.regY = 0;
+    icon.cache(-halfW - 18, -halfH - 18, width + 36, height + 36);
+
+    icon.clone = function () {
+        var clone = buildVectorArrowIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+function buildVectorHandIcon() {
+    var icon = new createjs.Container();
+
+    var finger = new createjs.Shape();
+    finger.graphics
+        .clear()
+        .beginLinearGradientFill(["#F59E0B", "#F97316", "#EC4899"], [0, 0.45, 1], 0, 0, 0, 160)
+        .drawRoundRectComplex(-18, 0, 36, 140, 20, 20, 26, 26)
+        .endFill();
+    finger.shadow = new createjs.Shadow("rgba(15,20,40,0.35)", 0, 10, 20);
+
+    var palm = new createjs.Shape();
+    palm.graphics
+        .clear()
+        .beginLinearGradientFill(["#FDBA74", "#FB7185"], [0, 1], 0, 80, 0, 190)
+        .drawRoundRectComplex(-34, 80, 68, 110, 34, 34, 32, 32)
+        .endFill();
+
+    var cuff = new createjs.Shape();
+    cuff.graphics
+        .clear()
+        .beginLinearGradientFill(["#2563EB", "#7C3AED"], [0, 1], -32, 182, 32, 218)
+        .drawRoundRectComplex(-36, 170, 72, 46, 18, 18, 24, 24)
+        .endFill();
+
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .clear()
+        .beginLinearGradientFill(["rgba(255,255,255,0.9)", "rgba(255,255,255,0)", "rgba(255,255,255,0.15)"], [0, 0.4, 1], -12, 10, 12, 160)
+        .drawRoundRect(-12, 12, 24, 110, 14)
+        .endFill();
+
+    icon.addChild(cuff, palm, finger, highlight);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.regX = 0;
+    icon.regY = 0;
+    icon.cache(-60, -20, 120, 240);
+
+    icon.clone = function () {
+        var clone = buildVectorHandIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+function buildVectorCursorIcon() {
+    var icon = new createjs.Container();
+
+    var outer = new createjs.Shape();
+    outer.graphics
+        .clear()
+        .beginRadialGradientFill(["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"], [0, 1], 0, 0, 0, 0, 0, 56)
+        .drawCircle(0, 0, 56)
+        .endFill();
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .clear()
+        .beginLinearGradientFill(["#22D3EE", "#6366F1"], [0, 1], -24, -24, 32, 32)
+        .drawCircle(0, 0, 28)
+        .endFill();
+    inner.shadow = new createjs.Shadow("rgba(11,18,34,0.3)", 0, 6, 16);
+
+    var tip = new createjs.Shape();
+    tip.graphics
+        .clear()
+        .beginLinearGradientFill(["#F8FAFC", "#C7D2FE"], [0, 1], -10, -36, 18, 6)
+        .moveTo(-10, -10)
+        .lineTo(22, 6)
+        .lineTo(0, 32)
+        .closePath()
+        .endFill();
+
+    icon.addChild(outer, inner, tip);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.regX = 0;
+    icon.regY = 0;
+    icon.cache(-60, -60, 120, 120);
+
+    icon.clone = function () {
+        var clone = buildVectorCursorIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -2650,16 +2793,18 @@ function doneLoading(event) {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (id == "arrow1") {
 
-                arrow1 = new createjs.Bitmap(preload.getResult('arrow1'));
+                arrow1 = buildVectorArrowIcon();
                 container.parent.addChild(arrow1);
                 arrow1.visible = false;
+                arrow1.scaleX = arrow1.scaleY = 0.78;
                 continue;
             }
             if (id == "fingure") {
 
-                fingure = new createjs.Bitmap(preload.getResult('fingure'));
+                fingure = buildVectorHandIcon();
                 container.parent.addChild(fingure);
                 fingure.visible = false;
+                fingure.scaleX = fingure.scaleY = 0.62;
                 continue;
             }
             ///////////////////////////////////////////////////////bg////////////////////////////
@@ -3018,9 +3163,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "handCursor") {
-                handCursor = new createjs.Bitmap(preload.getResult('handCursor'));
+                handCursor = buildVectorCursorIcon();
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
+                handCursor.scaleX = handCursor.scaleY = 0.9;
 
                 continue;
             }

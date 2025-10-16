@@ -21,18 +21,56 @@ var ArrowXArr = [, 500, 940, 720, 280],FingXArr = [, 525, 965, 745, 305]
 var ArrowYArr = [, 490, 490, 490, 490], FingYArr = [, 600, 600, 600, 600]
 var introClueArr = []
 
+function getFallbackChoiceBuilder() {
+    var txt = new createjs.Text("", "700 64px 'Nunito Sans'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.mouseEnabled = true;
+    txt.mouseChildren = false;
+    txt.__baseScale = 0.8;
+    return txt;
+}
+
+function getFallbackClueBuilder() {
+    var txt = new createjs.Text("", "700 60px 'Nunito Sans'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 1;
+    return txt;
+}
+
+function getFallbackLetterUpdater() {
+    return function (display, letter) {
+        if (!display) {
+            return;
+        }
+        var value = letter ? String(letter).toUpperCase() : "";
+        display.text = value;
+        display.alpha = value ? 1 : 0;
+    };
+}
+
+var buildIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_buildChoiceLetterDisplay === "function" && window.SA_buildChoiceLetterDisplay) || getFallbackChoiceBuilder;
+var updateIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_updateChoiceLetterDisplay === "function" && window.SA_updateChoiceLetterDisplay) || getFallbackLetterUpdater();
+var buildIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_buildClueLetterDisplay === "function" && window.SA_buildClueLetterDisplay) || getFallbackClueBuilder;
+var updateIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_updateClueLetterDisplay === "function" && window.SA_updateClueLetterDisplay) || getFallbackLetterUpdater();
+
 
 function commongameintro() {
     introClueArr = []
     introTitle = Title.clone()
-    introClu1 = clueMc.clone()
-    introClu2 = clueMc.clone()
-    introClu3 = clueMc.clone()
-    introClu4 = clueMc.clone()
-    introChoice1 = choice1.clone()
-    introChoice2 = choice1.clone()
-    introChoice3 = choice1.clone()
-    introChoice4 = choice1.clone()
+    introClu1 = buildIntroClueLetter()
+    introClu2 = buildIntroClueLetter()
+    introClu3 = buildIntroClueLetter()
+    introClu4 = buildIntroClueLetter()
+    introChoice1 = buildIntroChoiceLetter()
+    introChoice2 = buildIntroChoiceLetter()
+    introChoice3 = buildIntroChoiceLetter()
+    introChoice4 = buildIntroChoiceLetter()
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
 console.log("container.width ::"+container.width)
@@ -56,51 +94,51 @@ console.log("canvas.width ::"+canvas.width)
     introChoice1.y = introChoice1Y;
     introChoice1.scaleX = introChoice1.scaleY = .8;
     introChoice1.visible = false;
-    introChoice1.gotoAndStop(13);
+    updateIntroChoiceLetter(introChoice1, "N");
 
     container.parent.addChild(introChoice2)
     introChoice2.visible = false;
     introChoice2.x = introChoice2X;
     introChoice2.y = introChoice2Y;
     introChoice2.scaleX = introChoice2.scaleY = .8;
-    introChoice2.gotoAndStop(18)
+    updateIntroChoiceLetter(introChoice2, "S")
     container.parent.addChild(introChoice3)
     introChoice3.visible = false;
     introChoice3.x = introChoice3X;
     introChoice3.y = introChoice3Y;
     introChoice3.scaleX = introChoice3.scaleY = .8;
-    introChoice3.gotoAndStop(8)
+    updateIntroChoiceLetter(introChoice3, "I")
     container.parent.addChild(introChoice4)
     introChoice4.visible = false;
     introChoice4.x = introChoice4X;
     introChoice4.y = introChoice4Y;
     introChoice4.scaleX = introChoice4.scaleY = .8;
-    introChoice4.gotoAndStop(10)
-    cluegotoArr = [, 18, 10, 8, 13]
+    updateIntroChoiceLetter(introChoice4, "K")
+    cluegotoArr = ["", "S", "K", "I", "N"]
     container.parent.addChild(introClu1)
     introClu1.x = introClu1X;
     introClu1.y = introClu1Y;
     introClu1.scaleX = introClu1.scaleY = 1;
     introClu1.visible = false;
-    introClu1.gotoAndStop(26);
+    updateIntroClueLetter(introClu1, "");
     container.parent.addChild(introClu2)
     introClu2.visible = false;
     introClu2.x = introClu2X;
     introClu2.y = introClu2Y;
     introClu2.scaleX = introClu2.scaleY = 1;
-    introClu2.gotoAndStop(26)
+    updateIntroClueLetter(introClu2, "")
     container.parent.addChild(introClu3)
     introClu3.visible = false;
     introClu3.x = introClu3X;
     introClu3.y = introClu3Y;
     introClu3.scaleX = introClu3.scaleY = 1;
-    introClu3.gotoAndStop(26)
+    updateIntroClueLetter(introClu3, "")
     container.parent.addChild(introClu4)
     introClu4.visible = false;
     introClu4.x = introClu4X;
     introClu4.y = introClu4Y;
     introClu4.scaleX = introClu4.scaleY = 1;
-    introClu4.gotoAndStop(26)
+    updateIntroClueLetter(introClu4, "")
     introClueArr.push("", introClu1, introClu2, introClu3, introClu4)
 
     introQuestxt.alpha = 0;
@@ -136,7 +174,7 @@ function choiceTween() {
     var val = 700
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = true;
-        introClueArr[i].gotoAndStop(26)
+        updateIntroClueLetter(introClueArr[i], "")
         this["introChoice" + i].y = 590, this["introChoice" + i].x = this["introChoice" + i].x;
         this["introChoice" + i].visible = true;
         this["introChoice" + i].alpha = 0;
@@ -156,7 +194,7 @@ function handleComplete4_1() {
     if (TempIntroVal == 0) { }
     else {
         introClueArr[TempIntroVal].visible = true;
-        introClueArr[TempIntroVal].gotoAndStop(cluegotoArr[TempIntroVal])
+        updateIntroClueLetter(introClueArr[TempIntroVal], cluegotoArr[TempIntroVal])
 
         if( TempIntroVal == 1 )
         {
@@ -257,7 +295,7 @@ this.onComplete1 = function (e) {
 this.onComplete2 = function (e) {
     createjs.Tween.removeAllTweens();
     introClueArr[TempIntroVal].visible = true;
-    introClueArr[TempIntroVal].gotoAndStop(cluegotoArr[TempIntroVal])
+    updateIntroClueLetter(introClueArr[TempIntroVal], cluegotoArr[TempIntroVal])
     if( TempIntroVal == 4 )
     {
         console.log("TempIntroVal"+TempIntroVal);
