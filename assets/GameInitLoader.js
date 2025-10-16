@@ -48,70 +48,94 @@ var HUD_THEME_PRESETS = {
     dark: {
         cards: {
             score: {
-                background: ["rgba(88,60,185,0.92)", "rgba(206,106,255,0.88)"],
-                accent: ["rgba(255,206,126,0.62)", "rgba(255,176,92,0.26)"],
+                background: ["rgba(104,122,255,0.98)", "rgba(162,108,255,0.96)"],
+                accent: ["rgba(255,210,158,0.86)", "rgba(255,162,132,0.45)"],
                 iconStyle: {
-                    fill: "#FFD166",
-                    strokeColor: "rgba(26,20,66,0.55)",
-                    strokeWidth: 2
+                    fill: "#FFE68D",
+                    strokeColor: "rgba(38,30,92,0.46)",
+                    strokeWidth: 2.4
+                },
+                ambient: {
+                    halo: "rgba(255,230,170,0.85)",
+                    haloAlpha: 0.72,
+                    ring: "rgba(255,188,120,0.82)",
+                    ringAlpha: 0.74,
+                    spark: "#FFF8C7",
+                    sparkAlpha: 0.92
                 }
             },
             question: {
-                background: ["rgba(74,88,210,0.92)", "rgba(156,102,255,0.88)"],
-                accent: ["rgba(148,220,255,0.6)", "rgba(130,168,255,0.28)"],
+                background: ["rgba(92,150,255,0.97)", "rgba(148,126,255,0.95)"],
+                accent: ["rgba(156,228,255,0.74)", "rgba(132,184,255,0.4)"],
                 iconStyle: {
-                    fill: "#6EE7B7",
-                    strokeColor: "#86D5FF",
-                    strokeWidth: 3
+                    fill: "#6EE7FF",
+                    strokeColor: "#98E2FF",
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(148,220,255,0.9)",
+                    haloAlpha: 0.7,
+                    ring: "rgba(132,184,255,0.86)",
+                    ringAlpha: 0.76,
+                    spark: "#6EE7FF",
+                    sparkAlpha: 0.9
                 }
             },
             timer: {
-                background: ["rgba(58,168,218,0.92)", "rgba(102,128,255,0.9)"],
-                accent: ["rgba(126,232,196,0.62)", "rgba(128,198,255,0.28)"],
+                background: ["rgba(74,206,230,0.97)", "rgba(112,158,255,0.95)"],
+                accent: ["rgba(134,244,216,0.76)", "rgba(144,202,255,0.42)"],
                 iconStyle: {
                     strokeColor: "#6BE0C3",
-                    strokeWidth: 3
+                    strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(134,244,216,0.88)",
+                    haloAlpha: 0.7,
+                    ring: "rgba(136,208,255,0.84)",
+                    ringAlpha: 0.74,
+                    spark: "#A5FFE8",
+                    sparkAlpha: 0.9
                 }
             }
         },
         cardBackgroundAlpha: 1,
         cardAccentAlpha: 1,
         cardHighlight: {
-            colors: ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.05)"],
-            alpha: 0.42
+            colors: ["rgba(255,255,255,0.52)", "rgba(255,255,255,0.08)"],
+            alpha: 0.48
         },
         cardDecor: {
-            outline: { color: "rgba(255,255,255,0.38)", alpha: 0.92, width: 1 },
-            accentOutline: { color: "rgba(255,255,255,0.46)", alpha: 0.88, width: 1 },
-            glass: { colors: ["rgba(255,255,255,0.78)", "rgba(255,255,255,0.12)"], alpha: 0.66, heightRatio: 0.6 },
-            bottomGlow: { colors: ["rgba(255,147,226,0)", "rgba(123,102,255,0.32)"], alpha: 0.6 }
+            outline: { color: "rgba(202,218,255,0.82)", alpha: 0.96, width: 1.2 },
+            accentOutline: { color: "rgba(226,208,255,0.88)", alpha: 0.94, width: 1.1 },
+            glass: { colors: ["rgba(255,255,255,0.86)", "rgba(255,255,255,0.16)"], alpha: 0.78, heightRatio: 0.64 },
+            bottomGlow: { colors: ["rgba(124,156,255,0.1)", "rgba(208,140,255,0.5)"], alpha: 0.72 }
         },
         textStyles: {
             label: {
-                color: "#EEF4FF",
-                shadow: { color: "rgba(8,20,48,0.6)", x: 0, y: 2, blur: 6 }
+                color: "#F7F9FF",
+                shadow: { color: "rgba(4,10,24,0.72)", x: 0, y: 3, blur: 9 }
             },
             value: {
-                color: "#FDFEFF",
-                shadow: { color: "rgba(6,16,40,0.7)", x: 0, y: 4, blur: 10 }
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,12,30,0.76)", x: 0, y: 5, blur: 14 }
             },
             timerValue: {
-                color: "#FDFEFF",
-                shadow: { color: "rgba(6,18,44,0.65)", x: 0, y: 4, blur: 10 }
+                color: "#FFFFFF",
+                shadow: { color: "rgba(4,12,30,0.76)", x: 0, y: 5, blur: 14 }
             }
         },
         questionProgress: {
-            background: "rgba(12,28,62,0.46)",
-            fill: ["#7B66FF", "#FF93E2"]
+            background: "rgba(18,36,76,0.5)",
+            fill: ["#8896FF", "#FF8AF2"]
         },
         controlBackground: {
-            colors: ["rgba(34,48,102,0.64)", "rgba(58,34,104,0.58)"],
-            alpha: 0.92
+            colors: ["rgba(42,62,138,0.78)", "rgba(68,46,128,0.74)"],
+            alpha: 0.96
         },
         controlGlass: {
-            highlight: { colors: ["rgba(255,255,255,0.78)", "rgba(255,255,255,0.08)"], alpha: 0.82, heightRatio: 0.6 },
-            glow: { colors: ["rgba(123,102,255,0)", "rgba(255,147,226,0.32)"], alpha: 0.6, heightRatio: 0.58 },
-            outline: { color: "rgba(198,216,255,0.5)", alpha: 0.88, width: 1 }
+            highlight: { colors: ["rgba(255,255,255,0.82)", "rgba(255,255,255,0.1)"], alpha: 0.88, heightRatio: 0.62 },
+            glow: { colors: ["rgba(120,104,255,0.12)", "rgba(255,150,230,0.38)"], alpha: 0.74, heightRatio: 0.6 },
+            outline: { color: "rgba(204,220,255,0.58)", alpha: 0.96, width: 1.1 }
         },
         controlPalette: {
             volume: { primary: "rgba(118,182,255,0.94)", glow: "rgba(118,182,255,0.62)" },
@@ -119,16 +143,16 @@ var HUD_THEME_PRESETS = {
             close: { primary: "rgba(255,140,170,0.96)", glow: "rgba(255,140,170,0.66)" }
         },
         iconWrapper: {
-            ringColor: "rgba(194,210,255,0.68)",
-            ringAlpha: 0.82,
+            ringColor: "rgba(204,218,255,0.86)",
+            ringAlpha: 0.94,
             hoverRingAlpha: 1,
-            glowAlpha: 0.66,
-            hoverGlowAlpha: 0.86,
-            backgroundGradient: ["rgba(58,84,168,0.9)", "rgba(32,40,102,0.72)"],
-            backgroundAlpha: 0.97,
-            highlightGradient: ["rgba(255,255,255,0.92)", "rgba(255,255,255,0.12)"],
-            highlightAlpha: 0.78,
-            stroke: { color: "rgba(255,255,255,0.32)", width: 1.2, alpha: 0.94 }
+            glowAlpha: 0.72,
+            hoverGlowAlpha: 0.92,
+            backgroundGradient: ["rgba(74,92,188,0.96)", "rgba(42,50,124,0.82)"],
+            backgroundAlpha: 0.98,
+            highlightGradient: ["rgba(255,255,255,0.94)", "rgba(255,255,255,0.16)"],
+            highlightAlpha: 0.82,
+            stroke: { color: "rgba(216,230,255,0.54)", width: 1.2, alpha: 0.98 }
         },
         timerCritical: {
             warning: {
@@ -143,8 +167,8 @@ var HUD_THEME_PRESETS = {
                 icon: "#8F1E2C",
                 text: "#520F18"
             },
-            normalIcon: "#86D5FF",
-            normalText: "#EEF4FF"
+            normalIcon: "#9DE9FF",
+            normalText: "#F7FAFF"
         }
     },
     light: {
@@ -156,6 +180,14 @@ var HUD_THEME_PRESETS = {
                     fill: "#F97316",
                     strokeColor: "rgba(184,96,24,0.4)",
                     strokeWidth: 2.2
+                },
+                ambient: {
+                    halo: "rgba(255,215,170,0.9)",
+                    haloAlpha: 0.78,
+                    ring: "rgba(255,188,140,0.74)",
+                    ringAlpha: 0.72,
+                    spark: "#FDBA74",
+                    sparkAlpha: 0.9
                 }
             },
             question: {
@@ -165,6 +197,14 @@ var HUD_THEME_PRESETS = {
                     fill: "#0EA5E9",
                     strokeColor: "#6366F1",
                     strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(188,214,255,0.88)",
+                    haloAlpha: 0.76,
+                    ring: "rgba(168,192,255,0.78)",
+                    ringAlpha: 0.72,
+                    spark: "#38BDF8",
+                    sparkAlpha: 0.88
                 }
             },
             timer: {
@@ -173,6 +213,14 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     strokeColor: "#0F766E",
                     strokeWidth: 3.2
+                },
+                ambient: {
+                    halo: "rgba(178,240,224,0.9)",
+                    haloAlpha: 0.76,
+                    ring: "rgba(164,214,255,0.8)",
+                    ringAlpha: 0.74,
+                    spark: "#2DD4BF",
+                    sparkAlpha: 0.88
                 }
             }
         },
@@ -1346,6 +1394,287 @@ function updateHudIconWrapper(wrapper, paletteConfig, theme) {
     }
 }
 
+function applyAlphaToColor(color, alpha) {
+    if (typeof alpha !== "number") {
+        alpha = 1;
+    }
+
+    if (!color || typeof color !== "string") {
+        return "rgba(255,255,255," + alpha + ")";
+    }
+
+    var rgbaMatch = color.match(/rgba?\(([^)]+)\)/i);
+    if (rgbaMatch) {
+        var parts = rgbaMatch[1].split(/\s*,\s*/);
+        var r = parseFloat(parts[0]);
+        var g = parseFloat(parts[1]);
+        var b = parseFloat(parts[2]);
+        if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+            return "rgba(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + "," + alpha + ")";
+        }
+    }
+
+    if (color.charAt(0) === "#") {
+        var hex = color.substring(1);
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length === 6) {
+            var rHex = parseInt(hex.substring(0, 2), 16);
+            var gHex = parseInt(hex.substring(2, 4), 16);
+            var bHex = parseInt(hex.substring(4, 6), 16);
+            if (!isNaN(rHex) && !isNaN(gHex) && !isNaN(bHex)) {
+                return "rgba(" + rHex + "," + gHex + "," + bHex + "," + alpha + ")";
+            }
+        }
+    }
+
+    return color;
+}
+
+function ensureHudIconAmbientDecor(card) {
+    if (!card || !card.effectLayer) {
+        return null;
+    }
+
+    if (!card.__ambientDecor) {
+        var layer = card.effectLayer;
+
+        var halo = new createjs.Shape();
+        halo.name = "ambientHalo";
+        halo.alpha = 0.7;
+        layer.addChild(halo);
+
+        var ring = new createjs.Shape();
+        ring.name = "ambientRing";
+        ring.alpha = 0.7;
+        layer.addChild(ring);
+
+        var orbit = new createjs.Container();
+        orbit.name = "ambientOrbit";
+        var orbitGlow = new createjs.Shape();
+        orbitGlow.name = "ambientOrbitGlow";
+        orbitGlow.alpha = 0.35;
+        orbit.addChild(orbitGlow);
+        var orb = new createjs.Shape();
+        orb.name = "ambientOrb";
+        orb.x = 18;
+        orb.alpha = 0.85;
+        orbit.addChild(orb);
+        layer.addChild(orbit);
+
+        var sparkle = new createjs.Shape();
+        sparkle.name = "ambientSparkle";
+        sparkle.alpha = 0.85;
+        layer.addChild(sparkle);
+
+        card.__ambientDecor = {
+            halo: halo,
+            ring: ring,
+            orbit: orbit,
+            orbitGlow: orbitGlow,
+            orbitOrb: orb,
+            sparkle: sparkle
+        };
+    }
+
+    return card.__ambientDecor;
+}
+
+function updateHudIconAmbientDecor(card, type, theme) {
+    if (!card) {
+        return;
+    }
+
+    var decor = ensureHudIconAmbientDecor(card);
+    if (!decor) {
+        return;
+    }
+
+    var icon = card.icon;
+    var baseX = icon ? icon.x : 0;
+    var baseY = icon ? icon.y : 0;
+
+    var cardsTheme = theme && theme.cards ? theme.cards : {};
+    var cardTheme = cardsTheme[type] || cardsTheme.score || {};
+    var ambient = cardTheme.ambient || {};
+
+    var accentColors = [];
+    if (cardTheme.accent) {
+        accentColors = Array.isArray(cardTheme.accent) ? cardTheme.accent : [cardTheme.accent];
+    }
+
+    var backgroundColors = [];
+    if (cardTheme.background) {
+        backgroundColors = Array.isArray(cardTheme.background) ? cardTheme.background : [cardTheme.background];
+    }
+
+    var haloColor = ambient.halo || (accentColors.length ? accentColors[0] : (backgroundColors.length ? backgroundColors[0] : "rgba(255,255,255,0.85)"));
+    var ringColor = ambient.ring || (accentColors.length ? accentColors[accentColors.length - 1] : haloColor);
+    var sparkColor = ambient.spark || (cardTheme.iconStyle && (cardTheme.iconStyle.fill || cardTheme.iconStyle.strokeColor)) || haloColor;
+
+    var haloAlpha = typeof ambient.haloAlpha === "number" ? ambient.haloAlpha : 0.7;
+    var ringAlpha = typeof ambient.ringAlpha === "number" ? ambient.ringAlpha : 0.72;
+    var sparkAlpha = typeof ambient.sparkAlpha === "number" ? ambient.sparkAlpha : 0.82;
+
+    if (decor.halo) {
+        decor.halo.graphics
+            .clear()
+            .beginRadialGradientFill([applyAlphaToColor(haloColor, haloAlpha), applyAlphaToColor(haloColor, 0)], [0, 1], 0, 0, 0, 0, 0, 34)
+            .drawCircle(0, 0, 28);
+        decor.halo.x = baseX;
+        decor.halo.y = baseY;
+        decor.halo.alpha = haloAlpha;
+        decor.halo.baseAlpha = haloAlpha;
+        decor.halo.scaleX = decor.halo.scaleY = 1;
+    }
+
+    if (decor.ring) {
+        decor.ring.graphics
+            .clear()
+            .setStrokeStyle(1.6)
+            .beginStroke(applyAlphaToColor(ringColor, Math.min(ringAlpha + 0.08, 1)))
+            .drawCircle(0, 0, 18);
+        decor.ring.x = baseX;
+        decor.ring.y = baseY;
+        decor.ring.alpha = ringAlpha;
+        decor.ring.baseAlpha = ringAlpha;
+        decor.ring.scaleX = decor.ring.scaleY = 1;
+    }
+
+    if (decor.orbit) {
+        decor.orbit.x = baseX;
+        decor.orbit.y = baseY;
+        decor.orbit.rotation = 0;
+        if (decor.orbitGlow) {
+            decor.orbitGlow.graphics
+                .clear()
+                .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha * 0.45), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 20)
+                .drawCircle(0, 0, 20);
+            decor.orbitGlow.alpha = sparkAlpha * 0.45;
+        }
+        if (decor.orbitOrb) {
+            decor.orbitOrb.graphics
+                .clear()
+                .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 6)
+                .drawCircle(0, 0, 6);
+            decor.orbitOrb.x = 18;
+            decor.orbitOrb.y = 0;
+            decor.orbitOrb.alpha = sparkAlpha;
+            decor.orbitOrb.baseAlpha = sparkAlpha;
+            decor.orbitOrb.scaleX = decor.orbitOrb.scaleY = 1;
+        }
+    }
+
+    if (decor.sparkle) {
+        decor.sparkle.graphics
+            .clear()
+            .beginRadialGradientFill([applyAlphaToColor(sparkColor, sparkAlpha), applyAlphaToColor(sparkColor, 0)], [0, 1], 0, 0, 0, 0, 0, 12)
+            .drawPolyStar(0, 0, 6, 5, 0.6, -90);
+        decor.sparkle.x = baseX;
+        decor.sparkle.y = baseY - 16;
+        decor.sparkle.alpha = sparkAlpha;
+        decor.sparkle.baseAlpha = sparkAlpha;
+        decor.sparkle.scaleX = decor.sparkle.scaleY = 0.8;
+    }
+
+    card.__ambientDecor = decor;
+    card.__ambientDecor.__colorsApplied = true;
+}
+
+function startHudIconAmbientLoop(card, type) {
+    if (!card) {
+        return;
+    }
+
+    var decor = card.__ambientDecor || ensureHudIconAmbientDecor(card);
+    if (!decor) {
+        return;
+    }
+
+    var icon = card.icon;
+    var baseX = icon ? icon.x : 0;
+    var baseY = icon ? icon.y : 0;
+
+    if (decor.halo) {
+        createjs.Tween.removeTweens(decor.halo);
+        decor.halo.x = baseX;
+        decor.halo.y = baseY;
+        var haloAlpha = typeof decor.halo.baseAlpha === "number" ? decor.halo.baseAlpha : decor.halo.alpha;
+        decor.halo.alpha = haloAlpha;
+        decor.halo.scaleX = decor.halo.scaleY = 1;
+        createjs.Tween.get(decor.halo, { loop: true })
+            .to({ alpha: haloAlpha * 1.15, scaleX: 1.08, scaleY: 1.08 }, 1800, createjs.Ease.sineInOut)
+            .to({ alpha: haloAlpha * 0.85, scaleX: 0.92, scaleY: 0.92 }, 1800, createjs.Ease.sineInOut);
+    }
+
+    if (decor.ring) {
+        createjs.Tween.removeTweens(decor.ring);
+        decor.ring.x = baseX;
+        decor.ring.y = baseY;
+        var ringAlpha = typeof decor.ring.baseAlpha === "number" ? decor.ring.baseAlpha : decor.ring.alpha;
+        decor.ring.alpha = ringAlpha;
+        decor.ring.scaleX = decor.ring.scaleY = 1;
+        createjs.Tween.get(decor.ring, { loop: true })
+            .to({ scaleX: 1.12, scaleY: 1.12, alpha: ringAlpha * 1.05 }, 1600, createjs.Ease.sineInOut)
+            .to({ scaleX: 0.94, scaleY: 0.94, alpha: ringAlpha * 0.7 }, 1600, createjs.Ease.sineInOut);
+    }
+
+    if (decor.orbit) {
+        createjs.Tween.removeTweens(decor.orbit);
+        decor.orbit.x = baseX;
+        decor.orbit.y = baseY;
+        decor.orbit.rotation = 0;
+        var orbitDuration = type === "timer" ? 5200 : type === "score" ? 6400 : 5600;
+        createjs.Tween.get(decor.orbit, { loop: true })
+            .to({ rotation: 360 }, orbitDuration);
+    }
+
+    if (decor.orbitOrb) {
+        createjs.Tween.removeTweens(decor.orbitOrb);
+        var orbAlpha = typeof decor.orbitOrb.baseAlpha === "number" ? decor.orbitOrb.baseAlpha : decor.orbitOrb.alpha;
+        decor.orbitOrb.alpha = orbAlpha;
+        decor.orbitOrb.scaleX = decor.orbitOrb.scaleY = 1;
+        createjs.Tween.get(decor.orbitOrb, { loop: true })
+            .to({ scaleX: 1.18, scaleY: 1.18, alpha: orbAlpha * 0.8 }, 1500, createjs.Ease.sineInOut)
+            .to({ scaleX: 0.92, scaleY: 0.92, alpha: orbAlpha }, 1500, createjs.Ease.sineInOut);
+    }
+
+    if (decor.sparkle) {
+        createjs.Tween.removeTweens(decor.sparkle);
+        var sparkleAlpha = typeof decor.sparkle.baseAlpha === "number" ? decor.sparkle.baseAlpha : decor.sparkle.alpha;
+        decor.sparkle.alpha = sparkleAlpha;
+        decor.sparkle.x = baseX;
+        decor.sparkle.y = baseY - 16;
+        decor.sparkle.scaleX = decor.sparkle.scaleY = 0.8;
+        createjs.Tween.get(decor.sparkle, { loop: true })
+            .to({ y: baseY - 24, alpha: sparkleAlpha * 0.35, scaleX: 1.05, scaleY: 1.05 }, 1400, createjs.Ease.sineOut)
+            .to({ y: baseY - 14, alpha: sparkleAlpha, scaleX: 0.8, scaleY: 0.8 }, 1200, createjs.Ease.sineIn);
+    }
+}
+
+function burstHudAmbient(card) {
+    if (!card || !card.__ambientDecor) {
+        return;
+    }
+
+    var decor = card.__ambientDecor;
+
+    if (decor.halo) {
+        var haloAlpha = typeof decor.halo.baseAlpha === "number" ? decor.halo.baseAlpha : decor.halo.alpha;
+        createjs.Tween.get(decor.halo, { override: false })
+            .to({ alpha: haloAlpha * 1.45, scaleX: 1.18, scaleY: 1.18 }, 200, createjs.Ease.quadOut)
+            .to({ alpha: haloAlpha, scaleX: 1, scaleY: 1 }, 400, createjs.Ease.quadIn);
+    }
+
+    if (decor.sparkle) {
+        var sparkleAlpha = typeof decor.sparkle.baseAlpha === "number" ? decor.sparkle.baseAlpha : decor.sparkle.alpha;
+        createjs.Tween.get(decor.sparkle, { override: false })
+            .to({ alpha: Math.min(sparkleAlpha * 1.2, 1), scaleX: 1.2, scaleY: 1.2 }, 160, createjs.Ease.quadOut)
+            .to({ alpha: sparkleAlpha, scaleX: 0.85, scaleY: 0.85 }, 360, createjs.Ease.quadIn);
+    }
+}
+
 function applyHudThemeToCard(card, type, theme) {
     if (!card) {
         return;
@@ -1529,6 +1858,9 @@ function applyHudThemeToCard(card, type, theme) {
         glass: glassConfig,
         bottomGlow: bottomGlowConfig
     };
+
+    updateHudIconAmbientDecor(card, type, theme);
+    restartIconIdleAnimation(card, type);
 }
 
 function applyHudThemeToQuestionProgress(theme) {
@@ -3442,6 +3774,7 @@ function animateHudIconImpact(card, type, options) {
     icon.__impactActive = true;
 
     createjs.Tween.removeTweens(icon);
+    burstHudAmbient(card);
 
     var scaleUp = options && typeof options.scale === "number" ? options.scale : 1.24;
     var overshootScale = options && typeof options.overshoot === "number" ? options.overshoot : 0.94;
@@ -3578,23 +3911,28 @@ function restartIconIdleAnimation(card, type) {
     createjs.Tween.removeTweens(icon);
     icon.scaleX = icon.scaleY = 1;
     icon.rotation = 0;
+    icon.y = 0;
+
+    startHudIconAmbientLoop(card, type);
 
     switch (type) {
         case "score":
             createjs.Tween.get(icon, { loop: true })
-                .wait(800)
-                .to({ rotation: 8 }, 1600, createjs.Ease.sineInOut)
-                .to({ rotation: -8 }, 1600, createjs.Ease.sineInOut);
+                .to({ rotation: 10, y: -3, scaleX: 1.05, scaleY: 1.05 }, 1400, createjs.Ease.sineInOut)
+                .to({ rotation: -10, y: 3, scaleX: 0.96, scaleY: 0.96 }, 1400, createjs.Ease.sineInOut)
+                .to({ rotation: 0, y: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
         case "timer":
             createjs.Tween.get(icon, { loop: true })
-                .to({ rotation: -6 }, 1200, createjs.Ease.sineInOut)
-                .to({ rotation: 6 }, 1200, createjs.Ease.sineInOut);
+                .to({ rotation: -12, scaleX: 0.94, scaleY: 0.94 }, 900, createjs.Ease.sineInOut)
+                .to({ rotation: 14, scaleX: 1.08, scaleY: 1.08 }, 900, createjs.Ease.sineInOut)
+                .to({ rotation: 0, scaleX: 1, scaleY: 1 }, 800, createjs.Ease.sineInOut);
             break;
         case "question":
             createjs.Tween.get(icon, { loop: true })
-                .to({ scaleX: 1.06, scaleY: 1.06 }, 1400, createjs.Ease.sineInOut)
-                .to({ scaleX: 1, scaleY: 1 }, 1400, createjs.Ease.sineInOut);
+                .to({ y: -3, rotation: 4, scaleX: 1.07, scaleY: 1.07 }, 1300, createjs.Ease.sineInOut)
+                .to({ y: 2, rotation: -4, scaleX: 0.96, scaleY: 0.96 }, 1300, createjs.Ease.sineInOut)
+                .to({ y: 0, rotation: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
     }
 }
