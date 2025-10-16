@@ -425,8 +425,8 @@ if (typeof globalThis !== "undefined") {
 }
 
 function buildGameplayBackdrop() {
-    var width = 1280;
-    var height = 720;
+    var width = 1360;
+    var height = 768;
 
     var backdrop = new createjs.Container();
     backdrop.name = "GameplayBackdrop";
@@ -435,191 +435,194 @@ function buildGameplayBackdrop() {
 
     var base = new createjs.Shape();
     base.graphics
-        .beginLinearGradientFill(["#070c24", "#17104a", "#2c1f74"], [0, 0.55, 1], width / 2, 0, width / 2, height)
+        .beginLinearGradientFill(["#0b0624", "#1b0e46", "#2f1f73"], [0, 0.55, 1], 0, 0, width, height)
         .drawRect(0, 0, width, height);
     backdrop.addChild(base);
 
-    var vignette = new createjs.Shape();
-    vignette.graphics
-        .beginLinearGradientFill([
-            "rgba(7, 10, 28, 0)",
-            "rgba(7, 10, 28, 0.45)",
-            "rgba(7, 10, 28, 0.78)"
-        ], [0, 0.6, 1], width / 2, height * 0.25, width / 2, height)
-        .drawRect(0, 0, width, height);
-    vignette.alpha = 0.85;
-    backdrop.addChild(vignette);
-
-    var topAurora = new createjs.Shape();
-    topAurora.graphics
-        .beginLinearGradientFill(
-            ["rgba(146, 92, 255, 0.66)", "rgba(79, 204, 255, 0.38)", "rgba(79, 204, 255, 0)"],
-            [0, 0.65, 1],
-            0,
-            0,
-            width,
-            0
-        )
-        .drawEllipse(-width * 0.15, -height * 0.72, width * 1.3, height * 0.9);
-    topAurora.alpha = 0.6;
-    topAurora.compositeOperation = "lighter";
-    backdrop.addChild(topAurora);
-
-    var bottomAurora = new createjs.Shape();
-    bottomAurora.graphics
-        .beginLinearGradientFill(
-            ["rgba(67, 214, 195, 0.52)", "rgba(111, 162, 255, 0.34)", "rgba(111, 162, 255, 0)"],
-            [0, 0.65, 1],
-            0,
-            height,
-            width,
-            height
-        )
-        .drawEllipse(-width * 0.18, height * 0.48, width * 1.36, height * 0.92);
-    bottomAurora.alpha = 0.55;
-    bottomAurora.compositeOperation = "lighter";
-    backdrop.addChild(bottomAurora);
-
-    var horizonGlow = new createjs.Shape();
-    horizonGlow.graphics
+    var deepVignette = new createjs.Shape();
+    deepVignette.graphics
         .beginRadialGradientFill(
-            ["rgba(107, 167, 255, 0.02)", "rgba(107, 167, 255, 0.65)", "rgba(107, 167, 255, 0)"],
-            [0, 0.55, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            width * 0.62
+            ["rgba(6, 8, 23, 0)", "rgba(6, 8, 23, 0.75)", "rgba(6, 8, 23, 0.95)"],
+            [0, 0.72, 1],
+            width / 2,
+            height * 0.66,
+            width * 0.1,
+            width / 2,
+            height * 0.66,
+            width * 0.72
         )
-        .drawCircle(0, 0, width * 0.62);
-    horizonGlow.x = width / 2;
-    horizonGlow.y = height * 0.58;
-    horizonGlow.alpha = 0.78;
-    horizonGlow.compositeOperation = "lighter";
-    backdrop.addChild(horizonGlow);
+        .drawRect(0, 0, width, height);
+    deepVignette.alpha = 0.85;
+    backdrop.addChild(deepVignette);
 
-    var sheen = new createjs.Shape();
-    sheen.graphics
-        .beginLinearGradientFill(
-            ["rgba(110, 203, 255, 0)", "rgba(110, 203, 255, 0.45)", "rgba(110, 203, 255, 0)"],
-            [0, 0.55, 1],
-            0,
-            0,
-            0,
-            height * 0.3
-        )
-        .drawRect(0, height * 0.46, width, height * 0.24);
-    sheen.alpha = 0.72;
-    sheen.compositeOperation = "lighter";
-    backdrop.addChild(sheen);
+    var auroraGroup = new createjs.Container();
+    auroraGroup.mouseChildren = auroraGroup.mouseEnabled = false;
 
-    var ribbonGroup = new createjs.Container();
-    ribbonGroup.mouseEnabled = false;
-    ribbonGroup.mouseChildren = false;
-
-    var ribbonOne = new createjs.Shape();
-    ribbonOne.graphics
-        .beginLinearGradientFill(
-            ["rgba(255, 150, 234, 0.28)", "rgba(111, 180, 255, 0.24)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            height * 0.35
-        )
-        .moveTo(-160, height * 0.26)
-        .bezierCurveTo(width * 0.24, height * 0.08, width * 0.46, height * 0.44, width + 160, height * 0.32)
-        .lineTo(width + 160, height * 0.4)
-        .bezierCurveTo(width * 0.46, height * 0.52, width * 0.18, height * 0.34, -160, height * 0.46)
+    var upperAurora = new createjs.Shape();
+    upperAurora.graphics
+        .beginLinearGradientFill([
+            "rgba(255, 114, 198, 0.15)",
+            "rgba(183, 134, 255, 0.58)",
+            "rgba(86, 215, 255, 0.08)"
+        ], [0, 0.5, 1], 0, 0, width, 0)
+        .moveTo(-width * 0.15, height * 0.06)
+        .bezierCurveTo(width * 0.18, -height * 0.12, width * 0.54, height * 0.26, width + width * 0.1, height * 0.12)
+        .lineTo(width + width * 0.12, height * 0.24)
+        .bezierCurveTo(width * 0.58, height * 0.38, width * 0.18, height * 0.12, -width * 0.1, height * 0.22)
         .closePath();
-    ribbonOne.alpha = 0.65;
-    ribbonGroup.addChild(ribbonOne);
+    upperAurora.alpha = 0.78;
+    upperAurora.compositeOperation = "lighter";
+    auroraGroup.addChild(upperAurora);
 
-    var ribbonTwo = new createjs.Shape();
-    ribbonTwo.graphics
-        .beginLinearGradientFill(
-            ["rgba(104, 214, 244, 0.22)", "rgba(157, 127, 255, 0.26)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            height * 0.3
-        )
-        .moveTo(-180, height * 0.58)
-        .bezierCurveTo(width * 0.18, height * 0.48, width * 0.54, height * 0.76, width + 200, height * 0.68)
-        .lineTo(width + 200, height * 0.78)
-        .bezierCurveTo(width * 0.52, height * 0.9, width * 0.16, height * 0.66, -180, height * 0.74)
+    var lowerAurora = new createjs.Shape();
+    lowerAurora.graphics
+        .beginLinearGradientFill([
+            "rgba(86, 227, 209, 0.12)",
+            "rgba(111, 191, 255, 0.32)",
+            "rgba(255, 150, 229, 0.08)"
+        ], [0, 0.55, 1], 0, height, width, height)
+        .moveTo(-width * 0.16, height * 0.72)
+        .bezierCurveTo(width * 0.18, height * 0.54, width * 0.58, height * 0.94, width + width * 0.14, height * 0.84)
+        .lineTo(width + width * 0.16, height * 0.98)
+        .bezierCurveTo(width * 0.62, height * 1.1, width * 0.22, height * 0.82, -width * 0.14, height * 0.92)
         .closePath();
-    ribbonTwo.alpha = 0.58;
-    ribbonGroup.addChild(ribbonTwo);
+    lowerAurora.alpha = 0.68;
+    lowerAurora.compositeOperation = "lighter";
+    auroraGroup.addChild(lowerAurora);
 
-    ribbonGroup.y = 0;
-    backdrop.addChild(ribbonGroup);
+    backdrop.addChild(auroraGroup);
 
-    var diamondLayer = new createjs.Container();
-    diamondLayer.mouseEnabled = false;
-    diamondLayer.mouseChildren = false;
+    var glowLayer = new createjs.Container();
+    glowLayer.mouseChildren = glowLayer.mouseEnabled = false;
 
-    var diamondPalettes = [
-        ["rgba(255, 184, 244, 0.9)", "rgba(159, 125, 255, 0.82)", "rgba(255, 255, 255, 0.6)", "rgba(255, 255, 255, 0.95)"],
-        ["rgba(144, 230, 255, 0.9)", "rgba(120, 159, 255, 0.82)", "rgba(255, 255, 255, 0.55)", "rgba(255, 255, 255, 0.9)"],
-        ["rgba(158, 255, 219, 0.9)", "rgba(125, 208, 255, 0.8)", "rgba(255, 255, 255, 0.55)", "rgba(255, 255, 255, 0.92)"]
+    var topLeftGlow = createBackdropGlow(width * 0.38, ["rgba(255,150,229,0.6)", "rgba(61,15,90,0)"]);
+    topLeftGlow.x = width * 0.08;
+    topLeftGlow.y = height * 0.1;
+    glowLayer.addChild(topLeftGlow);
+
+    var midGlow = createBackdropGlow(width * 0.6, ["rgba(118,150,255,0.55)", "rgba(21,14,60,0)"]);
+    midGlow.x = width * 0.5;
+    midGlow.y = height * 0.58;
+    glowLayer.addChild(midGlow);
+
+    var bottomRightGlow = createBackdropGlow(width * 0.46, ["rgba(88,239,220,0.5)", "rgba(14,26,52,0)"]);
+    bottomRightGlow.x = width * 0.86;
+    bottomRightGlow.y = height * 0.78;
+    glowLayer.addChild(bottomRightGlow);
+
+    glowLayer.alpha = 0.85;
+    backdrop.addChild(glowLayer);
+
+    var lightColumns = new createjs.Container();
+    lightColumns.mouseEnabled = lightColumns.mouseChildren = false;
+    var columnCount = 3;
+    var columns = [];
+    for (var c = 0; c < columnCount; c++) {
+        var column = new createjs.Shape();
+        var columnWidth = width * 0.14;
+        column.graphics
+            .beginLinearGradientFill(
+                ["rgba(118,168,255,0)", "rgba(118,168,255,0.36)", "rgba(118,168,255,0)"],
+                [0, 0.45, 1],
+                0,
+                0,
+                columnWidth,
+                0
+            )
+            .drawRoundRect(-columnWidth / 2, -height * 0.36, columnWidth, height * 0.72, columnWidth * 0.32);
+        column.alpha = 0.45;
+        column.x = width * (0.28 + 0.24 * c);
+        column.y = height * 0.6;
+        column.compositeOperation = "lighter";
+        lightColumns.addChild(column);
+        columns.push(column);
+    }
+    backdrop.addChild(lightColumns);
+
+    var constellationLayer = new createjs.Shape();
+    var constellationGraphics = constellationLayer.graphics;
+    constellationGraphics.setStrokeStyle(1.2)
+        .beginStroke("rgba(195,223,255,0.35)")
+        .moveTo(width * 0.18, height * 0.34)
+        .bezierCurveTo(width * 0.26, height * 0.22, width * 0.4, height * 0.26, width * 0.48, height * 0.34)
+        .bezierCurveTo(width * 0.58, height * 0.42, width * 0.74, height * 0.38, width * 0.82, height * 0.26);
+    constellationGraphics
+        .moveTo(width * 0.2, height * 0.54)
+        .bezierCurveTo(width * 0.36, height * 0.46, width * 0.56, height * 0.58, width * 0.74, height * 0.48)
+        .bezierCurveTo(width * 0.82, height * 0.44, width * 0.9, height * 0.52, width * 0.92, height * 0.62);
+    constellationLayer.alpha = 0.45;
+    constellationLayer.compositeOperation = "lighter";
+    backdrop.addChild(constellationLayer);
+
+    var orbLayer = new createjs.Container();
+    orbLayer.mouseEnabled = orbLayer.mouseChildren = false;
+    var orbs = [];
+    var orbPalettes = [
+        ["rgba(255,178,236,0.6)", "rgba(255,255,255,0.05)"],
+        ["rgba(122,202,255,0.65)", "rgba(255,255,255,0.05)"],
+        ["rgba(122,255,225,0.58)", "rgba(255,255,255,0.05)"]
     ];
 
-    for (var i = 0; i < 12; i++) {
-        var palette = diamondPalettes[i % diamondPalettes.length];
-        var size = 18 + Math.random() * 18;
-        var diamond = createGameplayBackdropDiamond(size, palette);
-        diamond.x = width * (0.12 + Math.random() * 0.76);
-        diamond.y = height * (0.2 + Math.random() * 0.55);
-        diamondLayer.addChild(diamond);
+    for (var o = 0; o < 8; o++) {
+        var orb = createBackdropOrb(70 + Math.random() * 80, orbPalettes[o % orbPalettes.length]);
+        orb.x = width * (0.16 + Math.random() * 0.7);
+        orb.y = height * (0.18 + Math.random() * 0.6);
+        orb.alpha = 0.32 + Math.random() * 0.28;
+        orbLayer.addChild(orb);
+        orbs.push(orb);
     }
+    backdrop.addChild(orbLayer);
 
-    backdrop.addChild(diamondLayer);
+    var sparkleLayer = new createjs.Container();
+    sparkleLayer.mouseEnabled = sparkleLayer.mouseChildren = false;
+    var sparkles = [];
+    for (var s = 0; s < 14; s++) {
+        var sparkle = createBackdropSparkle(8 + Math.random() * 10);
+        sparkle.x = width * (0.12 + Math.random() * 0.76);
+        sparkle.y = height * (0.18 + Math.random() * 0.62);
+        sparkleLayer.addChild(sparkle);
+        sparkles.push(sparkle);
+    }
+    backdrop.addChild(sparkleLayer);
 
-    var particleLayer = createHowToPlayParticleField(width, height, 28);
-    particleLayer.alpha = 0.8;
+    var particleLayer = createHowToPlayParticleField(width, height, 32);
+    particleLayer.alpha = 0.72;
     backdrop.addChild(particleLayer);
 
     var highlightSweep = new createjs.Shape();
     highlightSweep.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.35)", "rgba(255, 255, 255, 0)"],
+            ["rgba(255,255,255,0)", "rgba(255,255,255,0.45)", "rgba(255,255,255,0)"],
             [0, 0.5, 1],
             0,
             0,
-            width * 0.18,
+            width * 0.22,
             0
         )
-        .drawRect(-width * 0.09, -height * 0.1, width * 0.18, height * 1.2);
-    highlightSweep.alpha = 0.24;
+        .drawRect(-width * 0.12, -height * 0.14, width * 0.22, height * 1.24);
+    highlightSweep.alpha = 0.3;
     highlightSweep.compositeOperation = "lighter";
-    highlightSweep.x = width * 0.28;
-    highlightSweep.y = height * 0.5;
+    highlightSweep.x = width * 0.22;
+    highlightSweep.y = height * 0.52;
     backdrop.addChild(highlightSweep);
 
     var frameGlow = new createjs.Shape();
     frameGlow.graphics
-        .beginRadialGradientFill(
-            ["rgba(10, 14, 40, 0)", "rgba(10, 14, 40, 0.7)"],
-            [0, 1],
-            width / 2,
-            height / 2,
-            width * 0.35,
-            width / 2,
-            height / 2,
-            width * 0.8
-        )
-        .drawRect(0, 0, width, height);
-    frameGlow.alpha = 0.75;
+        .beginLinearGradientStroke(["rgba(255,255,255,0.2)", "rgba(255,255,255,0)"], [0, 1], 0, 0, width, height)
+        .setStrokeStyle(2)
+        .drawRoundRect(2, 2, width - 4, height - 4, 28);
+    frameGlow.alpha = 0.4;
+    frameGlow.compositeOperation = "lighter";
     backdrop.addChild(frameGlow);
 
-    backdrop.topAurora = topAurora;
-    backdrop.bottomAurora = bottomAurora;
-    backdrop.horizonGlow = horizonGlow;
-    backdrop.ribbonGroup = ribbonGroup;
-    backdrop.diamondLayer = diamondLayer;
+    backdrop.auroraGroup = auroraGroup;
+    backdrop.upperAurora = upperAurora;
+    backdrop.lowerAurora = lowerAurora;
+    backdrop.glowLayer = glowLayer;
+    backdrop.lightColumns = columns;
+    backdrop.constellationLayer = constellationLayer;
+    backdrop.orbLayer = orbs;
+    backdrop.sparkleLayer = sparkles;
     backdrop.particleLayer = particleLayer;
     backdrop.highlightSweep = highlightSweep;
     backdrop.frameGlow = frameGlow;
@@ -633,48 +636,49 @@ function buildGameplayBackdrop() {
     return backdrop;
 }
 
-function createGameplayBackdropDiamond(size, palette) {
-    var container = new createjs.Container();
-    container.mouseEnabled = false;
-    container.mouseChildren = false;
+function createBackdropGlow(radius, colors) {
+    var glow = new createjs.Shape();
+    glow.graphics
+        .beginRadialGradientFill(colors || ["rgba(255,255,255,0.6)", "rgba(255,255,255,0)"] , [0, 1], 0, 0, radius * 0.1, 0, 0, radius)
+        .drawCircle(0, 0, radius);
+    glow.compositeOperation = "lighter";
+    glow.alpha = 0.9;
+    glow.__baseRadius = radius;
+    return glow;
+}
 
-    var fill = new createjs.Shape();
-    fill.graphics
-        .beginLinearGradientFill([palette[0], palette[1]], [0, 1], 0, -size, 0, size)
-        .drawPolyStar(0, 0, size, 4, 0, 45);
-    fill.alpha = 0.88;
-    container.addChild(fill);
+function createBackdropOrb(radius, colors) {
+    var orb = new createjs.Shape();
+    var palette = colors || ["rgba(255,255,255,0.4)", "rgba(255,255,255,0)"];
+    orb.graphics
+        .beginRadialGradientFill(palette, [0, 1], -radius * 0.2, -radius * 0.2, radius * 0.1, 0, 0, radius)
+        .drawCircle(0, 0, radius);
+    orb.compositeOperation = "lighter";
+    orb.__baseRadius = radius;
+    orb.__baseScale = 0.85 + Math.random() * 0.3;
+    orb.scaleX = orb.scaleY = orb.__baseScale;
+    orb.__floatDistance = 12 + Math.random() * 18;
+    return orb;
+}
 
-    var outline = new createjs.Shape();
-    outline.graphics
-        .setStrokeStyle(1.4)
-        .beginStroke(palette[2])
-        .drawPolyStar(0, 0, size, 4, 0, 45);
-    outline.alpha = 0.6;
-    container.addChild(outline);
-
+function createBackdropSparkle(size) {
     var sparkle = new createjs.Shape();
     sparkle.graphics
         .beginLinearGradientFill(
-            [palette[3], "rgba(255,255,255,0)"],
+            ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.1)"],
             [0, 1],
-            -size * 0.2,
-            -size * 0.2,
-            size * 0.6,
-            size * 0.6
+            -size,
+            -size,
+            size,
+            size
         )
-        .drawPolyStar(0, 0, size * 0.5, 4, 0, 45);
-    sparkle.alpha = 0.9;
-    container.addChild(sparkle);
-
-    container.alpha = 0.55 + Math.random() * 0.25;
-    container.__baseScale = 0.72 + Math.random() * 0.5;
-    container.scaleX = container.scaleY = container.__baseScale;
-    container.__floatOffset = 10 + Math.random() * 14;
-    container.__rotationRange = 8 + Math.random() * 18;
-    container.rotation = Math.random() * 360;
-
-    return container;
+        .drawPolyStar(0, 0, size, 4, 0.4, 45);
+    sparkle.alpha = 0.85;
+    sparkle.compositeOperation = "lighter";
+    sparkle.__pulseRange = 0.25 + Math.random() * 0.35;
+    sparkle.__baseScale = 0.7 + Math.random() * 0.3;
+    sparkle.scaleX = sparkle.scaleY = sparkle.__baseScale;
+    return sparkle;
 }
 
 function applyGameplayBackdropAnimations(backdrop) {
@@ -684,87 +688,89 @@ function applyGameplayBackdropAnimations(backdrop) {
 
     backdrop.__ambientAnimationAttached = true;
 
-    if (backdrop.topAurora) {
-        var topBaseAlpha = backdrop.topAurora.alpha;
-        createjs.Tween.get(backdrop.topAurora, { loop: true })
-            .to({ alpha: Math.min(0.82, topBaseAlpha + 0.18), skewX: 6 }, 4200, createjs.Ease.sineInOut)
-            .to({ alpha: Math.max(0.42, topBaseAlpha - 0.22), skewX: -4 }, 4200, createjs.Ease.sineInOut);
+    if (backdrop.upperAurora) {
+        var baseAlphaTop = backdrop.upperAurora.alpha;
+        createjs.Tween.get(backdrop.upperAurora, { loop: true })
+            .to({ alpha: Math.min(1, baseAlphaTop + 0.18), skewX: 8 }, 5200, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.36, baseAlphaTop - 0.26), skewX: -6 }, 5200, createjs.Ease.sineInOut);
     }
 
-    if (backdrop.bottomAurora) {
-        var bottomBaseAlpha = backdrop.bottomAurora.alpha;
-        createjs.Tween.get(backdrop.bottomAurora, { loop: true })
-            .to({ alpha: Math.min(0.78, bottomBaseAlpha + 0.18), skewX: -5 }, 5200, createjs.Ease.sineInOut)
-            .to({ alpha: Math.max(0.36, bottomBaseAlpha - 0.2), skewX: 3 }, 5200, createjs.Ease.sineInOut);
+    if (backdrop.lowerAurora) {
+        var baseAlphaBottom = backdrop.lowerAurora.alpha;
+        createjs.Tween.get(backdrop.lowerAurora, { loop: true })
+            .to({ alpha: Math.min(0.92, baseAlphaBottom + 0.18), skewX: -7 }, 5600, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.32, baseAlphaBottom - 0.22), skewX: 5 }, 5600, createjs.Ease.sineInOut);
     }
 
-    if (backdrop.horizonGlow) {
-        var glow = backdrop.horizonGlow;
-        var baseScale = glow.scaleX || 1;
-        createjs.Tween.get(glow, { loop: true })
-            .to({ scaleX: baseScale * 1.04, scaleY: baseScale * 1.04 }, 3200, createjs.Ease.sineInOut)
-            .to({ scaleX: baseScale * 0.96, scaleY: baseScale * 0.96 }, 3200, createjs.Ease.sineInOut);
+    if (backdrop.glowLayer && backdrop.glowLayer.children) {
+        backdrop.glowLayer.children.forEach(function (glow, index) {
+            if (!glow) {
+                return;
+            }
+
+            var baseAlpha = glow.alpha;
+            createjs.Tween.get(glow, { loop: true })
+                .wait(index * 420)
+                .to({ alpha: Math.min(1, baseAlpha + 0.18), scaleX: 1.08, scaleY: 1.08 }, 3800, createjs.Ease.sineInOut)
+                .to({ alpha: Math.max(0.32, baseAlpha - 0.22), scaleX: 0.96, scaleY: 0.96 }, 3800, createjs.Ease.sineInOut);
+        });
     }
 
-    if (backdrop.ribbonGroup) {
-        for (var i = 0; i < backdrop.ribbonGroup.numChildren; i++) {
-            (function (ribbon, index) {
-                if (!ribbon) {
-                    return;
-                }
+    if (backdrop.lightColumns && backdrop.lightColumns.length) {
+        backdrop.lightColumns.forEach(function (column, idx) {
+            if (!column) {
+                return;
+            }
 
-                var baseY = ribbon.y;
-                var baseAlpha = ribbon.alpha;
-                createjs.Tween.get(ribbon, { loop: true })
-                    .wait(index * 420)
-                    .to({ y: baseY - 12, alpha: Math.min(1, baseAlpha + 0.12) }, 3600, createjs.Ease.sineInOut)
-                    .to({ y: baseY + 10, alpha: Math.max(0.3, baseAlpha - 0.16) }, 3600, createjs.Ease.sineInOut);
-            })(backdrop.ribbonGroup.getChildAt(i), i);
-        }
+            var baseAlpha = column.alpha;
+            createjs.Tween.get(column, { loop: true })
+                .wait(idx * 560)
+                .to({ alpha: Math.min(0.9, baseAlpha + 0.25), skewX: 6 }, 4200, createjs.Ease.sineInOut)
+                .to({ alpha: Math.max(0.2, baseAlpha - 0.2), skewX: -4 }, 4200, createjs.Ease.sineInOut);
+        });
     }
 
-    if (backdrop.diamondLayer) {
-        for (var j = 0; j < backdrop.diamondLayer.numChildren; j++) {
-            (function (diamond) {
-                if (!diamond) {
-                    return;
-                }
+    if (backdrop.orbLayer && backdrop.orbLayer.length) {
+        backdrop.orbLayer.forEach(function (orb) {
+            if (!orb) {
+                return;
+            }
 
-                var baseY = diamond.y;
-                var baseRotation = diamond.rotation;
-                var baseScale = diamond.__baseScale || diamond.scaleX || 1;
-                var floatOffset = diamond.__floatOffset || 14;
-                var rotationRange = diamond.__rotationRange || 12;
+            var baseY = orb.y;
+            var baseScale = orb.__baseScale || orb.scaleX || 1;
+            var floatDistance = orb.__floatDistance || 14;
+            createjs.Tween.get(orb, { loop: true })
+                .wait(Math.random() * 2200)
+                .to({ y: baseY - floatDistance, scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 3600, createjs.Ease.sineInOut)
+                .to({ y: baseY + floatDistance, scaleX: baseScale * 0.94, scaleY: baseScale * 0.94 }, 3600, createjs.Ease.sineInOut);
+        });
+    }
 
-                createjs.Tween.get(diamond, { loop: true })
-                    .wait(Math.random() * 1600)
-                    .to(
-                        {
-                            y: baseY - floatOffset,
-                            rotation: baseRotation + rotationRange,
-                            scaleX: baseScale * 1.06,
-                            scaleY: baseScale * 1.06
-                        },
-                        2800,
-                        createjs.Ease.sineInOut
-                    )
-                    .to(
-                        {
-                            y: baseY + floatOffset,
-                            rotation: baseRotation - rotationRange,
-                            scaleX: baseScale * 0.94,
-                            scaleY: baseScale * 0.94
-                        },
-                        2800,
-                        createjs.Ease.sineInOut
-                    );
-            })(backdrop.diamondLayer.getChildAt(j));
-        }
+    if (backdrop.sparkleLayer && backdrop.sparkleLayer.length) {
+        backdrop.sparkleLayer.forEach(function (sparkle) {
+            if (!sparkle) {
+                return;
+            }
+
+            var baseScale = sparkle.__baseScale || sparkle.scaleX || 1;
+            var pulseRange = sparkle.__pulseRange || 0.35;
+            createjs.Tween.get(sparkle, { loop: true })
+                .wait(Math.random() * 1800)
+                .to({ scaleX: baseScale + pulseRange, scaleY: baseScale + pulseRange, alpha: 1 }, 2600, createjs.Ease.sineInOut)
+                .to({ scaleX: baseScale, scaleY: baseScale, alpha: 0.45 }, 2600, createjs.Ease.sineInOut);
+        });
+    }
+
+    if (backdrop.constellationLayer) {
+        var baseAlphaConstellation = backdrop.constellationLayer.alpha;
+        createjs.Tween.get(backdrop.constellationLayer, { loop: true })
+            .to({ alpha: Math.min(0.9, baseAlphaConstellation + 0.2) }, 3200, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.25, baseAlphaConstellation - 0.25) }, 3200, createjs.Ease.sineInOut);
     }
 
     if (backdrop.particleLayer && backdrop.particleLayer.children) {
-        for (var k = 0; k < backdrop.particleLayer.children.length; k++) {
-            startHowToPlayParticleFloat(backdrop.particleLayer.children[k], true);
+        for (var i = 0; i < backdrop.particleLayer.children.length; i++) {
+            startHowToPlayParticleFloat(backdrop.particleLayer.children[i], true);
         }
     }
 
@@ -772,12 +778,36 @@ function applyGameplayBackdropAnimations(backdrop) {
         var sweep = backdrop.highlightSweep;
         var baseX = sweep.x;
         createjs.Tween.get(sweep, { loop: true })
-            .to({ x: baseX + backdrop.__baseWidth * 0.4, alpha: 0.38 }, 4600, createjs.Ease.quadInOut)
-            .to({ x: baseX + backdrop.__baseWidth * 0.55, alpha: 0 }, 1200, createjs.Ease.quadIn)
-            .set({ x: baseX - backdrop.__baseWidth * 0.35, alpha: 0 })
-            .wait(1800)
-            .to({ alpha: 0.24 }, 600, createjs.Ease.quadOut)
-            .to({ x: baseX, alpha: 0.24 }, 4200, createjs.Ease.quadInOut);
+            .to({ x: baseX + backdrop.__baseWidth * 0.46, alpha: 0.42 }, 5000, createjs.Ease.quadInOut)
+            .to({ x: baseX + backdrop.__baseWidth * 0.62, alpha: 0 }, 1400, createjs.Ease.quadIn)
+            .set({ x: baseX - backdrop.__baseWidth * 0.38, alpha: 0 })
+            .wait(2100)
+            .to({ alpha: 0.32 }, 720, createjs.Ease.quadOut)
+            .to({ x: baseX, alpha: 0.3 }, 4800, createjs.Ease.quadInOut);
+    }
+}
+
+function ensureTitleShimmerAnimation() {
+    if (typeof Title === "undefined" || !Title || Title.__shimmerAnimating || !Title.__shimmer) {
+        return;
+    }
+
+    var shimmer = Title.__shimmer;
+    var badgeWidth = (Title.__layoutHalfWidth || 220) * 2;
+    Title.__shimmerAnimating = true;
+
+    shimmer.x = -badgeWidth;
+    createjs.Tween.get(shimmer, { loop: true })
+        .to({ x: badgeWidth }, 4200, createjs.Ease.quadInOut)
+        .wait(1600);
+
+    if (!Title.__breathingAnimationAttached) {
+        Title.__breathingAnimationAttached = true;
+        var baseY = typeof Title.__layoutTargetY === "number" ? Title.__layoutTargetY : Title.y;
+        Title.__breathingTween = createjs.Tween.get(Title, { loop: true })
+            .wait(680)
+            .to({ y: baseY - 6 }, 3400, createjs.Ease.sineInOut)
+            .to({ y: baseY + 4 }, 3400, createjs.Ease.sineInOut);
     }
 }
 
@@ -936,7 +966,13 @@ function refreshResponsiveLayout(force) {
     layoutOverlayToCanvas(HowToPlayScreenImg, 1280, 720);
     layoutOverlayToCanvas(howToPlayImageMc, 1280, 720);
     layoutOverlayToCanvas(loaderBar, 1280, 720);
-    layoutOverlayToCanvas(uniquebackGround, 1280, 720);
+    if (uniquebackGround) {
+        layoutOverlayToCanvas(
+            uniquebackGround,
+            uniquebackGround.__baseWidth || 1280,
+            uniquebackGround.__baseHeight || 720
+        );
+    }
 
     // SAUIX: reflow tooltip positions
     SAUIX_refreshTooltipsPositions(false);
@@ -2177,9 +2213,17 @@ function watchRestart() {
     }
 
     if (typeof Title !== "undefined" && Title) {
+        createjs.Tween.removeTweens(Title);
         Title.visible = false;
         Title.alpha = 0;
         Title.__introShown = false;
+        Title.__breathingAnimationAttached = false;
+        Title.__breathingTween = null;
+        if (Title.__shimmer) {
+            createjs.Tween.removeTweens(Title.__shimmer);
+            Title.__shimmer.x = -((Title.__layoutHalfWidth || 220) * 2);
+        }
+        Title.__shimmerAnimating = false;
     }
 
     refreshResponsiveLayout(true);
@@ -5594,6 +5638,8 @@ function panelVisibleFn() {
 
         createjs.Tween.get(Title, { override: true })
             .to({ alpha: 1, y: targetY }, 460, createjs.Ease.quadOut);
+
+        ensureTitleShimmerAnimation();
     }
 
     if (uniquebackGround) {
