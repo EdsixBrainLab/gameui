@@ -72,6 +72,9 @@ function isVisibleSkipBtn() {
     howToPlayImageMc.visible = true;
     container.parent.addChild(howToPlayImageMc);
     SkipBtnMc.cursor = "pointer";
+    if (typeof startIntroActionButtonAnimations === "function") {
+        startIntroActionButtonAnimations(SkipBtnMc);
+    }
 }
 
 function isVisibleStartBtn() {
@@ -85,6 +88,9 @@ function isVisibleStartBtn() {
     howToPlayImageMc.visible = true;
     container.parent.addChild(howToPlayImageMc);
     console.log("isVisibleStartBtn");
+    if (typeof startIntroActionButtonAnimations === "function") {
+        startIntroActionButtonAnimations(SkipBtnMc);
+    }
     ////////////////////////////////////////////////////////////////////
 }
 
@@ -94,6 +100,9 @@ function createDelayToStartGame() {
 
     howToPlayImageMc.visible = false;
 
+    if (typeof stopIntroActionButtonAnimations === "function" && SkipBtnMc) {
+        stopIntroActionButtonAnimations(SkipBtnMc);
+    }
     SkipBtnMc.visible = false;
     SkipBtnMc.mouseEnabled = false;
     //gameIntroAnimMc.stop();
