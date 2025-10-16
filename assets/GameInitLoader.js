@@ -2414,6 +2414,20 @@ function watchRestart() {
         HowToPlayScreenImg.visible = true;
     }
 
+    if (typeof Title !== "undefined" && Title) {
+        createjs.Tween.removeTweens(Title);
+        Title.visible = false;
+        Title.alpha = 0;
+        Title.__introShown = false;
+        Title.__breathingAnimationAttached = false;
+        Title.__breathingTween = null;
+        if (Title.__shimmer) {
+            createjs.Tween.removeTweens(Title.__shimmer);
+            Title.__shimmer.x = -((Title.__layoutHalfWidth || 220) * 2);
+        }
+        Title.__shimmerAnimating = false;
+    }
+
     refreshResponsiveLayout(true);
     showIntroTitleBadge();
 
@@ -5131,7 +5145,7 @@ function applyHowToPlayButtonState(button, state) {
         if (label) {
             label.text = "Start";
             label.font = "700 28px 'Baloo 2'";
-            label.color = "#FFFFFF";
+            label.color = "#F7FAFF";
         }
 
         button.shadow = new createjs.Shadow("rgba(10, 12, 34, 0.55)", 0, 22, 44);
