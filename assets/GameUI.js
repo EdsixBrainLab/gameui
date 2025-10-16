@@ -42,15 +42,22 @@ function call_UI_gameQuestion(incontainer,in_questiontext)
     QusTxtString.textBaseline = "middle";
     QusTxtString.lineWidth = 1000;
     QusTxtString.lineHeight = 30;
-    QusTxtString.x = 635;
+    var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
+    QusTxtString.x = promptCenterX;
     QusTxtString.y = INTRO_PROMPT_Y-55;
     QusTxtString.alpha = 0.96;
 QusTxtString.shadow = new createjs.Shadow("black", 1, 1, 1);
     incontainer.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
-	QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
+        QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
     padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22
   });
+
+    QusTxtString.__layoutHalfHeight = (QusTxtString.lineHeight || 34) / 2;
+
+    if (typeof refreshResponsiveLayout === "function") {
+      refreshResponsiveLayout(true);
+    }
 	
 	
 	
