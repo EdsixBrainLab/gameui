@@ -442,8 +442,8 @@ function CreateGameElements() {
       choiceGlowArr[i] = new createjs.Shape();
       choiceGlowArr[i].graphics
         .beginRadialGradientFill([
-          "rgba(104,174,255,0.4)",
-          "rgba(104,174,255,0)"
+          "rgba(209,178,255,0.6)",
+          "rgba(209,178,255,0)"
         ], [0, 1], 0, 0, 0, 0, 0, 120)
         .drawCircle(0, 0, 120);
       choiceGlowArr[i].alpha = 0;

@@ -12,14 +12,14 @@ var QUESTION_CARD_WIDTH = 600;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 
-var CHOICE_TILE_BASE_COLORS = ["rgba(28,52,92,0.95)", "rgba(15,32,66,0.95)"];
-var CHOICE_TILE_HOVER_COLORS = ["rgba(70,118,210,0.98)", "rgba(40,72,148,0.98)"];
-var CHOICE_TILE_CORRECT_COLORS = ["rgba(58,196,150,0.98)", "rgba(30,128,96,0.98)"];
-var CHOICE_TILE_WRONG_COLORS = ["rgba(236,118,135,0.98)", "rgba(160,58,92,0.98)"];
-var CLUE_SLOT_BASE_COLORS = ["rgba(32,58,104,0.92)", "rgba(19,36,74,0.92)"];
-var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"];
-var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
-var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
+var CHOICE_TILE_BASE_COLORS = ["rgba(123,104,238,0.96)", "rgba(76,53,163,0.96)"];
+var CHOICE_TILE_HOVER_COLORS = ["rgba(155,132,255,0.98)", "rgba(94,66,206,0.98)"];
+var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,210,190,0.96)", "rgba(30,140,126,0.96)"];
+var CHOICE_TILE_WRONG_COLORS = ["rgba(255,137,162,0.96)", "rgba(178,54,110,0.96)"];
+var CLUE_SLOT_BASE_COLORS = ["rgba(114,86,232,0.94)", "rgba(58,38,148,0.94)"];
+var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94)"];
+var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
+var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
 
 function call_UI_ambientOverlay(incontainer)
 {
@@ -122,10 +122,24 @@ function drawChoiceTileBackground(targetShape, colors) {
   }
 
   var gradient = colors || CHOICE_TILE_BASE_COLORS;
-  targetShape.graphics
-    .clear()
-    .beginLinearGradientFill(gradient, [0, 1], -90, -90, 90, 90)
-    .drawRoundRect(-32, -45, 130, 130, 30);
+  var stroke = ["rgba(228,215,255,0.85)", "rgba(142,114,255,0.65)"];
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(stroke, [0, 1], -70, -70, 70, 70);
+  g.beginLinearGradientFill(gradient, [0, 1], -80, -86, 80, 86);
+  g.drawRoundRect(-44, -58, 148, 148, 48);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -76,
+    0,
+    42
+  );
+  g.drawRoundRect(-36, -52, 132, 110, 40);
 }
 
 function drawClueSlotBackground(targetShape, colors) {
@@ -134,10 +148,23 @@ function drawClueSlotBackground(targetShape, colors) {
   }
 
   var gradient = colors || CLUE_SLOT_BASE_COLORS;
-  targetShape.graphics
-    .clear()
-    .beginLinearGradientFill(gradient, [0, 1], -60, -60, 60, 60)
-    .drawRoundRect(-42, -50, 100, 100, 20);
+  var stroke = ["rgba(222,205,255,0.85)", "rgba(142,114,255,0.6)"];
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(4, "round", "round");
+  g.beginLinearGradientStroke(stroke, [0, 1], -54, -54, 54, 54);
+  g.beginLinearGradientFill(gradient, [0, 1], -62, -62, 62, 62);
+  g.drawRoundRect(-44, -52, 108, 112, 36);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -50,
+    0,
+    30
+  );
+  g.drawRoundRect(-36, -44, 92, 88, 28);
 }
 
 
@@ -151,11 +178,17 @@ function renderQuestionCardBackground() {
 
   questionCardBackground.graphics
     .clear()
+    .setStrokeStyle(6, "round", "round")
+    .beginLinearGradientStroke(
+      ["rgba(233,222,255,0.85)", "rgba(146,122,255,0.6)"],
+      [0, 1],
+      -halfWidth,
+      -halfHeight,
+      halfWidth,
+      halfHeight
+    )
     .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
+      ["rgba(120,89,235,0.98)", "rgba(54,30,132,0.98)"],
       [0, 1],
       -halfWidth,
       -halfHeight,
@@ -167,12 +200,12 @@ function renderQuestionCardBackground() {
       -halfHeight,
       QUESTION_CARD_WIDTH,
       QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
+      QUESTION_CARD_CORNER_RADIUS + 6
     );
 
   if (questionCardHighlight) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
+    var highlightPaddingX = 32;
+    var highlightPaddingY = 26;
     var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
     var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
     var highlightHalfWidth = highlightWidth / 2;
@@ -181,7 +214,7 @@ function renderQuestionCardBackground() {
     questionCardHighlight.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+        ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.02)"],
         [0, 1],
         -highlightHalfWidth,
         -highlightHalfHeight,
@@ -193,9 +226,9 @@ function renderQuestionCardBackground() {
         -highlightHalfHeight,
         highlightWidth,
         highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
+        Math.max(QUESTION_CARD_CORNER_RADIUS - 2, 18)
       );
-    questionCardHighlight.alpha = 0.45;
+    questionCardHighlight.alpha = 0.66;
   }
 }
 
@@ -529,11 +562,17 @@ function attachChoiceInteractions(index) {
 
   questionCardBackground_htp.graphics
     .clear()
+    .setStrokeStyle(6, "round", "round")
+    .beginLinearGradientStroke(
+      ["rgba(233,222,255,0.85)", "rgba(146,122,255,0.6)"],
+      [0, 1],
+      -halfWidth,
+      -halfHeight,
+      halfWidth,
+      halfHeight
+    )
     .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
+      ["rgba(120,89,235,0.98)", "rgba(54,30,132,0.98)"],
       [0, 1],
       -halfWidth,
       -halfHeight,
@@ -545,12 +584,12 @@ function attachChoiceInteractions(index) {
       -halfHeight,
       QUESTION_CARD_WIDTH,
       QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
+      QUESTION_CARD_CORNER_RADIUS + 6
     );
 
   if (questionCardHighlight_htp) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
+    var highlightPaddingX = 32;
+    var highlightPaddingY = 26;
     var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
     var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
     var highlightHalfWidth = highlightWidth / 2;
@@ -559,7 +598,7 @@ function attachChoiceInteractions(index) {
     questionCardHighlight_htp.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+        ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.02)"],
         [0, 1],
         -highlightHalfWidth,
         -highlightHalfHeight,
@@ -571,9 +610,9 @@ function attachChoiceInteractions(index) {
         -highlightHalfHeight,
         highlightWidth,
         highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
+        Math.max(QUESTION_CARD_CORNER_RADIUS - 2, 18)
       );
-    questionCardHighlight_htp.alpha = 0.45;
+    questionCardHighlight_htp.alpha = 0.66;
   }
 }
 
