@@ -4315,6 +4315,9 @@ function applyHowToPlayButtonState(button, state) {
             );
     }
 
+    button.__glowTweenAttached = false;
+    button.__highlightTweenAttached = false;
+
     if (state === "start") {
         if (glow) {
             glow.graphics
@@ -4478,6 +4481,13 @@ function applyHowToPlayButtonState(button, state) {
 
     if (label) {
         label.x = icon ? icon.x + 38 : -24;
+    }
+
+    if (glow) {
+        glow.alpha = state === "start" ? 0.9 : 0.75;
+    }
+    if (button.highlightMask && highlight) {
+        highlight.mask = button.highlightMask;
     }
 
     button.state = state;
