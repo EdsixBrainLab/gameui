@@ -51,8 +51,8 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(104,122,255,0.98)", "rgba(162,108,255,0.96)"],
                 accent: ["rgba(255,210,158,0.86)", "rgba(255,162,132,0.45)"],
                 iconStyle: {
-                    fill: "#E58CFF",
-                    gradient: ["#FFE6FF", "#A855F7"],
+                    fill: "#E879F9",
+                    gradient: ["#F0ABFC", "#C084FC"],
                     strokeColor: "rgba(76,29,149,0.8)",
                     strokeWidth: 2.6,
                     shadow: { color: "rgba(5,10,32,0.6)", x: 0, y: 3, blur: 14 }
@@ -70,8 +70,8 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(92,150,255,0.97)", "rgba(148,126,255,0.95)"],
                 accent: ["rgba(156,228,255,0.74)", "rgba(132,184,255,0.4)"],
                 iconStyle: {
-                    fill: "#C7D2FE",
-                    gradient: ["#E0E7FF", "#6366F1"],
+                    fill: "#93A5FD",
+                    gradient: ["#A5B4FC", "#6366F1"],
                     strokeColor: "#4338CA",
                     strokeWidth: 3.2,
                     shadow: { color: "rgba(6,14,40,0.55)", x: 0, y: 3, blur: 12 }
@@ -90,7 +90,7 @@ var HUD_THEME_PRESETS = {
                 accent: ["rgba(134,244,216,0.76)", "rgba(144,202,255,0.42)"],
                 iconStyle: {
                     fill: "#38BDF8",
-                    gradient: ["#BAE6FD", "#38BDF8"],
+                    gradient: ["#7DD3FC", "#0EA5E9"],
                     strokeColor: "#0EA5E9",
                     strokeWidth: 3.2,
                     shadow: { color: "rgba(4,18,36,0.55)", x: 0, y: 3, blur: 10 }
@@ -185,7 +185,7 @@ var HUD_THEME_PRESETS = {
                 accent: ["rgba(255,189,116,0.72)", "rgba(255,173,128,0.32)"],
                 iconStyle: {
                     fill: "#F472B6",
-                    gradient: ["#FFD9F2", "#DB2777"],
+                    gradient: ["#FBCFE8", "#EC4899"],
                     strokeColor: "rgba(180,50,110,0.55)",
                     strokeWidth: 2.6,
                     shadow: { color: "rgba(152,64,18,0.3)", x: 0, y: 2, blur: 11 }
@@ -203,8 +203,8 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(230,238,255,0.98)", "rgba(204,216,255,0.96)"],
                 accent: ["rgba(164,210,255,0.7)", "rgba(178,176,255,0.32)"],
                 iconStyle: {
-                    fill: "#7C8FFC",
-                    gradient: ["#C7D2FE", "#4C51BF"],
+                    fill: "#667BFF",
+                    gradient: ["#93C5FD", "#6366F1"],
                     strokeColor: "rgba(59,130,246,0.7)",
                     strokeWidth: 3.2,
                     shadow: { color: "rgba(37,99,235,0.3)", x: 0, y: 2, blur: 10 }
@@ -222,8 +222,8 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(222,246,252,0.98)", "rgba(188,232,242,0.96)"],
                 accent: ["rgba(148,232,208,0.7)", "rgba(156,214,255,0.3)"],
                 iconStyle: {
-                    fill: "#38BDF8",
-                    gradient: ["#A5F3FC", "#0EA5E9"],
+                    fill: "#1EA7FF",
+                    gradient: ["#7CD4FD", "#0EA5E9"],
                     strokeColor: "rgba(14,165,233,0.85)",
                     strokeWidth: 3.1,
                     shadow: { color: "rgba(34,116,165,0.38)", x: 0, y: 2, blur: 10 }
@@ -288,7 +288,7 @@ var HUD_THEME_PRESETS = {
             hoverRingAlpha: 1,
             glowAlpha: 0.66,
             hoverGlowAlpha: 0.86,
-            backgroundGradient: ["rgba(248,252,255,0.98)", "rgba(216,228,255,0.92)"],
+            backgroundGradient: ["rgba(244,232,255,0.96)", "rgba(210,220,255,0.9)"],
             backgroundAlpha: 1,
             highlightGradient: ["rgba(255,255,255,0.98)", "rgba(255,255,255,0.44)"],
             highlightAlpha: 0.92,
@@ -3248,7 +3248,7 @@ function drawHudIcon(iconShape, type, overrideStyle) {
                 .beginLinearGradientFill(starColors, [0, 1], -14, -14, 14, 14)
                 .drawPolyStar(0, 0, 14, 5, 0.55, -90);
 
-            var starHighlight = starColors[0] || starColors[starColors.length - 1];
+            var starHighlight = iconStyle.highlight || starColors[starColors.length - 1] || starColors[0];
             iconShape.graphics
                 .beginRadialGradientFill([
                     applyAlphaToColor(starHighlight, 0.92),
@@ -3309,7 +3309,7 @@ function drawHudIcon(iconShape, type, overrideStyle) {
                 .drawRoundRect(-11, -11, 22, 22, 6);
             iconShape.graphics
                 .beginRadialGradientFill([
-                    applyAlphaToColor(questionColors[0], 0.82),
+                    applyAlphaToColor(questionColors[questionColors.length - 1], 0.82),
                     applyAlphaToColor(questionColors[0], 0)
                 ], [0, 1], 0, -5, 0, 0, 0, 10)
                 .drawRoundRect(-9, -9, 18, 18, 5);
@@ -4063,25 +4063,61 @@ function restartIconIdleAnimation(card, type) {
 
     startHudIconAmbientLoop(card, type);
 
+    var initialStates = {
+        score: { rotation: -9, y: 3, scale: 0.97 },
+        timer: { rotation: 12, y: 0, scale: 1.06 },
+        question: { rotation: -4, y: 3, scale: 0.96 }
+    };
+
+    if (initialStates[type]) {
+        var preset = initialStates[type];
+        icon.rotation = typeof preset.rotation === "number" ? preset.rotation : icon.rotation;
+        icon.y = typeof preset.y === "number" ? preset.y : icon.y;
+        var presetScale = typeof preset.scale === "number" ? preset.scale : 1;
+        icon.scaleX = icon.scaleY = presetScale;
+    }
+
+    var idleTween = null;
+
     switch (type) {
         case "score":
-            createjs.Tween.get(icon, { loop: true })
+            idleTween = createjs.Tween.get(icon, { loop: true })
                 .to({ rotation: 10, y: -3, scaleX: 1.05, scaleY: 1.05 }, 1400, createjs.Ease.sineInOut)
                 .to({ rotation: -10, y: 3, scaleX: 0.96, scaleY: 0.96 }, 1400, createjs.Ease.sineInOut)
                 .to({ rotation: 0, y: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
         case "timer":
-            createjs.Tween.get(icon, { loop: true })
+            idleTween = createjs.Tween.get(icon, { loop: true })
                 .to({ rotation: -12, scaleX: 0.94, scaleY: 0.94 }, 900, createjs.Ease.sineInOut)
                 .to({ rotation: 14, scaleX: 1.08, scaleY: 1.08 }, 900, createjs.Ease.sineInOut)
                 .to({ rotation: 0, scaleX: 1, scaleY: 1 }, 800, createjs.Ease.sineInOut);
             break;
         case "question":
-            createjs.Tween.get(icon, { loop: true })
+            idleTween = createjs.Tween.get(icon, { loop: true })
                 .to({ y: -3, rotation: 4, scaleX: 1.07, scaleY: 1.07 }, 1300, createjs.Ease.sineInOut)
                 .to({ y: 2, rotation: -4, scaleX: 0.96, scaleY: 0.96 }, 1300, createjs.Ease.sineInOut)
                 .to({ y: 0, rotation: 0, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
             break;
+    }
+
+    if (idleTween) {
+        icon.__idleTween = idleTween;
+        var totalDuration = 0;
+        switch (type) {
+            case "score":
+                totalDuration = 1400 + 1400 + 900;
+                break;
+            case "timer":
+                totalDuration = 900 + 900 + 800;
+                break;
+            case "question":
+                totalDuration = 1300 + 1300 + 900;
+                break;
+        }
+
+        if (totalDuration > 0 && typeof idleTween.setPosition === "function") {
+            idleTween.setPosition(Math.random() * totalDuration);
+        }
     }
 }
 
