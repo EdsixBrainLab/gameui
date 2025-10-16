@@ -670,7 +670,7 @@ function getValidation(aStr) {
     responseTime += rst;
     console.log("responseTime= " + responseTime);
     answer_status = aStr;
-    clrSent = setTimeout(sentscore, 1000);
+    clrSent = setTimeout(sentscore, 2000);
 
 }
 //=================================================================================================================//

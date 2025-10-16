@@ -51,18 +51,18 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(104,122,255,0.98)", "rgba(162,108,255,0.96)"],
                 accent: ["rgba(255,210,158,0.86)", "rgba(255,162,132,0.45)"],
                 iconStyle: {
-                    fill: "#FCD34D",
-                    gradient: ["#FFF2C2", "#F59E0B"],
-                    strokeColor: "rgba(24,16,64,0.4)",
-                    strokeWidth: 2.4,
-                    shadow: { color: "rgba(5,10,32,0.55)", x: 0, y: 3, blur: 12 }
+                    fill: "#E58CFF",
+                    gradient: ["#FFE6FF", "#A855F7"],
+                    strokeColor: "rgba(76,29,149,0.8)",
+                    strokeWidth: 2.6,
+                    shadow: { color: "rgba(5,10,32,0.6)", x: 0, y: 3, blur: 14 }
                 },
                 ambient: {
-                    halo: "rgba(255,230,170,0.85)",
-                    haloAlpha: 0.72,
-                    ring: "rgba(255,188,120,0.82)",
-                    ringAlpha: 0.74,
-                    spark: "#FFF8C7",
+                    halo: "rgba(238,208,255,0.88)",
+                    haloAlpha: 0.78,
+                    ring: "rgba(204,148,255,0.84)",
+                    ringAlpha: 0.78,
+                    spark: "#F7C7FF",
                     sparkAlpha: 0.92
                 }
             },
@@ -70,18 +70,18 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(92,150,255,0.97)", "rgba(148,126,255,0.95)"],
                 accent: ["rgba(156,228,255,0.74)", "rgba(132,184,255,0.4)"],
                 iconStyle: {
-                    fill: "#60A5FA",
-                    gradient: ["#BFE7FF", "#6366F1"],
-                    strokeColor: "#7DD3FC",
+                    fill: "#C7D2FE",
+                    gradient: ["#E0E7FF", "#6366F1"],
+                    strokeColor: "#4338CA",
                     strokeWidth: 3.2,
-                    shadow: { color: "rgba(6,14,40,0.5)", x: 0, y: 3, blur: 12 }
+                    shadow: { color: "rgba(6,14,40,0.55)", x: 0, y: 3, blur: 12 }
                 },
                 ambient: {
-                    halo: "rgba(148,220,255,0.9)",
-                    haloAlpha: 0.7,
-                    ring: "rgba(132,184,255,0.86)",
-                    ringAlpha: 0.76,
-                    spark: "#6EE7FF",
+                    halo: "rgba(188,214,255,0.92)",
+                    haloAlpha: 0.74,
+                    ring: "rgba(150,182,255,0.86)",
+                    ringAlpha: 0.78,
+                    spark: "#9DD7FF",
                     sparkAlpha: 0.9
                 }
             },
@@ -89,17 +89,19 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(74,206,230,0.97)", "rgba(112,158,255,0.95)"],
                 accent: ["rgba(134,244,216,0.76)", "rgba(144,202,255,0.42)"],
                 iconStyle: {
-                    strokeColor: "#7CF5DA",
+                    fill: "#38BDF8",
+                    gradient: ["#BAE6FD", "#38BDF8"],
+                    strokeColor: "#0EA5E9",
                     strokeWidth: 3.2,
-                    shadow: { color: "rgba(4,18,36,0.5)", x: 0, y: 3, blur: 10 }
+                    shadow: { color: "rgba(4,18,36,0.55)", x: 0, y: 3, blur: 10 }
                 },
                 ambient: {
-                    halo: "rgba(134,244,216,0.88)",
-                    haloAlpha: 0.7,
-                    ring: "rgba(136,208,255,0.84)",
-                    ringAlpha: 0.74,
-                    spark: "#A5FFE8",
-                    sparkAlpha: 0.9
+                    halo: "rgba(164,232,255,0.9)",
+                    haloAlpha: 0.74,
+                    ring: "rgba(150,208,255,0.86)",
+                    ringAlpha: 0.78,
+                    spark: "#A5F3FF",
+                    sparkAlpha: 0.92
                 }
             }
         },
@@ -182,55 +184,57 @@ var HUD_THEME_PRESETS = {
                 background: ["rgba(255,234,214,0.98)", "rgba(255,205,176,0.96)"],
                 accent: ["rgba(255,189,116,0.72)", "rgba(255,173,128,0.32)"],
                 iconStyle: {
-                    fill: "#F97316",
-                    gradient: ["#FFE0B3", "#F97316"],
-                    strokeColor: "rgba(191,98,28,0.55)",
-                    strokeWidth: 2.4,
-                    shadow: { color: "rgba(152,64,18,0.3)", x: 0, y: 2, blur: 10 }
+                    fill: "#F472B6",
+                    gradient: ["#FFD9F2", "#DB2777"],
+                    strokeColor: "rgba(180,50,110,0.55)",
+                    strokeWidth: 2.6,
+                    shadow: { color: "rgba(152,64,18,0.3)", x: 0, y: 2, blur: 11 }
                 },
                 ambient: {
-                    halo: "rgba(255,215,170,0.9)",
+                    halo: "rgba(255,208,232,0.92)",
                     haloAlpha: 0.78,
-                    ring: "rgba(255,188,140,0.74)",
-                    ringAlpha: 0.72,
-                    spark: "#FDBA74",
-                    sparkAlpha: 0.9
+                    ring: "rgba(255,162,206,0.78)",
+                    ringAlpha: 0.76,
+                    spark: "#FFC3E2",
+                    sparkAlpha: 0.92
                 }
             },
             question: {
                 background: ["rgba(230,238,255,0.98)", "rgba(204,216,255,0.96)"],
                 accent: ["rgba(164,210,255,0.7)", "rgba(178,176,255,0.32)"],
                 iconStyle: {
-                    fill: "#2563EB",
-                    gradient: ["#CFE1FF", "#6366F1"],
-                    strokeColor: "#1E40AF",
+                    fill: "#7C8FFC",
+                    gradient: ["#C7D2FE", "#4C51BF"],
+                    strokeColor: "rgba(59,130,246,0.7)",
                     strokeWidth: 3.2,
-                    shadow: { color: "rgba(37,99,235,0.28)", x: 0, y: 2, blur: 10 }
+                    shadow: { color: "rgba(37,99,235,0.3)", x: 0, y: 2, blur: 10 }
                 },
                 ambient: {
-                    halo: "rgba(188,214,255,0.88)",
+                    halo: "rgba(198,210,255,0.9)",
                     haloAlpha: 0.76,
-                    ring: "rgba(168,192,255,0.78)",
-                    ringAlpha: 0.72,
-                    spark: "#38BDF8",
-                    sparkAlpha: 0.88
+                    ring: "rgba(158,188,255,0.82)",
+                    ringAlpha: 0.74,
+                    spark: "#9AB8FF",
+                    sparkAlpha: 0.92
                 }
             },
             timer: {
                 background: ["rgba(222,246,252,0.98)", "rgba(188,232,242,0.96)"],
                 accent: ["rgba(148,232,208,0.7)", "rgba(156,214,255,0.3)"],
                 iconStyle: {
-                    strokeColor: "#0D9488",
-                    strokeWidth: 3.2,
-                    shadow: { color: "rgba(13,148,136,0.24)", x: 0, y: 2, blur: 10 }
+                    fill: "#38BDF8",
+                    gradient: ["#A5F3FC", "#0EA5E9"],
+                    strokeColor: "rgba(14,165,233,0.85)",
+                    strokeWidth: 3.1,
+                    shadow: { color: "rgba(34,116,165,0.38)", x: 0, y: 2, blur: 10 }
                 },
                 ambient: {
-                    halo: "rgba(178,240,224,0.9)",
-                    haloAlpha: 0.76,
-                    ring: "rgba(164,214,255,0.8)",
-                    ringAlpha: 0.74,
-                    spark: "#2DD4BF",
-                    sparkAlpha: 0.88
+                    halo: "rgba(196,240,255,0.92)",
+                    haloAlpha: 0.78,
+                    ring: "rgba(176,214,255,0.84)",
+                    ringAlpha: 0.76,
+                    spark: "#7DD3FC",
+                    sparkAlpha: 0.92
                 }
             }
         },
@@ -2106,6 +2110,10 @@ function applyHudThemeToHud() {
         setTimerCriticalState(!!timerCardContainer.__isCritical);
     }
 
+    if (typeof startHudAmbientAnimations === "function") {
+        startHudAmbientAnimations();
+    }
+
     if (stage) {
         stage.update();
     }
@@ -2208,54 +2216,6 @@ function mergeIconStyle(base, override) {
                     blur: typeof override.shadow.blur === "number" ? override.shadow.blur : 0
                 };
             }
-        }
-    }
-
-    return result;
-}
-
-function normalizeDecorConfig(config, fallback) {
-    var result = {};
-
-    if (typeof config === "string") {
-        result.color = config;
-    } else if (config && typeof config === "object") {
-        if (typeof config.color !== "undefined") {
-            result.color = config.color;
-        }
-        if (typeof config.alpha === "number") {
-            result.alpha = config.alpha;
-        }
-        if (typeof config.width === "number") {
-            result.width = config.width;
-        }
-        if (config.colors && config.colors.length) {
-            result.colors = cloneArray(config.colors);
-        }
-        if (typeof config.heightRatio === "number") {
-            result.heightRatio = config.heightRatio;
-        }
-    }
-
-    if (typeof fallback === "string") {
-        fallback = { color: fallback };
-    }
-
-    if (fallback && typeof fallback === "object") {
-        if (typeof result.color === "undefined" && typeof fallback.color !== "undefined") {
-            result.color = fallback.color;
-        }
-        if (typeof result.alpha === "undefined" && typeof fallback.alpha === "number") {
-            result.alpha = fallback.alpha;
-        }
-        if (typeof result.width === "undefined" && typeof fallback.width === "number") {
-            result.width = fallback.width;
-        }
-        if (!result.colors && fallback.colors && fallback.colors.length) {
-            result.colors = cloneArray(fallback.colors);
-        }
-        if (typeof result.heightRatio === "undefined" && typeof fallback.heightRatio === "number") {
-            result.heightRatio = fallback.heightRatio;
         }
     }
 
@@ -3287,16 +3247,18 @@ function drawHudIcon(iconShape, type, overrideStyle) {
             iconShape.graphics
                 .beginLinearGradientFill(starColors, [0, 1], -14, -14, 14, 14)
                 .drawPolyStar(0, 0, 14, 5, 0.55, -90);
+
             var starHighlight = starColors[0] || starColors[starColors.length - 1];
             iconShape.graphics
                 .beginRadialGradientFill([
-                    applyAlphaToColor(starHighlight, 0.85),
+                    applyAlphaToColor(starHighlight, 0.92),
                     applyAlphaToColor(starHighlight, 0)
-                ], [0, 1], 0, 0, 0, 0, 0, 9)
-                .drawPolyStar(0, 0, 9, 5, 0.5, -90);
+                ], [0, 1], 0, -2, 0, 0, 0, 10)
+                .drawPolyStar(0, 0, 10, 5, 0.5, -90);
+
             if (iconStyle.strokeColor) {
                 iconShape.graphics
-                    .setStrokeStyle(iconStyle.strokeWidth || 2)
+                    .setStrokeStyle(iconStyle.strokeWidth || 2.4, "round")
                     .beginStroke(iconStyle.strokeColor)
                     .drawPolyStar(0, 0, 14, 5, 0.55, -90);
             }
@@ -3304,26 +3266,40 @@ function drawHudIcon(iconShape, type, overrideStyle) {
         case "timer":
             var strokeColor = iconStyle.strokeColor || iconStyle.fill || "#66B9FF";
             var strokeWidth = iconStyle.strokeWidth || 3;
+            var timerGradient = (iconStyle.gradient && iconStyle.gradient.length) ? iconStyle.gradient : [strokeColor, strokeColor];
+            var faceFill = iconStyle.fill || timerGradient[0];
+
+            iconShape.graphics
+                .beginLinearGradientFill(timerGradient, [0, 1], -12, -12, 12, 12)
+                .drawCircle(0, 0, 12);
+
             iconShape.graphics
                 .beginRadialGradientFill([
-                    applyAlphaToColor(strokeColor, 0.25),
-                    applyAlphaToColor(strokeColor, 0)
-                ], [0, 1], 0, 0, 0, 0, 0, 7)
-                .drawCircle(0, 0, 7);
+                    applyAlphaToColor(faceFill, 0.9),
+                    applyAlphaToColor(faceFill, 0)
+                ], [0, 1], 0, -3, 0, 0, 0, 9)
+                .drawCircle(0, 0, 9);
+
             iconShape.graphics
-                .setStrokeStyle(strokeWidth)
+                .beginFill(applyAlphaToColor(strokeColor, 0.18))
+                .drawCircle(0, 0, 4.5);
+
+            iconShape.graphics
+                .setStrokeStyle(strokeWidth, "round")
                 .beginStroke(strokeColor)
-                .drawCircle(0, 0, 14);
+                .drawCircle(0, 0, 12.5);
+
             iconShape.graphics
-                .setStrokeStyle(strokeWidth)
+                .setStrokeStyle(strokeWidth, "round")
                 .beginStroke(strokeColor)
                 .moveTo(0, 0)
-                .lineTo(0, -10);
+                .lineTo(0, -9);
+
             iconShape.graphics
-                .setStrokeStyle(strokeWidth)
+                .setStrokeStyle(strokeWidth, "round")
                 .beginStroke(strokeColor)
                 .moveTo(0, 0)
-                .lineTo(9, 4);
+                .lineTo(7.5, 3.5);
             break;
         case "question":
             var fillColor = iconStyle.fill || "#6EE7B7";
@@ -3333,9 +3309,9 @@ function drawHudIcon(iconShape, type, overrideStyle) {
                 .drawRoundRect(-11, -11, 22, 22, 6);
             iconShape.graphics
                 .beginRadialGradientFill([
-                    applyAlphaToColor(questionColors[0], 0.8),
+                    applyAlphaToColor(questionColors[0], 0.82),
                     applyAlphaToColor(questionColors[0], 0)
-                ], [0, 1], 0, -6, 0, 0, 0, 10)
+                ], [0, 1], 0, -5, 0, 0, 0, 10)
                 .drawRoundRect(-9, -9, 18, 18, 5);
             if (iconStyle.strokeColor) {
                 iconShape.graphics
@@ -3680,8 +3656,6 @@ SAUIX_attachControlTooltips();
     applyHudThemeToHud();
     setTimerCriticalState(false);
     updateQuestionProgress();
-
-    startHudAmbientAnimations();
 
     refreshResponsiveLayout(true);
 }
