@@ -1124,10 +1124,18 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
-        var topMargin = stageHeight * baseTopMarginRatio;
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
+        var topMargin = Math.max(stageHeight * baseTopMarginRatio, 14);
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.12, 44);
+        var computedY = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+        if (typeof Title.__layoutTopNudge === "number") {
+            computedY -= Title.__layoutTopNudge;
+        }
+
+        var absoluteMinimum = titleHalfHeight + Math.max(safeMargin * 0.05, 28);
+
         Title.x = stageWidth / 2;
-        Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+        Title.y = Math.max(absoluteMinimum, computedY);
         Title.__layoutTargetY = Title.y;
     }
 
@@ -2004,8 +2012,40 @@ function doneLoading(event) {
                 titleLabel.textBaseline = "middle";
                 titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
 
-                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
-                var badgeHeight = 86;
+                var metrics = typeof getCanvasMetrics === "function" ? getCanvasMetrics() : null;
+                var stageWidth = metrics && metrics.width ? metrics.width : 1280;
+                var maxBadgeWidth = Math.min(Math.max(520, stageWidth * 0.82), stageWidth - Math.max(80, stageWidth * 0.12));
+                var fontCandidates = [44, 40, 36];
+                var badgeWidth = 360;
+                var measuredHeight = 60;
+                var appliedLineHeight = 50;
+                var estimatedLineCount = 1;
+
+                for (var i = 0; i < fontCandidates.length; i++) {
+                    var fontSize = fontCandidates[i];
+                    titleLabel.font = "800 " + fontSize + "px 'Baloo 2'";
+
+                    var measuredWidth = titleLabel.getMeasuredWidth();
+                    var candidateWidth = Math.max(360, Math.min(measuredWidth + 200, maxBadgeWidth));
+                    var candidateLineWidth = candidateWidth - 180;
+
+                    titleLabel.lineWidth = candidateLineWidth;
+                    var candidateLineHeight = Math.round(fontSize + 6);
+                    titleLabel.lineHeight = candidateLineHeight;
+
+                    measuredHeight = titleLabel.getMeasuredHeight ? titleLabel.getMeasuredHeight() : candidateLineHeight;
+                    appliedLineHeight = candidateLineHeight;
+                    estimatedLineCount = Math.max(1, Math.round(measuredHeight / candidateLineHeight));
+
+                    badgeWidth = candidateWidth;
+
+                    if (estimatedLineCount <= 2 || i === fontCandidates.length - 1) {
+                        break;
+                    }
+                }
+
+                var verticalPadding = Math.max(36, appliedLineHeight * 0.9);
+                var badgeHeight = Math.max(86, measuredHeight + verticalPadding);
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
@@ -2097,9 +2137,8 @@ function doneLoading(event) {
                 iconGlyph.alpha = 0.9;
                 TitleContaier.addChild(iconGlyph);
 
-                titleLabel.lineWidth = badgeWidth - 180;
                 titleLabel.x = iconOrb.x + 42;
-                titleLabel.y = 2;
+                titleLabel.y = estimatedLineCount > 1 ? 0 : 2;
                 TitleContaier.addChild(titleLabel);
 
                 var shimmerMask = new createjs.Shape();
@@ -2132,6 +2171,7 @@ function doneLoading(event) {
                 TitleContaier.__layoutHalfWidth = badgeWidth / 2;
                 TitleContaier.__layoutHalfHeight = badgeHeight / 2;
                 TitleContaier.__label = titleLabel;
+                TitleContaier.__layoutTopNudge = Math.min(24, badgeHeight * 0.22);
 
                 Title = TitleContaier;
                 container.parent.addChild(TitleContaier);
