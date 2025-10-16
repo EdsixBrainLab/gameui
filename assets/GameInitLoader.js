@@ -2262,6 +2262,54 @@ function normalizeDecorConfig(config, fallback) {
     return result;
 }
 
+function normalizeDecorConfig(config, fallback) {
+    var result = {};
+
+    if (typeof config === "string") {
+        result.color = config;
+    } else if (config && typeof config === "object") {
+        if (typeof config.color !== "undefined") {
+            result.color = config.color;
+        }
+        if (typeof config.alpha === "number") {
+            result.alpha = config.alpha;
+        }
+        if (typeof config.width === "number") {
+            result.width = config.width;
+        }
+        if (config.colors && config.colors.length) {
+            result.colors = cloneArray(config.colors);
+        }
+        if (typeof config.heightRatio === "number") {
+            result.heightRatio = config.heightRatio;
+        }
+    }
+
+    if (typeof fallback === "string") {
+        fallback = { color: fallback };
+    }
+
+    if (fallback && typeof fallback === "object") {
+        if (typeof result.color === "undefined" && typeof fallback.color !== "undefined") {
+            result.color = fallback.color;
+        }
+        if (typeof result.alpha === "undefined" && typeof fallback.alpha === "number") {
+            result.alpha = fallback.alpha;
+        }
+        if (typeof result.width === "undefined" && typeof fallback.width === "number") {
+            result.width = fallback.width;
+        }
+        if (!result.colors && fallback.colors && fallback.colors.length) {
+            result.colors = cloneArray(fallback.colors);
+        }
+        if (typeof result.heightRatio === "undefined" && typeof fallback.heightRatio === "number") {
+            result.heightRatio = fallback.heightRatio;
+        }
+    }
+
+    return result;
+}
+
 function formatTimerValue(totalSeconds) {
     totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
     var minutes = Math.floor(totalSeconds / 60);
