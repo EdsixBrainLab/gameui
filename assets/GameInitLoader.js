@@ -4070,16 +4070,32 @@ function createIntroHowToPlayHeader() {
     container.highlightSweep = highlight;
     container.highlightMask = highlightMask;
 
-    var sparkle = new createjs.Shape();
-    sparkle.graphics
-        .setStrokeStyle(1.6)
-        .beginStroke("rgba(255, 255, 255, 0.65)")
-        .moveTo(198, 12)
-        .lineTo(214, 20)
-        .moveTo(204, 24)
-        .lineTo(220, 16);
-    sparkle.alpha = 0.7;
-    container.addChild(sparkle);
+    var sparkleGlow = new createjs.Shape();
+    sparkleGlow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255, 255, 255, 0.9)", "rgba(255, 255, 255, 0)"],
+            [0, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            14
+        )
+        .drawCircle(0, 0, 14);
+    sparkleGlow.alpha = 0.85;
+    sparkleGlow.x = 212;
+    sparkleGlow.y = 22;
+    container.addChild(sparkleGlow);
+
+    var sparkleCore = new createjs.Shape();
+    sparkleCore.graphics
+        .beginFill("rgba(255, 255, 255, 0.95)")
+        .drawPolyStar(0, 0, 4.5, 4, 0.6, -90);
+    sparkleCore.alpha = 0.9;
+    sparkleCore.x = sparkleGlow.x;
+    sparkleCore.y = sparkleGlow.y;
+    container.addChild(sparkleCore);
 
     var wave = createHowToPlayTildeWave(216, 14);
     wave.x = 172;
@@ -4161,21 +4177,45 @@ function createIntroActionButton() {
     button.cursor = "pointer";
     button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.38)", 0, 18, 36);
 
-
+    var glow = new createjs.Shape();
+    glow.name = "glow";
+    glow.alpha = 0.8;
+    button.addChild(glow);
+    button.glowShape = glow;
 
     var base = new createjs.Shape();
     base.name = "base";
     button.addChild(base);
 
+    var highlightMask = new createjs.Shape();
+    highlightMask.name = "highlightMask";
+    highlightMask.graphics.drawRoundRect(-120, -70, 200, 75, 28);
+    highlightMask.visible = false;
+    button.addChild(highlightMask);
+
     var highlight = new createjs.Shape();
     highlight.name = "highlight";
+    highlight.alpha = 0;
+    highlight.mask = highlightMask;
+    highlight.compositeOperation = "lighter";
+    highlight.baseX = -200;
+    highlight.x = highlight.baseX;
     button.addChild(highlight);
+    button.highlightSweep = highlight;
+    button.highlightMask = highlightMask;
 
-    var glow = new createjs.Shape();
-    glow.name = "glow";
-    glow.alpha = 0.8;
-    button.addChildAt(glow, 0);
-
+    var tildeWave = createHowToPlayTildeWave(200, 12);
+    tildeWave.name = "tildeWave";
+    tildeWave.visible = false;
+    tildeWave.alpha = 0.78;
+    tildeWave.x = -120;
+    tildeWave.y = -32;
+    if (tildeWave.maskShape) {
+        tildeWave.maskShape.x = -120;
+        tildeWave.maskShape.y = -32;
+    }
+    button.addChild(tildeWave);
+    button.tildeWave = tildeWave;
 
     var icon = new createjs.Text("", "700 32px 'Baloo 2'", "#FFFFFF");
     icon.name = "icon";
@@ -4193,12 +4233,14 @@ function createIntroActionButton() {
     label.y = -28;
     button.addChild(label);
 
- 
+    button.__glowTweenAttached = false;
+    button.__highlightTweenAttached = false;
+    button.__tildeWaveAttached = false;
 
     applyHowToPlayButtonState(button, "skip");
 
     button.scaleX = button.scaleY = 0.96;
-    button.__layoutHalfWidth = 100;
+    button.__layoutHalfWidth = 118;
     button.__layoutHalfHeight = 44;
 
     return button;
@@ -4214,16 +4256,35 @@ function applyHowToPlayButtonState(button, state) {
     var label = button.getChildByName("label");
     var icon = button.getChildByName("icon");
     var glow = button.getChildByName("glow");
+    var tildeWave = button.tildeWave || button.getChildByName("tildeWave");
 
     if (base) {
         base.graphics.clear();
     }
     if (highlight) {
         highlight.graphics.clear();
+        createjs.Tween.removeTweens(highlight);
+        if (typeof highlight.baseX !== "number") {
+            highlight.baseX = -200;
+        }
+        highlight.x = highlight.baseX;
+        highlight.alpha = 0;
     }
     if (glow) {
         glow.graphics.clear();
+        createjs.Tween.removeTweens(glow);
+        glow.scaleX = glow.scaleY = 1;
     }
+    if (tildeWave) {
+        if (typeof stopHowToPlayTildeWaveAnimation === "function") {
+            stopHowToPlayTildeWaveAnimation(tildeWave);
+        }
+        tildeWave.visible = false;
+    }
+
+    button.__glowTweenAttached = false;
+    button.__highlightTweenAttached = false;
+    button.__tildeWaveAttached = false;
 
     if (state === "start") {
         if (glow) {
@@ -4259,6 +4320,8 @@ function applyHowToPlayButtonState(button, state) {
                     16
                 )
                 .drawRoundRect(-120, -70, 200, 75, 28);
+            highlight.baseX = -220;
+            highlight.x = highlight.baseX;
         }
         if (icon) {
             icon.text = "\u25B6";
@@ -4291,7 +4354,11 @@ function applyHowToPlayButtonState(button, state) {
             base.graphics
                 .setStrokeStyle(2)
                 .beginStroke("rgba(143, 205, 255, 0.38)")
-                .beginLinearGradientFill(["rgba(54, 47, 112, 0.95)", "rgba(80, 58, 145, 0.9)", "rgba(118, 72, 173, 0.88)"], [0, 0.55, 1], -160, 0, 160, 0)
+                .beginLinearGradientFill([
+                    "rgba(54, 47, 112, 0.95)",
+                    "rgba(80, 58, 145, 0.9)",
+                    "rgba(118, 72, 173, 0.88)"
+                ], [0, 0.55, 1], -160, 0, 160, 0)
                 .drawRoundRect(-120, -70, 190, 75, 30);
         }
         if (highlight) {
@@ -4305,6 +4372,8 @@ function applyHowToPlayButtonState(button, state) {
                     16
                 )
                 .drawRoundRect(-120, -70, 200, 75, 28);
+            highlight.baseX = -205;
+            highlight.x = highlight.baseX;
         }
         if (icon) {
             icon.text = "\u279C";
@@ -4319,14 +4388,101 @@ function applyHowToPlayButtonState(button, state) {
         button.shadow = new createjs.Shadow("rgba(8, 12, 30, 0.32)", 0, 18, 32);
     }
 
-    button.state = state;
-    var layoutHalfWidth = 10;
-    var layoutHalfHeight = 4;
-    if (state === "start") {
-        layoutHalfHeight = 4;
+    if (glow) {
+        glow.alpha = state === "start" ? 0.9 : 0.75;
     }
-    button.__layoutHalfWidth = layoutHalfWidth;
-    button.__layoutHalfHeight = layoutHalfHeight;
+    if (tildeWave) {
+        tildeWave.alpha = state === "start" ? 0.85 : 0.72;
+    }
+    if (button.highlightMask && highlight) {
+        highlight.mask = button.highlightMask;
+    }
+
+    button.state = state;
+    button.__layoutHalfWidth = 118;
+    button.__layoutHalfHeight = 44;
+}
+
+function startIntroActionButtonAnimations(button) {
+    if (!button) {
+        return;
+    }
+
+    var glow = button.glowShape || button.getChildByName("glow");
+    var highlight = button.highlightSweep || button.getChildByName("highlight");
+    var tildeWave = button.tildeWave || button.getChildByName("tildeWave");
+
+    var state = button.state || "skip";
+
+    if (glow && !button.__glowTweenAttached) {
+        button.__glowTweenAttached = true;
+        var maxAlpha = state === "start" ? 0.95 : 0.8;
+        var minAlpha = state === "start" ? 0.72 : 0.6;
+        var maxScale = state === "start" ? 1.12 : 1.08;
+
+        createjs.Tween.get(glow, { loop: true })
+            .to({ alpha: maxAlpha, scaleX: maxScale, scaleY: maxScale }, 520, createjs.Ease.quadOut)
+            .to({ alpha: minAlpha, scaleX: 1, scaleY: 1 }, 560, createjs.Ease.quadInOut);
+    }
+
+    if (highlight && !button.__highlightTweenAttached) {
+        var startX = typeof highlight.baseX === "number" ? highlight.baseX : -210;
+        var travelSpan = state === "start" ? 360 : 320;
+        var endX = startX + travelSpan;
+
+        createjs.Tween.removeTweens(highlight);
+        highlight.x = startX;
+        highlight.alpha = 0;
+
+        button.__highlightTweenAttached = true;
+
+        createjs.Tween.get(highlight, { loop: true })
+            .to({ alpha: 0.92 }, 260, createjs.Ease.quadOut)
+            .to({ x: endX }, 1160, createjs.Ease.quadInOut)
+            .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
+            .set({ x: startX })
+            .wait(420);
+    }
+
+    if (tildeWave && !button.__tildeWaveAttached) {
+        tildeWave.visible = true;
+        tildeWave.alpha = state === "start" ? 0.85 : 0.72;
+        startHowToPlayTildeWaveAnimation(tildeWave);
+        button.__tildeWaveAttached = true;
+    }
+}
+
+function stopIntroActionButtonAnimations(button) {
+    if (!button) {
+        return;
+    }
+
+    var glow = button.glowShape || button.getChildByName("glow");
+    var highlight = button.highlightSweep || button.getChildByName("highlight");
+    var tildeWave = button.tildeWave || button.getChildByName("tildeWave");
+    var state = button.state || "skip";
+
+    if (glow) {
+        createjs.Tween.removeTweens(glow);
+        glow.scaleX = glow.scaleY = 1;
+        glow.alpha = state === "start" ? 0.9 : 0.75;
+    }
+    button.__glowTweenAttached = false;
+
+    if (highlight) {
+        createjs.Tween.removeTweens(highlight);
+        highlight.alpha = 0;
+        if (typeof highlight.baseX === "number") {
+            highlight.x = highlight.baseX;
+        }
+    }
+    button.__highlightTweenAttached = false;
+
+    if (tildeWave) {
+        stopHowToPlayTildeWaveAnimation(tildeWave);
+        tildeWave.visible = false;
+    }
+    button.__tildeWaveAttached = false;
 }
 
 function attachProceedButtonListeners(button) {
