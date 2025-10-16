@@ -110,7 +110,7 @@ else
           syncing
         </span>
       </div>
-      <h1 class="card-title">Launching your SkillAngels test</h1>
+      <h1 class="card-title">Launching your SkillAngels puzzle</h1>
       <p class="card-subtitle">We are preparing a personalised experience for you. Sit tight while we set the stage!</p>
 
       <div class="progress-visual" aria-hidden="true">
@@ -123,7 +123,7 @@ else
         <div class="progress-bar"></div>
       </div>
 
-      <div class="loading-meta">
+      <div class="loading-meta" style="display:none;">
         <span class="meta-item">Questions</span>
         <span class="meta-item">Voice prompts</span>
         <span class="meta-item">Rewards</span>
@@ -138,8 +138,8 @@ else
     margin: 0;
     padding: 0;
     font-family: 'Baloo 2', sans-serif;
-    background-color: #f1ecff;
-    color: #2f1a46;
+    background-color: #0e0b24;
+    color: #ffffff;
   }
 
   #content1 {
@@ -152,10 +152,9 @@ else
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 20% 15%, rgba(246, 214, 255, 0.6), transparent 55%),
-                radial-gradient(circle at 80% 85%, rgba(255, 197, 222, 0.55), transparent 60%),
-                radial-gradient(circle at 55% 40%, rgba(196, 210, 255, 0.45), transparent 65%),
-                linear-gradient(135deg, #f2edff 0%, #fbe3ff 45%, #ffe6f0 100%);
+    background: radial-gradient(circle at top left, rgba(255, 161, 223, 0.5), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(114, 191, 255, 0.45), transparent 60%),
+                linear-gradient(135deg, #120835 0%, #1a0f4b 35%, #2a1e62 68%, #3a2c7a 100%);
   }
 
   .loading-wrapper {
@@ -170,9 +169,9 @@ else
     position: absolute;
     border-radius: 50%;
     filter: blur(0);
-    opacity: 0.55;
+    opacity: 0.65;
     pointer-events: none;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
     animation: float 12s ease-in-out infinite;
     z-index: 0;
   }
@@ -180,28 +179,28 @@ else
   .orb-one {
     top: -60px;
     right: -50px;
-    width: 190px;
-    height: 190px;
-    background: radial-gradient(circle at 35% 30%, rgba(255, 210, 176, 0.75), rgba(255, 187, 164, 0.2), rgba(255, 187, 164, 0));
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 111, 220, 0.15));
     animation-delay: 0s;
   }
 
   .orb-two {
     bottom: -70px;
     left: -80px;
-    width: 240px;
-    height: 240px;
-    background: radial-gradient(circle at 65% 70%, rgba(244, 186, 228, 0.7), rgba(230, 149, 207, 0.22), rgba(226, 154, 210, 0));
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.8), rgba(106, 152, 255, 0.2));
     animation-delay: 2s;
   }
 
   .orb-three {
     top: 40%;
-    left: 52%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle at 50% 50%, rgba(209, 220, 255, 0.62), rgba(168, 187, 255, 0.24), rgba(168, 187, 255, 0));
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
     mix-blend-mode: screen;
     animation-delay: 4s;
   }
@@ -213,11 +212,11 @@ else
 
   .loading-card {
     position: relative;
-    backdrop-filter: blur(24px);
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(245, 231, 255, 0.72));
+    backdrop-filter: blur(22px);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05));
     border-radius: 28px;
-    border: 1px solid rgba(226, 202, 255, 0.65);
-    box-shadow: 0 22px 60px rgba(136, 106, 173, 0.26);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 25px 60px rgba(18, 6, 52, 0.6);
     padding: clamp(28px, 5vw, 42px);
     overflow: hidden;
     z-index: 3;
@@ -228,8 +227,8 @@ else
     position: absolute;
     inset: 1px;
     border-radius: 26px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0));
-    opacity: 0.35;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+    opacity: 0.2;
     pointer-events: none;
   }
 
@@ -251,8 +250,8 @@ else
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #3b2655;
-    background: linear-gradient(135deg, #f9cfae 0%, #f2c4ff 55%, #d9d0ff 100%);
+    color: #140939;
+    background: linear-gradient(135deg, #ffffff 0%, #ffe5ff 100%);
     font-weight: 700;
   }
 
@@ -265,8 +264,8 @@ else
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    background: rgba(238, 221, 255, 0.78);
-    border: 1px solid rgba(208, 183, 255, 0.72);
+    background: rgba(20, 9, 57, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .status-pill .dot {
@@ -274,8 +273,8 @@ else
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #ff985d;
-    box-shadow: 0 0 12px rgba(255, 152, 93, 0.65);
+    background: #63ffa7;
+    box-shadow: 0 0 12px rgba(99, 255, 167, 0.85);
     animation: blink 1.6s ease-in-out infinite;
   }
 
@@ -291,7 +290,6 @@ else
     font-size: clamp(1.65rem, 5vw, 2.25rem);
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: #321c4d;
   }
 
   .card-subtitle {
@@ -300,7 +298,7 @@ else
     margin: 12px 0 32px;
     font-size: clamp(0.95rem, 2.4vw, 1.1rem);
     line-height: 1.5;
-    color: rgba(54, 30, 77, 0.72);
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .progress-visual {
@@ -318,14 +316,14 @@ else
 
   .pulse-ring {
     inset: 0;
-    border: 2px solid rgba(218, 195, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.25);
     animation: pulse 2.8s ease-out infinite;
   }
 
   .pulse-core {
     inset: 24px;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 222, 199, 0.9) 0%, rgba(245, 176, 214, 0.62) 45%, rgba(192, 201, 255, 0.55) 100%);
-    box-shadow: 0 0 28px rgba(189, 160, 236, 0.55);
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 147, 226, 0.65) 45%, rgba(123, 102, 255, 0.4) 100%);
+    box-shadow: 0 0 28px rgba(255, 255, 255, 0.65);
     animation: glow 2.8s ease-in-out infinite;
   }
 
@@ -345,7 +343,7 @@ else
     width: 100%;
     height: 10px;
     border-radius: 999px;
-    background: rgba(206, 189, 240, 0.45);
+    background: rgba(255, 255, 255, 0.16);
     overflow: hidden;
     margin-bottom: 18px;
   }
@@ -355,7 +353,7 @@ else
     inset: 0;
     width: 45%;
     border-radius: inherit;
-    background: linear-gradient(90deg, #f6a971 0%, #f183c9 55%, #9da5ff 100%);
+    background: linear-gradient(90deg, rgba(255, 147, 226, 0.95) 0%, rgba(123, 102, 255, 0.95) 100%);
     animation: load 2.8s ease-in-out infinite;
   }
 
@@ -363,9 +361,9 @@ else
     position: absolute;
     inset: -25px;
     border-radius: inherit;
-    background: radial-gradient(circle, rgba(210, 187, 245, 0.55) 0%, transparent 70%);
-    opacity: 0.5;
-    filter: blur(16px);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+    opacity: 0.35;
+    filter: blur(12px);
   }
 
   @keyframes load {
@@ -383,7 +381,7 @@ else
     font-size: clamp(0.75rem, 2vw, 0.9rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(47, 26, 70, 0.75);
+    color: rgba(255, 255, 255, 0.75);
   }
 
   .meta-item {
@@ -396,8 +394,8 @@ else
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgba(255, 202, 236, 0.9);
-    box-shadow: 0 0 14px rgba(255, 202, 236, 0.7);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.75);
     opacity: 0.75;
     animation: drift 6s linear infinite;
     pointer-events: none;
@@ -428,9 +426,8 @@ else
 
     .meta-item {
       padding: 6px 0;
-      background: rgba(211, 193, 241, 0.32);
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 12px;
-      color: #3a2454;
     }
   }
 </style>
