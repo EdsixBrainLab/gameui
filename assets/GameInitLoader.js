@@ -1074,6 +1074,7 @@ function layoutHudElements(canvasWidth, canvasHeight) {
 
     cursor += questionWidth / 2 + baseGap + controlWidth / 2;
     positions.push(cursor);
+console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
         scoreCardContainer.x = positions[0]-200;
         scoreCardContainer.baseX = positions[0]-200;
@@ -1123,18 +1124,10 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
-        var topMargin = Math.max(stageHeight * baseTopMarginRatio, 14);
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.12, 44);
-        var computedY = Math.max(topMargin + titleHalfHeight, minimumTop);
-
-        if (typeof Title.__layoutTopNudge === "number") {
-            computedY -= Title.__layoutTopNudge;
-        }
-
-        var absoluteMinimum = titleHalfHeight + Math.max(safeMargin * 0.05, 28);
-
+        var topMargin = stageHeight * baseTopMarginRatio;
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
         Title.x = stageWidth / 2;
-        Title.y = Math.max(absoluteMinimum, computedY);
+        Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
         Title.__layoutTargetY = Title.y;
     }
 
@@ -1415,13 +1408,13 @@ function applyHudThemeToControls(theme) {
     var controlTheme = theme.controlBackground || {};
     var controlPalette = theme.controlPalette || {};
 
-    var controlBg = controlContainer.backgroundShape || null;
-    var controlWidth = controlBg ? (controlBg.__width || 120) : 120;
-    var controlHeight = controlBg ? (controlBg.__height || 53) : 53;
-    var controlRadius = controlBg ? (controlBg.__radius || 24) : 24;
-    var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
+    if (controlContainer.backgroundShape) {
+        var controlBg = controlContainer.backgroundShape;
+        var controlWidth = controlBg.__width || 120;
+        var controlHeight = controlBg.__height || 53;
+        var controlRadius = controlBg.__radius || 24;
+        var bgColors = (controlTheme.colors && controlTheme.colors.length) ? controlTheme.colors : ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"];
 
-    if (controlBg) {
         controlBg.graphics
             .clear()
             .beginLinearGradientFill(bgColors, [0, 1], -controlWidth / 2, -controlHeight / 2, controlWidth / 2, controlHeight / 2)
@@ -1434,25 +1427,15 @@ function applyHudThemeToControls(theme) {
     updateHudIconWrapper(controlContainer.fullscreenWrapper, controlPalette.fullscreen || {}, theme);
     updateHudIconWrapper(controlContainer.closeWrapper, controlPalette.close || {}, theme);
 
-    var outline = controlContainer.__outlineShape;
-    if (!outline) {
-        outline = new createjs.Shape();
-        outline.name = "controlOutline";
-        controlContainer.__outlineShape = outline;
-        controlContainer.addChild(outline);
-    }
+var borderColor1 = "#000"; // Customize or use from theme
+var borderThickness1 = .5; // Change thickness as needed
 
-    var outlineColor = (controlTheme.outlineColor) || "rgba(0,0,0,0.25)";
-    outline.graphics
-        .clear()
-        .setStrokeStyle(0.5)
-        .beginStroke(outlineColor)
-        .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
-    outline.alpha = typeof controlTheme.outlineAlpha === "number" ? controlTheme.outlineAlpha : 1;
-
-    if (controlContainer.setChildIndex) {
-        controlContainer.setChildIndex(outline, controlContainer.getNumChildren() - 1);
-    }
+var border1 = new createjs.Shape();
+border1.graphics
+    .setStrokeStyle(borderThickness1)
+    .beginStroke(borderColor1)
+    .drawRoundRect(-controlWidth / 2, -controlHeight / 2, controlWidth, controlHeight, controlRadius);
+controlContainer.addChild(border1); // Add after background so it appears on top (or before to appear behind)
 
 }
 
@@ -1891,6 +1874,8 @@ function doneLoading(event) {
 
             var id = event.item.id;
 
+            console.log(id)
+
             if (id == "Grid") {
                 Grid = new createjs.Bitmap(preload.getResult('Grid'));
                 container.parent.addChild(Grid);
@@ -2019,40 +2004,8 @@ function doneLoading(event) {
                 titleLabel.textBaseline = "middle";
                 titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
 
-                var metrics = typeof getCanvasMetrics === "function" ? getCanvasMetrics() : null;
-                var stageWidth = metrics && metrics.width ? metrics.width : 1280;
-                var maxBadgeWidth = Math.min(Math.max(520, stageWidth * 0.82), stageWidth - Math.max(80, stageWidth * 0.12));
-                var fontCandidates = [44, 40, 36];
-                var badgeWidth = 360;
-                var measuredHeight = 60;
-                var appliedLineHeight = 50;
-                var estimatedLineCount = 1;
-
-                for (var i = 0; i < fontCandidates.length; i++) {
-                    var fontSize = fontCandidates[i];
-                    titleLabel.font = "800 " + fontSize + "px 'Baloo 2'";
-
-                    var measuredWidth = titleLabel.getMeasuredWidth();
-                    var candidateWidth = Math.max(360, Math.min(measuredWidth + 200, maxBadgeWidth));
-                    var candidateLineWidth = candidateWidth - 180;
-
-                    titleLabel.lineWidth = candidateLineWidth;
-                    var candidateLineHeight = Math.round(fontSize + 6);
-                    titleLabel.lineHeight = candidateLineHeight;
-
-                    measuredHeight = titleLabel.getMeasuredHeight ? titleLabel.getMeasuredHeight() : candidateLineHeight;
-                    appliedLineHeight = candidateLineHeight;
-                    estimatedLineCount = Math.max(1, Math.round(measuredHeight / candidateLineHeight));
-
-                    badgeWidth = candidateWidth;
-
-                    if (estimatedLineCount <= 2 || i === fontCandidates.length - 1) {
-                        break;
-                    }
-                }
-
-                var verticalPadding = Math.max(36, appliedLineHeight * 0.9);
-                var badgeHeight = Math.max(86, measuredHeight + verticalPadding);
+                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
+                var badgeHeight = 86;
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
@@ -2144,8 +2097,9 @@ function doneLoading(event) {
                 iconGlyph.alpha = 0.9;
                 TitleContaier.addChild(iconGlyph);
 
+                titleLabel.lineWidth = badgeWidth - 180;
                 titleLabel.x = iconOrb.x + 42;
-                titleLabel.y = estimatedLineCount > 1 ? 0 : 2;
+                titleLabel.y = 2;
                 TitleContaier.addChild(titleLabel);
 
                 var shimmerMask = new createjs.Shape();
@@ -2178,7 +2132,6 @@ function doneLoading(event) {
                 TitleContaier.__layoutHalfWidth = badgeWidth / 2;
                 TitleContaier.__layoutHalfHeight = badgeHeight / 2;
                 TitleContaier.__label = titleLabel;
-                TitleContaier.__layoutTopNudge = Math.min(24, badgeHeight * 0.22);
 
                 Title = TitleContaier;
                 container.parent.addChild(TitleContaier);
@@ -2325,8 +2278,10 @@ function doneLoading(event) {
 
             if (id == "domainPath") {
                 var json = preload.getResult("domainPath");
+                console.log(json); // true
                 url = json.path;
                 url1 = json.scoreupdate;
+                console.log("check= " + url1)
                 url2 = json.get_info;
                 nav = json.nav;
                 continue;
@@ -3586,10 +3541,7 @@ function createHowToPlayParticleField(width, height, count) {
         }
     ];
 
-    var requestedCount = typeof count === "number" ? count : 24;
-    var safeCount = Math.max(0, Math.min(requestedCount, 40));
-
-    for (var i = 0; i < safeCount; i++) {
+    for (var i = 0; i < count; i++) {
         var radius = 3 + Math.random() * 4;
         var palette = palettes[Math.floor(Math.random() * palettes.length)];
         var particle = new createjs.Container();
@@ -3828,14 +3780,7 @@ function createHowToPlayInstructions() {
     title.y = 38;
     container.addChild(title);
 
-    var subtitle = new createjs.Text(
-        "Follow these quick tips before you start",
-        "500 18px 'Baloo 2'",
-        "rgba(219, 212, 255, 0.88)"
-    );
-    subtitle.x = 46;
-    subtitle.y = 76;
-    container.addChild(subtitle);
+    
 
     var steps = [
         "Review the How to Play tips carefully.",
@@ -4713,12 +4658,7 @@ function createLoaderProceedButton() {
     button.highlightSweep = highlight;
     button.highlightMask = highlightMask;
 
-    var tildeWave = createHowToPlayTildeWave(200, 14);
-    tildeWave.x = 0;
-    tildeWave.y = 0;
-    tildeWave.visible = false;
-    button.addChild(tildeWave);
-    button.tildeWave = tildeWave;
+  
 
     var frameStroke = new createjs.Shape();
     frameStroke.graphics
@@ -5692,12 +5632,14 @@ function createGameIntroAnimationPlay() {
 }
 //===========================================================================================//
 function setStopRotation() {
+    console.log("Stop Rotation 1 " + isScreenRotation + " ======== " + isGamePlay)
     if (isGamePlay) {
         pauseTimer()
     }
 }
 
 function setResumeRotation() {
+    console.log("get value of = " + isGamePlay)
     if (isScreenRotation == "0" && !isGamePlay) {
         isScreenRotation = "5";
     }

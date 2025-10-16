@@ -87,6 +87,7 @@ function isVisibleStartBtn() {
     container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
     container.parent.addChild(howToPlayImageMc);
+    console.log("isVisibleStartBtn");
     if (typeof startIntroActionButtonAnimations === "function") {
         startIntroActionButtonAnimations(SkipBtnMc);
     }
@@ -111,6 +112,7 @@ function createDelayToStartGame() {
     window.removeEventListener('blur', stopGameIntro);
     TimerAnsScoreTweens()
     var isOnline = navigator.onLine;
+    console.log("isOnline= " + isOnline)
     if (runningBg == 1) {
         uniquebackGround.visible = false;
         createBackgroundTweens()
@@ -164,9 +166,11 @@ function animationEndHandler(e) {
     if (animEndCnt == 1) {
         animEndCnt = 0
         if (getCorrectStr == "") {
+            console.log("coming...")
             //  gameIntroAnimMc.addEventListener("tick",startAnimationHandler)
         } else {
             validCnt++
+            console.log("get validation= " + validCnt)
             if (validCnt == 2) {
 
                 //  getCorrectValidation();
@@ -331,6 +335,7 @@ function getValidation(aStr) {
     } else {
 
         wrongCnt++;
+        console.log("wr " + wrongCnt);
         ccnt = ccnt;
         ans = 0;
         ans = ccnt;
@@ -369,6 +374,7 @@ function getValidation(aStr) {
         rst = 1;
     }
     responseTime += rst;
+    console.log("responseTime= " + responseTime);
     answer_status = aStr;
     clrSent = setTimeout(sentscore, 1000);
 
@@ -378,6 +384,7 @@ function getValidation(aStr) {
 function sentscore() {
 
     clearTimeout(clrSent);
+    console.log("url1= " + url1)
     if (gameType == 0) {
         if (qscnt < totalQuestions - 1 && time > 0) {
 
@@ -429,6 +436,7 @@ function sentscore() {
         }
     } else {
         var isOnline = navigator.onLine;
+        console.log("isOnline= " + isOnline)
         if (isOnline) {
             if (puzzle_cycle == 1) {
                 ScoreRedirect(nav, url1, sid, gid, rst, time, ans, uans, answer_status, qno[cnt], scores, puzzle_cycle, timeOver_Status);
@@ -448,7 +456,9 @@ function sentscore() {
 
 //=================================================================================================================//
 function handleComplete(e) {
+    console.log("answ====== = " + answeredQuestions + " cnt = " + cnt)
     var isOnline = navigator.onLine;
+    console.log("isOnline= " + isOnline)
     if (isOnline) {
         if (qscnt < totalQuestions - 1) {
             wrongImg.visible = false;
@@ -486,6 +496,7 @@ function handleComplete(e) {
 }
 
 function handleComplete1(e) {
+	console.log("handleComplete1");
     timeOverImg.visible = false;
     gameOverImg.visible = false;
     clearInterval(interval);
@@ -505,11 +516,13 @@ function handleComplete1(e) {
     container1.parent.addChild(resultLoading)
 
 
+console.log("before computeresult");
     computeresult();
 }
 
 //=================================================================================================================//
 function computeresult() {
+console.log("computeresult");
     stage.mouseEnabled = false;
 
 
@@ -608,6 +621,7 @@ function computeresult() {
 }
 //----------------------------------------------------------------------------------------------------------------//
 function calculatescore() {
+console.log("rstrst:"+rst);
     switch (rst) {
 
         case 0:
