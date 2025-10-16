@@ -799,6 +799,275 @@ function createAmbientBackground() {
 }
 
 
+function createAmbientConstellation() {
+  var cluster = new createjs.Container();
+  cluster.mouseEnabled = false;
+  cluster.mouseChildren = false;
+
+  if (!canvas) {
+    return cluster;
+  }
+
+  var nodeCount = 3 + Math.floor(Math.random() * 3);
+  var radius = 40 + Math.random() * 80;
+  var baseAngle = Math.random() * Math.PI * 2;
+  var spread = 0.4 + Math.random() * 0.35;
+  var points = [];
+
+  for (var i = 0; i < nodeCount; i++) {
+    var angle = baseAngle + i * spread * Math.PI;
+    var distance = radius * (0.6 + Math.random() * 0.8);
+    points.push({
+      x: Math.cos(angle) * distance,
+      y: Math.sin(angle) * distance
+    });
+  }
+
+  var line = new createjs.Shape();
+  var graphics = line.graphics;
+  graphics.setStrokeStyle(1.6);
+  graphics.beginLinearGradientStroke(
+    ["rgba(194, 220, 255, 0.85)", "rgba(194, 220, 255, 0)"],
+    [0, 1],
+    -radius,
+    -radius,
+    radius,
+    radius
+  );
+
+  for (var p = 0; p < points.length; p++) {
+    var point = points[p];
+    if (p === 0) {
+      graphics.moveTo(point.x, point.y);
+    } else {
+      graphics.lineTo(point.x, point.y);
+    }
+  }
+
+  graphics.endStroke();
+  line.alpha = 0.75;
+  line.compositeOperation = "lighter";
+  cluster.addChild(line);
+
+  for (var n = 0; n < points.length; n++) {
+    var node = new createjs.Container();
+    var nodePoint = points[n];
+    node.x = nodePoint.x;
+    node.y = nodePoint.y;
+
+    var glowRadius = 7 + Math.random() * 5;
+    var glow = new createjs.Shape();
+    glow.graphics
+      .beginRadialGradientFill(
+        ["rgba(230, 244, 255, 0.6)", "rgba(126, 188, 255, 0.08)", "rgba(0,0,0,0)"],
+        [0, 0.55, 1],
+        0,
+        0,
+        0,
+        0,
+        0,
+        glowRadius * 2.4
+      )
+      .drawCircle(0, 0, glowRadius * 2.4);
+    glow.alpha = 0.72;
+    glow.compositeOperation = "lighter";
+    node.addChild(glow);
+
+    var core = new createjs.Shape();
+    core.graphics
+      .beginRadialGradientFill(
+        ["rgba(255, 255, 255, 0.95)", "rgba(174, 214, 255, 0.4)", "rgba(0,0,0,0)"],
+        [0, 0.7, 1],
+        0,
+        0,
+        0,
+        0,
+        0,
+        glowRadius
+      )
+      .drawCircle(0, 0, glowRadius);
+    core.alpha = 0.82;
+    node.addChild(core);
+
+    var baseScale = 0.9 + Math.random() * 0.2;
+    node.scaleX = node.scaleY = baseScale;
+
+    (function (target, glowShape) {
+      var initialAlpha = target.alpha || 1;
+      var initialScale = target.scaleX || 1;
+      createjs.Tween.get(target, { loop: true })
+        .to(
+          {
+            alpha: Math.min(1, initialAlpha + 0.2),
+            scaleX: initialScale * 1.12,
+            scaleY: initialScale * 1.12
+          },
+          1600 + Math.random() * 1200,
+          createjs.Ease.sineInOut
+        )
+        .to(
+          {
+            alpha: Math.max(0.55, initialAlpha - 0.25),
+            scaleX: initialScale * 0.88,
+            scaleY: initialScale * 0.88
+          },
+          1600 + Math.random() * 1200,
+          createjs.Ease.sineInOut
+        );
+
+      if (glowShape) {
+        var baseGlowAlpha = glowShape.alpha || 0.7;
+        createjs.Tween.get(glowShape, { loop: true })
+          .to(
+            {
+              alpha: Math.min(0.9, baseGlowAlpha + 0.15)
+            },
+            1400 + Math.random() * 1200,
+            createjs.Ease.sineInOut
+          )
+          .to(
+            {
+              alpha: Math.max(0.4, baseGlowAlpha - 0.2)
+            },
+            1400 + Math.random() * 1200,
+            createjs.Ease.sineInOut
+          );
+      }
+    })(node, glow);
+
+    cluster.addChild(node);
+  }
+
+  cluster.x = canvas.width * (0.18 + Math.random() * 0.64);
+  cluster.y = canvas.height * (0.18 + Math.random() * 0.46);
+  cluster.scaleX = cluster.scaleY = 0.65 + Math.random() * 0.35;
+  cluster.rotation = -12 + Math.random() * 24;
+
+  (function (target) {
+    var baseX = target.x;
+    var baseY = target.y;
+    var baseRotation = target.rotation;
+
+    var drift = function () {
+      createjs.Tween.get(target)
+        .to(
+          {
+            x: baseX + (-16 + Math.random() * 32),
+            y: baseY + (-12 + Math.random() * 24),
+            rotation: baseRotation + (-5 + Math.random() * 10)
+          },
+          4800 + Math.random() * 3400,
+          createjs.Ease.sineInOut
+        )
+        .to(
+          {
+            x: baseX,
+            y: baseY,
+            rotation: baseRotation
+          },
+          4800 + Math.random() * 3400,
+          createjs.Ease.sineInOut
+        )
+        .call(drift);
+    };
+
+    drift();
+  })(cluster);
+
+  return cluster;
+}
+
+
+function createAmbientShimmerConstellations() {
+  var layer = new createjs.Container();
+  layer.mouseEnabled = false;
+  layer.mouseChildren = false;
+
+  if (!canvas) {
+    return layer;
+  }
+
+  var clusterCount = 3 + Math.floor(Math.random() * 3);
+
+  for (var i = 0; i < clusterCount; i++) {
+    var shimmer = new createjs.Container();
+    shimmer.x = canvas.width * (0.15 + Math.random() * 0.7);
+    shimmer.y = canvas.height * (0.12 + Math.random() * 0.5);
+    shimmer.scaleX = shimmer.scaleY = 0.6 + Math.random() * 0.6;
+    shimmer.alpha = 0.55 + Math.random() * 0.25;
+
+    var tail = new createjs.Shape();
+    var tailLength = 40 + Math.random() * 70;
+    tail.graphics
+      .setStrokeStyle(1.2)
+      .beginLinearGradientStroke(
+        ["rgba(156, 204, 255, 0.6)", "rgba(156, 204, 255, 0)"],
+        [0, 1],
+        -tailLength / 2,
+        0,
+        tailLength / 2,
+        0
+      )
+      .moveTo(-tailLength / 2, 0)
+      .quadraticCurveTo(0, -tailLength * 0.35, tailLength / 2, 0);
+    tail.alpha = 0.75;
+    tail.compositeOperation = "lighter";
+    shimmer.addChild(tail);
+
+    var pulse = new createjs.Shape();
+    var pulseRadius = 10 + Math.random() * 8;
+    pulse.graphics
+      .beginRadialGradientFill(
+        ["rgba(222, 241, 255, 0.7)", "rgba(150, 206, 255, 0.24)", "rgba(0,0,0,0)"],
+        [0, 0.6, 1],
+        0,
+        0,
+        0,
+        0,
+        0,
+        pulseRadius * 2.8
+      )
+      .drawCircle(0, 0, pulseRadius * 2.8);
+    pulse.alpha = 0.7;
+    pulse.compositeOperation = "lighter";
+    shimmer.addChild(pulse);
+
+    var sparkle = new createjs.Shape();
+    sparkle.graphics
+      .beginFill("rgba(236, 248, 255, 0.95)")
+      .drawPolyStar(0, 0, pulseRadius * 0.5, 4, 0.6, -90);
+    sparkle.alpha = 0.9;
+    shimmer.addChild(sparkle);
+
+    (function (target, glowShape, tailShape) {
+      var baseAlpha = target.alpha;
+      createjs.Tween.get(target, { loop: true })
+        .to({ alpha: Math.min(1, baseAlpha + 0.2) }, 2200 + Math.random() * 1600, createjs.Ease.sineInOut)
+        .to({ alpha: Math.max(0.35, baseAlpha - 0.25) }, 2200 + Math.random() * 1600, createjs.Ease.sineInOut);
+
+      if (glowShape) {
+        var baseScale = glowShape.scaleX || 1;
+        createjs.Tween.get(glowShape, { loop: true })
+          .to({ scaleX: baseScale * 1.12, scaleY: baseScale * 1.12 }, 1800 + Math.random() * 1200, createjs.Ease.sineInOut)
+          .to({ scaleX: baseScale * 0.88, scaleY: baseScale * 0.88 }, 1800 + Math.random() * 1200, createjs.Ease.sineInOut);
+      }
+
+      if (tailShape) {
+        var baseTailRotation = -6 + Math.random() * 12;
+        tailShape.rotation = baseTailRotation;
+        createjs.Tween.get(tailShape, { loop: true })
+          .to({ rotation: baseTailRotation + (-8 + Math.random() * 16) }, 2600 + Math.random() * 1800, createjs.Ease.sineInOut)
+          .to({ rotation: baseTailRotation + (8 - Math.random() * 16) }, 2600 + Math.random() * 1800, createjs.Ease.sineInOut);
+      }
+    })(shimmer, pulse, tail);
+
+    layer.addChild(shimmer);
+  }
+
+  return layer;
+}
+
+
 function createAmbientGlowOrb(radius, colors) {
   var palette = colors && colors.length ? colors : ["rgba(186, 209, 255, 0.4)", "rgba(186, 209, 255, 0)"];
   var stops = [];
