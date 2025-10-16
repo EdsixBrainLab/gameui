@@ -435,24 +435,49 @@ function buildGameplayBackdrop() {
 
     var base = new createjs.Shape();
     base.graphics
-        .beginLinearGradientFill(["#0b0624", "#1b0e46", "#2f1f73"], [0, 0.55, 1], 0, 0, width, height)
+        .beginLinearGradientFill(["#050822", "#101d45", "#1f1f63", "#331a78"], [0, 0.4, 0.78, 1], 0, 0, width, height)
         .drawRect(0, 0, width, height);
     backdrop.addChild(base);
 
-    var deepVignette = new createjs.Shape();
-    deepVignette.graphics
+    var horizonGlow = new createjs.Shape();
+    horizonGlow.graphics
         .beginRadialGradientFill(
-            ["rgba(6, 8, 23, 0)", "rgba(6, 8, 23, 0.75)", "rgba(6, 8, 23, 0.95)"],
-            [0, 0.72, 1],
-            width / 2,
-            height * 0.66,
+            ["rgba(44,109,255,0)", "rgba(44,109,255,0.45)", "rgba(255,132,214,0)"] ,
+            [0, 0.7, 1],
+            width * 0.5,
+            height * 0.62,
             width * 0.1,
-            width / 2,
-            height * 0.66,
-            width * 0.72
+            width * 0.5,
+            height * 0.62,
+            width * 0.76
         )
         .drawRect(0, 0, width, height);
-    deepVignette.alpha = 0.85;
+    horizonGlow.alpha = 0.92;
+    horizonGlow.compositeOperation = "lighter";
+    backdrop.addChild(horizonGlow);
+
+    var topGlow = new createjs.Shape();
+    topGlow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255,180,240,0.34)", "rgba(127,208,255,0.12)", "rgba(127,208,255,0)"] ,
+            [0, 0.8, 1],
+            width * 0.26,
+            height * 0.08,
+            width * 0.05,
+            width * 0.26,
+            height * 0.08,
+            width * 0.34
+        )
+        .drawRect(0, 0, width, height);
+    topGlow.alpha = 0.8;
+    topGlow.compositeOperation = "lighter";
+    backdrop.addChild(topGlow);
+
+    var deepVignette = new createjs.Shape();
+    deepVignette.graphics
+        .beginRadialGradientFill(["rgba(6, 10, 28, 0)", "rgba(6, 10, 28, 0.78)", "rgba(3, 6, 18, 0.95)"], [0, 0.7, 1], width / 2, height * 0.64, width * 0.12, width / 2, height * 0.64, width * 0.78)
+        .drawRect(0, 0, width, height);
+    deepVignette.alpha = 0.88;
     backdrop.addChild(deepVignette);
 
     var auroraGroup = new createjs.Container();
@@ -461,32 +486,48 @@ function buildGameplayBackdrop() {
     var upperAurora = new createjs.Shape();
     upperAurora.graphics
         .beginLinearGradientFill([
-            "rgba(255, 114, 198, 0.15)",
-            "rgba(183, 134, 255, 0.58)",
-            "rgba(86, 215, 255, 0.08)"
-        ], [0, 0.5, 1], 0, 0, width, 0)
-        .moveTo(-width * 0.15, height * 0.06)
-        .bezierCurveTo(width * 0.18, -height * 0.12, width * 0.54, height * 0.26, width + width * 0.1, height * 0.12)
-        .lineTo(width + width * 0.12, height * 0.24)
-        .bezierCurveTo(width * 0.58, height * 0.38, width * 0.18, height * 0.12, -width * 0.1, height * 0.22)
+            "rgba(140, 214, 255, 0.14)",
+            "rgba(209, 145, 255, 0.55)",
+            "rgba(255, 178, 236, 0.12)"
+        ], [0, 0.52, 1], 0, 0, width, 0)
+        .moveTo(-width * 0.2, height * 0.16)
+        .bezierCurveTo(width * 0.14, -height * 0.04, width * 0.58, height * 0.2, width * 1.12, height * 0.08)
+        .lineTo(width * 1.12, height * 0.22)
+        .bezierCurveTo(width * 0.64, height * 0.32, width * 0.2, height * 0.14, -width * 0.12, height * 0.24)
         .closePath();
-    upperAurora.alpha = 0.78;
+    upperAurora.alpha = 0.82;
     upperAurora.compositeOperation = "lighter";
     auroraGroup.addChild(upperAurora);
+
+    var midAurora = new createjs.Shape();
+    midAurora.graphics
+        .beginLinearGradientFill([
+            "rgba(94, 226, 219, 0.15)",
+            "rgba(126, 184, 255, 0.42)",
+            "rgba(255, 162, 233, 0.16)"
+        ], [0, 0.6, 1], 0, height * 0.5, width, height * 0.5)
+        .moveTo(-width * 0.18, height * 0.42)
+        .bezierCurveTo(width * 0.18, height * 0.32, width * 0.62, height * 0.52, width * 1.08, height * 0.44)
+        .lineTo(width * 1.08, height * 0.58)
+        .bezierCurveTo(width * 0.64, height * 0.66, width * 0.22, height * 0.48, -width * 0.12, height * 0.56)
+        .closePath();
+    midAurora.alpha = 0.72;
+    midAurora.compositeOperation = "lighter";
+    auroraGroup.addChild(midAurora);
 
     var lowerAurora = new createjs.Shape();
     lowerAurora.graphics
         .beginLinearGradientFill([
-            "rgba(86, 227, 209, 0.12)",
-            "rgba(111, 191, 255, 0.32)",
-            "rgba(255, 150, 229, 0.08)"
+            "rgba(86, 227, 209, 0.14)",
+            "rgba(107, 193, 255, 0.3)",
+            "rgba(255, 136, 217, 0.1)"
         ], [0, 0.55, 1], 0, height, width, height)
-        .moveTo(-width * 0.16, height * 0.72)
-        .bezierCurveTo(width * 0.18, height * 0.54, width * 0.58, height * 0.94, width + width * 0.14, height * 0.84)
-        .lineTo(width + width * 0.16, height * 0.98)
-        .bezierCurveTo(width * 0.62, height * 1.1, width * 0.22, height * 0.82, -width * 0.14, height * 0.92)
+        .moveTo(-width * 0.22, height * 0.74)
+        .bezierCurveTo(width * 0.18, height * 0.58, width * 0.62, height * 0.94, width * 1.12, height * 0.86)
+        .lineTo(width * 1.12, height * 1.04)
+        .bezierCurveTo(width * 0.66, height * 1.14, width * 0.24, height * 0.86, -width * 0.14, height * 0.96)
         .closePath();
-    lowerAurora.alpha = 0.68;
+    lowerAurora.alpha = 0.66;
     lowerAurora.compositeOperation = "lighter";
     auroraGroup.addChild(lowerAurora);
 
@@ -495,64 +536,89 @@ function buildGameplayBackdrop() {
     var glowLayer = new createjs.Container();
     glowLayer.mouseChildren = glowLayer.mouseEnabled = false;
 
-    var topLeftGlow = createBackdropGlow(width * 0.38, ["rgba(255,150,229,0.6)", "rgba(61,15,90,0)"]);
-    topLeftGlow.x = width * 0.08;
-    topLeftGlow.y = height * 0.1;
+    var topLeftGlow = createBackdropGlow(width * 0.36, ["rgba(255,150,229,0.55)", "rgba(61,15,90,0)"]);
+    topLeftGlow.x = width * 0.12;
+    topLeftGlow.y = height * 0.14;
     glowLayer.addChild(topLeftGlow);
 
-    var midGlow = createBackdropGlow(width * 0.6, ["rgba(118,150,255,0.55)", "rgba(21,14,60,0)"]);
-    midGlow.x = width * 0.5;
-    midGlow.y = height * 0.58;
+    var midGlow = createBackdropGlow(width * 0.58, ["rgba(118,150,255,0.55)", "rgba(21,14,60,0)"]);
+    midGlow.x = width * 0.48;
+    midGlow.y = height * 0.56;
     glowLayer.addChild(midGlow);
 
     var bottomRightGlow = createBackdropGlow(width * 0.46, ["rgba(88,239,220,0.5)", "rgba(14,26,52,0)"]);
-    bottomRightGlow.x = width * 0.86;
-    bottomRightGlow.y = height * 0.78;
+    bottomRightGlow.x = width * 0.84;
+    bottomRightGlow.y = height * 0.76;
     glowLayer.addChild(bottomRightGlow);
 
     glowLayer.alpha = 0.85;
     backdrop.addChild(glowLayer);
 
-    var lightColumns = new createjs.Container();
-    lightColumns.mouseEnabled = lightColumns.mouseChildren = false;
-    var columnCount = 3;
-    var columns = [];
-    for (var c = 0; c < columnCount; c++) {
-        var column = new createjs.Shape();
-        var columnWidth = width * 0.14;
-        column.graphics
+    var beamLayer = new createjs.Container();
+    beamLayer.mouseEnabled = beamLayer.mouseChildren = false;
+    var beams = [];
+    for (var b = 0; b < 3; b++) {
+        var beam = new createjs.Shape();
+        var beamWidth = width * (0.12 + b * 0.02);
+        beam.graphics
             .beginLinearGradientFill(
-                ["rgba(118,168,255,0)", "rgba(118,168,255,0.36)", "rgba(118,168,255,0)"],
-                [0, 0.45, 1],
+                ["rgba(118,168,255,0)", "rgba(118,168,255,0.32)", "rgba(255,176,238,0)"],
+                [0, 0.5, 1],
                 0,
                 0,
-                columnWidth,
+                beamWidth,
                 0
             )
-            .drawRoundRect(-columnWidth / 2, -height * 0.36, columnWidth, height * 0.72, columnWidth * 0.32);
-        column.alpha = 0.45;
-        column.x = width * (0.28 + 0.24 * c);
-        column.y = height * 0.6;
-        column.compositeOperation = "lighter";
-        lightColumns.addChild(column);
-        columns.push(column);
+            .drawRoundRect(-beamWidth / 2, -height * 0.3, beamWidth, height * 0.6, beamWidth * 0.4);
+        beam.alpha = 0.42 + b * 0.08;
+        beam.x = width * (0.28 + 0.24 * b);
+        beam.y = height * (0.56 + b * 0.04);
+        beam.rotation = -6 + b * 4;
+        beam.compositeOperation = "lighter";
+        beamLayer.addChild(beam);
+        beams.push(beam);
     }
-    backdrop.addChild(lightColumns);
+    backdrop.addChild(beamLayer);
 
     var constellationLayer = new createjs.Shape();
     var constellationGraphics = constellationLayer.graphics;
-    constellationGraphics.setStrokeStyle(1.2)
-        .beginStroke("rgba(195,223,255,0.35)")
-        .moveTo(width * 0.18, height * 0.34)
-        .bezierCurveTo(width * 0.26, height * 0.22, width * 0.4, height * 0.26, width * 0.48, height * 0.34)
-        .bezierCurveTo(width * 0.58, height * 0.42, width * 0.74, height * 0.38, width * 0.82, height * 0.26);
     constellationGraphics
-        .moveTo(width * 0.2, height * 0.54)
-        .bezierCurveTo(width * 0.36, height * 0.46, width * 0.56, height * 0.58, width * 0.74, height * 0.48)
-        .bezierCurveTo(width * 0.82, height * 0.44, width * 0.9, height * 0.52, width * 0.92, height * 0.62);
-    constellationLayer.alpha = 0.45;
+        .setStrokeStyle(1.4)
+        .beginStroke("rgba(181,212,255,0.35)")
+        .moveTo(width * 0.16, height * 0.32)
+        .bezierCurveTo(width * 0.28, height * 0.22, width * 0.48, height * 0.28, width * 0.62, height * 0.26)
+        .bezierCurveTo(width * 0.78, height * 0.24, width * 0.88, height * 0.32, width * 0.92, height * 0.42);
+    constellationGraphics
+        .moveTo(width * 0.18, height * 0.52)
+        .bezierCurveTo(width * 0.34, height * 0.46, width * 0.56, height * 0.6, width * 0.74, height * 0.5)
+        .bezierCurveTo(width * 0.86, height * 0.44, width * 0.92, height * 0.54, width * 0.94, height * 0.64);
+    constellationGraphics
+        .moveTo(width * 0.1, height * 0.68)
+        .bezierCurveTo(width * 0.28, height * 0.62, width * 0.46, height * 0.74, width * 0.68, height * 0.68)
+        .bezierCurveTo(width * 0.82, height * 0.64, width * 0.9, height * 0.72, width * 0.92, height * 0.8);
+    constellationLayer.alpha = 0.42;
     constellationLayer.compositeOperation = "lighter";
     backdrop.addChild(constellationLayer);
+
+    var ringLayer = new createjs.Container();
+    ringLayer.mouseEnabled = ringLayer.mouseChildren = false;
+    var rings = [];
+    for (var r = 0; r < 2; r++) {
+        var ring = new createjs.Shape();
+        var ringWidth = width * (0.52 + r * 0.18);
+        var ringHeight = height * (0.28 + r * 0.12);
+        ring.graphics
+            .setStrokeStyle(2)
+            .beginStroke("rgba(142,196,255,0.25)")
+            .drawEllipse(-ringWidth / 2, -ringHeight / 2, ringWidth, ringHeight);
+        ring.alpha = 0.32 - r * 0.06;
+        ring.x = width * 0.52;
+        ring.y = height * (0.58 + r * 0.04);
+        ring.compositeOperation = "lighter";
+        ringLayer.addChild(ring);
+        rings.push(ring);
+    }
+    backdrop.addChild(ringLayer);
 
     var orbLayer = new createjs.Container();
     orbLayer.mouseEnabled = orbLayer.mouseChildren = false;
@@ -573,6 +639,23 @@ function buildGameplayBackdrop() {
     }
     backdrop.addChild(orbLayer);
 
+    var diamondLayer = new createjs.Container();
+    diamondLayer.mouseEnabled = diamondLayer.mouseChildren = false;
+    var diamonds = [];
+    var diamondPalettes = [
+        ["rgba(255,214,138,0.85)", "rgba(255,123,187,0.45)"],
+        ["rgba(140,202,255,0.85)", "rgba(86,173,255,0.45)"],
+        ["rgba(122,255,225,0.85)", "rgba(86,208,208,0.45)"],
+    ];
+    for (var d = 0; d < 10; d++) {
+        var diamond = createBackdropDiamond(20 + Math.random() * 18, diamondPalettes[d % diamondPalettes.length]);
+        diamond.x = width * (0.12 + Math.random() * 0.76);
+        diamond.y = height * (0.16 + Math.random() * 0.68);
+        diamondLayer.addChild(diamond);
+        diamonds.push(diamond);
+    }
+    backdrop.addChild(diamondLayer);
+
     var sparkleLayer = new createjs.Container();
     sparkleLayer.mouseEnabled = sparkleLayer.mouseChildren = false;
     var sparkles = [];
@@ -586,7 +669,7 @@ function buildGameplayBackdrop() {
     backdrop.addChild(sparkleLayer);
 
     var particleLayer = createHowToPlayParticleField(width, height, 32);
-    particleLayer.alpha = 0.72;
+    particleLayer.alpha = 0.68;
     backdrop.addChild(particleLayer);
 
     var highlightSweep = new createjs.Shape();
@@ -596,11 +679,11 @@ function buildGameplayBackdrop() {
             [0, 0.5, 1],
             0,
             0,
-            width * 0.22,
+            width * 0.24,
             0
         )
-        .drawRect(-width * 0.12, -height * 0.14, width * 0.22, height * 1.24);
-    highlightSweep.alpha = 0.3;
+        .drawRect(-width * 0.12, -height * 0.14, width * 0.24, height * 1.24);
+    highlightSweep.alpha = 0.26;
     highlightSweep.compositeOperation = "lighter";
     highlightSweep.x = width * 0.22;
     highlightSweep.y = height * 0.52;
@@ -615,13 +698,18 @@ function buildGameplayBackdrop() {
     frameGlow.compositeOperation = "lighter";
     backdrop.addChild(frameGlow);
 
+    backdrop.horizonGlow = horizonGlow;
+    backdrop.topGlow = topGlow;
     backdrop.auroraGroup = auroraGroup;
     backdrop.upperAurora = upperAurora;
+    backdrop.midAurora = midAurora;
     backdrop.lowerAurora = lowerAurora;
     backdrop.glowLayer = glowLayer;
-    backdrop.lightColumns = columns;
+    backdrop.lightColumns = beams;
     backdrop.constellationLayer = constellationLayer;
+    backdrop.ringLayer = rings;
     backdrop.orbLayer = orbs;
+    backdrop.diamondLayer = diamonds;
     backdrop.sparkleLayer = sparkles;
     backdrop.particleLayer = particleLayer;
     backdrop.highlightSweep = highlightSweep;
@@ -681,6 +769,21 @@ function createBackdropSparkle(size) {
     return sparkle;
 }
 
+function createBackdropDiamond(size, colors) {
+    var palette = colors || ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.35)"];
+    var diamond = new createjs.Shape();
+    diamond.graphics
+        .beginLinearGradientFill(palette, [0, 1], 0, -size, 0, size)
+        .drawPolyStar(0, 0, size, 4, 0, 45);
+    diamond.alpha = 0.72;
+    diamond.compositeOperation = "lighter";
+    diamond.__pulseRange = 0.18 + Math.random() * 0.22;
+    diamond.__baseScale = 0.82 + Math.random() * 0.24;
+    diamond.__rotateSpeed = (Math.random() * 0.4 + 0.1) * (Math.random() > 0.5 ? 1 : -1);
+    diamond.scaleX = diamond.scaleY = diamond.__baseScale;
+    return diamond;
+}
+
 function applyGameplayBackdropAnimations(backdrop) {
     if (!backdrop || backdrop.__ambientAnimationAttached) {
         return;
@@ -695,11 +798,33 @@ function applyGameplayBackdropAnimations(backdrop) {
             .to({ alpha: Math.max(0.36, baseAlphaTop - 0.26), skewX: -6 }, 5200, createjs.Ease.sineInOut);
     }
 
+    if (backdrop.midAurora) {
+        var baseAlphaMid = backdrop.midAurora.alpha;
+        createjs.Tween.get(backdrop.midAurora, { loop: true })
+            .to({ alpha: Math.min(0.88, baseAlphaMid + 0.16), skewX: -5 }, 5600, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.34, baseAlphaMid - 0.22), skewX: 7 }, 5600, createjs.Ease.sineInOut);
+    }
+
     if (backdrop.lowerAurora) {
         var baseAlphaBottom = backdrop.lowerAurora.alpha;
         createjs.Tween.get(backdrop.lowerAurora, { loop: true })
             .to({ alpha: Math.min(0.92, baseAlphaBottom + 0.18), skewX: -7 }, 5600, createjs.Ease.sineInOut)
             .to({ alpha: Math.max(0.32, baseAlphaBottom - 0.22), skewX: 5 }, 5600, createjs.Ease.sineInOut);
+    }
+
+    if (backdrop.horizonGlow) {
+        var baseScale = backdrop.horizonGlow.scaleX || 1;
+        createjs.Tween.get(backdrop.horizonGlow, { loop: true })
+            .to({ alpha: 1, scaleX: baseScale * 1.04, scaleY: baseScale * 1.06 }, 4600, createjs.Ease.sineInOut)
+            .to({ alpha: 0.82, scaleX: baseScale, scaleY: baseScale }, 4600, createjs.Ease.sineInOut);
+    }
+
+    if (backdrop.topGlow) {
+        var topBaseAlpha = backdrop.topGlow.alpha;
+        createjs.Tween.get(backdrop.topGlow, { loop: true })
+            .to({ alpha: Math.min(0.92, topBaseAlpha + 0.1), x: backdrop.topGlow.x + 6 }, 4200, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.6, topBaseAlpha - 0.12), x: backdrop.topGlow.x - 6 }, 4200, createjs.Ease.sineInOut)
+            .to({ alpha: topBaseAlpha, x: backdrop.topGlow.x }, 2000, createjs.Ease.sineInOut);
     }
 
     if (backdrop.glowLayer && backdrop.glowLayer.children) {
@@ -725,8 +850,8 @@ function applyGameplayBackdropAnimations(backdrop) {
             var baseAlpha = column.alpha;
             createjs.Tween.get(column, { loop: true })
                 .wait(idx * 560)
-                .to({ alpha: Math.min(0.9, baseAlpha + 0.25), skewX: 6 }, 4200, createjs.Ease.sineInOut)
-                .to({ alpha: Math.max(0.2, baseAlpha - 0.2), skewX: -4 }, 4200, createjs.Ease.sineInOut);
+                .to({ alpha: Math.min(0.88, baseAlpha + 0.22), skewX: 8, rotation: column.rotation + 4 }, 4200, createjs.Ease.sineInOut)
+                .to({ alpha: Math.max(0.22, baseAlpha - 0.18), skewX: -6, rotation: column.rotation - 4 }, 4200, createjs.Ease.sineInOut);
         });
     }
 
@@ -758,6 +883,37 @@ function applyGameplayBackdropAnimations(backdrop) {
                 .wait(Math.random() * 1800)
                 .to({ scaleX: baseScale + pulseRange, scaleY: baseScale + pulseRange, alpha: 1 }, 2600, createjs.Ease.sineInOut)
                 .to({ scaleX: baseScale, scaleY: baseScale, alpha: 0.45 }, 2600, createjs.Ease.sineInOut);
+        });
+    }
+
+    if (backdrop.diamondLayer && backdrop.diamondLayer.length) {
+        backdrop.diamondLayer.forEach(function (diamond, index) {
+            if (!diamond) {
+                return;
+            }
+
+            var baseScaleDiamond = diamond.__baseScale || diamond.scaleX || 1;
+            var pulse = diamond.__pulseRange || 0.2;
+            var rotateSpeed = diamond.__rotateSpeed || 0.15;
+
+            createjs.Tween.get(diamond, { loop: true })
+                .wait(index * 320)
+                .to({ scaleX: baseScaleDiamond + pulse, scaleY: baseScaleDiamond + pulse, rotation: diamond.rotation + rotateSpeed * 180 }, 3000, createjs.Ease.sineInOut)
+                .to({ scaleX: baseScaleDiamond, scaleY: baseScaleDiamond, rotation: diamond.rotation + rotateSpeed * 360 }, 3000, createjs.Ease.sineInOut);
+        });
+    }
+
+    if (backdrop.ringLayer && backdrop.ringLayer.length) {
+        backdrop.ringLayer.forEach(function (ring, idx) {
+            if (!ring) {
+                return;
+            }
+
+            var baseAlphaRing = ring.alpha;
+            createjs.Tween.get(ring, { loop: true })
+                .wait(idx * 420)
+                .to({ alpha: Math.min(0.4, baseAlphaRing + 0.08), rotation: ring.rotation + 4 }, 5200, createjs.Ease.sineInOut)
+                .to({ alpha: Math.max(0.18, baseAlphaRing - 0.08), rotation: ring.rotation - 4 }, 5200, createjs.Ease.sineInOut);
         });
     }
 
@@ -809,6 +965,49 @@ function ensureTitleShimmerAnimation() {
             .to({ y: baseY - 6 }, 3400, createjs.Ease.sineInOut)
             .to({ y: baseY + 4 }, 3400, createjs.Ease.sineInOut);
     }
+}
+
+function showIntroTitleBadge() {
+    if (typeof Title === "undefined" || !Title) {
+        return;
+    }
+
+    var targetY = typeof Title.__layoutTargetY === "number" ? Title.__layoutTargetY : Title.y;
+
+    if (typeof targetY !== "number") {
+        var metrics = getCanvasMetrics();
+        var stageHeight = metrics && metrics.height ? metrics.height : 720;
+        var fallbackHalf = typeof Title.__layoutHalfHeight === "number" ? Title.__layoutHalfHeight : 38;
+        targetY = Math.max(stageHeight * 0.08 + fallbackHalf, fallbackHalf + 56);
+    }
+
+    Title.__layoutTargetY = targetY;
+
+    createjs.Tween.removeTweens(Title);
+
+    if (Title.__shimmer) {
+        createjs.Tween.removeTweens(Title.__shimmer);
+        Title.__shimmer.x = -((Title.__layoutHalfWidth || 220) * 2);
+    }
+
+    Title.__shimmerAnimating = false;
+    Title.__breathingAnimationAttached = false;
+    Title.__breathingTween = null;
+
+    var firstIntro = !Title.__introBadgeActive;
+
+    Title.visible = true;
+    Title.alpha = firstIntro ? 0 : 1;
+    Title.y = firstIntro ? targetY - 22 : targetY;
+
+    createjs.Tween.get(Title, { override: true })
+        .to({ alpha: 1, y: targetY }, firstIntro ? 560 : 360, createjs.Ease.quadOut)
+        .call(function () {
+            Title.__introBadgeActive = true;
+            Title.__introShown = true;
+            Title.__layoutTargetY = targetY;
+            ensureTitleShimmerAnimation();
+        });
 }
 
 function ensureResponsiveResizeListener() {
@@ -929,6 +1128,7 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+        Title.__layoutTargetY = Title.y;
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -1937,7 +2137,9 @@ function doneLoading(event) {
                 container.parent.addChild(TitleContaier);
 
                 Title.visible = false;
+                Title.__introBadgeActive = false;
                 refreshResponsiveLayout(true);
+                showIntroTitleBadge();
                 continue;
             }
 
@@ -2227,6 +2429,7 @@ function watchRestart() {
     }
 
     refreshResponsiveLayout(true);
+    showIntroTitleBadge();
 
 
 
