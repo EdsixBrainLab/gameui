@@ -144,6 +144,62 @@ var words_arry = [
   "hips",
 ];
 
+var CHOICE_LETTER_FONT = "700 64px 'Nunito Sans'";
+var CLUE_LETTER_FONT = "700 60px 'Nunito Sans'";
+var LETTER_FILL_COLOR = "#FFFFFF";
+var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+
+function buildChoiceLetterDisplay() {
+  var label = new createjs.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = true;
+  label.mouseChildren = false;
+  label.__baseScale = 0.8;
+  label.__isChoiceLetter = true;
+  return label;
+}
+
+function updateChoiceLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function buildClueLetterDisplay() {
+  var label = new createjs.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = 1;
+  label.__isClueLetter = true;
+  return label;
+}
+
+function updateClueLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+if (typeof window !== "undefined") {
+  window.SA_buildChoiceLetterDisplay = buildChoiceLetterDisplay;
+  window.SA_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
+  window.SA_buildClueLetterDisplay = buildClueLetterDisplay;
+  window.SA_updateClueLetterDisplay = updateClueLetterDisplay;
+}
+
 var maxLetterCnt = 13;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
@@ -351,18 +407,23 @@ function CreateGameElements() {
       container.parent.addChild(clueBgArr[i]);
     }
 
-    clueMcArr[i] = new createjs.MovieClip();
-    container.parent.addChild(clueMcArr[i]);
-    clueArr[i] = clueMc.clone();
-    clueMcArr[i].addChild(clueArr[i]);
-    clueArr[i].gotoAndStop(26);
+    if (!clueMcArr[i]) {
+      clueMcArr[i] = new createjs.Container();
+      clueMcArr[i].mouseEnabled = false;
+      clueMcArr[i].mouseChildren = false;
+      container.parent.addChild(clueMcArr[i]);
+    }
+
+    if (!clueArr[i]) {
+      clueArr[i] = buildClueLetterDisplay();
+      clueMcArr[i].addChild(clueArr[i]);
+    }
+
+    updateClueLetterDisplay(clueArr[i], "");
     clueArr[i].visible = false;
     clueArr[i].x = 355 + i * 70 - 14;
     clueArr[i].y = 490;
   }
-
-  container.parent.addChild(choice1);
-  choice1.visible = false;
 
   for (i = 0; i < maxLetterCnt; i++) {
     if (!choiceBgArr[i]) {
@@ -392,10 +453,14 @@ function CreateGameElements() {
       container.parent.addChild(choiceGlowArr[i]);
     }
 
-    choiceArr[i] = choice1.clone();
-    choiceArr[i].scaleX = choiceArr[i].scaleY = 0.8;
+    if (!choiceArr[i]) {
+      choiceArr[i] = buildChoiceLetterDisplay();
+      container.parent.addChild(choiceArr[i]);
+    }
+
+    updateChoiceLetterDisplay(choiceArr[i], "");
     choiceArr[i].visible = false;
-    container.parent.addChild(choiceArr[i]);
+    choiceArr[i].scaleX = choiceArr[i].scaleY = choiceArr[i].__baseScale || 0.8;
     choiceArr[i].x = 205 + i * 120;
     choiceArr[i].y = 620;
   }
@@ -505,7 +570,7 @@ function enablechoices() {
     }
     if (clueArr[i]) {
       clueArr[i].visible = false;
-      clueArr[i].gotoAndStop(26);
+      updateClueLetterDisplay(clueArr[i], "");
     }
     if (clueBgArr[i]) {
       drawClueSlotBackground(clueBgArr[i]);
@@ -517,7 +582,7 @@ function enablechoices() {
   for (i = 0; i < cLen; i++) {
     getChar[i] = correctAnswer.charAt(i).toString().toUpperCase();
     indx[i] = alphabetArr.indexOf(getChar[i]);
-    choiceArr[rand1[i]].gotoAndStop(indx[i]);
+    updateChoiceLetterDisplay(choiceArr[rand1[i]], getChar[i]);
     choiceArr[rand1[i]].name = getChar[i];
   }
 
@@ -788,7 +853,7 @@ e.currentTarget.visible=false;
   strArr.push(uans);
   var str1 = uans;
   var indAnsVal = alphabetArr.indexOf(str1);
-  clueArr[lCnt].gotoAndStop(indAnsVal);
+  updateClueLetterDisplay(clueArr[lCnt], str1);
   animateClueSlotFill(lCnt, getChar[lCnt] == str1);
   markChoiceResult(selectedIndex, getChar[lCnt] == str1);
 
