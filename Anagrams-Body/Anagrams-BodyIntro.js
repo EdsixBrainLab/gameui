@@ -5,20 +5,20 @@ var highlightTweenArr = []
 var cluegotoArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introQuestxtX = 636; introQuestxtY = 120;
-var introQues1X = 635, introQues1Y = 280
-var introChoice1X = 280, introChoice1Y = 590;
-var introChoice2X = 500, introChoice2Y = 590;
-var introChoice3X = 720, introChoice3Y = 590;
-var introChoice4X = 940, introChoice4Y = 590;
-var introClu1X = 465, introClu1Y = 460;
-var introClu2X = 575, introClu2Y = 460;
-var introClu3X = 685, introClu3Y = 460;
-var introClu4X = 795, introClu4Y = 460;
-var introArrowX = 210, introArrowY = 350;
-var introfingureX = 220, introfingureY = 520;
-var ArrowXArr = [, 500, 940, 720, 280],FingXArr = [, 525, 965, 745, 305]
-var ArrowYArr = [, 490, 490, 490, 490], FingYArr = [, 600, 600, 600, 600]
+var introQuestxtX = 640; introQuestxtY = 160;
+var introQues1X = 640, introQues1Y = 312
+var introChoice1X = 376, introChoice1Y = 610;
+var introChoice2X = 552, introChoice2Y = 610;
+var introChoice3X = 728, introChoice3Y = 610;
+var introChoice4X = 904, introChoice4Y = 610;
+var introClu1X = 460, introClu1Y = 470;
+var introClu2X = 580, introClu2Y = 470;
+var introClu3X = 700, introClu3Y = 470;
+var introClu4X = 820, introClu4Y = 470;
+var introArrowX = introChoice2X, introArrowY = introClu1Y - 46;
+var introfingureX = introChoice2X, introfingureY = introChoice2Y + 32;
+var ArrowXArr = [, introChoice2X, introChoice4X, introChoice3X, introChoice1X],FingXArr = [, introChoice2X + 20, introChoice4X + 20, introChoice3X + 20, introChoice1X + 20]
+var ArrowYArr = [, introClu1Y - 46, introClu1Y - 46, introClu1Y - 46, introClu1Y - 46], FingYArr = [, introChoice2Y + 32, introChoice4Y + 32, introChoice3Y + 32, introChoice1Y + 32]
 var introClueArr = []
 var introClueBgArr = []
 var introChoiceBgArr = []
@@ -215,6 +215,12 @@ function commongameintro() {
     container.parent.addChild(introQuestxt);
     introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
     introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX;
+    introQuestxt.y = introQuestxtY;
+
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     var choiceConfigs = [
         { index: 1, x: introChoice1X, y: introChoice1Y, letter: "N" },

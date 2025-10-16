@@ -7,7 +7,7 @@ var ambientLayer,
   ambientSparkGeneration = 0;
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
 var INTRO_TITLE_Y = 75;
-var INTRO_PROMPT_Y = 184;
+var INTRO_PROMPT_Y = 210;
 var QUESTION_CARD_WIDTH = 600;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
@@ -21,6 +21,51 @@ var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94
 var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
 var choiceIdleStates = [];
+
+function computeCenteredRowLayout(count, options) {
+  options = options || {};
+  var centerX =
+    typeof options.centerX === "number"
+      ? options.centerX
+      : typeof getCanvasCenterX === "function"
+      ? getCanvasCenterX()
+      : 640;
+  var baseSpacing = options.baseSpacing != null ? options.baseSpacing : 174;
+  var baseScale = options.baseScale != null ? options.baseScale : 1;
+  var minScale = options.minScale != null ? options.minScale : 0.6;
+  var maxSpan = options.maxSpan != null ? options.maxSpan : 900;
+  var tileSpan = options.tileSpan != null ? options.tileSpan : baseSpacing;
+
+  if (count <= 0) {
+    return {
+      positions: [],
+      scale: baseScale,
+      spacing: baseSpacing
+    };
+  }
+
+  var totalSpan = (count - 1) * baseSpacing + tileSpan;
+  var spanRatio = totalSpan > maxSpan && totalSpan > 0 ? maxSpan / totalSpan : 1;
+  var scale = Math.max(minScale, baseScale * spanRatio);
+  var spacing = baseSpacing * spanRatio;
+
+  var positions = [];
+  var startX = centerX - ((count - 1) * spacing) / 2;
+
+  for (var i = 0; i < count; i++) {
+    positions.push(startX + i * spacing);
+  }
+
+  return {
+    positions: positions,
+    scale: scale,
+    spacing: spacing
+  };
+}
+
+if (typeof window !== "undefined") {
+  window.SAUI_computeCenteredRow = computeCenteredRowLayout;
+}
 
 function call_UI_ambientOverlay(incontainer)
 {
@@ -309,7 +354,7 @@ function ensureQuestionCard() {
   if (!questionCardContainer) {
     questionCardContainer = new createjs.Container();
     questionCardContainer.x = canvas.width / 2;
-    questionCardContainer.y = 250;
+    questionCardContainer.y = 308;
     questionCardContainer.alpha = 0;
     questionCardContainer.visible = false;
     questionCardContainer.mouseEnabled = false;
@@ -611,61 +656,61 @@ function animateClueSlotFill(index, isCorrect) {
   }
 
 function detachChoiceInteractions(index) {
-    var tile = choiceArr[index];
-    if (!tile) {
-      return;
-    }
-
-    if (tile.__hoverListener) {
-      tile.off("mouseover", tile.__hoverListener);
-      tile.__hoverListener = null;
-    }
-    if (tile.__outListener) {
-      tile.off("mouseout", tile.__outListener);
-      tile.__outListener = null;
-    }
-    if (tile.__downListener) {
-      tile.off("mousedown", tile.__downListener);
-      tile.__downListener = null;
-    }
-    if (tile.__upListener) {
-      tile.off("pressup", tile.__upListener);
-      tile.__upListener = null;
-    }
+  var tile = choiceMcArr && choiceMcArr[index] ? choiceMcArr[index] : choiceArr[index];
+  if (!tile) {
+    return;
   }
+
+  if (tile.__hoverListener) {
+    tile.off("mouseover", tile.__hoverListener);
+    tile.__hoverListener = null;
+  }
+  if (tile.__outListener) {
+    tile.off("mouseout", tile.__outListener);
+    tile.__outListener = null;
+  }
+  if (tile.__downListener) {
+    tile.off("mousedown", tile.__downListener);
+    tile.__downListener = null;
+  }
+  if (tile.__upListener) {
+    tile.off("pressup", tile.__upListener);
+    tile.__upListener = null;
+  }
+}
 
 function attachChoiceInteractions(index) {
-    var tile = choiceArr[index];
-    if (!tile) {
-      return;
-    }
-
-    detachChoiceInteractions(index);
-
-    tile.__hoverListener = tile.on("mouseover", function () {
-      stopChoiceIdleAnimation(index);
-      emphasizeChoiceTile(index, true);
-    });
-    tile.__outListener = tile.on("mouseout", function () {
-      emphasizeChoiceTile(index, false);
-      var resumeTarget = choiceArr[index];
-      if (resumeTarget) {
-        createjs.Tween.get(resumeTarget, { override: false })
-          .wait(200)
-          .call(function () {
-            startChoiceIdleAnimation(index, true);
-          });
-      } else {
-        startChoiceIdleAnimation(index, true);
-      }
-    });
-    tile.__downListener = tile.on("mousedown", function () {
-      pressChoiceTile(index);
-    });
-    tile.__upListener = tile.on("pressup", function () {
-      releaseChoiceTile(index);
-    });
+  var tile = choiceMcArr && choiceMcArr[index] ? choiceMcArr[index] : choiceArr[index];
+  if (!tile) {
+    return;
   }
+
+  detachChoiceInteractions(index);
+
+  tile.__hoverListener = tile.on("mouseover", function () {
+    stopChoiceIdleAnimation(index);
+    emphasizeChoiceTile(index, true);
+  });
+  tile.__outListener = tile.on("mouseout", function () {
+    emphasizeChoiceTile(index, false);
+    var resumeTarget = choiceArr[index];
+    if (resumeTarget) {
+      createjs.Tween.get(resumeTarget, { override: false })
+        .wait(200)
+        .call(function () {
+          startChoiceIdleAnimation(index, true);
+        });
+    } else {
+      startChoiceIdleAnimation(index, true);
+    }
+  });
+  tile.__downListener = tile.on("mousedown", function () {
+    pressChoiceTile(index);
+  });
+  tile.__upListener = tile.on("pressup", function () {
+    releaseChoiceTile(index);
+  });
+}
 
 function startChoiceIdleAnimation(index, force) {
   if (typeof index !== "number" || index < 0) {
