@@ -1127,9 +1127,18 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
         var topMargin = stageHeight * baseTopMarginRatio;
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 44);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+        var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
+        var titleLift = Math.min(
+            Math.max(Title.y - titleSafeTop, 0),
+            stageHeight * 0.025
+        );
+        if (titleLift > 0) {
+            Title.y -= titleLift;
+        }
         Title.__layoutTargetY = Title.y;
 
         titleBottomEdge = Title.y + titleHalfHeight;
@@ -1159,14 +1168,19 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         }
 
         var promptHalfHeight = measuredPromptHeight / 2;
-        var promptSpacing = Math.max(stageHeight * 0.035, 48);
-        var promptMinY = promptHalfHeight + Math.max(safeMargin * 0.35, 74);
+        var promptSpacing = Math.max(stageHeight * 0.028, 40);
+        var promptMinY = promptHalfHeight + Math.max(safeMargin * 0.28, 60);
         var promptBaseline = titleBottomEdge
             ? titleBottomEdge + promptSpacing + promptHalfHeight
             : stageHeight * 0.24 + promptHalfHeight;
 
         QusTxtString.x = stageWidth / 2;
-        QusTxtString.y = Math.max(promptBaseline, promptMinY);
+        var promptTargetY = Math.max(promptBaseline, promptMinY);
+        var promptLift = Math.min(
+            Math.max(promptTargetY - promptMinY, 0),
+            stageHeight * 0.04
+        );
+        QusTxtString.y = promptTargetY - promptLift;
         QusTxtString.__layoutHalfHeight = promptHalfHeight;
 
         if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
