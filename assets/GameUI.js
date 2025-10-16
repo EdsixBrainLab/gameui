@@ -20,6 +20,7 @@ var CLUE_SLOT_BASE_COLORS = ["rgba(114,86,232,0.94)", "rgba(58,38,148,0.94)"];
 var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94)"];
 var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
+var choiceIdleStates = [];
 
 function call_UI_ambientOverlay(incontainer)
 {
@@ -32,21 +33,20 @@ ambientLayer = new createjs.Container();
 
 function call_UI_gameQuestion(incontainer,in_questiontext)
 {
-	 QusTxtString = new createjs.Text(
+         QusTxtString = new createjs.Text(
       in_questiontext,
-      "700 30px 'Baloo 2'",
+      "800 32px 'Baloo 2'",
       "#EAF2FF"
     );
-    QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.28)", 0, 10, 20);
+    QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
     QusTxtString.textAlign = "center";
     QusTxtString.textBaseline = "middle";
     QusTxtString.lineWidth = 1000;
-    QusTxtString.lineHeight = 30;
+    QusTxtString.lineHeight = 36;
     var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
     QusTxtString.x = promptCenterX;
     QusTxtString.y = INTRO_PROMPT_Y-55;
-    QusTxtString.alpha = 0.96;
-QusTxtString.shadow = new createjs.Shadow("black", 1, 1, 1);
+    QusTxtString.alpha = 0.98;
     incontainer.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
         QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
@@ -140,6 +140,75 @@ function drawChoiceTileBackground(targetShape, colors) {
     42
   );
   g.drawRoundRect(-36, -52, 132, 110, 40);
+}
+
+function drawChoiceSpeechWave(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+
+  var g = targetShape.graphics;
+  g.clear();
+
+  g.setStrokeStyle(6, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(236,230,255,0.85)", "rgba(154,134,255,0.4)"],
+    [0, 1],
+    -24,
+    -54,
+    24,
+    46
+  );
+  g.moveTo(-46, -8);
+  g.quadraticCurveTo(0, -62, 46, -8);
+
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(255,255,255,0.65)", "rgba(170,198,255,0.32)"],
+    [0, 1],
+    -18,
+    -18,
+    18,
+    58
+  );
+  g.moveTo(-34, 12);
+  g.quadraticCurveTo(0, -26, 34, 12);
+
+  g.setStrokeStyle(4, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(212,192,255,0.55)", "rgba(132,112,255,0.22)"],
+    [0, 1],
+    -12,
+    16,
+    12,
+    74
+  );
+  g.moveTo(-24, 30);
+  g.quadraticCurveTo(0, 4, 24, 30);
+
+  g.beginRadialGradientFill(
+    ["rgba(128,96,255,0.28)", "rgba(128,96,255,0)"] ,
+    [0, 1],
+    0,
+    38,
+    0,
+    0,
+    38,
+    54
+  );
+  g.drawEllipse(-38, 32, 76, 26);
+
+  g.beginRadialGradientFill(
+    ["rgba(255,255,255,0.36)", "rgba(255,255,255,0)"] ,
+    [0, 1],
+    0,
+    -48,
+    0,
+    0,
+    -48,
+    42
+  );
+  g.drawEllipse(-28, -64, 56, 28);
 }
 
 function drawClueSlotBackground(targetShape, colors) {
@@ -396,6 +465,7 @@ function emphasizeChoiceTile(index, isHover) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     var baseScale = tile && tile.__baseScale ? tile.__baseScale : tile ? tile.scaleX : 1;
     var bgBase = bg && bg.__baseScale ? bg.__baseScale : 1;
@@ -416,11 +486,23 @@ function emphasizeChoiceTile(index, isHover) {
       createjs.Tween.get(glow, { override: true })
         .to({ alpha: isHover ? 0.52 : 0.38 }, 160, createjs.Ease.quadOut);
     }
+
+    if (pulse) {
+      pulse.visible = true;
+      var pulseScale = pulse.__baseScale || baseScale;
+      createjs.Tween.get(pulse, { override: true })
+        .to({
+          alpha: isHover ? 0.88 : 0.7,
+          scaleX: pulseScale * (isHover ? 1.06 : 1),
+          scaleY: pulseScale * (isHover ? 1.06 : 1)
+        }, 180, createjs.Ease.quadOut);
+    }
   }
 
 function pressChoiceTile(index) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     if (tile) {
       var baseScale = tile.__baseScale || tile.scaleX;
@@ -433,11 +515,18 @@ function pressChoiceTile(index) {
       createjs.Tween.get(bg, { override: true })
         .to({ scaleX: bgBase * 0.96, scaleY: bgBase * 0.96, alpha: 1 }, 90, createjs.Ease.quadOut);
     }
+
+    if (pulse) {
+      var pulseScale = pulse.__baseScale || (tile ? tile.__baseScale || tile.scaleX : 1);
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0.4, scaleX: pulseScale * 0.9, scaleY: pulseScale * 0.9 }, 90, createjs.Ease.quadOut);
+    }
   }
 
 function releaseChoiceTile(index) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     if (tile) {
       var baseScale = tile.__baseScale || tile.scaleX;
@@ -452,6 +541,13 @@ function releaseChoiceTile(index) {
         .to({ scaleX: bgBase * 1.03, scaleY: bgBase * 1.03 }, 120, createjs.Ease.quadOut)
         .to({ scaleX: bgBase, scaleY: bgBase }, 150, createjs.Ease.quadIn);
     }
+
+    if (pulse) {
+      var pulseScale = pulse.__baseScale || (tile ? tile.__baseScale || tile.scaleX : 1);
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0.82, scaleX: pulseScale * 1.05, scaleY: pulseScale * 1.05 }, 120, createjs.Ease.quadOut)
+        .to({ alpha: 0.7, scaleX: pulseScale, scaleY: pulseScale }, 160, createjs.Ease.quadIn);
+    }
   }
 
 function markChoiceResult(index, isCorrect) {
@@ -459,6 +555,8 @@ function markChoiceResult(index, isCorrect) {
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
     var colors = isCorrect ? CHOICE_TILE_CORRECT_COLORS : CHOICE_TILE_WRONG_COLORS;
+
+    stopChoiceIdleAnimation(index);
 
     if (bg) {
       drawChoiceTileBackground(bg, colors);
@@ -484,6 +582,12 @@ function markChoiceResult(index, isCorrect) {
         .to({ alpha: isCorrect ? 0.5 : 0.2 }, 180, createjs.Ease.quadOut)
         .wait(isCorrect ? 600 : 900)
         .to({ alpha: 0.38 }, 220, createjs.Ease.quadOut);
+    }
+
+    if (typeof choicePulseArr !== "undefined" && choicePulseArr[index]) {
+      var pulse = choicePulseArr[index];
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0 }, 200, createjs.Ease.quadOut);
     }
   }
 
@@ -539,10 +643,21 @@ function attachChoiceInteractions(index) {
     detachChoiceInteractions(index);
 
     tile.__hoverListener = tile.on("mouseover", function () {
+      stopChoiceIdleAnimation(index);
       emphasizeChoiceTile(index, true);
     });
     tile.__outListener = tile.on("mouseout", function () {
       emphasizeChoiceTile(index, false);
+      var resumeTarget = choiceArr[index];
+      if (resumeTarget) {
+        createjs.Tween.get(resumeTarget, { override: false })
+          .wait(200)
+          .call(function () {
+            startChoiceIdleAnimation(index, true);
+          });
+      } else {
+        startChoiceIdleAnimation(index, true);
+      }
     });
     tile.__downListener = tile.on("mousedown", function () {
       pressChoiceTile(index);
@@ -551,6 +666,91 @@ function attachChoiceInteractions(index) {
       releaseChoiceTile(index);
     });
   }
+
+function startChoiceIdleAnimation(index, force) {
+  if (typeof index !== "number" || index < 0) {
+    return;
+  }
+
+  if (!force && choiceIdleStates[index]) {
+    return;
+  }
+
+  var label = choiceArr[index];
+  if (!label) {
+    return;
+  }
+
+  if (force) {
+    stopChoiceIdleAnimation(index);
+  }
+
+  var baseScale = label.__baseScale || label.scaleX || 1;
+  label.scaleX = baseScale;
+  label.scaleY = baseScale;
+
+  var idleLabelTween = createjs.Tween.get(label, { loop: true, override: false })
+    .to({ scaleX: baseScale * 1.02, scaleY: baseScale * 0.98 }, 340, createjs.Ease.sineInOut)
+    .to({ scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.sineInOut);
+  label.__idleTween = idleLabelTween;
+
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  if (pulse) {
+    var pulseScale = pulse.__baseScale || baseScale;
+    pulse.visible = true;
+    pulse.alpha = pulse.alpha && pulse.alpha > 0 ? pulse.alpha : 0.7;
+    pulse.scaleX = pulseScale;
+    pulse.scaleY = pulseScale;
+    pulse.__idleTween = createjs.Tween.get(pulse, { loop: true, override: false })
+      .to({ scaleX: pulseScale * 1.1, scaleY: pulseScale * 1.1, alpha: 0.86 }, 520, createjs.Ease.sineOut)
+      .to({ scaleX: pulseScale * 0.92, scaleY: pulseScale * 0.92, alpha: 0.5 }, 460, createjs.Ease.sineIn);
+  }
+
+  var glow = choiceGlowArr[index];
+  if (glow) {
+    var glowTargetScale = glow.__targetScale || (baseScale * 1.3);
+    glow.scaleX = glow.scaleY = glowTargetScale;
+    var baseAlpha = glow.alpha && glow.alpha > 0 ? glow.alpha : 0.38;
+    glow.alpha = baseAlpha;
+    glow.__idleTween = createjs.Tween.get(glow, { loop: true, override: false })
+      .to({ alpha: Math.min(0.54, baseAlpha + 0.14) }, 520, createjs.Ease.sineInOut)
+      .to({ alpha: baseAlpha }, 480, createjs.Ease.sineInOut);
+  }
+
+  choiceIdleStates[index] = true;
+}
+
+function stopChoiceIdleAnimation(index) {
+  if (typeof index !== "number" || index < 0) {
+    return;
+  }
+
+  choiceIdleStates[index] = false;
+
+  var label = choiceArr[index];
+  if (label) {
+    createjs.Tween.removeTweens(label);
+    var baseScale = label.__baseScale || label.scaleX || 1;
+    label.scaleX = baseScale;
+    label.scaleY = baseScale;
+    label.__idleTween = null;
+  }
+
+  var glow = choiceGlowArr[index];
+  if (glow) {
+    createjs.Tween.removeTweens(glow);
+    glow.alpha = 0.38;
+    glow.__idleTween = null;
+  }
+
+  if (typeof choicePulseArr !== "undefined" && choicePulseArr[index]) {
+    var pulse = choicePulseArr[index];
+    createjs.Tween.removeTweens(pulse);
+    pulse.visible = false;
+    pulse.alpha = 0;
+    pulse.__idleTween = null;
+  }
+}
   
   function renderQuestionCardBackground_htp() {
   if (!questionCardBackground_htp) {
