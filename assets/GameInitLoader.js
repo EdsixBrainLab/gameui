@@ -424,6 +424,363 @@ if (typeof globalThis !== "undefined") {
     globalThis.layoutOverlayToCanvas = layoutOverlayToCanvas;
 }
 
+function buildGameplayBackdrop() {
+    var width = 1280;
+    var height = 720;
+
+    var backdrop = new createjs.Container();
+    backdrop.name = "GameplayBackdrop";
+    backdrop.mouseEnabled = false;
+    backdrop.mouseChildren = false;
+
+    var base = new createjs.Shape();
+    base.graphics
+        .beginLinearGradientFill(["#070c24", "#17104a", "#2c1f74"], [0, 0.55, 1], width / 2, 0, width / 2, height)
+        .drawRect(0, 0, width, height);
+    backdrop.addChild(base);
+
+    var vignette = new createjs.Shape();
+    vignette.graphics
+        .beginLinearGradientFill([
+            "rgba(7, 10, 28, 0)",
+            "rgba(7, 10, 28, 0.45)",
+            "rgba(7, 10, 28, 0.78)"
+        ], [0, 0.6, 1], width / 2, height * 0.25, width / 2, height)
+        .drawRect(0, 0, width, height);
+    vignette.alpha = 0.85;
+    backdrop.addChild(vignette);
+
+    var topAurora = new createjs.Shape();
+    topAurora.graphics
+        .beginLinearGradientFill(
+            ["rgba(146, 92, 255, 0.66)", "rgba(79, 204, 255, 0.38)", "rgba(79, 204, 255, 0)"],
+            [0, 0.65, 1],
+            0,
+            0,
+            width,
+            0
+        )
+        .drawEllipse(-width * 0.15, -height * 0.72, width * 1.3, height * 0.9);
+    topAurora.alpha = 0.6;
+    topAurora.compositeOperation = "lighter";
+    backdrop.addChild(topAurora);
+
+    var bottomAurora = new createjs.Shape();
+    bottomAurora.graphics
+        .beginLinearGradientFill(
+            ["rgba(67, 214, 195, 0.52)", "rgba(111, 162, 255, 0.34)", "rgba(111, 162, 255, 0)"],
+            [0, 0.65, 1],
+            0,
+            height,
+            width,
+            height
+        )
+        .drawEllipse(-width * 0.18, height * 0.48, width * 1.36, height * 0.92);
+    bottomAurora.alpha = 0.55;
+    bottomAurora.compositeOperation = "lighter";
+    backdrop.addChild(bottomAurora);
+
+    var horizonGlow = new createjs.Shape();
+    horizonGlow.graphics
+        .beginRadialGradientFill(
+            ["rgba(107, 167, 255, 0.02)", "rgba(107, 167, 255, 0.65)", "rgba(107, 167, 255, 0)"],
+            [0, 0.55, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            width * 0.62
+        )
+        .drawCircle(0, 0, width * 0.62);
+    horizonGlow.x = width / 2;
+    horizonGlow.y = height * 0.58;
+    horizonGlow.alpha = 0.78;
+    horizonGlow.compositeOperation = "lighter";
+    backdrop.addChild(horizonGlow);
+
+    var sheen = new createjs.Shape();
+    sheen.graphics
+        .beginLinearGradientFill(
+            ["rgba(110, 203, 255, 0)", "rgba(110, 203, 255, 0.45)", "rgba(110, 203, 255, 0)"],
+            [0, 0.55, 1],
+            0,
+            0,
+            0,
+            height * 0.3
+        )
+        .drawRect(0, height * 0.46, width, height * 0.24);
+    sheen.alpha = 0.72;
+    sheen.compositeOperation = "lighter";
+    backdrop.addChild(sheen);
+
+    var ribbonGroup = new createjs.Container();
+    ribbonGroup.mouseEnabled = false;
+    ribbonGroup.mouseChildren = false;
+
+    var ribbonOne = new createjs.Shape();
+    ribbonOne.graphics
+        .beginLinearGradientFill(
+            ["rgba(255, 150, 234, 0.28)", "rgba(111, 180, 255, 0.24)"],
+            [0, 1],
+            0,
+            0,
+            0,
+            height * 0.35
+        )
+        .moveTo(-160, height * 0.26)
+        .bezierCurveTo(width * 0.24, height * 0.08, width * 0.46, height * 0.44, width + 160, height * 0.32)
+        .lineTo(width + 160, height * 0.4)
+        .bezierCurveTo(width * 0.46, height * 0.52, width * 0.18, height * 0.34, -160, height * 0.46)
+        .closePath();
+    ribbonOne.alpha = 0.65;
+    ribbonGroup.addChild(ribbonOne);
+
+    var ribbonTwo = new createjs.Shape();
+    ribbonTwo.graphics
+        .beginLinearGradientFill(
+            ["rgba(104, 214, 244, 0.22)", "rgba(157, 127, 255, 0.26)"],
+            [0, 1],
+            0,
+            0,
+            0,
+            height * 0.3
+        )
+        .moveTo(-180, height * 0.58)
+        .bezierCurveTo(width * 0.18, height * 0.48, width * 0.54, height * 0.76, width + 200, height * 0.68)
+        .lineTo(width + 200, height * 0.78)
+        .bezierCurveTo(width * 0.52, height * 0.9, width * 0.16, height * 0.66, -180, height * 0.74)
+        .closePath();
+    ribbonTwo.alpha = 0.58;
+    ribbonGroup.addChild(ribbonTwo);
+
+    ribbonGroup.y = 0;
+    backdrop.addChild(ribbonGroup);
+
+    var diamondLayer = new createjs.Container();
+    diamondLayer.mouseEnabled = false;
+    diamondLayer.mouseChildren = false;
+
+    var diamondPalettes = [
+        ["rgba(255, 184, 244, 0.9)", "rgba(159, 125, 255, 0.82)", "rgba(255, 255, 255, 0.6)", "rgba(255, 255, 255, 0.95)"],
+        ["rgba(144, 230, 255, 0.9)", "rgba(120, 159, 255, 0.82)", "rgba(255, 255, 255, 0.55)", "rgba(255, 255, 255, 0.9)"],
+        ["rgba(158, 255, 219, 0.9)", "rgba(125, 208, 255, 0.8)", "rgba(255, 255, 255, 0.55)", "rgba(255, 255, 255, 0.92)"]
+    ];
+
+    for (var i = 0; i < 12; i++) {
+        var palette = diamondPalettes[i % diamondPalettes.length];
+        var size = 18 + Math.random() * 18;
+        var diamond = createGameplayBackdropDiamond(size, palette);
+        diamond.x = width * (0.12 + Math.random() * 0.76);
+        diamond.y = height * (0.2 + Math.random() * 0.55);
+        diamondLayer.addChild(diamond);
+    }
+
+    backdrop.addChild(diamondLayer);
+
+    var particleLayer = createHowToPlayParticleField(width, height, 28);
+    particleLayer.alpha = 0.8;
+    backdrop.addChild(particleLayer);
+
+    var highlightSweep = new createjs.Shape();
+    highlightSweep.graphics
+        .beginLinearGradientFill(
+            ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.35)", "rgba(255, 255, 255, 0)"],
+            [0, 0.5, 1],
+            0,
+            0,
+            width * 0.18,
+            0
+        )
+        .drawRect(-width * 0.09, -height * 0.1, width * 0.18, height * 1.2);
+    highlightSweep.alpha = 0.24;
+    highlightSweep.compositeOperation = "lighter";
+    highlightSweep.x = width * 0.28;
+    highlightSweep.y = height * 0.5;
+    backdrop.addChild(highlightSweep);
+
+    var frameGlow = new createjs.Shape();
+    frameGlow.graphics
+        .beginRadialGradientFill(
+            ["rgba(10, 14, 40, 0)", "rgba(10, 14, 40, 0.7)"],
+            [0, 1],
+            width / 2,
+            height / 2,
+            width * 0.35,
+            width / 2,
+            height / 2,
+            width * 0.8
+        )
+        .drawRect(0, 0, width, height);
+    frameGlow.alpha = 0.75;
+    backdrop.addChild(frameGlow);
+
+    backdrop.topAurora = topAurora;
+    backdrop.bottomAurora = bottomAurora;
+    backdrop.horizonGlow = horizonGlow;
+    backdrop.ribbonGroup = ribbonGroup;
+    backdrop.diamondLayer = diamondLayer;
+    backdrop.particleLayer = particleLayer;
+    backdrop.highlightSweep = highlightSweep;
+    backdrop.frameGlow = frameGlow;
+
+    backdrop.__baseWidth = width;
+    backdrop.__baseHeight = height;
+
+    layoutOverlayToCanvas(backdrop, width, height);
+    applyGameplayBackdropAnimations(backdrop);
+
+    return backdrop;
+}
+
+function createGameplayBackdropDiamond(size, palette) {
+    var container = new createjs.Container();
+    container.mouseEnabled = false;
+    container.mouseChildren = false;
+
+    var fill = new createjs.Shape();
+    fill.graphics
+        .beginLinearGradientFill([palette[0], palette[1]], [0, 1], 0, -size, 0, size)
+        .drawPolyStar(0, 0, size, 4, 0, 45);
+    fill.alpha = 0.88;
+    container.addChild(fill);
+
+    var outline = new createjs.Shape();
+    outline.graphics
+        .setStrokeStyle(1.4)
+        .beginStroke(palette[2])
+        .drawPolyStar(0, 0, size, 4, 0, 45);
+    outline.alpha = 0.6;
+    container.addChild(outline);
+
+    var sparkle = new createjs.Shape();
+    sparkle.graphics
+        .beginLinearGradientFill(
+            [palette[3], "rgba(255,255,255,0)"],
+            [0, 1],
+            -size * 0.2,
+            -size * 0.2,
+            size * 0.6,
+            size * 0.6
+        )
+        .drawPolyStar(0, 0, size * 0.5, 4, 0, 45);
+    sparkle.alpha = 0.9;
+    container.addChild(sparkle);
+
+    container.alpha = 0.55 + Math.random() * 0.25;
+    container.__baseScale = 0.72 + Math.random() * 0.5;
+    container.scaleX = container.scaleY = container.__baseScale;
+    container.__floatOffset = 10 + Math.random() * 14;
+    container.__rotationRange = 8 + Math.random() * 18;
+    container.rotation = Math.random() * 360;
+
+    return container;
+}
+
+function applyGameplayBackdropAnimations(backdrop) {
+    if (!backdrop || backdrop.__ambientAnimationAttached) {
+        return;
+    }
+
+    backdrop.__ambientAnimationAttached = true;
+
+    if (backdrop.topAurora) {
+        var topBaseAlpha = backdrop.topAurora.alpha;
+        createjs.Tween.get(backdrop.topAurora, { loop: true })
+            .to({ alpha: Math.min(0.82, topBaseAlpha + 0.18), skewX: 6 }, 4200, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.42, topBaseAlpha - 0.22), skewX: -4 }, 4200, createjs.Ease.sineInOut);
+    }
+
+    if (backdrop.bottomAurora) {
+        var bottomBaseAlpha = backdrop.bottomAurora.alpha;
+        createjs.Tween.get(backdrop.bottomAurora, { loop: true })
+            .to({ alpha: Math.min(0.78, bottomBaseAlpha + 0.18), skewX: -5 }, 5200, createjs.Ease.sineInOut)
+            .to({ alpha: Math.max(0.36, bottomBaseAlpha - 0.2), skewX: 3 }, 5200, createjs.Ease.sineInOut);
+    }
+
+    if (backdrop.horizonGlow) {
+        var glow = backdrop.horizonGlow;
+        var baseScale = glow.scaleX || 1;
+        createjs.Tween.get(glow, { loop: true })
+            .to({ scaleX: baseScale * 1.04, scaleY: baseScale * 1.04 }, 3200, createjs.Ease.sineInOut)
+            .to({ scaleX: baseScale * 0.96, scaleY: baseScale * 0.96 }, 3200, createjs.Ease.sineInOut);
+    }
+
+    if (backdrop.ribbonGroup) {
+        for (var i = 0; i < backdrop.ribbonGroup.numChildren; i++) {
+            (function (ribbon, index) {
+                if (!ribbon) {
+                    return;
+                }
+
+                var baseY = ribbon.y;
+                var baseAlpha = ribbon.alpha;
+                createjs.Tween.get(ribbon, { loop: true })
+                    .wait(index * 420)
+                    .to({ y: baseY - 12, alpha: Math.min(1, baseAlpha + 0.12) }, 3600, createjs.Ease.sineInOut)
+                    .to({ y: baseY + 10, alpha: Math.max(0.3, baseAlpha - 0.16) }, 3600, createjs.Ease.sineInOut);
+            })(backdrop.ribbonGroup.getChildAt(i), i);
+        }
+    }
+
+    if (backdrop.diamondLayer) {
+        for (var j = 0; j < backdrop.diamondLayer.numChildren; j++) {
+            (function (diamond) {
+                if (!diamond) {
+                    return;
+                }
+
+                var baseY = diamond.y;
+                var baseRotation = diamond.rotation;
+                var baseScale = diamond.__baseScale || diamond.scaleX || 1;
+                var floatOffset = diamond.__floatOffset || 14;
+                var rotationRange = diamond.__rotationRange || 12;
+
+                createjs.Tween.get(diamond, { loop: true })
+                    .wait(Math.random() * 1600)
+                    .to(
+                        {
+                            y: baseY - floatOffset,
+                            rotation: baseRotation + rotationRange,
+                            scaleX: baseScale * 1.06,
+                            scaleY: baseScale * 1.06
+                        },
+                        2800,
+                        createjs.Ease.sineInOut
+                    )
+                    .to(
+                        {
+                            y: baseY + floatOffset,
+                            rotation: baseRotation - rotationRange,
+                            scaleX: baseScale * 0.94,
+                            scaleY: baseScale * 0.94
+                        },
+                        2800,
+                        createjs.Ease.sineInOut
+                    );
+            })(backdrop.diamondLayer.getChildAt(j));
+        }
+    }
+
+    if (backdrop.particleLayer && backdrop.particleLayer.children) {
+        for (var k = 0; k < backdrop.particleLayer.children.length; k++) {
+            startHowToPlayParticleFloat(backdrop.particleLayer.children[k], true);
+        }
+    }
+
+    if (backdrop.highlightSweep) {
+        var sweep = backdrop.highlightSweep;
+        var baseX = sweep.x;
+        createjs.Tween.get(sweep, { loop: true })
+            .to({ x: baseX + backdrop.__baseWidth * 0.4, alpha: 0.38 }, 4600, createjs.Ease.quadInOut)
+            .to({ x: baseX + backdrop.__baseWidth * 0.55, alpha: 0 }, 1200, createjs.Ease.quadIn)
+            .set({ x: baseX - backdrop.__baseWidth * 0.35, alpha: 0 })
+            .wait(1800)
+            .to({ alpha: 0.24 }, 600, createjs.Ease.quadOut)
+            .to({ x: baseX, alpha: 0.24 }, 4200, createjs.Ease.quadInOut);
+    }
+}
+
 function ensureResponsiveResizeListener() {
     if (responsiveResizeListenerAttached) {
         return;
@@ -579,6 +936,7 @@ function refreshResponsiveLayout(force) {
     layoutOverlayToCanvas(HowToPlayScreenImg, 1280, 720);
     layoutOverlayToCanvas(howToPlayImageMc, 1280, 720);
     layoutOverlayToCanvas(loaderBar, 1280, 720);
+    layoutOverlayToCanvas(uniquebackGround, 1280, 720);
 
     // SAUIX: reflow tooltip positions
     SAUIX_refreshTooltipsPositions(false);
@@ -1377,38 +1735,24 @@ function doneLoading(event) {
             ///////////////////////////////////////////////////////bg////////////////////////////
 
 
-            if (runningBg == 1) {
             if (id == "uniquebackGround") {
-                uniquebackGround = new createjs.Bitmap(preload.getResult('uniquebackGround'));
+                uniquebackGround = buildGameplayBackdrop();
+
                 if (typeof ambientLayer !== "undefined" && ambientLayer) {
                     ambientLayer.addChildAt(uniquebackGround, 0);
-                } else {
+                } else if (container.parent) {
                     container.parent.addChildAt(uniquebackGround, 0);
                 }
-                uniquebackGround.alpha = 0.35;
-                uniquebackGround.visible = false;
-                continue;
-            }
 
-
-
-
-            } else {
-
-                if (id == "uniquebackGround") {
-                    uniquebackGround = new createjs.Bitmap(preload.getResult('uniquebackGround'));
-                    if (typeof ambientLayer !== "undefined" && ambientLayer) {
-                        ambientLayer.addChildAt(uniquebackGround, 0);
-                    } else {
-                        container.parent.addChildAt(uniquebackGround, 0);
-                    }
+                if (runningBg == 1) {
+                    uniquebackGround.alpha = 0.35;
+                    uniquebackGround.visible = false;
+                } else {
                     uniquebackGround.alpha = 1;
                     uniquebackGround.visible = true;
-                    continue;
                 }
 
-
-
+                continue;
             }
             //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1830,6 +2174,12 @@ function watchRestart() {
             overlayParent.setChildIndex(HowToPlayScreenImg, overlayParent.numChildren - 1);
         }
         HowToPlayScreenImg.visible = true;
+    }
+
+    if (typeof Title !== "undefined" && Title) {
+        Title.visible = false;
+        Title.alpha = 0;
+        Title.__introShown = false;
     }
 
     refreshResponsiveLayout(true);
@@ -5110,6 +5460,8 @@ function TimerAnsScoreTweens() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function panelVisibleFn() {
+    refreshResponsiveLayout(true);
+
     if (QuesCntMc) {
         QuesCntMc.visible = false;
     }
@@ -5221,6 +5573,42 @@ function panelVisibleFn() {
 
     refreshHudValues();
     pulseHudCard(hudQuestionCardContainer);
+
+    if (typeof Title !== "undefined" && Title) {
+        Title.visible = true;
+
+        var targetY = Title.y;
+        Title.__layoutTargetY = targetY;
+
+        var startingY = targetY;
+        var startingAlpha = 1;
+
+        if (!Title.__introShown) {
+            startingY = targetY - 26;
+            startingAlpha = 0;
+            Title.__introShown = true;
+        }
+
+        Title.alpha = startingAlpha;
+        Title.y = startingY;
+
+        createjs.Tween.get(Title, { override: true })
+            .to({ alpha: 1, y: targetY }, 460, createjs.Ease.quadOut);
+    }
+
+    if (uniquebackGround) {
+        if (runningBg == 1) {
+            uniquebackGround.visible = false;
+            uniquebackGround.alpha = 0.35;
+        } else {
+            uniquebackGround.visible = true;
+            uniquebackGround.alpha = 1;
+        }
+
+        if (!uniquebackGround.__ambientAnimationAttached) {
+            applyGameplayBackdropAnimations(uniquebackGround);
+        }
+    }
 }
  
 ///////////////////////////////////////////////////
