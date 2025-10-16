@@ -1999,13 +1999,42 @@ function doneLoading(event) {
                     .split("LEVEL")[0]
                     .trim();
 
-                var titleLabel = new createjs.Text(formattedTitle, "800 44px 'Baloo 2'", "#F9F7FF");
-                titleLabel.textAlign = "left";
-                titleLabel.textBaseline = "middle";
-                titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+                var fontFamily = "'Baloo 2'";
+                var fontWeight = "800";
+                var badgePadding = 200;
+                var minBadgeWidth = 360;
+                var maxBadgeWidth = 640;
+                var fontSizes = [44, 40, 36, 32, 28];
+                var titleLabel;
 
-                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
-                var badgeHeight = 86;
+                for (var sizeIndex = 0; sizeIndex < fontSizes.length; sizeIndex++) {
+                    var fontSize = fontSizes[sizeIndex];
+                    titleLabel = new createjs.Text(
+                        formattedTitle,
+                        fontWeight + " " + fontSize + "px " + fontFamily,
+                        "#F9F7FF"
+                    );
+                    titleLabel.textAlign = "left";
+                    titleLabel.textBaseline = "middle";
+                    titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+
+                    if (
+                        titleLabel.getMeasuredWidth() + badgePadding <= maxBadgeWidth ||
+                        sizeIndex === fontSizes.length - 1
+                    ) {
+                        break;
+                    }
+                }
+
+                var measuredTitleWidth = titleLabel.getMeasuredWidth();
+                var badgeWidth = Math.max(
+                    minBadgeWidth,
+                    Math.min(maxBadgeWidth, measuredTitleWidth + badgePadding)
+                );
+
+                titleLabel.lineWidth = badgeWidth - 180;
+                var textHeight = titleLabel.getMeasuredHeight();
+                var badgeHeight = Math.max(86, Math.round(textHeight + 48));
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
