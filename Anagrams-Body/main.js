@@ -5,6 +5,7 @@ var choiceArr = [];
 var choiceBgArr = [];
 var choiceGlowArr = [];
 var choiceMcArr = [];
+var choicePulseArr = [];
 var textArr = [];
 var qno = [];
 var strArr = [];
@@ -143,6 +144,66 @@ var words_arry = [
   "livers",
   "hips",
 ];
+
+var CHOICE_LETTER_FONT = "800 66px 'Baloo 2'";
+var CLUE_LETTER_FONT = "800 60px 'Baloo 2'";
+var LETTER_FILL_COLOR = "#FFFFFF";
+var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+
+function buildChoiceLetterDisplay() {
+  var label = new createjs.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = true;
+  label.mouseChildren = false;
+  label.__baseScale = 0.8;
+  label.__isChoiceLetter = true;
+  var hitArea = new createjs.Shape();
+  hitArea.graphics.beginFill("#000").drawRoundRect(-78, -78, 156, 156, 52);
+  label.hitArea = hitArea;
+  label.__hitArea = hitArea;
+  return label;
+}
+
+function updateChoiceLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function buildClueLetterDisplay() {
+  var label = new createjs.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = 1;
+  label.__isClueLetter = true;
+  return label;
+}
+
+function updateClueLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+if (typeof window !== "undefined") {
+  window.SA_buildChoiceLetterDisplay = buildChoiceLetterDisplay;
+  window.SA_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
+  window.SA_buildClueLetterDisplay = buildClueLetterDisplay;
+  window.SA_updateClueLetterDisplay = updateClueLetterDisplay;
+}
 
 var maxLetterCnt = 13;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
@@ -351,18 +412,23 @@ function CreateGameElements() {
       container.parent.addChild(clueBgArr[i]);
     }
 
-    clueMcArr[i] = new createjs.MovieClip();
-    container.parent.addChild(clueMcArr[i]);
-    clueArr[i] = clueMc.clone();
-    clueMcArr[i].addChild(clueArr[i]);
-    clueArr[i].gotoAndStop(26);
+    if (!clueMcArr[i]) {
+      clueMcArr[i] = new createjs.Container();
+      clueMcArr[i].mouseEnabled = false;
+      clueMcArr[i].mouseChildren = false;
+      container.parent.addChild(clueMcArr[i]);
+    }
+
+    if (!clueArr[i]) {
+      clueArr[i] = buildClueLetterDisplay();
+      clueMcArr[i].addChild(clueArr[i]);
+    }
+
+    updateClueLetterDisplay(clueArr[i], "");
     clueArr[i].visible = false;
     clueArr[i].x = 355 + i * 70 - 14;
     clueArr[i].y = 490;
   }
-
-  container.parent.addChild(choice1);
-  choice1.visible = false;
 
   for (i = 0; i < maxLetterCnt; i++) {
     if (!choiceBgArr[i]) {
@@ -381,8 +447,8 @@ function CreateGameElements() {
       choiceGlowArr[i] = new createjs.Shape();
       choiceGlowArr[i].graphics
         .beginRadialGradientFill([
-          "rgba(104,174,255,0.4)",
-          "rgba(104,174,255,0)"
+          "rgba(209,178,255,0.6)",
+          "rgba(209,178,255,0)"
         ], [0, 1], 0, 0, 0, 0, 0, 120)
         .drawCircle(0, 0, 120);
       choiceGlowArr[i].alpha = 0;
@@ -392,10 +458,24 @@ function CreateGameElements() {
       container.parent.addChild(choiceGlowArr[i]);
     }
 
-    choiceArr[i] = choice1.clone();
-    choiceArr[i].scaleX = choiceArr[i].scaleY = 0.8;
+    if (!choicePulseArr[i]) {
+      choicePulseArr[i] = new createjs.Shape();
+      drawChoiceSpeechWave(choicePulseArr[i]);
+      choicePulseArr[i].alpha = 0;
+      choicePulseArr[i].visible = false;
+      choicePulseArr[i].mouseEnabled = false;
+      choicePulseArr[i].mouseChildren = false;
+      container.parent.addChild(choicePulseArr[i]);
+    }
+
+    if (!choiceArr[i]) {
+      choiceArr[i] = buildChoiceLetterDisplay();
+      container.parent.addChild(choiceArr[i]);
+    }
+
+    updateChoiceLetterDisplay(choiceArr[i], "");
     choiceArr[i].visible = false;
-    container.parent.addChild(choiceArr[i]);
+    choiceArr[i].scaleX = choiceArr[i].scaleY = choiceArr[i].__baseScale || 0.8;
     choiceArr[i].x = 205 + i * 120;
     choiceArr[i].y = 620;
   }
@@ -503,21 +583,29 @@ function enablechoices() {
       choiceGlowArr[i].visible = false;
       choiceGlowArr[i].alpha = 0;
     }
+    if (choicePulseArr[i]) {
+      drawChoiceSpeechWave(choicePulseArr[i]);
+      choicePulseArr[i].visible = false;
+      choicePulseArr[i].alpha = 0;
+      choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = 1;
+    }
     if (clueArr[i]) {
       clueArr[i].visible = false;
-      clueArr[i].gotoAndStop(26);
+      updateClueLetterDisplay(clueArr[i], "");
     }
     if (clueBgArr[i]) {
       drawClueSlotBackground(clueBgArr[i]);
       clueBgArr[i].visible = false;
       clueBgArr[i].alpha = 0;
     }
+
+    stopChoiceIdleAnimation(i);
   }
 
   for (i = 0; i < cLen; i++) {
     getChar[i] = correctAnswer.charAt(i).toString().toUpperCase();
     indx[i] = alphabetArr.indexOf(getChar[i]);
-    choiceArr[rand1[i]].gotoAndStop(indx[i]);
+    updateChoiceLetterDisplay(choiceArr[rand1[i]], getChar[i]);
     choiceArr[rand1[i]].name = getChar[i];
   }
 
@@ -606,6 +694,16 @@ function enablechoices() {
       choiceBgArr[i].__baseScale = tileScale * 1.18;
       choiceBgArr[i].visible = true;
       choiceBgArr[i].alpha = 0;
+    }
+
+    if (choicePulseArr[i]) {
+      var pulseScale = choiceArr[i].scaleX || choiceArrScale;
+      choicePulseArr[i].x = choiceArr[i].x;
+      choicePulseArr[i].y = choiceArr[i].y - 86 * pulseScale;
+      choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = pulseScale;
+      choicePulseArr[i].alpha = 0;
+      choicePulseArr[i].visible = true;
+      choicePulseArr[i].__baseScale = pulseScale;
     }
 
     if (choiceGlowArr[i]) {
@@ -704,13 +802,29 @@ function createTween() {
         .to({ alpha: 0.38, scaleX: glowTargetScale, scaleY: glowTargetScale }, 260, createjs.Ease.quadOut);
     }
 
+    if (choicePulseArr[i]) {
+      var pulseScale = choicePulseArr[i].__baseScale || targetScale;
+      choicePulseArr[i].alpha = 0;
+      choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = pulseScale * 0.84;
+      createjs.Tween.get(choicePulseArr[i], { override: true })
+        .wait(val + 120)
+        .to({ alpha: 0.78, scaleX: pulseScale, scaleY: pulseScale }, 320, createjs.Ease.quadOut);
+    }
+
     choiceArr[i].visible = true;
     choiceArr[i].alpha = 0;
     choiceArr[i].y = 570;
     choiceArr[i].scaleX = choiceArr[i].scaleY = targetScale * 1.12;
     createjs.Tween.get(choiceArr[i], { override: true })
       .wait(val)
-      .to({ y: 600, scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut);
+      .to({ y: 600, scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut)
+      .call(
+        (function (index) {
+          return function () {
+            startChoiceIdleAnimation(index, true);
+          };
+        })(i)
+      );
 
     val += 140;
   }
@@ -755,11 +869,16 @@ function disablechoices() {
     clueArr[i].visible = false;
     choiceArr[i].visible = false;
 
+    stopChoiceIdleAnimation(i);
+
     if (choiceBgArr[i]) {
       createjs.Tween.get(choiceBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
     }
     if (choiceGlowArr[i]) {
       createjs.Tween.get(choiceGlowArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
+    }
+    if (choicePulseArr[i]) {
+      createjs.Tween.get(choicePulseArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
     }
     if (clueBgArr[i]) {
       createjs.Tween.get(clueBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
@@ -784,11 +903,15 @@ function answerSelected(e) {
   e.currentTarget.mouseEnabled = false;
   e.currentTarget.cursor = "default";
   detachChoiceInteractions(selectedIndex);
+  stopChoiceIdleAnimation(selectedIndex);
+  if (choicePulseArr[selectedIndex]) {
+    choicePulseArr[selectedIndex].visible = false;
+  }
 e.currentTarget.visible=false;
   strArr.push(uans);
   var str1 = uans;
   var indAnsVal = alphabetArr.indexOf(str1);
-  clueArr[lCnt].gotoAndStop(indAnsVal);
+  updateClueLetterDisplay(clueArr[lCnt], str1);
   animateClueSlotFill(lCnt, getChar[lCnt] == str1);
   markChoiceResult(selectedIndex, getChar[lCnt] == str1);
 

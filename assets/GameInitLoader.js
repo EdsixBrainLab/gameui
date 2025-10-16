@@ -36,6 +36,324 @@ var lastDisplayedScore = null,
     lastDisplayedQuestion = null;
 var howToPlayWaveTransferred = false;
 
+function buildVectorArrowIcon() {
+    var icon = new createjs.Container();
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(252,210,255,0.7)",
+            "rgba(125,86,209,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 100)
+        .drawCircle(0, 0, 100);
+    halo.alpha = 0.8;
+
+    var tail = new createjs.Shape();
+    tail.graphics
+        .clear()
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.24)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], -140, 0, 24, 0)
+        .moveTo(-136, -18)
+        .quadraticCurveTo(-58, -58, -18, -36)
+        .lineTo(4, -20)
+        .lineTo(-26, 20)
+        .quadraticCurveTo(-74, 56, -136, 22)
+        .closePath();
+    tail.alpha = 0.65;
+
+    var arrow = new createjs.Shape();
+    var g = arrow.graphics;
+    g.clear();
+    g.setStrokeStyle(5, "round", "round");
+    g.beginLinearGradientStroke([
+        "rgba(255,255,255,0.92)",
+        "rgba(255,255,255,0.3)"
+    ], [0, 1], -96, -52, 118, 60);
+    g.beginLinearGradientFill([
+        "#FFB9F4",
+        "#F472B6",
+        "#7C3AED"
+    ], [0, 0.42, 1], -102, -48, 124, 56);
+    g.moveTo(-104, -26);
+    g.quadraticCurveTo(-36, -76, 12, -48);
+    g.lineTo(120, 0);
+    g.lineTo(12, 48);
+    g.quadraticCurveTo(-36, 76, -104, 26);
+    g.closePath();
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .clear()
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.94)",
+            "rgba(255,255,255,0.04)"
+        ], [0, 1], -54, -22, 52, 26)
+        .moveTo(-64, -14)
+        .quadraticCurveTo(-12, -40, 24, -8)
+        .lineTo(-8, 28)
+        .quadraticCurveTo(-46, 36, -64, 6)
+        .closePath();
+
+    var tipSpark = new createjs.Shape();
+    tipSpark.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.95)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 26)
+        .drawCircle(0, 0, 26);
+    tipSpark.x = 112;
+    tipSpark.y = 0;
+    tipSpark.alpha = 0.92;
+
+    var rim = new createjs.Shape();
+    rim.graphics
+        .clear()
+        .setStrokeStyle(3, "round", "round")
+        .beginStroke("rgba(255,255,255,0.32)")
+        .moveTo(98, -18)
+        .quadraticCurveTo(124, 0, 98, 18);
+    rim.alpha = 0.7;
+
+    icon.addChild(halo, tail, arrow, inner, rim, tipSpark);
+    icon.shadow = new createjs.Shadow("rgba(20,14,60,0.45)", 0, 14, 32);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.cache(-160, -120, 320, 240);
+
+    icon.clone = function () {
+        var clone = buildVectorArrowIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
+function buildVectorHandIcon() {
+    var icon = new createjs.Container();
+
+    var floorShadow = new createjs.Shape();
+    floorShadow.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(20,16,68,0.42)",
+            "rgba(20,16,68,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 96)
+        .drawEllipse(-68, 190, 136, 70);
+    floorShadow.alpha = 0.62;
+
+    var cuff = new createjs.Shape();
+    cuff.graphics
+        .clear()
+        .setStrokeStyle(4, "round", "round")
+        .beginStroke("rgba(255,255,255,0.32)")
+        .beginLinearGradientFill(["#312E81", "#6D28D9"], [0, 1], -48, 178, 48, 236)
+        .drawRoundRectComplex(-48, 176, 96, 64, 28, 28, 36, 36);
+
+    var cuffHighlight = new createjs.Shape();
+    cuffHighlight.graphics
+        .clear()
+        .beginLinearGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"] , [0, 1], -30, 186, 24, 214)
+        .drawRoundRect(-34, 184, 68, 32, 18);
+    cuffHighlight.alpha = 0.75;
+
+    var palm = new createjs.Shape();
+    var gp = palm.graphics;
+    gp.clear();
+    gp.setStrokeStyle(3, "round", "round");
+    gp.beginLinearGradientStroke([
+        "rgba(255,255,255,0.6)",
+        "rgba(255,255,255,0.18)"
+    ], [0, 1], -34, 112, 38, 228);
+    gp.beginLinearGradientFill([
+        "#FFE6CC",
+        "#FDBA74",
+        "#FB7185",
+        "#F472B6"
+    ], [0, 0.32, 0.7, 1], -44, 92, 44, 236);
+    gp.moveTo(-42, 184);
+    gp.quadraticCurveTo(-68, 132, -26, 110);
+    gp.quadraticCurveTo(4, 96, 32, 118);
+    gp.quadraticCurveTo(56, 140, 54, 176);
+    gp.quadraticCurveTo(50, 232, 6, 236);
+    gp.quadraticCurveTo(-26, 238, -42, 208);
+    gp.closePath();
+
+    var indexFinger = new createjs.Shape();
+    var gi = indexFinger.graphics;
+    gi.clear();
+    gi.setStrokeStyle(3, "round", "round");
+    gi.beginLinearGradientStroke([
+        "rgba(255,255,255,0.68)",
+        "rgba(255,255,255,0.2)"
+    ], [0, 1], -14, 24, 24, 160);
+    gi.beginLinearGradientFill([
+        "#FFF3E5",
+        "#FDBA74",
+        "#FB7185"
+    ], [0, 0.35, 1], -18, 12, 26, 184);
+    gi.moveTo(-10, 96);
+    gi.quadraticCurveTo(-22, 40, 12, 26);
+    gi.quadraticCurveTo(48, 12, 54, 46);
+    gi.quadraticCurveTo(60, 86, 38, 154);
+    gi.quadraticCurveTo(18, 190, -8, 168);
+    gi.closePath();
+
+    var thumb = new createjs.Shape();
+    var gt = thumb.graphics;
+    gt.clear();
+    gt.beginLinearGradientFill([
+        "#FFE1C7",
+        "#FDBA74",
+        "#FB7185"
+    ], [0, 0.42, 1], -60, 128, 12, 210)
+        .moveTo(-42, 140)
+        .quadraticCurveTo(-86, 170, -62, 204)
+        .quadraticCurveTo(-32, 234, -8, 206)
+        .quadraticCurveTo(8, 186, -2, 158)
+        .quadraticCurveTo(-10, 142, -42, 140)
+        .closePath();
+
+    var knuckleHighlight = new createjs.Shape();
+    knuckleHighlight.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.82)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 34)
+        .drawCircle(-6, 190, 22);
+
+    var fingerHighlight = new createjs.Shape();
+    fingerHighlight.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(255,255,255,0.8)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 38)
+        .drawEllipse(-6, 60, 28, 52);
+    fingerHighlight.x = 20;
+    fingerHighlight.y = 22;
+
+    var fingertipAura = new createjs.Shape();
+    fingertipAura.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(255,248,240,0.95)",
+            "rgba(253,186,116,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 56)
+        .drawCircle(0, 0, 56);
+    fingertipAura.x = 50;
+    fingertipAura.y = 54;
+    fingertipAura.alpha = 0.92;
+
+    var fingertipRing = new createjs.Shape();
+    fingertipRing.graphics
+        .clear()
+        .setStrokeStyle(3, "round", "round")
+        .beginStroke("rgba(255,255,255,0.55)")
+        .drawCircle(50, 54, 30);
+    fingertipRing.alpha = 0.58;
+
+    var sparkle = new createjs.Shape();
+    sparkle.graphics
+        .clear()
+        .setStrokeStyle(2, "round", "round")
+        .beginStroke("rgba(255,255,255,0.78)")
+        .moveTo(50, 30)
+        .lineTo(50, 78)
+        .moveTo(26, 54)
+        .lineTo(74, 54);
+    sparkle.alpha = 0.6;
+
+    icon.addChild(
+        floorShadow,
+        cuff,
+        cuffHighlight,
+        palm,
+        thumb,
+        indexFinger,
+        fingerHighlight,
+        knuckleHighlight,
+        fingertipAura,
+        fingertipRing,
+        sparkle
+    );
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.shadow = new createjs.Shadow("rgba(20,14,64,0.48)", 0, 18, 34);
+    icon.cache(-150, 70, 300, 240);
+
+    icon.clone = function () {
+        var clone = buildVectorHandIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
+function buildVectorCursorIcon() {
+    var icon = new createjs.Container();
+
+    var halo = new createjs.Shape();
+    halo.graphics
+        .clear()
+        .beginRadialGradientFill([
+            "rgba(198,181,255,0.55)",
+            "rgba(198,181,255,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 72)
+        .drawCircle(0, 0, 72);
+    halo.alpha = 0.85;
+
+    var inner = new createjs.Shape();
+    inner.graphics
+        .clear()
+        .beginLinearGradientFill(["#22D3EE", "#6366F1"], [0, 1], -32, -32, 36, 36)
+        .drawCircle(0, 0, 32);
+    inner.shadow = new createjs.Shadow("rgba(14,18,48,0.35)", 0, 8, 20);
+
+    var ring = new createjs.Shape();
+    ring.graphics
+        .clear()
+        .setStrokeStyle(4)
+        .beginLinearGradientStroke(["rgba(255,255,255,0.95)", "rgba(255,255,255,0.35)"], [0, 1], -34, -34, 34, 34)
+        .drawCircle(0, 0, 36);
+
+    var tip = new createjs.Shape();
+    tip.graphics
+        .clear()
+        .beginLinearGradientFill(["#F8FAFC", "#C084FC"], [0, 1], -12, -40, 28, 20)
+        .moveTo(-12, -12)
+        .lineTo(28, 12)
+        .lineTo(0, 44)
+        .closePath();
+    tip.shadow = new createjs.Shadow("rgba(18,16,46,0.3)", 0, 6, 16);
+
+    icon.addChild(halo, inner, ring, tip);
+    icon.mouseEnabled = false;
+    icon.mouseChildren = false;
+    icon.shadow = new createjs.Shadow("rgba(18,16,48,0.22)", 0, 8, 20);
+    icon.cache(-90, -90, 180, 180);
+
+    icon.clone = function () {
+        var clone = buildVectorCursorIcon();
+        clone.scaleX = icon.scaleX;
+        clone.scaleY = icon.scaleY;
+        return clone;
+    };
+
+    return icon;
+}
+
+
 var HUD_CARD_WIDTH = 50;
 var HUD_CARD_HEIGHT = 50;
 var HUD_CARD_CORNER_RADIUS = 20;
@@ -2650,16 +2968,18 @@ function doneLoading(event) {
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (id == "arrow1") {
 
-                arrow1 = new createjs.Bitmap(preload.getResult('arrow1'));
+                arrow1 = buildVectorArrowIcon();
                 container.parent.addChild(arrow1);
                 arrow1.visible = false;
+                arrow1.scaleX = arrow1.scaleY = 0.78;
                 continue;
             }
             if (id == "fingure") {
 
-                fingure = new createjs.Bitmap(preload.getResult('fingure'));
+                fingure = buildVectorHandIcon();
                 container.parent.addChild(fingure);
                 fingure.visible = false;
+                fingure.scaleX = fingure.scaleY = 0.62;
                 continue;
             }
             ///////////////////////////////////////////////////////bg////////////////////////////
@@ -3018,9 +3338,10 @@ function doneLoading(event) {
                 continue;
             }
             if (id == "handCursor") {
-                handCursor = new createjs.Bitmap(preload.getResult('handCursor'));
+                handCursor = buildVectorCursorIcon();
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
+                handCursor.scaleX = handCursor.scaleY = 0.9;
 
                 continue;
             }
