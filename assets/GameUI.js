@@ -1,15 +1,5 @@
 var ambientLayer,overlayLayer,ambientGradientLayer,ambientOrbs = [];
-var questionSubtitle,
-  questionCardContainer,
-  questionCardBackground,
-  questionCardHighlight,
-  questionCardShadow,
-  circleOutline,
-  questionCardContainer_htp,
-  questionCardShadow_htp,
-  questionCardGlow_htp,
-  questionCardFrame_htp,
-  in_introQues1;
+var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
 var INTRO_TITLE_Y = 75;
 var INTRO_PROMPT_Y = 184;
 var QUESTION_CARD_WIDTH = 600;
@@ -64,84 +54,50 @@ QusTxtString.shadow = new createjs.Shadow("black", 1, 1, 1);
 function call_UI_introQuestionCardContainer(incontainer,in_question)
 {
 	
-    questionCardContainer_htp = new createjs.Container();
+	questionCardContainer_htp = new createjs.Container();
     questionCardContainer_htp.x = introQues1X;
     questionCardContainer_htp.y = introQues1Y;
     questionCardContainer_htp.alpha = 0;
     questionCardContainer_htp.visible = false;
     questionCardContainer_htp.mouseEnabled = false;
     questionCardContainer_htp.mouseChildren = false;
-
-    var glowWidth_htp = QUESTION_CARD_WIDTH + 220;
-    var glowHeight_htp = QUESTION_CARD_HEIGHT + 140;
-    questionCardGlow_htp = new createjs.Shape();
-    questionCardGlow_htp.graphics
-      .beginRadialGradientFill(
-        [
-          "rgba(255, 192, 237, 0.75)",
-          "rgba(145, 121, 255, 0.55)",
-          "rgba(80, 46, 140, 0)"
-        ],
-        [0, 0.45, 1],
-        0,
-        0,
-        0,
-        0,
-        0,
-        Math.max(glowWidth_htp, glowHeight_htp) / 2
-      )
-      .drawEllipse(
-        -glowWidth_htp / 2,
-        -glowHeight_htp / 2,
-        glowWidth_htp,
-        glowHeight_htp
-      );
-    questionCardGlow_htp.alpha = 0.55;
-    questionCardGlow_htp.compositeOperation = "lighter";
-    questionCardContainer_htp.addChild(questionCardGlow_htp);
-
-    questionCardShadow_htp = new createjs.Shape();
-    var shadowWidth_htp = QUESTION_CARD_WIDTH + 68;
-    var shadowHeight_htp = QUESTION_CARD_HEIGHT + 34;
+	
+	questionCardShadow_htp = new createjs.Shape();
+    var shadowWidth_htp = QUESTION_CARD_WIDTH + 64;
+    var shadowHeight_htp = QUESTION_CARD_HEIGHT + 26;
     var shadowHalfWidth_htp = shadowWidth_htp / 2;
     var shadowHalfHeight_htp = shadowHeight_htp / 2;
     questionCardShadow_htp.graphics
-      .beginFill("rgba(20, 8, 44, 0.45)")
+      .beginFill("rgba(8,18,36,0.32)")
       .drawRoundRect(
         -shadowHalfWidth_htp,
         -shadowHalfHeight_htp,
         shadowWidth_htp,
         shadowHeight_htp,
-        QUESTION_CARD_CORNER_RADIUS + 16
+        QUESTION_CARD_CORNER_RADIUS + 10
       );
-    questionCardShadow_htp.y = 2;
-    questionCardShadow_htp.alpha = 0.38;
-    questionCardShadow_htp.compositeOperation = "multiply";
+    questionCardShadow_htp.y = 1;
+    questionCardShadow_htp.alpha = 0.32;
     questionCardContainer_htp.addChild(questionCardShadow_htp);
 
     questionCardBackground_htp = new createjs.Shape();
     questionCardContainer_htp.addChild(questionCardBackground_htp);
 
     questionCardHighlight_htp = new createjs.Shape();
-    questionCardHighlight_htp.compositeOperation = "lighter";
     questionCardContainer_htp.addChild(questionCardHighlight_htp);
-
-    questionCardFrame_htp = new createjs.Shape();
-    questionCardContainer_htp.addChild(questionCardFrame_htp);
-
-    renderQuestionCardBackground_htp();
-
-    in_introQues1 = new createjs.Text(in_question, "800 60px 'Baloo 2'", "#FFF6FF");
+	
+	renderQuestionCardBackground_htp();
+	
+    in_introQues1 = new createjs.Text(in_question, "800 60px 'Baloo 2'", "#F4FAFF");
     in_introQues1.x = 0;
     in_introQues1.y = 0;
     in_introQues1.textAlign = "center";
     in_introQues1.textBaseline = "middle";
-    in_introQues1.lineWidth = QUESTION_CARD_WIDTH - 120;
-    in_introQues1.shadow = new createjs.Shadow("rgba(14, 6, 35, 0.58)", 0, 12, 32);
+	in_introQues1.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
     in_introQues1.visible = true;
-
-    questionCardContainer_htp.addChild(in_introQues1);
-    incontainer.parent.addChild(questionCardContainer_htp);
+	
+	 questionCardContainer_htp.addChild(in_introQues1)
+incontainer.parent.addChild(questionCardContainer_htp);
 
 }
 
@@ -562,11 +518,10 @@ function attachChoiceInteractions(index) {
     .clear()
     .beginLinearGradientFill(
       [
-        "rgba(70, 45, 140, 0.94)",
-        "rgba(133, 62, 182, 0.95)",
-        "rgba(251, 110, 160, 0.92)"
+        "rgba(18,38,76,0.95)",
+        "rgba(14,28,58,0.95)"
       ],
-      [0, 0.55, 1],
+      [0, 1],
       -halfWidth,
       -halfHeight,
       halfWidth,
@@ -591,8 +546,8 @@ function attachChoiceInteractions(index) {
     questionCardHighlight_htp.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.58)", "rgba(255,255,255,0.16)", "rgba(255,255,255,0)"],
-        [0, 0.52, 1],
+        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+        [0, 1],
         -highlightHalfWidth,
         -highlightHalfHeight,
         highlightHalfWidth,
@@ -605,32 +560,7 @@ function attachChoiceInteractions(index) {
         highlightHeight,
         Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
       );
-    questionCardHighlight_htp.alpha = 0.55;
-  }
-
-  if (questionCardFrame_htp) {
-    questionCardFrame_htp.graphics
-      .clear()
-      .setStrokeStyle(3)
-      .beginLinearGradientStroke(
-        ["rgba(255, 220, 255, 0.82)", "rgba(144, 196, 255, 0.82)"],
-        [0, 1],
-        -halfWidth,
-        0,
-        halfWidth,
-        0
-      )
-      .drawRoundRect(
-        -halfWidth,
-        -halfHeight,
-        QUESTION_CARD_WIDTH,
-        QUESTION_CARD_HEIGHT,
-        QUESTION_CARD_CORNER_RADIUS + 2
-      );
-    questionCardFrame_htp.alpha = 0.95;
-    if (!questionCardFrame_htp.shadow) {
-      questionCardFrame_htp.shadow = new createjs.Shadow("rgba(255, 173, 231, 0.35)", 0, 0, 18);
-    }
+    questionCardHighlight_htp.alpha = 0.45;
   }
 }
 

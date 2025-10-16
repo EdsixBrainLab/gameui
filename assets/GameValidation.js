@@ -62,7 +62,6 @@ function isVisibleSkipBtn() {
     }
 
     applyHowToPlayButtonState(SkipBtnMc, "skip");
-    startIntroActionButtonHighlight(SkipBtnMc);
     SkipBtnMc.visible = true;
     SkipBtnMc.mouseEnabled = true;
     container.parent.addChild(SkipBtnMc);
@@ -81,7 +80,6 @@ function isVisibleStartBtn() {
     }
 
     applyHowToPlayButtonState(SkipBtnMc, "start");
-    startIntroActionButtonHighlight(SkipBtnMc);
     container.parent.addChild(SkipBtnMc);
     container.parent.addChild(skipMc);
     howToPlayImageMc.visible = true;
