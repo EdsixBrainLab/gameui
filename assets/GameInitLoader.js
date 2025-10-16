@@ -2774,17 +2774,55 @@ function createHowToPlayParticleField(width, height, count) {
     layer.mouseEnabled = false;
     layer.mouseChildren = false;
 
+    var palettes = [
+        {
+            inner: "rgba(255, 255, 255, 0.95)",
+            mid: "rgba(255, 197, 242, 0.55)",
+            outer: "rgba(255, 197, 242, 0)",
+            spark: "rgba(255, 240, 255, 0.95)"
+        },
+        {
+            inner: "rgba(255, 255, 255, 0.95)",
+            mid: "rgba(172, 222, 255, 0.6)",
+            outer: "rgba(172, 222, 255, 0)",
+            spark: "rgba(214, 237, 255, 0.95)"
+        },
+        {
+            inner: "rgba(255, 255, 255, 0.95)",
+            mid: "rgba(154, 237, 221, 0.6)",
+            outer: "rgba(154, 237, 221, 0)",
+            spark: "rgba(220, 255, 246, 0.95)"
+        }
+    ];
+
     for (var i = 0; i < count; i++) {
         var radius = 3 + Math.random() * 4;
-        var particle = new createjs.Shape();
-        particle.graphics
+        var palette = palettes[Math.floor(Math.random() * palettes.length)];
+        var particle = new createjs.Container();
+        particle.compositeOperation = "lighter";
+
+        var glow = new createjs.Shape();
+        glow.graphics
             .beginRadialGradientFill(
-                [
-                    "rgba(255, 255, 255, 0.95)",
-                    "rgba(255, 202, 236, 0.5)",
-                    "rgba(255, 202, 236, 0)"
-                ],
-                [0, 0.6, 1],
+                [palette.mid, palette.outer],
+                [0, 1],
+                0,
+                0,
+                0,
+                0,
+                0,
+                radius * 2.2
+            )
+            .drawCircle(0, 0, radius * 2.2);
+        glow.alpha = 0.38 + Math.random() * 0.18;
+        glow.__baseAlpha = glow.alpha;
+        particle.addChild(glow);
+
+        var core = new createjs.Shape();
+        core.graphics
+            .beginRadialGradientFill(
+                [palette.inner, palette.mid, palette.outer],
+                [0, 0.55, 1],
                 0,
                 0,
                 0,
@@ -2793,9 +2831,27 @@ function createHowToPlayParticleField(width, height, count) {
                 radius
             )
             .drawCircle(0, 0, radius);
-        particle.compositeOperation = "lighter";
-        particle.alpha = 0;
+        core.alpha = 0.9;
+        core.__baseScale = 1;
+        core.__baseAlpha = core.alpha;
+        particle.addChild(core);
+
+        var spark = new createjs.Shape();
+        spark.graphics
+            .beginFill(palette.spark)
+            .drawPolyStar(0, 0, radius * 0.9, 4, 0.6, -90);
+        spark.alpha = 0.65 + Math.random() * 0.2;
+        spark.scaleX = spark.scaleY = 0.7 + Math.random() * 0.2;
+        spark.__baseScale = spark.scaleX;
+        spark.__baseAlpha = spark.alpha;
+        particle.addChild(spark);
+
         particle.__particleBounds = { width: width, height: height };
+        particle.__core = core;
+        particle.__glow = glow;
+        particle.__spark = spark;
+        particle.__pulseAttached = false;
+
         layer.addChild(particle);
     }
 
@@ -2809,6 +2865,60 @@ function startHowToPlayParticleFloat(particle, immediate) {
 
     createjs.Tween.removeTweens(particle);
 
+    if (!particle.__pulseAttached) {
+        particle.__pulseAttached = true;
+
+        if (particle.__core) {
+            createjs.Tween.get(particle.__core, { loop: true })
+                .to(
+                    {
+                        scaleX: particle.__core.__baseScale * 1.12,
+                        scaleY: particle.__core.__baseScale * 1.12,
+                        alpha: Math.min(1, particle.__core.__baseAlpha + 0.08)
+                    },
+                    860,
+                    createjs.Ease.sineInOut
+                )
+                .to(
+                    {
+                        scaleX: particle.__core.__baseScale * 0.92,
+                        scaleY: particle.__core.__baseScale * 0.92,
+                        alpha: Math.max(0.4, particle.__core.__baseAlpha - 0.18)
+                    },
+                    860,
+                    createjs.Ease.sineInOut
+                );
+        }
+
+        if (particle.__spark) {
+            createjs.Tween.get(particle.__spark, { loop: true })
+                .to(
+                    {
+                        scaleX: particle.__spark.__baseScale * 1.18,
+                        scaleY: particle.__spark.__baseScale * 1.18,
+                        alpha: Math.min(1, particle.__spark.__baseAlpha + 0.12)
+                    },
+                    680,
+                    createjs.Ease.quadOut
+                )
+                .to(
+                    {
+                        scaleX: particle.__spark.__baseScale * 0.86,
+                        scaleY: particle.__spark.__baseScale * 0.86,
+                        alpha: Math.max(0.25, particle.__spark.__baseAlpha - 0.2)
+                    },
+                    680,
+                    createjs.Ease.quadIn
+                );
+        }
+
+        if (particle.__glow) {
+            createjs.Tween.get(particle.__glow, { loop: true })
+                .to({ alpha: particle.__glow.__baseAlpha + 0.1 }, 1200, createjs.Ease.sineInOut)
+                .to({ alpha: Math.max(0.18, particle.__glow.__baseAlpha - 0.12) }, 1200, createjs.Ease.sineInOut);
+        }
+    }
+
     var bounds = particle.__particleBounds;
     var startX = Math.random() * bounds.width;
     var startY = immediate ? Math.random() * bounds.height : bounds.height + Math.random() * 80;
@@ -2818,16 +2928,29 @@ function startHowToPlayParticleFloat(particle, immediate) {
     var endScale = startScale * (0.6 + Math.random() * 0.5);
     var floatDuration = 4600 + Math.random() * 2800;
     var delay = immediate ? Math.random() * 1200 : Math.random() * 400;
+    var spin = (Math.random() * 120 + 60) * (Math.random() > 0.5 ? 1 : -1);
 
     particle.x = startX;
     particle.y = startY;
     particle.scaleX = particle.scaleY = startScale;
+    particle.rotation = Math.random() * 360;
     particle.alpha = 0;
 
     createjs.Tween.get(particle, { override: true })
         .wait(delay)
-        .to({ alpha: 0.75 }, 520, createjs.Ease.quadOut)
-        .to({ x: driftX, y: endY, alpha: 0, scaleX: endScale, scaleY: endScale }, floatDuration, createjs.Ease.quadIn)
+        .to({ alpha: 0.85 }, 520, createjs.Ease.quadOut)
+        .to(
+            {
+                x: driftX,
+                y: endY,
+                alpha: 0,
+                scaleX: endScale,
+                scaleY: endScale,
+                rotation: particle.rotation + spin
+            },
+            floatDuration,
+            createjs.Ease.quadIn
+        )
         .call(function () {
             startHowToPlayParticleFloat(particle, false);
         });
