@@ -91,7 +91,7 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     fill: "#38BDF8",
                     gradient: ["#7DD3FC", "#0EA5E9"],
-                    strokeColor: "#0EA5E9",
+                    strokeColor: "#000",
                     strokeWidth: 3.2,
                     shadow: { color: "rgba(4,18,36,0.55)", x: 0, y: 3, blur: 10 }
                 },
@@ -114,7 +114,7 @@ var HUD_THEME_PRESETS = {
         cardDecor: {
             outline: { color: "rgba(202,218,255,0.82)", alpha: 0.96, width: 1.2 },
             accentOutline: { color: "rgba(226,208,255,0.88)", alpha: 0.94, width: 1.1 },
-            glass: { colors: ["rgba(255,255,255,0.86)", "rgba(255,255,255,0.16)"], alpha: 0.78, heightRatio: 0.64 },
+glass: { colors: ["rgba(255,255,255,0.86)", "rgba(255,255,255,0.16)"], alpha: 0.78, heightRatio: 0.64 },
             bottomGlow: { colors: ["rgba(124,156,255,0.1)", "rgba(208,140,255,0.5)"], alpha: 0.72 }
         },
         textStyles: {
@@ -157,7 +157,7 @@ var HUD_THEME_PRESETS = {
             hoverGlowAlpha: 0.92,
             backgroundGradient: ["rgba(74,92,188,0.96)", "rgba(42,50,124,0.82)"],
             backgroundAlpha: 0.98,
-            highlightGradient: ["rgba(255,255,255,0.94)", "rgba(255,255,255,0.16)"],
+            //highlightGradient: ["rgba(255,255,255,0.94)", "rgba(255,255,255,0.16)"],
             highlightAlpha: 0.82,
             stroke: { color: "rgba(216,230,255,0.54)", width: 1.2, alpha: 0.98 }
         },
@@ -186,7 +186,7 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     fill: "#F472B6",
                     gradient: ["#FBCFE8", "#EC4899"],
-                    strokeColor: "rgba(180,50,110,0.55)",
+                    strokeColor: "rgba(76,29,149,0.8)",
                     strokeWidth: 2.6,
                     shadow: { color: "rgba(152,64,18,0.3)", x: 0, y: 2, blur: 11 }
                 },
@@ -205,7 +205,7 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     fill: "#667BFF",
                     gradient: ["#93C5FD", "#6366F1"],
-                    strokeColor: "rgba(59,130,246,0.7)",
+                    strokeColor: "#4338CA",
                     strokeWidth: 3.2,
                     shadow: { color: "rgba(37,99,235,0.3)", x: 0, y: 2, blur: 10 }
                 },
@@ -224,7 +224,7 @@ var HUD_THEME_PRESETS = {
                 iconStyle: {
                     fill: "#1EA7FF",
                     gradient: ["#7CD4FD", "#0EA5E9"],
-                    strokeColor: "rgba(14,165,233,0.85)",
+                    strokeColor: "#000",
                     strokeWidth: 3.1,
                     shadow: { color: "rgba(34,116,165,0.38)", x: 0, y: 2, blur: 10 }
                 },
@@ -1080,12 +1080,12 @@ function layoutHudElements(canvasWidth, canvasHeight) {
     positions.push(cursor);
 console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
-        scoreCardContainer.x = positions[0]-200;
-        scoreCardContainer.baseX = positions[0]-200;
+        scoreCardContainer.x = positions[0]-210;
+        scoreCardContainer.baseX = positions[0]-210;
     }
     if (timerCardContainer) {
-        timerCardContainer.x = positions[1]-300;
-        timerCardContainer.baseX = positions[1]-300;
+        timerCardContainer.x = positions[1]-330;
+        timerCardContainer.baseX = positions[1]-330;
     }
     if (hudQuestionCardContainer) {
         hudQuestionCardContainer.x = positions[2]+200;
@@ -1120,7 +1120,7 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var metrics = getCanvasMetrics();
     var stageWidth = typeof canvasWidth === "number" ? canvasWidth : metrics.width;
     var stageHeight = typeof canvasHeight === "number" ? canvasHeight : metrics.height;
-    var safeMargin = Math.max(20, stageWidth * 0.05);
+    var safeMargin = Math.max(7, stageWidth * 0.05);
     var baseHorizontalMarginRatio = 22 / 1280;
     var baseTopMarginRatio = 16 / 720;
 
@@ -1131,9 +1131,14 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
         var topMargin = stageHeight * baseTopMarginRatio;
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 44);
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 7);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+console.log("Title.y::"+Title.y)
+console.log("topMargin::"+topMargin)
+console.log("titleHalfHeight::"+titleHalfHeight)
+console.log("minimumTop::"+minimumTop)
 
         var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
         var titleLift = Math.min(
@@ -1184,7 +1189,7 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
             Math.max(promptTargetY - promptMinY, 0),
             stageHeight * 0.04
         );
-        QusTxtString.y = promptTargetY - promptLift;
+        QusTxtString.y = promptTargetY - promptLift+15;
         QusTxtString.__layoutHalfHeight = promptHalfHeight;
 
         if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
@@ -2723,7 +2728,7 @@ function doneLoading(event) {
 
                 titleLabel.lineWidth = badgeWidth - 180;
                 var textHeight = titleLabel.getMeasuredHeight();
-                var badgeHeight = Math.max(86, Math.round(textHeight + 48));
+                var badgeHeight = Math.max(76, Math.round(textHeight + 48));
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
@@ -2732,7 +2737,7 @@ function doneLoading(event) {
                 var badgeShadow = new createjs.Shape();
                 badgeShadow.graphics
                     .beginFill("rgba(6,12,28,0.55)")
-                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2 + 10, badgeWidth, badgeHeight, 44);
+                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2 + 10, badgeWidth, badgeHeight, 40);
                 badgeShadow.alpha = 0.34;
                 TitleContaier.addChild(badgeShadow);
 
@@ -3413,7 +3418,7 @@ function createHudCard(label, type) {
     var labelText = new createjs.Text(label.toUpperCase(), "600 12px 'Baloo 2'", labelColor);
     labelText.textAlign = 'left';
     labelText.x = icon.x - 20;
-    labelText.y = -34;
+    labelText.y = -38;
     applyTextStyle(labelText, labelStyle);
     card.addChild(labelText);
 
@@ -3667,19 +3672,20 @@ function refreshHudValues() {
 
     var currentScore = typeof score !== "undefined" ? score : 0;
     gameScoreTxt.text = String(currentScore);
-
-    if (lastDisplayedScore !== null && currentScore > lastDisplayedScore && (!scoreCardContainer || !scoreCardContainer.__scoreCelebrating)) {
+animateScoreCelebration();
+    /*if (lastDisplayedScore !== null && currentScore > lastDisplayedScore && (!scoreCardContainer || !scoreCardContainer.__scoreCelebrating)) {
         animateScoreCelebration();
-    }
+    }*/
     lastDisplayedScore = currentScore;
 
     var timerValue = typeof formatTimerValue === "function" ? formatTimerValue(time) : String(parseInt(time, 10) || 0);
     gameTimerTxt.text = timerValue;
 
     var numericTime = typeof time !== "undefined" ? parseInt(time, 10) || 0 : 0;
-    if (lastDisplayedTime !== null && numericTime !== lastDisplayedTime) {
+   animateTimerTick();
+/*   if (lastDisplayedTime !== null && numericTime !== lastDisplayedTime) {
         animateTimerTick();
-    }
+    }*/
     lastDisplayedTime = numericTime;
 
     var total = typeof totalQuestions !== "undefined" ? totalQuestions : 0;
@@ -3691,10 +3697,10 @@ function refreshHudValues() {
     }
 
     gameQCntTxt.text = currentQuestion + "/" + total;
-
-    if (lastDisplayedQuestion !== null && currentQuestion > lastDisplayedQuestion) {
+animateQuestionAdvance();
+   /* if (lastDisplayedQuestion !== null && currentQuestion > lastDisplayedQuestion) {
         animateQuestionAdvance();
-    }
+    }*/
     lastDisplayedQuestion = currentQuestion;
 
     if (typeof setTimerCriticalState === "function") {
