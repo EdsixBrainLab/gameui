@@ -37,15 +37,60 @@ var es1 = [2, 0, 3, 4, 1, 4, 2, 0, 1, 3, 2, 0, 3, 4, 1, 4, 2, 0, 1, 3, 2, 0, 3, 
 var es2 = [5, 6, 7, 6, 5, 7, 7, 6, 5, 6, 5, 6, 7, 6, 5, 7, 7, 6, 5, 6, 5, 6, 7, 6, 5, 7, 7, 6, 5, 6, 5, 6, 7, 6, 5, 7, 7, 6, 5, 6, 5, 6, 7, 6, 5, 7, 7, 6, 5, 6, 5, 6, 7, 6, 5, 7, 7, 6, 5, 6]
 var feedbackContainer,
   feedbackBackgroundShape,
+  feedbackOverlayShape,
+  feedbackOutlineShape,
+  feedbackSheenShape,
   feedbackAccentContainer,
   feedbackAccentGlow,
   feedbackAccentBg,
+  feedbackIconBackdrop,
+  feedbackIconHalo,
+  feedbackPulseRing,
   feedbackIconShape,
+  feedbackParticleLayer,
   feedbackTitleTxt,
   feedbackMessageTxt;
 
 var confettiLayer;
 var confettiColors = ["#f9d342", "#ff6f61", "#50c878", "#4fc3f7", "#af7ac5", "#ffd1dc"]; // soft vibrant palette
+
+function applyColorAlpha(color, alpha) {
+    if (typeof alpha !== "number") {
+        alpha = 1;
+    }
+
+    if (!color || typeof color !== "string") {
+        return "rgba(255,255,255," + alpha + ")";
+    }
+
+    var rgbaMatch = color.match(/rgba?\(([^)]+)\)/i);
+    if (rgbaMatch) {
+        var parts = rgbaMatch[1].split(/\s*,\s*/);
+        var r = parseFloat(parts[0]);
+        var g = parseFloat(parts[1]);
+        var b = parseFloat(parts[2]);
+        if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+            return "rgba(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + "," + alpha + ")";
+        }
+    }
+
+    if (color.charAt(0) === "#") {
+        var hex = color.substring(1);
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length === 6) {
+            var rHex = parseInt(hex.substring(0, 2), 16);
+            var gHex = parseInt(hex.substring(2, 4), 16);
+            var bHex = parseInt(hex.substring(4, 6), 16);
+            if (!isNaN(rHex) && !isNaN(gHex) && !isNaN(bHex)) {
+                return "rgba(" + rHex + "," + gHex + "," + bHex + "," + alpha + ")";
+            }
+        }
+    }
+
+    return color;
+}
 function randomSort1(a, b) {
     if (Math.random() < 0.5) return -1;
     else return 1;
@@ -186,105 +231,354 @@ function ensureFeedbackContainer() {
 
     feedbackContainer = new createjs.Container();
     feedbackContainer.x = 650;
-    feedbackContainer.y = 240;
+    feedbackContainer.y = 340;
     feedbackContainer.alpha = 0;
     feedbackContainer.visible = false;
     feedbackContainer.mouseEnabled = false;
     feedbackContainer.mouseChildren = false;
+    feedbackContainer.shadow = new createjs.Shadow("rgba(8,18,46,0.4)", 0, 18, 36);
+
+    feedbackParticleLayer = new createjs.Container();
+    feedbackParticleLayer.mouseEnabled = false;
+    feedbackParticleLayer.mouseChildren = false;
+    feedbackContainer.addChild(feedbackParticleLayer);
 
     feedbackBackgroundShape = new createjs.Shape();
     feedbackContainer.addChild(feedbackBackgroundShape);
 
+    feedbackOverlayShape = new createjs.Shape();
+    feedbackOverlayShape.alpha = 0.9;
+    feedbackContainer.addChild(feedbackOverlayShape);
+
+    feedbackOutlineShape = new createjs.Shape();
+    feedbackContainer.addChild(feedbackOutlineShape);
+
     feedbackAccentContainer = new createjs.Container();
-    feedbackAccentContainer.x = -190;
+    feedbackAccentContainer.x = -210;
     feedbackAccentContainer.y = 0;
+    feedbackAccentContainer.mouseEnabled = false;
+    feedbackAccentContainer.mouseChildren = false;
     feedbackContainer.addChild(feedbackAccentContainer);
 
+    feedbackIconHalo = new createjs.Shape();
+    feedbackAccentContainer.addChild(feedbackIconHalo);
+
     feedbackAccentGlow = new createjs.Shape();
-    feedbackAccentGlow.graphics
-        .beginRadialGradientFill(["rgba(255,255,255,0.2)", "rgba(255,255,255,0)"] , [0, 1], 0, 0, 0, 0, 0, 48)
-        .drawCircle(0, 0, 48);
-    feedbackAccentGlow.alpha = 0.45;
     feedbackAccentContainer.addChild(feedbackAccentGlow);
+
+    feedbackPulseRing = new createjs.Shape();
+    feedbackAccentContainer.addChild(feedbackPulseRing);
 
     feedbackAccentBg = new createjs.Shape();
     feedbackAccentContainer.addChild(feedbackAccentBg);
 
+    feedbackIconBackdrop = new createjs.Shape();
+    feedbackAccentContainer.addChild(feedbackIconBackdrop);
+
     feedbackIconShape = new createjs.Shape();
     feedbackAccentContainer.addChild(feedbackIconShape);
 
-    feedbackTitleTxt = new createjs.Text("", "700 26px 'Baloo 2'", "#FFFFFF");
+    feedbackSheenShape = new createjs.Shape();
+    feedbackSheenShape.alpha = 0;
+    feedbackContainer.addChild(feedbackSheenShape);
+
+    feedbackTitleTxt = new createjs.Text("", "800 28px 'Baloo 2'", "#FFFFFF");
     feedbackTitleTxt.textAlign = "left";
     feedbackTitleTxt.x = -120;
-    feedbackTitleTxt.y = -20;
+    feedbackTitleTxt.y = -26;
     feedbackContainer.addChild(feedbackTitleTxt);
 
-    feedbackMessageTxt = new createjs.Text("", "400 16px 'Baloo 2'", "#E3ECFF");
+    feedbackMessageTxt = new createjs.Text("", "400 18px 'Baloo 2'", "#E3ECFF");
     feedbackMessageTxt.textAlign = "left";
-    feedbackMessageTxt.lineWidth = 320;
+    feedbackMessageTxt.lineWidth = 360;
+    feedbackMessageTxt.lineHeight = 24;
     feedbackMessageTxt.x = -120;
-    feedbackMessageTxt.y = 14;
+    feedbackMessageTxt.y = 18;
     feedbackContainer.addChild(feedbackMessageTxt);
 
     container.parent.addChild(feedbackContainer);
 }
 
+function getFeedbackPalette(isCorrect) {
+    if (isCorrect) {
+        return {
+            cardGradient: ["rgba(20,68,104,0.96)", "rgba(34,82,142,0.96)"],
+            overlayGradient: ["rgba(255,255,255,0.28)", "rgba(255,255,255,0.05)"],
+            outline: "rgba(166,242,236,0.68)",
+            accentGradient: ["#2DD4BF", "#38BDF8"],
+            accentHalo: "rgba(45,212,191,0.6)",
+            iconBackdrop: "#164E63",
+            pulseRing: "rgba(56,189,248,0.35)",
+            iconStroke: "#F0FDFA",
+            titleColor: "#ECFEFF",
+            messageColor: "#D1FAF9",
+            particleColors: ["#2DD4BF", "#5EEAD4", "#38BDF8", "#C4F1F9"],
+            sparkColor: "#FFFFFF"
+        };
+    }
+
+    return {
+        cardGradient: ["rgba(72,24,60,0.96)", "rgba(46,28,84,0.96)"],
+        overlayGradient: ["rgba(255,255,255,0.24)", "rgba(255,255,255,0.04)"],
+        outline: "rgba(255,184,210,0.62)",
+        accentGradient: ["#FB7185", "#C084FC"],
+        accentHalo: "rgba(251,113,133,0.55)",
+        iconBackdrop: "#3B0B2B",
+        pulseRing: "rgba(236,72,153,0.32)",
+        iconStroke: "#FFE4F1",
+        titleColor: "#FFE4F1",
+        messageColor: "#FBCFE8",
+        particleColors: ["#FB7185", "#F472B6", "#C084FC", "#FDA4AF"],
+        sparkColor: "#FFFFFF"
+    };
+}
+
+function animateFeedbackAccent(palette, isCorrect) {
+    if (!feedbackAccentContainer) {
+        return;
+    }
+
+    feedbackAccentContainer.scaleX = feedbackAccentContainer.scaleY = 0.88;
+    createjs.Tween.removeTweens(feedbackAccentContainer);
+    createjs.Tween.get(feedbackAccentContainer, { override: true })
+        .to({ scaleX: 1.08, scaleY: 1.08 }, 280, createjs.Ease.backOut)
+        .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.sineInOut);
+
+    if (feedbackPulseRing) {
+        feedbackPulseRing.alpha = 0.75;
+        feedbackPulseRing.scaleX = feedbackPulseRing.scaleY = 0.55;
+        createjs.Tween.removeTweens(feedbackPulseRing);
+        createjs.Tween.get(feedbackPulseRing, { override: true })
+            .to({ scaleX: 1.4, scaleY: 1.4, alpha: 0 }, 540, createjs.Ease.quadOut);
+    }
+
+    if (feedbackAccentGlow) {
+        createjs.Tween.removeTweens(feedbackAccentGlow);
+        feedbackAccentGlow.alpha = 0.65;
+        createjs.Tween.get(feedbackAccentGlow, { override: true })
+            .to({ alpha: 0.4 }, 420, createjs.Ease.quadOut)
+            .to({ alpha: 0.6 }, 380, createjs.Ease.quadIn);
+    }
+
+    if (feedbackIconHalo) {
+        createjs.Tween.removeTweens(feedbackIconHalo);
+        feedbackIconHalo.alpha = 0.8;
+        feedbackIconHalo.scaleX = feedbackIconHalo.scaleY = 1;
+        createjs.Tween.get(feedbackIconHalo, { override: true })
+            .to({ alpha: 0.45, scaleX: 1.12, scaleY: 1.12 }, 480, createjs.Ease.quadOut)
+            .to({ alpha: 0.72, scaleX: 1, scaleY: 1 }, 420, createjs.Ease.quadIn);
+    }
+
+    if (feedbackIconShape) {
+        createjs.Tween.removeTweens(feedbackIconShape);
+        feedbackIconShape.scaleX = feedbackIconShape.scaleY = 0.86;
+        createjs.Tween.get(feedbackIconShape, { override: true })
+            .to({ scaleX: 1.08, scaleY: 1.08 }, 260, createjs.Ease.elasticOut)
+            .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.sineInOut);
+    }
+}
+
+function animateFeedbackSheen(palette) {
+    if (!feedbackSheenShape) {
+        return;
+    }
+
+    var cardWidth = 520;
+    var cardHeight = 128;
+
+    feedbackSheenShape.graphics.clear();
+    feedbackSheenShape.graphics
+        .beginLinearGradientFill([
+            applyColorAlpha(palette.sparkColor, 0),
+            applyColorAlpha(palette.sparkColor, 0.6),
+            applyColorAlpha(palette.sparkColor, 0)
+        ], [0, 0.5, 1], -60, 0, 60, 0)
+        .drawRoundRect(-60, -cardHeight, 120, cardHeight * 2, 60);
+
+    feedbackSheenShape.alpha = 0;
+    feedbackSheenShape.x = -cardWidth / 2 - 70;
+    feedbackSheenShape.y = 0;
+    feedbackSheenShape.rotation = 18;
+
+    createjs.Tween.removeTweens(feedbackSheenShape);
+    createjs.Tween.get(feedbackSheenShape, { override: true })
+        .to({ alpha: 0.65 }, 220, createjs.Ease.quadOut)
+        .to({ x: cardWidth / 2 + 70 }, 720, createjs.Ease.quadInOut)
+        .to({ alpha: 0 }, 160, createjs.Ease.quadIn);
+}
+
+function spawnFeedbackParticles(palette, isCorrect) {
+    if (!feedbackParticleLayer) {
+        return;
+    }
+
+    feedbackParticleLayer.removeAllChildren();
+
+    var colors = palette.particleColors || ["#ffffff"];
+    var burstCount = isCorrect ? 12 : 10;
+
+    for (var i = 0; i < burstCount; i++) {
+        var particle = new createjs.Shape();
+        var color = colors[i % colors.length];
+        var radius = 6 + Math.random() * 7;
+        var startX = -40 + Math.random() * 80;
+        var startY = -10 + Math.random() * 20;
+
+        if (isCorrect) {
+            particle.graphics.beginFill(color).drawPolyStar(0, 0, radius, 5, 0.5, -90);
+        } else {
+            particle.graphics
+                .beginFill(applyColorAlpha(color, 0.2))
+                .drawCircle(0, 0, radius * 0.45);
+            particle.graphics
+                .setStrokeStyle(2)
+                .beginStroke(color)
+                .drawPolyStar(0, 0, radius, 4, 0.5, -90);
+        }
+
+        particle.x = startX;
+        particle.y = startY;
+        particle.alpha = 0;
+
+        feedbackParticleLayer.addChild(particle);
+
+        var travelX = (Math.random() * (isCorrect ? 260 : 160) + 80) * (Math.random() < 0.5 ? -1 : 1);
+        var travelY = isCorrect ? -(80 + Math.random() * 110) : (40 + Math.random() * 70);
+
+        createjs.Tween.get(particle)
+            .wait(i * 30)
+            .to({ alpha: 1 }, 100)
+            .to({ x: startX + travelX, y: startY + travelY, rotation: (Math.random() * 240 - 120) }, 900 + Math.random() * 420, createjs.Ease.quadOut)
+            .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
+            .call((function (target) {
+                return function () {
+                    if (target.parent) {
+                        target.parent.removeChild(target);
+                    }
+                };
+            })(particle));
+    }
+}
+
 function showFeedbackBanner(isCorrect) {
     ensureFeedbackContainer();
 
-    var accentColor = isCorrect ? "#3EE0B8" : "#FF7B9C";
-    var gradient = isCorrect
-        ? ["rgba(16,57,54,0.95)", "rgba(21,40,86,0.95)"]
-        : ["rgba(82,22,38,0.95)", "rgba(41,23,61,0.95)"];
+    var palette = getFeedbackPalette(isCorrect);
+    var cardWidth = 520;
+    var cardHeight = 128;
+    var halfWidth = cardWidth / 2;
+    var halfHeight = cardHeight / 2;
+    var cornerRadius = 36;
 
     feedbackBackgroundShape.graphics
         .clear()
-        .beginLinearGradientFill(gradient, [0, 1], -240, 0, 240, 0)
-        .drawRoundRect(-240, -50, 480, 100, 28);
+        .beginLinearGradientFill(palette.cardGradient, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+        .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+    feedbackOverlayShape.graphics
+        .clear()
+        .beginLinearGradientFill(palette.overlayGradient, [0, 1], -halfWidth, -halfHeight, halfWidth, -halfHeight / 4)
+        .drawRoundRectComplex(
+            -halfWidth,
+            -halfHeight,
+            cardWidth,
+            cardHeight * 0.55,
+            cornerRadius,
+            cornerRadius,
+            Math.max(cornerRadius * 0.5, 16),
+            Math.max(cornerRadius * 0.5, 16)
+        );
+
+    feedbackOutlineShape.graphics
+        .clear()
+        .setStrokeStyle(2)
+        .beginStroke(palette.outline)
+        .drawRoundRect(-halfWidth, -halfHeight, cardWidth, cardHeight, cornerRadius);
+
+    var accentRadius = 36;
+    feedbackIconHalo.graphics
+        .clear()
+        .beginRadialGradientFill([
+            applyColorAlpha(palette.accentHalo, 0.9),
+            applyColorAlpha(palette.accentHalo, 0)
+        ], [0, 1], 0, 0, 0, 0, 0, accentRadius * 1.6)
+        .drawCircle(0, 0, accentRadius * 1.6);
+
+    feedbackAccentGlow.graphics
+        .clear()
+        .beginRadialGradientFill([
+            applyColorAlpha(palette.accentGradient[0], 0.85),
+            applyColorAlpha(palette.accentGradient[0], 0)
+        ], [0, 1], 0, 0, 0, 0, 0, accentRadius * 1.2)
+        .drawCircle(0, 0, accentRadius * 1.2);
+
+    feedbackPulseRing.graphics
+        .clear()
+        .setStrokeStyle(3)
+        .beginStroke(palette.pulseRing)
+        .drawCircle(0, 0, accentRadius + 6);
+    feedbackPulseRing.alpha = 0;
 
     feedbackAccentBg.graphics
         .clear()
-        .beginLinearGradientFill([accentColor, "rgba(255,255,255,0.2)"] , [0, 1], -30, -30, 30, 30)
-        .drawCircle(0, 0, 28);
+        .beginLinearGradientFill(palette.accentGradient, [0, 1], -accentRadius, -accentRadius, accentRadius, accentRadius)
+        .drawCircle(0, 0, accentRadius);
 
-    feedbackAccentGlow.alpha = isCorrect ? 0.4 : 0.45;
+    var backdropColor = palette.iconBackdrop || palette.accentGradient[0];
+    feedbackIconBackdrop.graphics
+        .clear()
+        .beginRadialGradientFill([
+            applyColorAlpha(backdropColor, 0.95),
+            applyColorAlpha(backdropColor, 0.15)
+        ], [0, 1], 0, 0, 0, 0, 0, accentRadius * 0.72)
+        .drawCircle(0, 0, accentRadius * 0.72);
 
     feedbackIconShape.graphics.clear();
-    feedbackIconShape.graphics.setStrokeStyle(5, "round").beginStroke("#ffffff");
+    feedbackIconShape.graphics.setStrokeStyle(6, "round").beginStroke(palette.iconStroke);
     if (isCorrect) {
-        feedbackIconShape.graphics.moveTo(-10, 0).lineTo(-2, 10).lineTo(16, -12);
+        feedbackIconShape.graphics.moveTo(-10, 4).lineTo(-2, 14).lineTo(18, -14);
     } else {
         feedbackIconShape.graphics.moveTo(-12, -12).lineTo(12, 12);
         feedbackIconShape.graphics.moveTo(12, -12).lineTo(-12, 12);
     }
+    feedbackIconShape.shadow = new createjs.Shadow(applyColorAlpha(palette.iconStroke, 0.35), 0, 6, 14);
+
+    feedbackTitleTxt.color = palette.titleColor;
+    feedbackMessageTxt.color = palette.messageColor;
 
     var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? correctAnswer.toUpperCase() : "";
     if (isCorrect) {
-        feedbackTitleTxt.text = "Great job!";
-        feedbackMessageTxt.text = answerText ? "You formed \"" + answerText + "\" correctly." : "That was a perfect match.";
-    } else {
-        feedbackTitleTxt.text = "Keep trying!";
+        feedbackTitleTxt.text = answerText ? "Brilliant match!" : "Brilliant match!";
         feedbackMessageTxt.text = answerText
-            ? "The word was \"" + answerText + "\". Give the next one a go!"
-            : "Take a breath and try the next one.";
+            ? "\"" + answerText + "\" locked in perfectly. Keep that momentum!"
+            : "Everything clicked beautifully—ride the streak!";
+    } else {
+        feedbackTitleTxt.text = "Almost there!";
+        feedbackMessageTxt.text = answerText
+            ? "The answer was \"" + answerText + "\". Shake it off and take on the next one!"
+            : "Take a breath, reset, and crush the next puzzle.";
     }
+
+    feedbackParticleLayer.removeAllChildren();
 
     feedbackContainer.visible = true;
     feedbackContainer.alpha = 0;
-    feedbackContainer.y = 240;
+    feedbackContainer.scaleX = feedbackContainer.scaleY = 0.92;
+    feedbackContainer.y = 260;
 
     createjs.Tween.removeTweens(feedbackContainer);
-    createjs.Tween.get(feedbackContainer)
-        .to({ alpha: 1, y: 340 }, 240, createjs.Ease.quadOut)
-        .wait(1400)
-        .to({ alpha: 0, y: 100 }, 320, createjs.Ease.quadIn)
+    createjs.Tween.get(feedbackContainer, { override: true })
+        .to({ alpha: 1, y: 340, scaleX: 1, scaleY: 1 }, 340, createjs.Ease.backOut)
+        .wait(1600)
+        .to({ alpha: 0, y: 220, scaleX: 0.96, scaleY: 0.96 }, 360, createjs.Ease.quadIn)
         .call(function () {
             feedbackContainer.visible = false;
+            feedbackParticleLayer.removeAllChildren();
         });
 
-    feedbackAccentContainer.scaleX = feedbackAccentContainer.scaleY = 0.8;
-    createjs.Tween.get(feedbackAccentContainer, { override: true })
-        .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.elasticOut);
+    animateFeedbackAccent(palette, isCorrect);
+    animateFeedbackSheen(palette);
+    spawnFeedbackParticles(palette, isCorrect);
 }
 function getValidation(aStr) {
 
