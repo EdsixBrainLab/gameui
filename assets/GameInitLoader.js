@@ -1120,6 +1120,8 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var baseHorizontalMarginRatio = 22 / 1280;
     var baseTopMarginRatio = 16 / 720;
 
+    var titleBottomEdge = 0;
+
     if (typeof Title !== "undefined" && Title) {
         var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
             ? Title.__layoutHalfHeight
@@ -1129,6 +1131,47 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
         Title.__layoutTargetY = Title.y;
+
+        titleBottomEdge = Title.y + titleHalfHeight;
+    }
+
+    if (!titleBottomEdge && typeof Title !== "undefined" && Title) {
+        var fallbackHalf = typeof Title.__layoutHalfHeight === "number" ? Title.__layoutHalfHeight : 38;
+        var fallbackY = typeof Title.__layoutTargetY === "number" ? Title.__layoutTargetY : Title.y || 0;
+        titleBottomEdge = fallbackY + fallbackHalf;
+    }
+
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        var measuredPromptHeight = 0;
+
+        if (typeof QusTxtString.getMeasuredHeight === "function") {
+            measuredPromptHeight = QusTxtString.getMeasuredHeight() || 0;
+        }
+
+        if (!measuredPromptHeight) {
+            var promptLineHeight = QusTxtString.lineHeight;
+
+            if (!promptLineHeight && typeof QusTxtString.getMeasuredLineHeight === "function") {
+                promptLineHeight = QusTxtString.getMeasuredLineHeight();
+            }
+
+            measuredPromptHeight = promptLineHeight || 34;
+        }
+
+        var promptHalfHeight = measuredPromptHeight / 2;
+        var promptSpacing = Math.max(stageHeight * 0.035, 48);
+        var promptMinY = promptHalfHeight + Math.max(safeMargin * 0.35, 74);
+        var promptBaseline = titleBottomEdge
+            ? titleBottomEdge + promptSpacing + promptHalfHeight
+            : stageHeight * 0.24 + promptHalfHeight;
+
+        QusTxtString.x = stageWidth / 2;
+        QusTxtString.y = Math.max(promptBaseline, promptMinY);
+        QusTxtString.__layoutHalfHeight = promptHalfHeight;
+
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
+            QusTxtString.__labelBG.refresh();
+        }
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
