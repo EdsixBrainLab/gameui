@@ -1120,15 +1120,72 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
     var baseHorizontalMarginRatio = 22 / 1280;
     var baseTopMarginRatio = 16 / 720;
 
+    var titleBottomEdge = 0;
+
     if (typeof Title !== "undefined" && Title) {
         var titleHalfHeight = typeof Title.__layoutHalfHeight === "number"
             ? Title.__layoutHalfHeight
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
         var topMargin = stageHeight * baseTopMarginRatio;
-        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.2, 52);
+        var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 44);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+        var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
+        var titleLift = Math.min(
+            Math.max(Title.y - titleSafeTop, 0),
+            stageHeight * 0.025
+        );
+        if (titleLift > 0) {
+            Title.y -= titleLift;
+        }
         Title.__layoutTargetY = Title.y;
+
+        titleBottomEdge = Title.y + titleHalfHeight;
+    }
+
+    if (!titleBottomEdge && typeof Title !== "undefined" && Title) {
+        var fallbackHalf = typeof Title.__layoutHalfHeight === "number" ? Title.__layoutHalfHeight : 38;
+        var fallbackY = typeof Title.__layoutTargetY === "number" ? Title.__layoutTargetY : Title.y || 0;
+        titleBottomEdge = fallbackY + fallbackHalf;
+    }
+
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        var measuredPromptHeight = 0;
+
+        if (typeof QusTxtString.getMeasuredHeight === "function") {
+            measuredPromptHeight = QusTxtString.getMeasuredHeight() || 0;
+        }
+
+        if (!measuredPromptHeight) {
+            var promptLineHeight = QusTxtString.lineHeight;
+
+            if (!promptLineHeight && typeof QusTxtString.getMeasuredLineHeight === "function") {
+                promptLineHeight = QusTxtString.getMeasuredLineHeight();
+            }
+
+            measuredPromptHeight = promptLineHeight || 34;
+        }
+
+        var promptHalfHeight = measuredPromptHeight / 2;
+        var promptSpacing = Math.max(stageHeight * 0.028, 40);
+        var promptMinY = promptHalfHeight + Math.max(safeMargin * 0.28, 60);
+        var promptBaseline = titleBottomEdge
+            ? titleBottomEdge + promptSpacing + promptHalfHeight
+            : stageHeight * 0.24 + promptHalfHeight;
+
+        QusTxtString.x = stageWidth / 2;
+        var promptTargetY = Math.max(promptBaseline, promptMinY);
+        var promptLift = Math.min(
+            Math.max(promptTargetY - promptMinY, 0),
+            stageHeight * 0.04
+        );
+        QusTxtString.y = promptTargetY - promptLift;
+        QusTxtString.__layoutHalfHeight = promptHalfHeight;
+
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
+            QusTxtString.__labelBG.refresh();
+        }
     }
 
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
@@ -1999,13 +2056,42 @@ function doneLoading(event) {
                     .split("LEVEL")[0]
                     .trim();
 
-                var titleLabel = new createjs.Text(formattedTitle, "800 44px 'Baloo 2'", "#F9F7FF");
-                titleLabel.textAlign = "left";
-                titleLabel.textBaseline = "middle";
-                titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+                var fontFamily = "'Baloo 2'";
+                var fontWeight = "800";
+                var badgePadding = 200;
+                var minBadgeWidth = 360;
+                var maxBadgeWidth = 640;
+                var fontSizes = [44, 40, 36, 32, 28];
+                var titleLabel;
 
-                var badgeWidth = Math.max(360, titleLabel.getMeasuredWidth() + 200);
-                var badgeHeight = 86;
+                for (var sizeIndex = 0; sizeIndex < fontSizes.length; sizeIndex++) {
+                    var fontSize = fontSizes[sizeIndex];
+                    titleLabel = new createjs.Text(
+                        formattedTitle,
+                        fontWeight + " " + fontSize + "px " + fontFamily,
+                        "#F9F7FF"
+                    );
+                    titleLabel.textAlign = "left";
+                    titleLabel.textBaseline = "middle";
+                    titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+
+                    if (
+                        titleLabel.getMeasuredWidth() + badgePadding <= maxBadgeWidth ||
+                        sizeIndex === fontSizes.length - 1
+                    ) {
+                        break;
+                    }
+                }
+
+                var measuredTitleWidth = titleLabel.getMeasuredWidth();
+                var badgeWidth = Math.max(
+                    minBadgeWidth,
+                    Math.min(maxBadgeWidth, measuredTitleWidth + badgePadding)
+                );
+
+                titleLabel.lineWidth = badgeWidth - 180;
+                var textHeight = titleLabel.getMeasuredHeight();
+                var badgeHeight = Math.max(86, Math.round(textHeight + 48));
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
