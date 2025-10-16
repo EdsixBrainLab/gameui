@@ -187,6 +187,44 @@ function highlightIntroClueTarget(index) {
         .to({ scaleX: baseScale, scaleY: baseScale }, 200, createjs.Ease.quadOut);
 }
 
+function getFallbackChoiceBuilder() {
+    var txt = new createjs.Text("", "700 64px 'Nunito Sans'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.mouseEnabled = true;
+    txt.mouseChildren = false;
+    txt.__baseScale = 0.8;
+    return txt;
+}
+
+function getFallbackClueBuilder() {
+    var txt = new createjs.Text("", "700 60px 'Nunito Sans'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 1;
+    return txt;
+}
+
+function getFallbackLetterUpdater() {
+    return function (display, letter) {
+        if (!display) {
+            return;
+        }
+        var value = letter ? String(letter).toUpperCase() : "";
+        display.text = value;
+        display.alpha = value ? 1 : 0;
+    };
+}
+
+var buildIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_buildChoiceLetterDisplay === "function" && window.SA_buildChoiceLetterDisplay) || getFallbackChoiceBuilder;
+var updateIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_updateChoiceLetterDisplay === "function" && window.SA_updateChoiceLetterDisplay) || getFallbackLetterUpdater();
+var buildIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_buildClueLetterDisplay === "function" && window.SA_buildClueLetterDisplay) || getFallbackClueBuilder;
+var updateIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_updateClueLetterDisplay === "function" && window.SA_updateClueLetterDisplay) || getFallbackLetterUpdater();
+
 
 function commongameintro() {
     introClueArr = [];
