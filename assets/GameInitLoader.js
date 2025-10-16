@@ -2843,8 +2843,8 @@ function createHowToPlayInstructions() {
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(
-            ["rgba(34, 25, 76, 0.95)", "rgba(52, 30, 103, 0.9)", "rgba(71, 40, 129, 0.88)"],
-            [0, 0.5, 1],
+            ["rgba(18, 10, 52, 0.95)", "rgba(31, 16, 82, 0.93)", "rgba(50, 22, 116, 0.9)"],
+            [0, 0.55, 1],
             0,
             0,
             0,
@@ -2861,7 +2861,7 @@ function createHowToPlayInstructions() {
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(147, 121, 255, 0.55)")
+        .beginStroke("rgba(178, 148, 255, 0.5)")
         .drawRoundRect(0, 0, 648, 292, 42);
     cardStroke.regX = 324;
     cardStroke.regY = 146;
@@ -2873,11 +2873,11 @@ function createHowToPlayInstructions() {
     glow.graphics
         .beginRadialGradientFill(
             [
-                "rgba(111, 82, 220, 0.46)",
-                "rgba(83, 132, 255, 0.3)",
-                "rgba(50, 34, 109, 0)"
+                "rgba(118, 83, 224, 0.5)",
+                "rgba(255, 124, 224, 0.28)",
+                "rgba(46, 24, 110, 0)"
             ],
-            [0, 0.55, 1],
+            [0, 0.6, 1],
             324,
             146,
             0,
@@ -2886,7 +2886,7 @@ function createHowToPlayInstructions() {
             320
         )
         .drawEllipse(-90, -60, 800, 360);
-    glow.alpha = 0.6;
+    glow.alpha = 0.68;
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
@@ -2894,15 +2894,15 @@ function createHowToPlayInstructions() {
     var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0.55)", "rgba(224, 212, 255, 0.32)", "rgba(183, 175, 255, 0)"],
+            ["rgba(255, 255, 255, 0.72)", "rgba(224, 210, 255, 0.3)", "rgba(183, 175, 255, 0)"],
             [0, 0.65, 1],
             36,
             28,
             612,
             120
         )
-        .drawRoundRect(24, 24, 600, 48, 20);
-    highlight.alpha = 0.82;
+        .drawRoundRect(24, 24, 600, 52, 22);
+    highlight.alpha = 0.78;
     container.addChild(highlight);
     container.glassHighlight = highlight;
 
@@ -2910,6 +2910,15 @@ function createHowToPlayInstructions() {
     title.x = 46;
     title.y = 38;
     container.addChild(title);
+
+    var subtitle = new createjs.Text(
+        "Follow these quick tips before you start",
+        "500 18px 'Baloo 2'",
+        "rgba(219, 212, 255, 0.88)"
+    );
+    subtitle.x = 46;
+    subtitle.y = 76;
+    container.addChild(subtitle);
 
     var steps = [
         "Review the How to Play tips carefully.",
@@ -2919,7 +2928,7 @@ function createHowToPlayInstructions() {
     ];
 
     for (var i = 0; i < steps.length; i++) {
-        var itemY = 100 + i * 46;
+        var itemY = 116 + i * 46;
 
         var badge = new createjs.Shape();
         badge.graphics
@@ -2927,7 +2936,7 @@ function createHowToPlayInstructions() {
             .drawCircle(0, 0, 22);
         badge.x = 68;
         badge.y = itemY;
-        badge.alpha = 0.9;
+        badge.alpha = 0.95;
         container.addChild(badge);
 
         var badgeText = new createjs.Text((i + 1).toString(), "700 20px 'Baloo 2'", "#FFFFFF");
@@ -2946,7 +2955,7 @@ function createHowToPlayInstructions() {
 
         if (i < steps.length - 1) {
             var divider = new createjs.Shape();
-            divider.graphics.beginFill("rgba(103, 86, 178, 0.55)").drawRoundRect(114, itemY + 18, 484, 2, 1);
+            divider.graphics.beginFill("rgba(103, 86, 178, 0.45)").drawRoundRect(114, itemY + 18, 484, 2, 1);
             container.addChild(divider);
         }
     }
@@ -2988,7 +2997,7 @@ function createHowToPlayHeader() {
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
-            ["rgba(103, 142, 255, 0.35)", "rgba(167, 105, 255, 0.2)", "rgba(68, 53, 143, 0)"],
+            ["rgba(118, 77, 255, 0.42)", "rgba(255, 122, 214, 0.22)", "rgba(54, 30, 122, 0)"],
             [0, 0.6, 1],
             0,
             0,
@@ -2998,7 +3007,7 @@ function createHowToPlayHeader() {
             260
         )
         .drawCircle(0, 0, 240);
-    glow.alpha = 0.78;
+    glow.alpha = 0.82;
     glow.x = 252;
     glow.y = 60;
     glow.compositeOperation = "lighter";
@@ -3008,15 +3017,15 @@ function createHowToPlayHeader() {
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(
-            ["rgba(38, 27, 84, 0.95)", "rgba(61, 34, 115, 0.92)", "rgba(86, 42, 143, 0.9)"],
-            [0, 0.5, 1],
+            ["rgba(22, 12, 56, 0.96)", "rgba(38, 18, 88, 0.94)", "rgba(57, 30, 126, 0.92)"],
+            [0, 0.45, 1],
             0,
             0,
             520,
             0
         )
         .drawRoundRect(0, 0, 520, 120, 42);
-    card.shadow = new createjs.Shadow("rgba(7, 9, 26, 0.52)", 0, 24, 46);
+    card.shadow = new createjs.Shadow("rgba(9, 12, 36, 0.55)", 0, 28, 48);
     container.addChild(card);
     container.cardShape = card;
     container.cardWidth = 520;
@@ -3024,7 +3033,7 @@ function createHowToPlayHeader() {
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(143, 123, 255, 0.52)")
+        .beginStroke("rgba(168, 136, 255, 0.55)")
         .drawRoundRect(1, 1, 518, 118, 40);
     container.addChild(cardStroke);
 
@@ -3038,7 +3047,7 @@ function createHowToPlayHeader() {
         .beginLinearGradientFill(
             [
                 "rgba(255, 255, 255, 0)",
-                "rgba(255, 255, 255, 0.55)",
+                "rgba(255, 246, 255, 0.65)",
                 "rgba(255, 255, 255, 0)"
             ],
             [0, 0.5, 1],
@@ -3053,6 +3062,7 @@ function createHowToPlayHeader() {
     animatedHighlight.y = -12;
     animatedHighlight.mask = highlightMask;
     animatedHighlight.compositeOperation = "lighter";
+    animatedHighlight.baseX = -160;
     container.addChild(animatedHighlight);
     container.highlightSweep = animatedHighlight;
 
@@ -3125,8 +3135,8 @@ function createHowToPlayProgressBar() {
     var frame = new createjs.Shape();
     frame.graphics
         .beginLinearGradientFill(
-            ["rgba(33, 24, 80, 0.95)", "rgba(55, 30, 108, 0.92)", "rgba(76, 40, 132, 0.9)"],
-            [0, 0.5, 1],
+            ["rgba(20, 12, 60, 0.95)", "rgba(33, 17, 84, 0.93)", "rgba(50, 26, 118, 0.9)"],
+            [0, 0.55, 1],
             0,
             0,
             0,
@@ -3139,17 +3149,17 @@ function createHowToPlayProgressBar() {
     var frameStroke = new createjs.Shape();
     frameStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(140, 118, 246, 0.45)")
+        .beginStroke("rgba(178, 148, 255, 0.45)")
         .drawRoundRect(1, 1, 646, 106, 32);
     container.addChild(frameStroke);
 
-    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "rgba(221, 212, 255, 0.85)");
+    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "rgba(223, 214, 255, 0.9)");
     status.x = 48;
     status.y = 26;
     status.lineWidth = 432;
     container.addChild(status);
 
-    var percent = new createjs.Text("0%", "700 32px 'Baloo 2'", "#ff8bd8");
+    var percent = new createjs.Text("0%", "700 32px 'Baloo 2'", "#ff96e0");
     percent.textAlign = "right";
     percent.x = 600;
     percent.y = 22;
@@ -3158,8 +3168,8 @@ function createHowToPlayProgressBar() {
     var track = new createjs.Shape();
     track.graphics
         .beginLinearGradientFill(
-            ["rgba(63, 52, 138, 0.55)", "rgba(90, 60, 162, 0.45)", "rgba(117, 69, 184, 0.45)"],
-            [0, 0.5, 1],
+            ["rgba(66, 45, 142, 0.55)", "rgba(95, 57, 170, 0.45)", "rgba(125, 69, 195, 0.45)"],
+            [0, 0.55, 1],
             0,
             0,
             560,
@@ -3174,8 +3184,8 @@ function createHowToPlayProgressBar() {
     glow.graphics
         .beginRadialGradientFill(
             [
-                "rgba(110, 90, 210, 0.45)",
-                "rgba(110, 90, 210, 0)"
+                "rgba(118, 83, 224, 0.42)",
+                "rgba(118, 83, 224, 0)"
             ],
             [0, 1],
             324,
@@ -3202,7 +3212,7 @@ function createHowToPlayProgressBar() {
 
     var fill = new createjs.Shape();
     fill.graphics
-        .beginLinearGradientFill(["#8d6aff", "#c061ff", "#ff84d6"], [0, 0.55, 1], 0, 0, 560, 0)
+        .beginLinearGradientFill(["#7e6bff", "#b366ff", "#ff8fe2"], [0, 0.55, 1], 0, 0, 560, 0)
         .drawRoundRect(0, 0, 560, 20, 12);
     fillContainer.addChild(fill);
 
@@ -3228,7 +3238,7 @@ function createHowToPlayProgressBar() {
 
     var shine = new createjs.Shape();
     shine.graphics
-        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(249, 231, 255, 0.9)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 220, 0)
+        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(248, 234, 255, 0.9)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 220, 0)
         .drawRect(-110, -12, 220, 40);
     shine.alpha = 0;
     shine.compositeOperation = "lighter";
@@ -3547,8 +3557,11 @@ function startHowToPlayHeaderIdleAnimation(header) {
         var travelStart = -160;
         var travelEnd = header.cardWidth + 160;
 
+        createjs.Tween.removeTweens(sweep);
+        sweep.baseX = travelStart;
         sweep.x = travelStart;
         sweep.alpha = 0;
+        header.__highlightSweepAttached = true;
 
         createjs.Tween.get(sweep, { loop: true })
             .to({ alpha: 0.85 }, 320, createjs.Ease.quadOut)
@@ -3560,6 +3573,26 @@ function startHowToPlayHeaderIdleAnimation(header) {
 
     if (header.tildeWave) {
         startHowToPlayTildeWaveAnimation(header.tildeWave);
+    }
+}
+
+function stopHowToPlayHeaderIdleAnimation(header) {
+    if (!header) {
+        return;
+    }
+
+    header.__idleAnimationAttached = false;
+
+    if (header.highlightSweep) {
+        createjs.Tween.removeTweens(header.highlightSweep);
+        header.highlightSweep.alpha = 0;
+        header.highlightSweep.x = typeof header.highlightSweep.baseX === "number" ? header.highlightSweep.baseX : -160;
+        header.__highlightSweepAttached = false;
+    }
+
+    if (header.tildeWave) {
+        stopHowToPlayTildeWaveAnimation(header.tildeWave);
+        header.tildeWave.visible = false;
     }
 }
 
@@ -3661,6 +3694,14 @@ function resetHowToPlayWaveStates(overlay) {
         }
     }
 
+    if (overlay.header && overlay.header.highlightSweep) {
+        var headerHighlight = overlay.header.highlightSweep;
+        createjs.Tween.removeTweens(headerHighlight);
+        headerHighlight.alpha = 0;
+        headerHighlight.x = typeof headerHighlight.baseX === "number" ? headerHighlight.baseX : -160;
+        overlay.header.__highlightSweepAttached = false;
+    }
+
     if (overlay.proceedButton && overlay.proceedButton.tildeWave) {
         var buttonWave = overlay.proceedButton.tildeWave;
         stopHowToPlayTildeWaveAnimation(buttonWave);
@@ -3708,7 +3749,7 @@ function createLoaderProceedButton() {
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
-            ["rgba(255, 210, 176, 0.55)", "rgba(246, 107, 198, 0.28)", "rgba(108, 107, 255, 0)"],
+            ["rgba(255, 184, 226, 0.6)", "rgba(129, 119, 255, 0.32)", "rgba(72, 59, 170, 0)"],
             [0, 0.6, 1],
             0,
             0,
@@ -3718,23 +3759,47 @@ function createLoaderProceedButton() {
             160
         )
         .drawCircle(0, 0, 160);
-    glow.alpha = 0.75;
+    glow.alpha = 0.78;
     glow.compositeOperation = "lighter";
     button.addChild(glow);
+    button.glowShape = glow;
 
     var frame = new createjs.Shape();
     frame.graphics
-        .beginLinearGradientFill(["#6c79ff", "#a369ff", "#ff88d8"], [0, 0.5, 1], -118, 0, 118, 0)
+        .beginLinearGradientFill(["#6f6eff", "#a566ff", "#ff8fe0"], [0, 0.5, 1], -118, 0, 118, 0)
         .drawRoundRect(-112, -36, 224, 72, 26);
     frame.shadow = new createjs.Shadow("rgba(6, 8, 24, 0.45)", 0, 20, 36);
     button.addChild(frame);
 
-    
+    var highlightMask = new createjs.Shape();
+    highlightMask.graphics.drawRoundRect(-112, -36, 224, 72, 26);
+    highlightMask.visible = false;
+    button.addChild(highlightMask);
 
- 
-	var tildeWave = createHowToPlayTildeWave(260, 16);
-    tildeWave.x = 186;
-    tildeWave.y = 94;
+    var highlight = new createjs.Shape();
+    highlight.graphics
+        .beginLinearGradientFill(
+            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.85)", "rgba(255, 255, 255, 0)"],
+            [0, 0.5, 1],
+            -72,
+            0,
+            72,
+            0
+        )
+        .drawRoundRect(-72, -40, 144, 80, 26);
+    highlight.alpha = 0;
+    highlight.mask = highlightMask;
+    highlight.compositeOperation = "lighter";
+    highlight.x = -140;
+    highlight.baseX = -140;
+    button.addChild(highlight);
+    button.highlightSweep = highlight;
+    button.highlightMask = highlightMask;
+
+    var tildeWave = createHowToPlayTildeWave(200, 14);
+    tildeWave.x = 0;
+    tildeWave.y = 0;
+    tildeWave.visible = false;
     button.addChild(tildeWave);
     button.tildeWave = tildeWave;
 
@@ -3752,8 +3817,7 @@ function createLoaderProceedButton() {
     button.addChild(label);
 
     button.cursor = "pointer";
-    button.glowShape = null;
- 
+
     return button;
 }
 
@@ -4142,6 +4206,10 @@ function showLoaderProceedButton() {
         return;
     }
 
+    if (HowToPlayScreenImg.header) {
+        stopHowToPlayHeaderIdleAnimation(HowToPlayScreenImg.header);
+    }
+
     var button = HowToPlayScreenImg.proceedButton;
     attachProceedButtonListeners(button);
     button.visible = true;
@@ -4156,6 +4224,7 @@ function showLoaderProceedButton() {
 
     createjs.Tween.removeTweens(button);
     button.__pulseTweenAttached = false;
+    button.__highlightSweepAttached = false;
 
     if (button.glowShape) {
         createjs.Tween.removeTweens(button.glowShape);
@@ -4164,15 +4233,17 @@ function showLoaderProceedButton() {
         button.glowShape.__glowTweenAttached = false;
     }
 
-    if (button.highlightShape) {
-        createjs.Tween.removeTweens(button.highlightShape);
-        button.highlightShape.alpha = 0.7;
-        button.highlightShape.y = -6;
-        button.highlightShape.__glimmerTweenAttached = false;
+    if (button.highlightSweep) {
+        createjs.Tween.removeTweens(button.highlightSweep);
+        button.highlightSweep.alpha = 0;
+        button.highlightSweep.x = typeof button.highlightSweep.baseX === "number" ? button.highlightSweep.baseX : -140;
     }
 
     if (button.tildeWave) {
         button.tildeWave.visible = howToPlayWaveTransferred;
+        if (button.tildeWave.visible) {
+            startHowToPlayTildeWaveAnimation(button.tildeWave);
+        }
     }
 
     createjs.Tween.get(button, { override: true })
@@ -4180,6 +4251,7 @@ function showLoaderProceedButton() {
         .call(function () {
             startProceedButtonPulse(button);
             startProceedButtonGlow(button);
+            startProceedButtonHighlightSweep(button);
         });
 
     // Ensure the control is visible even if tweens do not advance (e.g., paused tickers)
@@ -4231,9 +4303,11 @@ function hideLoaderProceedButton() {
         createjs.Tween.removeTweens(button.glowShape);
         button.glowShape.__glowTweenAttached = false;
     }
-    if (button.highlightShape) {
-        createjs.Tween.removeTweens(button.highlightShape);
-        button.highlightShape.__glimmerTweenAttached = false;
+    if (button.highlightSweep) {
+        createjs.Tween.removeTweens(button.highlightSweep);
+        button.highlightSweep.alpha = 0;
+        button.highlightSweep.x = typeof button.highlightSweep.baseX === "number" ? button.highlightSweep.baseX : -140;
+        button.__highlightSweepAttached = false;
     }
     button.alpha = 0;
     button.scaleX = button.scaleY = 0.92;
@@ -4275,13 +4349,29 @@ function startProceedButtonGlow(button) {
             .to({ alpha: 0.65, scaleX: 1, scaleY: 1 }, 560, createjs.Ease.quadIn);
     }
 
-    var highlight = button.highlightShape;
-    if (highlight && !highlight.__glimmerTweenAttached) {
-        highlight.__glimmerTweenAttached = true;
-        createjs.Tween.get(highlight, { loop: true })
-            .to({ alpha: 0.85, y: -4 }, 420, createjs.Ease.quadOut)
-            .to({ alpha: 0.6, y: -6 }, 420, createjs.Ease.quadIn);
+}
+
+function startProceedButtonHighlightSweep(button) {
+    if (!button || !button.highlightSweep || button.__highlightSweepAttached) {
+        return;
     }
+
+    var sweep = button.highlightSweep;
+    var startX = typeof sweep.baseX === "number" ? sweep.baseX : -140;
+    var endX = 140;
+
+    createjs.Tween.removeTweens(sweep);
+    sweep.x = startX;
+    sweep.alpha = 0;
+
+    button.__highlightSweepAttached = true;
+
+    createjs.Tween.get(sweep, { loop: true })
+        .to({ alpha: 0.9 }, 280, createjs.Ease.quadOut)
+        .to({ x: endX }, 1280, createjs.Ease.quadInOut)
+        .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
+        .set({ x: startX })
+        .wait(420);
 }
 
 
