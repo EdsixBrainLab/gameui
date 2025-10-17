@@ -96,7 +96,7 @@ function configureIntroFingerSprite(sprite) {
 }
 
 function getFallbackChoiceBuilder() {
-    var txt = new createjs.Text("", "700 64px 'Nunito Sans'", "#FFFFFF");
+    var txt = new createjs.Text("", "700 64px 'Baloo 2'", "#FFFFFF");
     txt.textAlign = "center";
     txt.textBaseline = "middle";
     txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
@@ -107,7 +107,7 @@ function getFallbackChoiceBuilder() {
 }
 
 function getFallbackClueBuilder() {
-    var txt = new createjs.Text("", "700 60px 'Nunito Sans'", "#FFFFFF");
+    var txt = new createjs.Text("", "700 60px 'Baloo 2'", "#FFFFFF");
     txt.textAlign = "center";
     txt.textBaseline = "middle";
     txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
