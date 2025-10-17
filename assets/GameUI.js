@@ -8,8 +8,8 @@ var ambientLayer,
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
 var QusTxtString;
 var INTRO_TITLE_Y = 75;
-var INTRO_PROMPT_Y = 184;
-var QUESTION_CARD_WIDTH = 600;
+var INTRO_PROMPT_Y = 210;
+var QUESTION_CARD_WIDTH = 720;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 
@@ -140,7 +140,24 @@ function call_UI_introQuestionCardContainer(incontainer, in_question) {
   incontainer.parent.addChild(questionCardContainer_htp);
 }
 
+  if (timeUpIconContainer) {
+    createjs.Tween.removeTweens(timeUpIconContainer);
+    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
+    createjs.Tween.get(timeUpIconContainer, { override: true })
+      .to({ scaleX: 1.08, scaleY: 1.08 }, 320, createjs.Ease.backOut)
+      .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
+  }
 
+  createjs.Tween.get(overlay)
+    .wait(1180)
+    .to({ alpha: 0 }, 240, createjs.Ease.quadIn)
+    .call(function () {
+      hideGameplayTimeUpBanner(true);
+      if (typeof onComplete === "function") {
+        onComplete();
+      }
+    });
+}
 
 function drawChoiceTileBackground(targetShape, colors) {
   if (targetShape) {
@@ -831,11 +848,17 @@ function renderQuestionCardBackground() {
 
   questionCardBackground.graphics
     .clear()
+    .setStrokeStyle(6, "round", "round")
+    .beginLinearGradientStroke(
+      ["rgba(233,222,255,0.85)", "rgba(146,122,255,0.6)"],
+      [0, 1],
+      -halfWidth,
+      -halfHeight,
+      halfWidth,
+      halfHeight
+    )
     .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
+      ["rgba(120,89,235,0.98)", "rgba(54,30,132,0.98)"],
       [0, 1],
       -halfWidth,
       -halfHeight,
@@ -847,12 +870,12 @@ function renderQuestionCardBackground() {
       -halfHeight,
       QUESTION_CARD_WIDTH,
       QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
+      QUESTION_CARD_CORNER_RADIUS + 6
     );
 
   if (questionCardHighlight) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
+    var highlightPaddingX = 32;
+    var highlightPaddingY = 26;
     var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
     var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
     var highlightHalfWidth = highlightWidth / 2;
@@ -861,7 +884,7 @@ function renderQuestionCardBackground() {
     questionCardHighlight.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+        ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.02)"],
         [0, 1],
         -highlightHalfWidth,
         -highlightHalfHeight,
@@ -873,9 +896,9 @@ function renderQuestionCardBackground() {
         -highlightHalfHeight,
         highlightWidth,
         highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
+        Math.max(QUESTION_CARD_CORNER_RADIUS - 2, 18)
       );
-    questionCardHighlight.alpha = 0.45;
+    questionCardHighlight.alpha = 0.66;
   }
 }
 
@@ -1061,6 +1084,7 @@ function emphasizeChoiceTile(index, isHover) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     var baseScale = tile && tile.__baseScale ? tile.__baseScale : tile ? tile.scaleX : 1;
     var bgBase = bg && bg.__baseScale ? bg.__baseScale : 1;
@@ -1081,11 +1105,23 @@ function emphasizeChoiceTile(index, isHover) {
       createjs.Tween.get(glow, { override: true })
         .to({ alpha: isHover ? 0.52 : 0.38 }, 160, createjs.Ease.quadOut);
     }
+
+    if (pulse) {
+      pulse.visible = true;
+      var pulseScale = pulse.__baseScale || baseScale;
+      createjs.Tween.get(pulse, { override: true })
+        .to({
+          alpha: isHover ? 0.88 : 0.7,
+          scaleX: pulseScale * (isHover ? 1.06 : 1),
+          scaleY: pulseScale * (isHover ? 1.06 : 1)
+        }, 180, createjs.Ease.quadOut);
+    }
   }
 
 function pressChoiceTile(index) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     if (tile) {
       var baseScale = tile.__baseScale || tile.scaleX;
@@ -1098,11 +1134,18 @@ function pressChoiceTile(index) {
       createjs.Tween.get(bg, { override: true })
         .to({ scaleX: bgBase * 0.96, scaleY: bgBase * 0.96, alpha: 1 }, 90, createjs.Ease.quadOut);
     }
+
+    if (pulse) {
+      var pulseScale = pulse.__baseScale || (tile ? tile.__baseScale || tile.scaleX : 1);
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0.4, scaleX: pulseScale * 0.9, scaleY: pulseScale * 0.9 }, 90, createjs.Ease.quadOut);
+    }
   }
 
 function releaseChoiceTile(index) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
+    var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
 
     if (tile) {
       var baseScale = tile.__baseScale || tile.scaleX;
@@ -1117,6 +1160,13 @@ function releaseChoiceTile(index) {
         .to({ scaleX: bgBase * 1.03, scaleY: bgBase * 1.03 }, 120, createjs.Ease.quadOut)
         .to({ scaleX: bgBase, scaleY: bgBase }, 150, createjs.Ease.quadIn);
     }
+
+    if (pulse) {
+      var pulseScale = pulse.__baseScale || (tile ? tile.__baseScale || tile.scaleX : 1);
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0.82, scaleX: pulseScale * 1.05, scaleY: pulseScale * 1.05 }, 120, createjs.Ease.quadOut)
+        .to({ alpha: 0.7, scaleX: pulseScale, scaleY: pulseScale }, 160, createjs.Ease.quadIn);
+    }
   }
 
 function markChoiceResult(index, isCorrect) {
@@ -1124,7 +1174,16 @@ function markChoiceResult(index, isCorrect) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
+    var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+    var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
     var colors = isCorrect ? CHOICE_TILE_CORRECT_COLORS : CHOICE_TILE_WRONG_COLORS;
+
+    stopChoiceIdleAnimation(index);
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
 
     if (bg) {
       drawChoiceTileBackground(bg, colors);
@@ -1151,6 +1210,17 @@ function markChoiceResult(index, isCorrect) {
         .wait(isCorrect ? 420 : 900)
         .to({ alpha: 0.38 }, 220, createjs.Ease.quadOut);
     }
+
+    if (typeof choicePulseArr !== "undefined" && choicePulseArr[index]) {
+      var pulse = choicePulseArr[index];
+      createjs.Tween.get(pulse, { override: true })
+        .to({ alpha: 0 }, 200, createjs.Ease.quadOut);
+    }
+
+    if (overlay) {
+      createjs.Tween.get(overlay, { override: true })
+        .to({ alpha: 0, visible: false }, 140);
+    }
   }
 
 function animateClueSlotFill(index, isCorrect) {
@@ -1173,50 +1243,326 @@ function animateClueSlotFill(index, isCorrect) {
   }
 
 function detachChoiceInteractions(index) {
-    var tile = choiceArr[index];
-    if (!tile) {
-      return;
-    }
-
-    if (tile.__hoverListener) {
-      tile.off("mouseover", tile.__hoverListener);
-      tile.__hoverListener = null;
-    }
-    if (tile.__outListener) {
-      tile.off("mouseout", tile.__outListener);
-      tile.__outListener = null;
-    }
-    if (tile.__downListener) {
-      tile.off("mousedown", tile.__downListener);
-      tile.__downListener = null;
-    }
-    if (tile.__upListener) {
-      tile.off("pressup", tile.__upListener);
-      tile.__upListener = null;
-    }
+  var tile = choiceMcArr && choiceMcArr[index] ? choiceMcArr[index] : choiceArr[index];
+  if (!tile) {
+    return;
   }
+
+  if (tile.__hoverListener) {
+    tile.off("mouseover", tile.__hoverListener);
+    tile.__hoverListener = null;
+  }
+  if (tile.__outListener) {
+    tile.off("mouseout", tile.__outListener);
+    tile.__outListener = null;
+  }
+  if (tile.__downListener) {
+    tile.off("mousedown", tile.__downListener);
+    tile.__downListener = null;
+  }
+  if (tile.__upListener) {
+    tile.off("pressup", tile.__upListener);
+    tile.__upListener = null;
+  }
+}
 
 function attachChoiceInteractions(index) {
-    var tile = choiceArr[index];
-    if (!tile) {
-      return;
-    }
-
-    detachChoiceInteractions(index);
-
-    tile.__hoverListener = tile.on("mouseover", function () {
-      emphasizeChoiceTile(index, true);
-    });
-    tile.__outListener = tile.on("mouseout", function () {
-      emphasizeChoiceTile(index, false);
-    });
-    tile.__downListener = tile.on("mousedown", function () {
-      pressChoiceTile(index);
-    });
-    tile.__upListener = tile.on("pressup", function () {
-      releaseChoiceTile(index);
-    });
+  var tile = choiceMcArr && choiceMcArr[index] ? choiceMcArr[index] : choiceArr[index];
+  if (!tile) {
+    return;
   }
+
+  detachChoiceInteractions(index);
+
+  tile.__hoverListener = tile.on("mouseover", function () {
+    stopChoiceIdleAnimation(index);
+    emphasizeChoiceTile(index, true);
+  });
+  tile.__outListener = tile.on("mouseout", function () {
+    emphasizeChoiceTile(index, false);
+    var resumeTarget = choiceArr[index];
+    if (resumeTarget) {
+      createjs.Tween.get(resumeTarget, { override: false })
+        .wait(200)
+        .call(function () {
+          startChoiceIdleAnimation(index, true);
+        });
+    } else {
+      startChoiceIdleAnimation(index, true);
+    }
+  });
+  tile.__downListener = tile.on("mousedown", function () {
+    pressChoiceTile(index);
+  });
+  tile.__upListener = tile.on("pressup", function () {
+    releaseChoiceTile(index);
+  });
+}
+
+function startChoiceIdleAnimation(index, force) {
+  if (typeof index !== "number" || index < 0) {
+    return;
+  }
+
+  if (!force && choiceIdleStates[index]) {
+    return;
+  }
+
+  var label = choiceArr[index];
+  if (!label) {
+    return;
+  }
+
+  if (force) {
+    stopChoiceIdleAnimation(index);
+  }
+
+  var baseScale = label.__baseScale || label.scaleX || 1;
+  label.scaleX = baseScale;
+  label.scaleY = baseScale;
+
+  var idleLabelTween = createjs.Tween.get(label, { loop: true, override: false })
+    .to({ scaleX: baseScale * 1.02, scaleY: baseScale * 0.98 }, 340, createjs.Ease.sineInOut)
+    .to({ scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.sineInOut);
+  label.__idleTween = idleLabelTween;
+
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  if (pulse) {
+    var pulseScale = pulse.__baseScale || baseScale;
+    pulse.visible = true;
+    pulse.alpha = pulse.alpha && pulse.alpha > 0 ? pulse.alpha : 0.7;
+    pulse.scaleX = pulseScale;
+    pulse.scaleY = pulseScale;
+    pulse.__idleTween = createjs.Tween.get(pulse, { loop: true, override: false })
+      .to({ scaleX: pulseScale * 1.1, scaleY: pulseScale * 1.1, alpha: 0.86 }, 520, createjs.Ease.sineOut)
+      .to({ scaleX: pulseScale * 0.92, scaleY: pulseScale * 0.92, alpha: 0.5 }, 460, createjs.Ease.sineIn);
+  }
+
+  var glow = choiceGlowArr[index];
+  if (glow) {
+    var glowTargetScale = glow.__targetScale || (baseScale * 1.3);
+    glow.scaleX = glow.scaleY = glowTargetScale;
+    var baseAlpha = glow.alpha && glow.alpha > 0 ? glow.alpha : 0.38;
+    glow.alpha = baseAlpha;
+    glow.__idleTween = createjs.Tween.get(glow, { loop: true, override: false })
+      .to({ alpha: Math.min(0.54, baseAlpha + 0.14) }, 520, createjs.Ease.sineInOut)
+      .to({ alpha: baseAlpha }, 480, createjs.Ease.sineInOut);
+  }
+
+  choiceIdleStates[index] = true;
+}
+
+function stopChoiceIdleAnimation(index) {
+  if (typeof index !== "number" || index < 0) {
+    return;
+  }
+
+  choiceIdleStates[index] = false;
+
+  var label = choiceArr[index];
+  if (label) {
+    createjs.Tween.removeTweens(label);
+    var baseScale = label.__baseScale || label.scaleX || 1;
+    label.scaleX = baseScale;
+    label.scaleY = baseScale;
+    label.__idleTween = null;
+  }
+
+  var glow = choiceGlowArr[index];
+  if (glow) {
+    createjs.Tween.removeTweens(glow);
+    glow.alpha = 0.38;
+    glow.__idleTween = null;
+  }
+
+  if (typeof choicePulseArr !== "undefined" && choicePulseArr[index]) {
+    var pulse = choicePulseArr[index];
+    createjs.Tween.removeTweens(pulse);
+    pulse.visible = false;
+    pulse.alpha = 0;
+    pulse.__idleTween = null;
+  }
+
+  if (typeof choiceReadyBadgeArr !== "undefined") {
+    var badge = choiceReadyBadgeArr[index];
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
+  }
+}
+
+function setChoiceInteractiveState(index, isInteractive, options) {
+  options = options || {};
+  var immediate = !!options.immediate;
+
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var glow = choiceGlowArr[index];
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+  var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
+
+  if (!tile && !bg && !overlay) {
+    return;
+  }
+
+  var baseScale = tile && (tile.__baseScale || tile.scaleX) ? tile.__baseScale || tile.scaleX : 1;
+  var bgScale = bg && (bg.__baseScale || bg.scaleX) ? bg.__baseScale || bg.scaleX : baseScale * 1.12;
+
+  if (isInteractive) {
+    if (bg) {
+      drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
+      if (immediate) {
+        bg.alpha = 0.95;
+        bg.scaleX = bgScale;
+        bg.scaleY = bgScale;
+      } else {
+        createjs.Tween.get(bg, { override: true })
+          .to({ alpha: 0.96, scaleX: bgScale, scaleY: bgScale }, 220, createjs.Ease.quadOut);
+      }
+    }
+    if (tile) {
+      if (immediate) {
+        tile.alpha = 1;
+      } else {
+        createjs.Tween.get(tile, { override: true }).to({ alpha: 1 }, 200, createjs.Ease.quadOut);
+      }
+    }
+    if (glow) {
+      glow.visible = true;
+      if (immediate) {
+        glow.alpha = Math.max(0.38, glow.alpha || 0.38);
+      } else {
+        createjs.Tween.get(glow, { override: true })
+          .to({ alpha: 0.42 }, 220, createjs.Ease.quadOut);
+      }
+    }
+    if (pulse) {
+      pulse.visible = true;
+      var pulseScale = pulse.__baseScale || baseScale;
+      if (immediate) {
+        pulse.alpha = 0.75;
+        pulse.scaleX = pulseScale;
+        pulse.scaleY = pulseScale;
+      } else {
+        pulse.alpha = 0;
+        pulse.scaleX = pulse.scaleY = pulseScale * 0.88;
+        createjs.Tween.get(pulse, { override: true })
+          .to({ alpha: 0.78, scaleX: pulseScale, scaleY: pulseScale }, 240, createjs.Ease.quadOut);
+      }
+    }
+    if (overlay) {
+      createjs.Tween.get(overlay, { override: true })
+        .to({ alpha: 0 }, 180, createjs.Ease.quadOut)
+        .call(function () {
+          overlay.visible = false;
+        });
+    }
+    if (badge && !options.suppressBadge) {
+      badge.visible = true;
+      var badgeScale = badge.__baseScale || badge.scaleX || 1;
+      badge.scaleX = badge.scaleY = badgeScale * (immediate ? 1 : 0.7);
+      badge.alpha = immediate ? 1 : 0;
+      createjs.Tween.removeTweens(badge);
+      if (immediate) {
+        badge.alpha = 1;
+        badge.scaleX = badge.scaleY = badgeScale;
+        startChoiceReadyBadgeAnimation(badge);
+      } else {
+        createjs.Tween.get(badge, { override: true })
+          .to({ alpha: 1, scaleX: badgeScale, scaleY: badgeScale }, 260, createjs.Ease.backOut)
+          .call(function () {
+            startChoiceReadyBadgeAnimation(badge);
+          });
+      }
+    }
+  } else {
+    stopChoiceIdleAnimation(index);
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
+    if (bg) {
+      drawChoiceTileBackground(bg, CHOICE_TILE_DISABLED_COLORS);
+      if (immediate) {
+        bg.alpha = 0.62;
+        bg.scaleX = bgScale;
+        bg.scaleY = bgScale;
+      } else {
+        createjs.Tween.get(bg, { override: true })
+          .to({ alpha: 0.62, scaleX: bgScale, scaleY: bgScale }, 180, createjs.Ease.quadOut);
+      }
+    }
+    if (tile) {
+      if (immediate) {
+        tile.alpha = 0.58;
+      } else {
+        createjs.Tween.get(tile, { override: true })
+          .to({ alpha: 0.58 }, 160, createjs.Ease.quadOut);
+      }
+    }
+    if (glow) {
+      createjs.Tween.get(glow, { override: true })
+        .to({ alpha: 0.22 }, 160, createjs.Ease.quadOut);
+    }
+    if (pulse) {
+      createjs.Tween.removeTweens(pulse);
+      pulse.visible = false;
+      pulse.alpha = 0;
+    }
+    if (overlay) {
+      drawChoiceDisabledOverlay(overlay);
+      overlay.visible = true;
+      if (immediate) {
+        overlay.alpha = 0.78;
+      } else {
+        overlay.alpha = 0;
+        createjs.Tween.get(overlay, { override: true })
+          .to({ alpha: 0.78 }, 180, createjs.Ease.quadOut);
+      }
+    }
+  }
+}
+
+function resetChoiceTileTweens(index) {
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var glow = choiceGlowArr[index];
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+  var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
+
+  if (tile) {
+    createjs.Tween.removeTweens(tile);
+  }
+  if (bg) {
+    createjs.Tween.removeTweens(bg);
+  }
+  if (glow) {
+    createjs.Tween.removeTweens(glow);
+  }
+  if (pulse) {
+    createjs.Tween.removeTweens(pulse);
+  }
+  if (overlay) {
+    createjs.Tween.removeTweens(overlay);
+  }
+  if (badge) {
+    stopChoiceReadyBadgeAnimation(badge);
+    createjs.Tween.removeTweens(badge);
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.SA_setChoiceInteractiveState = setChoiceInteractiveState;
+  window.SA_resetChoiceTileTweens = resetChoiceTileTweens;
+  window.SA_buildChoiceReadyBadge = buildChoiceReadyBadge;
+  window.SA_drawChoiceDisabledOverlay = drawChoiceDisabledOverlay;
+  window.SA_stopChoiceReadyBadgeAnimation = stopChoiceReadyBadgeAnimation;
+}
   
   function renderQuestionCardBackground_htp() {
   if (!questionCardBackground_htp) {
@@ -1228,11 +1574,17 @@ function attachChoiceInteractions(index) {
 
   questionCardBackground_htp.graphics
     .clear()
+    .setStrokeStyle(6, "round", "round")
+    .beginLinearGradientStroke(
+      ["rgba(233,222,255,0.85)", "rgba(146,122,255,0.6)"],
+      [0, 1],
+      -halfWidth,
+      -halfHeight,
+      halfWidth,
+      halfHeight
+    )
     .beginLinearGradientFill(
-      [
-        "rgba(18,38,76,0.95)",
-        "rgba(14,28,58,0.95)"
-      ],
+      ["rgba(120,89,235,0.98)", "rgba(54,30,132,0.98)"],
       [0, 1],
       -halfWidth,
       -halfHeight,
@@ -1244,12 +1596,12 @@ function attachChoiceInteractions(index) {
       -halfHeight,
       QUESTION_CARD_WIDTH,
       QUESTION_CARD_HEIGHT,
-      QUESTION_CARD_CORNER_RADIUS
+      QUESTION_CARD_CORNER_RADIUS + 6
     );
 
   if (questionCardHighlight_htp) {
-    var highlightPaddingX = 24;
-    var highlightPaddingY = 18;
+    var highlightPaddingX = 32;
+    var highlightPaddingY = 26;
     var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
     var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
     var highlightHalfWidth = highlightWidth / 2;
@@ -1258,7 +1610,7 @@ function attachChoiceInteractions(index) {
     questionCardHighlight_htp.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+        ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.02)"],
         [0, 1],
         -highlightHalfWidth,
         -highlightHalfHeight,
@@ -1270,9 +1622,9 @@ function attachChoiceInteractions(index) {
         -highlightHalfHeight,
         highlightWidth,
         highlightHeight,
-        Math.max(QUESTION_CARD_CORNER_RADIUS - 6, 12)
+        Math.max(QUESTION_CARD_CORNER_RADIUS - 2, 18)
       );
-    questionCardHighlight_htp.alpha = 0.45;
+    questionCardHighlight_htp.alpha = 0.66;
   }
 }
 
