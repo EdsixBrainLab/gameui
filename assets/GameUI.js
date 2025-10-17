@@ -923,31 +923,98 @@ function showGameplayTimeUpBanner(onComplete) {
   }
 
   var overlayDisplayDuration = 3000;
-  var overlayFadeDuration = 320;
+  var overlayHoldSafetyDuration = 4000;
   var overlayCompleteFired = false;
+  var overlayHideRequested = false;
+  var overlayHoldTimer = null;
 
-  function fireOverlayComplete() {
+  function clearOverlayHoldTimer() {
+    if (overlayHoldTimer) {
+      clearTimeout(overlayHoldTimer);
+      overlayHoldTimer = null;
+    }
+  }
+
+  function requestOverlayHide() {
+    if (overlayHideRequested) {
+      return;
+    }
+
+    overlayHideRequested = true;
+    clearOverlayHoldTimer();
+    hideGameplayTimeUpBanner();
+  }
+
+  function handleOverlayDisplayComplete() {
     if (overlayCompleteFired) {
       return;
     }
     overlayCompleteFired = true;
 
+    var doneCalled = false;
+
+    function done() {
+      if (doneCalled) {
+        return;
+      }
+
+      doneCalled = true;
+      requestOverlayHide();
+    }
+
     if (typeof onComplete === "function") {
       try {
-        onComplete();
+        if (onComplete.length >= 1) {
+          overlayHoldTimer = setTimeout(done, overlayHoldSafetyDuration);
+          var asyncResult = onComplete(done);
+          if (asyncResult && typeof asyncResult.then === "function") {
+            asyncResult
+              .then(function () {
+                done();
+              })
+              .catch(function (overlayCompleteError) {
+                console.log(
+                  "Error: time up complete handler",
+                  overlayCompleteError
+                );
+                done();
+              });
+            return;
+          }
+
+          if (asyncResult === false) {
+            return;
+          }
+
+          return;
+        }
+
+        var result = onComplete();
+        if (result && typeof result.then === "function") {
+          result
+            .then(function () {
+              done();
+            })
+            .catch(function (overlayCompleteError) {
+              console.log(
+                "Error: time up complete handler",
+                overlayCompleteError
+              );
+              done();
+            });
+          return;
+        }
       } catch (overlayCompleteError) {
         console.log("Error: time up complete handler", overlayCompleteError);
       }
     }
+
+    done();
   }
 
   createjs.Tween.get(overlay)
     .wait(overlayDisplayDuration)
-    .call(fireOverlayComplete)
-    .to({ alpha: 0 }, overlayFadeDuration, createjs.Ease.quadIn)
-    .call(function () {
-      hideGameplayTimeUpBanner(true);
-    });
+    .call(handleOverlayDisplayComplete);
 }
 
 function hideGameplayTimeUpBanner(force) {
