@@ -17,6 +17,10 @@ function CreateGameStart() {
 
     pauseTimer();
 
+    if (typeof hideGameplayTimeUpBanner === "function") {
+        hideGameplayTimeUpBanner(true);
+    }
+
     document.getElementById("gameCanvas").style.background = 'white';
     //////////////////////////////
     closeBtn.visible = false;
@@ -216,16 +220,20 @@ if (questionOverImg) {
                 questionOverImg.y = -720;
                 createjs.Tween.get(questionOverImg).wait(100).to({ alpha: 1, x: 0, y: 0 }, 8000);*/
 
-                timeOverImgTimer = setInterval(removeTimeOverImg, 300);
+                if (typeof showGameplayTimeUpBanner === "function") {
+                    showGameplayTimeUpBanner(removeTimeOverImg);
+                } else {
+                    timeOverImgTimer = setInterval(removeTimeOverImg, 300);
+                }
             }
         } else {
             if (bgSnd) {
                 bgSnd.stop();
             }
 
-            container.parent.addChild(timeOverImg);
-            timeOverImg.visible = true;
-            stage.update();
+            if (timeOverImg) {
+                timeOverImg.visible = false;
+            }
 
             correctSnd.stop();
             wrongSnd.stop();
@@ -249,6 +257,12 @@ if (questionOverImg) {
                 timeOverSnd.addEventListener("complete", handleTimeOverComplete);
             }
 
+            if (typeof showGameplayTimeUpBanner === "function") {
+                showGameplayTimeUpBanner(handleTimeOverComplete);
+            } else {
+                timeOverImgTimer = setInterval(removeTimeOverImg, 300);
+            }
+
             setTimeout(handleTimeOverComplete, 1500);
         }
 
@@ -262,6 +276,9 @@ if (questionOverImg) {
 
 function removeTimeOverImg() {
     clearInterval(timeOverImgTimer);
+    if (typeof hideGameplayTimeUpBanner === "function") {
+        hideGameplayTimeUpBanner(true);
+    }
     timeOverImg.visible = false;
     time = 18;
     currTime = time;
