@@ -376,32 +376,30 @@ var time=1000
     var val =1800
     for (i = 0; i < 3; i++) {
         choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-        choiceArr[i].y = 600, 
+        choiceArr[i].y = 600,
         choiceArr[i].visible = true;
          choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].alpha = 0;
+        var tween = createjs.Tween.get(choiceArr[i])
+        .wait(val)
+        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
+        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500);
         if(i==2)
         {
-        createjs.Tween.get(choiceArr[i]).wait(val)
-        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
-        }
-        else{
-        createjs.Tween.get(choiceArr[i]).wait(val)
-        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
+        tween.call(AddListenerFn);
         }
         val = val + 150
     }
-
-    repTimeClearInterval = setTimeout(AddListenerFn, 3000)
 
 
 
 }
 function AddListenerFn() {
 
-    clearTimeout(repTimeClearInterval)
+    if (typeof repTimeClearInterval !== "undefined" && repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval)
+        repTimeClearInterval = 0
+    }
   
 
 
