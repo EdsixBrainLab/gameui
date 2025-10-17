@@ -79,14 +79,28 @@ function call_UI_gameQuestion(incontainer, in_questiontext) {
 }
 
 function call_UI_introQuestionCardContainer(incontainer, in_question) {
+  var fallbackX = 0;
+  if (typeof introQues1X !== "undefined") {
+    fallbackX = introQues1X;
+  } else if (incontainer && typeof incontainer.x === "number") {
+    fallbackX = incontainer.x;
+  }
+
+  var fallbackY = 0;
+  if (typeof introQues1Y !== "undefined") {
+    fallbackY = introQues1Y;
+  } else if (incontainer && typeof incontainer.y === "number") {
+    fallbackY = incontainer.y;
+  }
+
   questionCardContainer_htp = new createjs.Container();
-  questionCardContainer_htp.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : introQues1X;
-  questionCardContainer_htp.y = introQues1Y;
+  questionCardContainer_htp.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : fallbackX;
+  questionCardContainer_htp.y = fallbackY;
   questionCardContainer_htp.alpha = 0;
   questionCardContainer_htp.visible = false;
   questionCardContainer_htp.mouseEnabled = false;
   questionCardContainer_htp.mouseChildren = false;
-  questionCardContainer_htp.__baseY = introQues1Y;
+  questionCardContainer_htp.__baseY = fallbackY;
 
   questionCardShadow_htp = new createjs.Shape();
   var shadowWidth_htp = QUESTION_CARD_WIDTH + 64;
@@ -168,6 +182,50 @@ function drawClueSlotBackground(targetShape, colors) {
   }
 }
 
+function buildChoiceReadyBadge() {
+  var badge = new createjs.Container();
+  badge.mouseEnabled = false;
+  badge.mouseChildren = false;
+
+  var badgeBg = new createjs.Shape();
+  badgeBg.graphics
+    .beginLinearGradientFill(
+      ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
+      [0, 1],
+      -30,
+      -18,
+      30,
+      18
+    )
+    .drawRoundRect(-32, -18, 64, 36, 18);
+  badge.addChild(badgeBg);
+
+  var badgeHighlight = new createjs.Shape();
+  badgeHighlight.graphics
+    .beginLinearGradientFill(
+      ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
+      [0, 1],
+      -28,
+      -12,
+      28,
+      12
+    )
+    .drawRoundRect(-28, -14, 56, 24, 14);
+  badgeHighlight.alpha = 0.8;
+  badge.addChild(badgeHighlight);
+
+  var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
+  badgeTxt.textAlign = "center";
+  badgeTxt.textBaseline = "middle";
+  badgeTxt.y = 1;
+  badge.addChild(badgeTxt);
+
+  badge.visible = false;
+  badge.alpha = 0;
+
+  return badge;
+}
+
 function ensureChoiceDecorations(index) {
   if (!(index == null || index < 0) && container && container.parent) {
     var parent = container.parent;
@@ -214,46 +272,7 @@ function ensureChoiceDecorations(index) {
     }
 
     if (!choiceReadyBadgeArr[index]) {
-      var badge = new createjs.Container();
-      badge.mouseEnabled = false;
-      badge.mouseChildren = false;
-
-      var badgeBg = new createjs.Shape();
-      badgeBg.graphics
-        .beginLinearGradientFill(
-          ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
-          [0, 1],
-          -30,
-          -18,
-          30,
-          18
-        )
-        .drawRoundRect(-32, -18, 64, 36, 18);
-      badge.addChild(badgeBg);
-
-      var badgeHighlight = new createjs.Shape();
-      badgeHighlight.graphics
-        .beginLinearGradientFill(
-          ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
-          [0, 1],
-          -28,
-          -12,
-          28,
-          12
-        )
-        .drawRoundRect(-28, -14, 56, 24, 14);
-      badgeHighlight.alpha = 0.8;
-      badge.addChild(badgeHighlight);
-
-      var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
-      badgeTxt.textAlign = "center";
-      badgeTxt.textBaseline = "middle";
-      badgeTxt.y = 1;
-      badge.addChild(badgeTxt);
-
-      badge.visible = false;
-      badge.alpha = 0;
-
+      var badge = buildChoiceReadyBadge();
       choiceReadyBadgeArr[index] = badge;
       parent.addChild(badge);
     }
@@ -2934,6 +2953,7 @@ if (GameUIGlobal) {
   GameUIGlobal.call_UI_introQuestionCardContainer = call_UI_introQuestionCardContainer;
   GameUIGlobal.drawChoiceTileBackground = drawChoiceTileBackground;
   GameUIGlobal.drawClueSlotBackground = drawClueSlotBackground;
+  GameUIGlobal.buildChoiceReadyBadge = buildChoiceReadyBadge;
   GameUIGlobal.ensureChoiceDecorations = ensureChoiceDecorations;
   GameUIGlobal.positionChoiceDecorations = positionChoiceDecorations;
   GameUIGlobal.stopChoiceReadyPulse = stopChoiceReadyPulse;
