@@ -415,7 +415,7 @@ function spawnFeedbackParticles(palette, isCorrect) {
     feedbackParticleLayer.removeAllChildren();
 
     var colors = palette.particleColors || ["#ffffff"];
-    var burstCount = isCorrect ? 12 : 10;
+    var burstCount = isCorrect ? 20 : 10;
 
     for (var i = 0; i < burstCount; i++) {
         var particle = new createjs.Shape();
@@ -442,13 +442,13 @@ function spawnFeedbackParticles(palette, isCorrect) {
 
         feedbackParticleLayer.addChild(particle);
 
-        var travelX = (Math.random() * (isCorrect ? 260 : 160) + 80) * (Math.random() < 0.5 ? -1 : 1);
-        var travelY = isCorrect ? -(80 + Math.random() * 110) : (40 + Math.random() * 70);
+        var travelX = (Math.random() * (isCorrect ? 300 : 160) + 80) * (Math.random() < 0.5 ? -1 : 1);
+        var travelY = isCorrect ? -(110 + Math.random() * 140) : (40 + Math.random() * 70);
 
         createjs.Tween.get(particle)
             .wait(i * 30)
             .to({ alpha: 1 }, 100)
-            .to({ x: startX + travelX, y: startY + travelY, rotation: (Math.random() * 240 - 120) }, 900 + Math.random() * 420, createjs.Ease.quadOut)
+            .to({ x: startX + travelX, y: startY + travelY, rotation: (Math.random() * 260 - 130) }, 900 + Math.random() * 420, createjs.Ease.quadOut)
             .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
             .call((function (target) {
                 return function () {
@@ -457,6 +457,44 @@ function spawnFeedbackParticles(palette, isCorrect) {
                     }
                 };
             })(particle));
+    }
+
+    if (isCorrect) {
+        var sparkleCount = 10;
+        for (var j = 0; j < sparkleCount; j++) {
+            var sparkle = new createjs.Shape();
+            var sparkleColor = colors[j % colors.length];
+            var sparkleRadius = 3 + Math.random() * 3;
+            sparkle.graphics
+                .beginFill(applyColorAlpha(sparkleColor, 0.4))
+                .drawCircle(0, 0, sparkleRadius)
+                .endFill();
+            sparkle.graphics
+                .setStrokeStyle(1.6)
+                .beginStroke(applyColorAlpha(sparkleColor, 0.9))
+                .moveTo(-sparkleRadius, 0)
+                .lineTo(sparkleRadius, 0)
+                .moveTo(0, -sparkleRadius)
+                .lineTo(0, sparkleRadius);
+            sparkle.x = -16 + Math.random() * 32;
+            sparkle.y = -6 + Math.random() * 12;
+            sparkle.alpha = 0;
+            feedbackParticleLayer.addChild(sparkle);
+
+            (function (target) {
+                var lift = 60 + Math.random() * 50;
+                createjs.Tween.get(target)
+                    .wait(180 + Math.random() * 220)
+                    .to({ alpha: 1 }, 120)
+                    .to({ y: target.y - lift, scaleX: 1.4, scaleY: 1.4 }, 540, createjs.Ease.quadOut)
+                    .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
+                    .call(function () {
+                        if (target.parent) {
+                            target.parent.removeChild(target);
+                        }
+                    });
+            })(sparkle);
+        }
     }
 }
 
@@ -611,7 +649,7 @@ function getValidation(aStr) {
         }
 
         if (typeof launchConfetti === "function") {
-            launchConfetti(40);
+            launchConfetti(80);
         }
 
         if (typeof showStarburst === "function") {
@@ -1772,34 +1810,44 @@ function launchConfetti(particleCount) {
         return;
     }
 
-    var count = particleCount != null ? particleCount : 30;
-    var centerX = typeof canvas !== "undefined" && canvas ? canvas.width / 2 : 640;
-    var centerY = 180;
+    layer.x = 0;
+    layer.y = 0;
+    layer.regX = layer.regY = 0;
+    layer.scaleX = layer.scaleY = 1;
+
+    var metrics = typeof getCanvasMetrics === "function" ? getCanvasMetrics() : null;
+    var logicalWidth = metrics ? metrics.width : (typeof canvas !== "undefined" && canvas ? canvas.width : 1280);
+    var logicalHeight = metrics ? metrics.height : (typeof canvas !== "undefined" && canvas ? canvas.height : 720);
+    var centerX = metrics ? metrics.centerX : logicalWidth / 2;
+    var centerY = metrics ? Math.max(120, metrics.centerY - logicalHeight * 0.24) : 180;
+
+    var count = particleCount != null ? particleCount : 60;
+    var spreadX = Math.max(220, logicalWidth * 0.48);
+    var spreadY = Math.max(90, logicalHeight * 0.16);
 
     for (var i = 0; i < count; i++) {
         var confetti = new createjs.Shape();
         var size = 6 + Math.random() * 6;
         var color = confettiColors[(Math.random() * confettiColors.length) | 0];
         confetti.graphics.beginFill(color).drawRect(-size / 2, -size / 2, size, size);
-        confetti.x = centerX ;
-        confetti.x = centerX -360 - (Math.random() * 320 - 160);
-        confetti.y = centerY + (Math.random() * 40 - 20);
+        confetti.x = centerX + (Math.random() - 0.5) * spreadX;
+        confetti.y = centerY + (Math.random() - 0.5) * spreadY;
         confetti.rotation = Math.random() * 360;
-        confetti.alpha = 0.9;
+        confetti.alpha = 0.95;
         layer.addChild(confetti);
 
         (function (shape) {
-            var driftX = (Math.random() - 0.5) * 380;
-            var fallDistance = 420 + Math.random() * 260;
-            var duration = 1200 + Math.random() * 900;
-            var spin = (Math.random() > 0.5 ? 360 : -360) * (1 + Math.random());
+            var driftX = (Math.random() - 0.5) * spreadX * 1.4;
+            var fallDistance = logicalHeight * 0.5 + Math.random() * (logicalHeight * 0.4);
+            var duration = 1400 + Math.random() * 1100;
+            var spin = (Math.random() > 0.5 ? 360 : -360) * (1.2 + Math.random());
 
             createjs.Tween.get(shape)
                 .to({
                     x: shape.x + driftX,
                     y: shape.y + fallDistance,
                     rotation: shape.rotation + spin,
-                    alpha: 0.2
+                    alpha: 0.15
                 }, duration, createjs.Ease.quadIn)
                 .call(function () {
                     if (shape.parent) {
