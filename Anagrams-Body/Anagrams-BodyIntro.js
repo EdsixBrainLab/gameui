@@ -602,9 +602,7 @@ function setArrowTween() {
             .wait(400)
             .call(this.onComplete1)
 
-    }
 
-}
 
 
 function setFingureTween() {
