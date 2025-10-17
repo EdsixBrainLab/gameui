@@ -7041,6 +7041,9 @@ function internetErrorFn() {
     timeOverImg.visible = false;
     gameOverImg.visible = false;
     questionOverImg.visible = false;
+    if (typeof hideGameplayTimeUpBanner === "function") {
+        hideGameplayTimeUpBanner(true);
+    }
     gameResponseTimerStop();
     correctSnd.stop();
     wrongSnd.stop();
