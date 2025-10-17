@@ -278,7 +278,36 @@ function removeTimeOverImg() {
         gameTimerTxt.text = String(time);
     }
 
-    pickques();
+    var proceedCalled = false;
+    function continueToNextQuestion() {
+        if (proceedCalled) {
+            return;
+        }
+        proceedCalled = true;
+        pickques();
+    }
+
+    var hookHandled = false;
+    var timeExpiredHook = null;
+
+    if (typeof SA_handleTimeExpiredBeforeNextQuestion === "function") {
+        timeExpiredHook = SA_handleTimeExpiredBeforeNextQuestion;
+    } else if (typeof handleTimeExpiredBeforeNextQuestion === "function") {
+        timeExpiredHook = handleTimeExpiredBeforeNextQuestion;
+    }
+
+    if (timeExpiredHook) {
+        try {
+            hookHandled = timeExpiredHook(continueToNextQuestion) === true;
+        } catch (hookError) {
+            console.log("Error: time expired hook", hookError);
+            hookHandled = false;
+        }
+    }
+
+    if (!hookHandled) {
+        continueToNextQuestion();
+    }
 }
 
 function pauseTimer() {

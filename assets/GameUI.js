@@ -169,22 +169,28 @@ function drawChoiceTileBackground(targetShape, colors) {
   var gradient = colors || CHOICE_TILE_BASE_COLORS;
   var stroke = ["rgba(228,215,255,0.85)", "rgba(142,114,255,0.65)"];
 
+  var width = 148;
+  var height = 148;
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+  var cornerRadius = 48;
+
   var g = targetShape.graphics;
   g.clear();
   g.setStrokeStyle(5, "round", "round");
-  g.beginLinearGradientStroke(stroke, [0, 1], -70, -70, 70, 70);
-  g.beginLinearGradientFill(gradient, [0, 1], -80, -86, 80, 86);
-  g.drawRoundRect(-44, -58, 148, 148, 48);
+  g.beginLinearGradientStroke(stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight);
+  g.beginLinearGradientFill(gradient, [0, 1], 0, -halfHeight, 0, halfHeight);
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
 
   g.beginLinearGradientFill(
-    ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
+    ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
     [0, 1],
     0,
-    -76,
+    -halfHeight,
     0,
-    42
+    halfHeight
   );
-  g.drawRoundRect(-36, -52, 132, 110, 40);
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
 }
 
 function drawChoiceSpeechWave(targetShape) {
@@ -195,65 +201,17 @@ function drawChoiceSpeechWave(targetShape) {
   var g = targetShape.graphics;
   g.clear();
 
-  g.setStrokeStyle(6, "round", "round");
-  g.beginLinearGradientStroke(
-    ["rgba(236,230,255,0.85)", "rgba(154,134,255,0.4)"],
-    [0, 1],
-    -24,
-    -54,
-    24,
-    46
-  );
-  g.moveTo(-46, -8);
-  g.quadraticCurveTo(0, -62, 46, -8);
-
-  g.setStrokeStyle(5, "round", "round");
-  g.beginLinearGradientStroke(
-    ["rgba(255,255,255,0.65)", "rgba(170,198,255,0.32)"],
-    [0, 1],
-    -18,
-    -18,
-    18,
-    58
-  );
-  g.moveTo(-34, 12);
-  g.quadraticCurveTo(0, -26, 34, 12);
-
-  g.setStrokeStyle(4, "round", "round");
-  g.beginLinearGradientStroke(
-    ["rgba(212,192,255,0.55)", "rgba(132,112,255,0.22)"],
-    [0, 1],
-    -12,
-    16,
-    12,
-    74
-  );
-  g.moveTo(-24, 30);
-  g.quadraticCurveTo(0, 4, 24, 30);
-
   g.beginRadialGradientFill(
-    ["rgba(128,96,255,0.28)", "rgba(128,96,255,0)"] ,
+    ["rgba(206,190,255,0.45)", "rgba(140,110,255,0)"] ,
     [0, 1],
     0,
-    38,
     0,
     0,
-    38,
-    54
+    0,
+    0,
+    92
   );
-  g.drawEllipse(-38, 32, 76, 26);
-
-  g.beginRadialGradientFill(
-    ["rgba(255,255,255,0.36)", "rgba(255,255,255,0)"] ,
-    [0, 1],
-    0,
-    -48,
-    0,
-    0,
-    -48,
-    42
-  );
-  g.drawEllipse(-28, -64, 56, 28);
+  g.drawCircle(0, 0, 92);
 }
 
 function drawClueSlotBackground(targetShape, colors) {

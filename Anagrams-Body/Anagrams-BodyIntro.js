@@ -321,7 +321,8 @@ function commongameintro() {
         bg.y = cfg.y;
         bg.visible = false;
         bg.alpha = 0;
-        bg.__baseScale = 0.8 * 1.12;
+        var baseLetterScale = 0.8;
+        bg.__baseScale = baseLetterScale * 1.08;
         bg.shadow = new createjs.Shadow("rgba(10,18,44,0.45)", 0, 12, 28);
         bg.mouseEnabled = false;
         bg.mouseChildren = false;
@@ -334,18 +335,18 @@ function commongameintro() {
         }
         letter.x = cfg.x;
         letter.y = cfg.y;
-        letter.scaleX = letter.scaleY = 0.8;
-        letter.__baseScale = 0.8;
+        letter.scaleX = letter.scaleY = baseLetterScale;
+        letter.__baseScale = baseLetterScale;
         letter.__baseX = cfg.x;
         letter.__baseY = cfg.y;
         letter.visible = false;
         updateIntroChoiceLetter(letter, cfg.letter);
         container.parent.addChild(letter);
 
-        glow.scaleX = glow.scaleY = letter.__baseScale * 1.3;
+        var tileScale = letter.__baseScale || baseLetterScale;
+        glow.scaleX = glow.scaleY = tileScale * 1.28;
 
-        var tileScale = letter.__baseScale || 0.8;
-        var bgScale = bg.__baseScale || tileScale * 1.12;
+        var bgScale = bg.__baseScale || tileScale * 1.08;
         var tileHeight = 148 * bgScale;
         var tileTop = cfg.y - tileHeight / 2;
         var tipTargetY = tileTop + tileHeight * 0.28;
@@ -413,7 +414,9 @@ function commongameintro() {
     cluegotoArr = ["", "S", "K", "I", "N"];
 
     introArrow.visible = false;
+    introArrow.alpha = 0;
     introfingure.visible = false;
+    introfingure.alpha = 0;
 
     introQuestxt.alpha = 0;
     createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
@@ -572,7 +575,27 @@ function setArrowTween() {
         container.parent.addChild(introArrow);
 
         introArrow.visible = true;
+        introArrow.alpha = 1;
         introfingure.visible = false;
+        introfingure.alpha = 0;
+
+        var arrowTargetX = typeof ArrowXArr[TempIntroVal] === "number" ? ArrowXArr[TempIntroVal] : introClu1X;
+        var defaultTipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
+        var fallbackTipY = introClu1Y - (56 + defaultTipGap);
+        var arrowTipY = typeof ArrowYArr[TempIntroVal] === "number" ? ArrowYArr[TempIntroVal] : fallbackTipY;
+        var arrowBounce = introArrow && introArrow.__bounceOffset ? introArrow.__bounceOffset : 18;
+        var arrowUpY = arrowTipY - arrowBounce;
+
+        introArrow.x = arrowTargetX;
+        introArrow.y = arrowTipY;
+
+        highlightTweenArr[0] = createjs.Tween.get(introArrow)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .wait(400)
+            .call(this.onComplete1)
 
         var arrowTargetX = typeof ArrowXArr[TempIntroVal] === "number" ? ArrowXArr[TempIntroVal] : introClu1X;
         var defaultTipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
@@ -627,6 +650,7 @@ function setArrowTween() {
 
 
 
+
 function setFingureTween() {
     if (stopValue == 0) {
         console.log("setFingureTween  == stopValue")
@@ -637,6 +661,7 @@ function setFingureTween() {
 
         container.parent.removeChild(introArrow);
         introArrow.visible = false;
+        introArrow.alpha = 0;
         container.parent.addChild(introfingure);
 
         var pointerOffsetX = introfingure.__pointerOffsetX || 0;
@@ -648,6 +673,7 @@ function setFingureTween() {
         var fingerPressX = fingerBaseX - 18;
 
         introfingure.visible = true;
+        introfingure.alpha = 1;
         introfingure.x = fingerBaseX;
         introfingure.y = fingerBaseY;
         var activeChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
@@ -657,8 +683,6 @@ function setFingureTween() {
                 highlightIntroChoiceTile(activeChoiceIndex, true);
             }
         }
-        highlightTweenArr[1] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[1])
         if (TempIntroVal == 4) {
             highlightTweenArr[1] = createjs.Tween.get(introfingure)
                 .to({ x: fingerBaseX }, 300)
@@ -687,10 +711,15 @@ this.onComplete1 = function (e) {
 
     if (highlightTweenArr[0]) {
         console.log("onComplete1")
-        container.parent.removeChild(highlightTweenArr[0]);
+        if (typeof highlightTweenArr[0].setPaused === "function") {
+            highlightTweenArr[0].setPaused(true);
+        }
+        highlightTweenArr[0] = null;
     }
 
     container.parent.removeChild(introArrow);
+    introArrow.visible = false;
+    introArrow.alpha = 0;
     if (stopValue == 0) {
         console.log("onComplete1  == stopValue")
         removeGameIntro()
@@ -720,11 +749,15 @@ this.onComplete2 = function (e) {
 
     if (highlightTweenArr[1]) {
         console.log("onComplete2")
-        container.parent.removeChild(highlightTweenArr[1]);
+        if (typeof highlightTweenArr[1].setPaused === "function") {
+            highlightTweenArr[1].setPaused(true);
+        }
+        highlightTweenArr[1] = null;
     }
 
     container.parent.removeChild(introfingure);
     introfingure.visible = false;
+    introfingure.alpha = 0;
 
     if (stopValue == 0) {
         console.log("onComplete2  == stopValue")
@@ -759,11 +792,13 @@ function setCallDelay() {
 }
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
- 
+
     container.parent.removeChild(introArrow)
     introArrow.visible = false
+    introArrow.alpha = 0
     container.parent.removeChild(introfingure)
     introfingure.visible = false
+    introfingure.alpha = 0
     container.parent.removeChild(questionCardContainer_htp)
     questionCardContainer_htp.visible = false
     if (introQuestxt && introQuestxt.__labelBG) {
@@ -812,15 +847,20 @@ introQuestxt = null;
     introClueBgArr = [null];
 
     if (highlightTweenArr[0]) {
-        highlightTweenArr[0].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[0]);
+        if (typeof highlightTweenArr[0].setPaused === "function") {
+            highlightTweenArr[0].setPaused(true);
+        }
+        highlightTweenArr[0] = null;
     }
     if (highlightTweenArr[1]) {
-        highlightTweenArr[1].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[1]);
+        if (typeof highlightTweenArr[1].setPaused === "function") {
+            highlightTweenArr[1].setPaused(true);
+        }
+        highlightTweenArr[1] = null;
     }
     container.parent.removeChild(introfingure);
     introfingure.visible = false;
+    introfingure.alpha = 0;
     introClueArr = [];
     cluegotoArr = [];
 }
