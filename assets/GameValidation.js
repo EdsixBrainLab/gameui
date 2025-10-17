@@ -1772,27 +1772,24 @@ function launchConfetti(particleCount) {
         return;
     }
 
-    var baseCount = particleCount != null ? particleCount : 30;
-    var count = Math.max(Math.round(baseCount * 1.4), baseCount + 12);
-    var canvasWidth = typeof canvas !== "undefined" && canvas && !isNaN(canvas.width) ? canvas.width : 1280;
-    var centerX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvasWidth / 2;
+    var count = particleCount != null ? particleCount : 30;
+    var centerX = typeof canvas !== "undefined" && canvas ? canvas.width / 2 : 640;
     var centerY = 180;
-    var spread = Math.max(320, Math.min(canvasWidth * 0.65, 520));
 
     for (var i = 0; i < count; i++) {
         var confetti = new createjs.Shape();
         var size = 6 + Math.random() * 6;
         var color = confettiColors[(Math.random() * confettiColors.length) | 0];
         confetti.graphics.beginFill(color).drawRect(-size / 2, -size / 2, size, size);
-        var horizontalOffset = Math.random() * spread - spread / 2;
-        confetti.x = centerX + horizontalOffset;
-        confetti.y = centerY - (Math.random() * 30 + 10);
+        confetti.x = centerX ;
+        confetti.x = centerX -360 - (Math.random() * 320 - 160);
+        confetti.y = centerY + (Math.random() * 40 - 20);
         confetti.rotation = Math.random() * 360;
-        confetti.alpha = 0.92;
+        confetti.alpha = 0.9;
         layer.addChild(confetti);
 
-        (function (shape, offset) {
-            var driftX = offset * 0.45 + (Math.random() - 0.5) * 120;
+        (function (shape) {
+            var driftX = (Math.random() - 0.5) * 380;
             var fallDistance = 420 + Math.random() * 260;
             var duration = 1200 + Math.random() * 900;
             var spin = (Math.random() > 0.5 ? 360 : -360) * (1 + Math.random());
@@ -1812,7 +1809,7 @@ function launchConfetti(particleCount) {
                         stage.update();
                     }
                 });
-        })(confetti, horizontalOffset);
+        })(confetti);
     }
 
     if (typeof stage !== "undefined" && stage) {

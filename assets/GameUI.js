@@ -6,433 +6,535 @@ var ambientLayer,
   ambientOrbs = [],
   ambientSparkGeneration = 0;
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
-var QusTxtString;
 var INTRO_TITLE_Y = 75;
 var INTRO_PROMPT_Y = 210;
 var QUESTION_CARD_WIDTH = 720;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 
-var CHOICE_TILE_BASE_COLORS = ["rgba(104,84,214,0.98)", "rgba(68,52,158,0.98)"];
-var CHOICE_TILE_HOVER_COLORS = ["rgba(140,110,248,1)", "rgba(94,68,208,1)"];
-var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,204,164,0.98)", "rgba(38,132,110,0.98)"];
-var CHOICE_TILE_WRONG_COLORS = ["rgba(242,132,152,0.98)", "rgba(170,64,102,0.98)"];
-var CLUE_SLOT_BASE_COLORS = ["rgba(32,58,104,0.92)", "rgba(19,36,74,0.92)"];
-var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"];
-var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
-var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
+var CHOICE_TILE_BASE_COLORS = ["rgba(123,104,238,0.96)", "rgba(76,53,163,0.96)"];
+var CHOICE_TILE_HOVER_COLORS = ["rgba(155,132,255,0.98)", "rgba(94,66,206,0.98)"];
+var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,210,190,0.96)", "rgba(30,140,126,0.96)"];
+var CHOICE_TILE_WRONG_COLORS = ["rgba(255,137,162,0.96)", "rgba(178,54,110,0.96)"];
+var CHOICE_TILE_DISABLED_COLORS = ["rgba(94,78,166,0.8)", "rgba(54,36,122,0.82)"];
+var CLUE_SLOT_BASE_COLORS = ["rgba(114,86,232,0.94)", "rgba(58,38,148,0.94)"];
+var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94)"];
+var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
+var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
+var choiceIdleStates = [];
+
+function computeCenteredRowLayout(count, options) {
+  options = options || {};
+  var centerX =
+    typeof options.centerX === "number"
+      ? options.centerX
+      : typeof getCanvasCenterX === "function"
+      ? getCanvasCenterX()
+      : 640;
+  var baseSpacing = options.baseSpacing != null ? options.baseSpacing : 174;
+  var baseScale = options.baseScale != null ? options.baseScale : 1;
+  var minScale = options.minScale != null ? options.minScale : 0.6;
+  var maxSpan = options.maxSpan != null ? options.maxSpan : 900;
+  var tileSpan = options.tileSpan != null ? options.tileSpan : baseSpacing;
+
+  if (count <= 0) {
+    return {
+      positions: [],
+      scale: baseScale,
+      spacing: baseSpacing
+    };
+  }
+
+  var totalSpan = (count - 1) * baseSpacing + tileSpan;
+  var spanRatio = totalSpan > maxSpan && totalSpan > 0 ? maxSpan / totalSpan : 1;
+  var scale = Math.max(minScale, baseScale * spanRatio);
+  var spacing = baseSpacing * spanRatio;
+
+  var positions = [];
+  var startX = centerX - ((count - 1) * spacing) / 2;
+
+  for (var i = 0; i < count; i++) {
+    positions.push(startX + i * spacing);
+  }
+
+  return {
+    positions: positions,
+    scale: scale,
+    spacing: spacing
+  };
+}
+
+if (typeof window !== "undefined") {
+  window.SAUI_computeCenteredRow = computeCenteredRowLayout;
+}
 
 var choiceDisableOverlayArr = [];
 var choiceReadyPulseArr = [];
 var choiceReadyBadgeArr = [];
 var choiceReadyTweenArr = [];
-var choiceReadyBadgeTweenArr = [];
-var choiceLiveAccentArr = [];
-var choiceLiveAccentTweenArr = [];
 
 var timeUpOverlay,
   timeUpOverlayBg,
   timeUpIconContainer,
   timeUpIconHand,
-  timeUpIconGlow,
   timeUpText;
 
-function call_UI_ambientOverlay(incontainer) {
-  ambientLayer = new createjs.Container();
+function call_UI_ambientOverlay(incontainer)
+{
+ambientLayer = new createjs.Container();
   incontainer.addChild(ambientLayer);
   overlayLayer = new createjs.Container();
   incontainer.addChild(overlayLayer);
   createAmbientBackground();
 }
 
-function call_UI_gameQuestion(incontainer, in_questiontext) {
-  QusTxtString = new createjs.Text(
-    in_questiontext,
-    "700 40px 'Baloo 2'",
-    "#F6F1FF"
-  );
-  QusTxtString.shadow = new createjs.Shadow("rgba(8,14,32,0.45)", 0, 12, 24);
-  QusTxtString.textAlign = "center";
-  QusTxtString.textBaseline = "middle";
-  QusTxtString.lineWidth = 1000;
-  QusTxtString.lineHeight = 40;
-  var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
-  QusTxtString.x = promptCenterX;
-  QusTxtString.y = INTRO_PROMPT_Y - 20;
-  QusTxtString.alpha = 0.98;
-  incontainer.parent.addChild(QusTxtString);
-  QusTxtString.visible = false;
-  QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
-    padX: 32,
-    padY: 18,
-    fill: "rgba(34,24,78,0.68)",
-    stroke: "rgba(255,255,255,0.18)",
-    strokeW: 2,
-    maxRadius: 28
+function call_UI_gameQuestion(incontainer,in_questiontext)
+{
+         QusTxtString = new createjs.Text(
+      in_questiontext,
+      "700 34px 'Baloo 2'",
+      "#EAF2FF"
+    );
+    QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
+    QusTxtString.textAlign = "center";
+    QusTxtString.textBaseline = "middle";
+    QusTxtString.lineWidth = 1000;
+    QusTxtString.lineHeight = 40;
+    var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
+    QusTxtString.x = promptCenterX;
+    QusTxtString.y = INTRO_PROMPT_Y-55;
+    QusTxtString.alpha = 0.98;
+    incontainer.parent.addChild(QusTxtString);
+    QusTxtString.visible = false;
+        QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
+    padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22
   });
 
-  QusTxtString.__layoutHalfHeight = (QusTxtString.lineHeight || 34) / 2;
+    QusTxtString.__layoutHalfHeight = (QusTxtString.lineHeight || 34) / 2;
 
-  if (typeof refreshResponsiveLayout === "function") {
-    refreshResponsiveLayout(true);
-  }
+    if (typeof refreshResponsiveLayout === "function") {
+      refreshResponsiveLayout(true);
+    }
+	
+	
+	
+	
 }
 
-function call_UI_introQuestionCardContainer(incontainer, in_question) {
-  var fallbackX = 0;
-  if (typeof introQues1X !== "undefined") {
-    fallbackX = introQues1X;
-  } else if (incontainer && typeof incontainer.x === "number") {
-    fallbackX = incontainer.x;
-  }
+function call_UI_introQuestionCardContainer(incontainer,in_question)
+{
+	
+	questionCardContainer_htp = new createjs.Container();
+    questionCardContainer_htp.x = introQues1X;
+    questionCardContainer_htp.y = introQues1Y;
+    questionCardContainer_htp.alpha = 0;
+    questionCardContainer_htp.visible = false;
+    questionCardContainer_htp.mouseEnabled = false;
+    questionCardContainer_htp.mouseChildren = false;
+	
+	questionCardShadow_htp = new createjs.Shape();
+    var shadowWidth_htp = QUESTION_CARD_WIDTH + 64;
+    var shadowHeight_htp = QUESTION_CARD_HEIGHT + 26;
+    var shadowHalfWidth_htp = shadowWidth_htp / 2;
+    var shadowHalfHeight_htp = shadowHeight_htp / 2;
+    questionCardShadow_htp.graphics
+      .beginFill("rgba(8,18,36,0.32)")
+      .drawRoundRect(
+        -shadowHalfWidth_htp,
+        -shadowHalfHeight_htp,
+        shadowWidth_htp,
+        shadowHeight_htp,
+        QUESTION_CARD_CORNER_RADIUS + 10
+      );
+    questionCardShadow_htp.y = 1;
+    questionCardShadow_htp.alpha = 0.32;
+    questionCardContainer_htp.addChild(questionCardShadow_htp);
 
-  var fallbackY = 0;
-  if (typeof introQues1Y !== "undefined") {
-    fallbackY = introQues1Y;
-  } else if (incontainer && typeof incontainer.y === "number") {
-    fallbackY = incontainer.y;
-  }
+    questionCardBackground_htp = new createjs.Shape();
+    questionCardContainer_htp.addChild(questionCardBackground_htp);
 
-  questionCardContainer_htp = new createjs.Container();
-  questionCardContainer_htp.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : fallbackX;
-  questionCardContainer_htp.y = fallbackY;
-  questionCardContainer_htp.alpha = 0;
-  questionCardContainer_htp.visible = false;
-  questionCardContainer_htp.mouseEnabled = false;
-  questionCardContainer_htp.mouseChildren = false;
-  questionCardContainer_htp.__baseY = fallbackY;
+    questionCardHighlight_htp = new createjs.Shape();
+    questionCardContainer_htp.addChild(questionCardHighlight_htp);
+	
+	renderQuestionCardBackground_htp();
+	
+    in_introQues1 = new createjs.Text(in_question, "800 66px 'Baloo 2'", "#F4FAFF");
+    in_introQues1.x = 0;
+    in_introQues1.y = 0;
+    in_introQues1.textAlign = "center";
+    in_introQues1.textBaseline = "middle";
+	in_introQues1.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
+    in_introQues1.visible = true;
+	
+	 questionCardContainer_htp.addChild(in_introQues1)
+incontainer.parent.addChild(questionCardContainer_htp);
 
-  questionCardShadow_htp = new createjs.Shape();
-  var shadowWidth_htp = QUESTION_CARD_WIDTH + 64;
-  var shadowHeight_htp = QUESTION_CARD_HEIGHT + 26;
-  var shadowHalfWidth_htp = shadowWidth_htp / 2;
-  var shadowHalfHeight_htp = shadowHeight_htp / 2;
-  questionCardShadow_htp.graphics
-    .beginFill("rgba(8,18,36,0.32)")
-    .drawRoundRect(
-      -shadowHalfWidth_htp,
-      -shadowHalfHeight_htp,
-      shadowWidth_htp,
-      shadowHeight_htp,
-      QUESTION_CARD_CORNER_RADIUS + 10
-    );
-  questionCardShadow_htp.y = 1;
-  questionCardShadow_htp.alpha = 0.32;
-  questionCardContainer_htp.addChild(questionCardShadow_htp);
-
-  questionCardBackground_htp = new createjs.Shape();
-  questionCardContainer_htp.addChild(questionCardBackground_htp);
-
-  questionCardHighlight_htp = new createjs.Shape();
-  questionCardContainer_htp.addChild(questionCardHighlight_htp);
-
-  renderQuestionCardBackground_htp();
-
-  in_introQues1 = new createjs.Text(in_question, "800 66px 'Baloo 2'", "#F4FAFF");
-  in_introQues1.x = 0;
-  in_introQues1.y = 0;
-  in_introQues1.textAlign = "center";
-  in_introQues1.textBaseline = "middle";
-  in_introQues1.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
-  in_introQues1.visible = true;
-
-  questionCardContainer_htp.addChild(in_introQues1);
-  incontainer.parent.addChild(questionCardContainer_htp);
 }
 
-  if (timeUpIconContainer) {
-    createjs.Tween.removeTweens(timeUpIconContainer);
-    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
-    createjs.Tween.get(timeUpIconContainer, { override: true })
-      .to({ scaleX: 1.08, scaleY: 1.08 }, 320, createjs.Ease.backOut)
-      .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
-  }
 
-  createjs.Tween.get(overlay)
-    .wait(1180)
-    .to({ alpha: 0 }, 240, createjs.Ease.quadIn)
-    .call(function () {
-      hideGameplayTimeUpBanner(true);
-      if (typeof onComplete === "function") {
-        onComplete();
-      }
-    });
-}
 
 function drawChoiceTileBackground(targetShape, colors) {
-  if (targetShape) {
-    var gradient = colors || CHOICE_TILE_BASE_COLORS;
-    targetShape.graphics
-      .clear()
-      .beginLinearGradientFill(gradient, [0, 1], -120, -80, 120, 80)
-      .drawRoundRect(-68, -54, 152, 132, 38)
-      .beginLinearGradientStroke(["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"] , [0, 1], -120, -64, 120, 64)
-      .setStrokeStyle(2)
-      .drawRoundRect(-68, -54, 152, 132, 38);
+  if (!targetShape) {
+    return;
   }
+
+  var gradient = colors || CHOICE_TILE_BASE_COLORS;
+  var stroke = ["rgba(228,215,255,0.85)", "rgba(142,114,255,0.65)"];
+
+  var width = 148;
+  var height = 148;
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+  var cornerRadius = 48;
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight);
+  g.beginLinearGradientFill(gradient, [0, 1], 0, -halfHeight, 0, halfHeight);
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
 }
 
-function drawClueSlotBackground(targetShape, colors) {
-  if (targetShape) {
-    var gradient = colors || CLUE_SLOT_BASE_COLORS;
-    targetShape.graphics
-      .clear()
-      .beginLinearGradientFill(gradient, [0, 1], -60, -60, 60, 60)
-      .drawRoundRect(-42, -50, 100, 100, 20);
+function drawChoiceSpeechWave(targetShape) {
+  if (!targetShape) {
+    return;
   }
+
+  var g = targetShape.graphics;
+  g.clear();
+
+  g.beginRadialGradientFill(
+    ["rgba(206,190,255,0.45)", "rgba(140,110,255,0)"] ,
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    92
+  );
+  g.drawCircle(0, 0, 92);
+}
+
+function drawChoiceDisabledOverlay(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+
+  var g = targetShape.graphics;
+  g.clear();
+  var overlayWidth = 148;
+  var overlayHeight = 148;
+  var overlayRadius = 48;
+
+  g.beginLinearGradientFill(
+    ["rgba(30,26,74,0.75)", "rgba(56,38,112,0.75)"],
+    [0, 1],
+    0,
+    -overlayHeight / 2,
+    0,
+    overlayHeight / 2
+  );
+  g.drawRoundRect(
+    -overlayWidth / 2,
+    -overlayHeight / 2,
+    overlayWidth,
+    overlayHeight,
+    overlayRadius
+  );
+
+  g.beginStroke("rgba(224,212,255,0.4)");
+  g.setStrokeStyle(3, "round", "round");
+  g.drawRoundRect(
+    -overlayWidth / 2 + 6,
+    -overlayHeight / 2 + 6,
+    overlayWidth - 12,
+    overlayHeight - 12,
+    overlayRadius - 10
+  );
 }
 
 function buildChoiceReadyBadge() {
   var badge = new createjs.Container();
   badge.mouseEnabled = false;
   badge.mouseChildren = false;
+  badge.visible = false;
+  badge.alpha = 0;
 
-  var badgeBg = new createjs.Shape();
-  badgeBg.graphics
+  var base = new createjs.Shape();
+  base.graphics
     .beginLinearGradientFill(
-      ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
+      ["rgba(242,227,255,0.95)", "rgba(168,132,255,0.95)"],
       [0, 1],
-      -30,
+      -32,
       -18,
-      30,
+      32,
       18
     )
     .drawRoundRect(-32, -18, 64, 36, 18);
-  badge.addChild(badgeBg);
+  badge.addChild(base);
 
-  var badgeHighlight = new createjs.Shape();
-  badgeHighlight.graphics
-    .beginLinearGradientFill(
-      ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -28,
-      -12,
-      28,
-      12
-    )
-    .drawRoundRect(-28, -14, 56, 24, 14);
-  badgeHighlight.alpha = 0.8;
-  badge.addChild(badgeHighlight);
+  var spark = new createjs.Shape();
+  spark.graphics
+    .beginFill("#5B2DE1")
+    .moveTo(0, -10)
+    .lineTo(8, 2)
+    .lineTo(-8, 2)
+    .closePath();
+  badge.addChild(spark);
 
-  var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
-  badgeTxt.textAlign = "center";
-  badgeTxt.textBaseline = "middle";
-  badgeTxt.y = 1;
-  badge.addChild(badgeTxt);
+  var dot = new createjs.Shape();
+  dot.graphics.beginFill("#FFFFFF").drawCircle(0, 8, 4.5);
+  badge.addChild(dot);
 
-  badge.visible = false;
-  badge.alpha = 0;
+  badge.__baseScale = 1;
+  badge.__designScale = 1;
 
   return badge;
 }
 
+function drawClueSlotBackground(targetShape, colors) {
+  if (!targetShape) {
+    return;
+  }
+
+  var gradient = colors || CLUE_SLOT_BASE_COLORS;
+  var stroke = ["rgba(222,205,255,0.85)", "rgba(142,114,255,0.6)"];
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(4, "round", "round");
+  g.beginLinearGradientStroke(stroke, [0, 1], -54, -54, 54, 54);
+  g.beginLinearGradientFill(gradient, [0, 1], -62, -62, 62, 62);
+  g.drawRoundRect(-44, -52, 108, 112, 36);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -50,
+    0,
+    30
+  );
+  g.drawRoundRect(-36, -44, 92, 88, 28);
+}
+
+function startChoiceReadyBadgeAnimation(badge) {
+  if (!badge) {
+    return;
+  }
+
+  stopChoiceReadyBadgeAnimation(badge);
+
+  var baseScale = badge.__baseScale || badge.scaleX || 1;
+  badge.scaleX = baseScale;
+  badge.scaleY = baseScale;
+  badge.__pulseTween = createjs.Tween.get(badge, { loop: true, override: false })
+    .to({ scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 320, createjs.Ease.sineOut)
+    .to({ scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.sineIn);
+}
+
+function stopChoiceReadyBadgeAnimation(badge) {
+  if (!badge) {
+    return;
+  }
+
+  if (badge.__pulseTween) {
+    badge.__pulseTween.setPaused(true);
+    badge.__pulseTween = null;
+  }
+  createjs.Tween.removeTweens(badge);
+}
+
 function ensureChoiceDecorations(index) {
-  if (!(index == null || index < 0) && container && container.parent) {
-    var parent = container.parent;
+  if (index == null || index < 0) {
+    return;
+  }
 
-    if (!choiceDisableOverlayArr[index]) {
-      var overlay = new createjs.Shape();
-      overlay.graphics
-        .beginLinearGradientFill(
-          ["rgba(8,14,30,0.78)", "rgba(12,20,42,0.6)"],
-          [0, 1],
-          -40,
-          -40,
-          40,
-          40
-        )
-        .drawRoundRect(-42, -50, 130, 130, 30);
-      overlay.visible = false;
-      overlay.alpha = 0;
-      overlay.mouseEnabled = false;
-      overlay.mouseChildren = false;
-      choiceDisableOverlayArr[index] = overlay;
-      parent.addChild(overlay);
-    }
+  if (!container || !container.parent) {
+    return;
+  }
 
-    if (!choiceReadyPulseArr[index]) {
-      var pulse = new createjs.Shape();
-      pulse.graphics
-        .setStrokeStyle(4)
-        .beginLinearGradientStroke(
-          ["rgba(120,196,255,0.8)", "rgba(120,196,255,0)"],
-          [0, 1],
-          0,
-          -60,
-          0,
-          60
-        )
-        .drawRoundRect(-40, -48, 124, 124, 32);
-      pulse.visible = false;
-      pulse.alpha = 0;
-      pulse.mouseEnabled = false;
-      pulse.mouseChildren = false;
-      choiceReadyPulseArr[index] = pulse;
-      parent.addChild(pulse);
-    }
+  var parent = container.parent;
 
-    if (!choiceReadyBadgeArr[index]) {
-      var badge = buildChoiceReadyBadge();
-      choiceReadyBadgeArr[index] = badge;
-      parent.addChild(badge);
-    }
+  if (!choiceDisableOverlayArr[index]) {
+    var overlay = new createjs.Shape();
+    overlay.graphics
+      .beginLinearGradientFill(
+        ["rgba(8,14,30,0.78)", "rgba(12,20,42,0.6)"],
+        [0, 1],
+        -40,
+        -40,
+        40,
+        40
+      )
+      .drawRoundRect(-42, -50, 130, 130, 30);
+    overlay.visible = false;
+    overlay.alpha = 0;
+    overlay.mouseEnabled = false;
+    overlay.mouseChildren = false;
+    choiceDisableOverlayArr[index] = overlay;
+    parent.addChild(overlay);
+  }
 
-    if (!choiceLiveAccentArr[index]) {
-      var accent = new createjs.Shape();
-      var accentGraphics = accent.graphics;
-      accentGraphics
-        .beginLinearGradientFill(
-          ["rgba(124,196,255,0.38)", "rgba(124,196,255,0)", "rgba(96,148,255,0)"] ,
-          [0, 0.6, 1],
-          0,
-          -60,
-          0,
-          42
-        )
-        .drawRoundRect(-54, -32, 108, 48, 28);
-      accentGraphics
-        .beginLinearGradientFill(
-          ["rgba(124,196,255,0.32)", "rgba(124,196,255,0)"] ,
-          [0, 1],
-          0,
-          0,
-          0,
-          40
-        )
-        .moveTo(-10, 12)
-        .lineTo(0, 32)
-        .lineTo(10, 12)
-        .closePath();
-      accent.visible = false;
-      accent.alpha = 0;
-      accent.mouseEnabled = false;
-      accent.mouseChildren = false;
-      choiceLiveAccentArr[index] = accent;
-      parent.addChild(accent);
-    }
+  if (!choiceReadyPulseArr[index]) {
+    var pulse = new createjs.Shape();
+    pulse.graphics
+      .setStrokeStyle(4)
+      .beginLinearGradientStroke(
+        ["rgba(120,196,255,0.8)", "rgba(120,196,255,0)"],
+        [0, 1],
+        0,
+        -60,
+        0,
+        60
+      )
+      .drawRoundRect(-40, -48, 124, 124, 32);
+    pulse.visible = false;
+    pulse.alpha = 0;
+    pulse.mouseEnabled = false;
+    pulse.mouseChildren = false;
+    choiceReadyPulseArr[index] = pulse;
+    parent.addChild(pulse);
+  }
+
+  if (!choiceReadyBadgeArr[index]) {
+    var badge = new createjs.Container();
+    badge.mouseEnabled = false;
+    badge.mouseChildren = false;
+
+    var badgeBg = new createjs.Shape();
+    badgeBg.graphics
+      .beginLinearGradientFill(
+        ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
+        [0, 1],
+        -30,
+        -18,
+        30,
+        18
+      )
+      .drawRoundRect(-32, -18, 64, 36, 18);
+    badge.addChild(badgeBg);
+
+    var badgeHighlight = new createjs.Shape();
+    badgeHighlight.graphics
+      .beginLinearGradientFill(
+        ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
+        [0, 1],
+        -28,
+        -12,
+        28,
+        12
+      )
+      .drawRoundRect(-28, -14, 56, 24, 14);
+    badgeHighlight.alpha = 0.8;
+    badge.addChild(badgeHighlight);
+
+    var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
+    badgeTxt.textAlign = "center";
+    badgeTxt.textBaseline = "middle";
+    badgeTxt.y = 1;
+    badge.addChild(badgeTxt);
+
+    badge.visible = false;
+    badge.alpha = 0;
+
+    choiceReadyBadgeArr[index] = badge;
+    parent.addChild(badge);
   }
 }
 
 function positionChoiceDecorations(index) {
-  if (choiceArr[index] && container && container.parent) {
-    var parent = container.parent;
-    var tile = choiceArr[index];
-    var bg = choiceBgArr[index];
-    var overlay = choiceDisableOverlayArr[index];
-    var pulse = choiceReadyPulseArr[index];
-    var badge = choiceReadyBadgeArr[index];
-    var glow = choiceGlowArr ? choiceGlowArr[index] : null;
-    var baseScale = tile.__baseScale || tile.scaleX || 1;
-    var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.08;
-    var accent = choiceLiveAccentArr[index];
+  if (!choiceArr[index]) {
+    return;
+  }
 
-    if (bg) {
-      bg.x = tile.x;
-      bg.y = tile.y;
-      bg.visible = tile.visible;
-      bg.scaleX = bg.scaleY = bgScale;
-      try {
-        parent.setChildIndex(bg, Math.max(parent.getChildIndex(tile) - 1, 0));
-      } catch (err) {}
-    }
+  if (!container || !container.parent) {
+    return;
+  }
 
-    if (glow) {
-      glow.x = tile.x;
-      glow.y = tile.y + 6;
-      glow.scaleX = glow.scaleY = glow.__targetScale || baseScale * 1.26;
-      try {
-        parent.setChildIndex(glow, parent.getChildIndex(tile) - 1);
-      } catch (err) {}
-    }
+  var parent = container.parent;
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var overlay = choiceDisableOverlayArr[index];
+  var pulse = choiceReadyPulseArr[index];
+  var badge = choiceReadyBadgeArr[index];
+  var baseScale = tile.__baseScale || tile.scaleX || 1;
+  var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.18;
 
-    if (overlay) {
-      overlay.x = tile.x;
-      overlay.y = tile.y;
-      overlay.scaleX = overlay.scaleY = bgScale;
-      overlay.__baseScale = bgScale;
-      overlay.visible = tile.visible;
-      try {
-        parent.setChildIndex(overlay, parent.getChildIndex(tile) + 1);
-      } catch (err) {}
-    }
+  if (overlay) {
+    overlay.x = tile.x;
+    overlay.y = tile.y;
+    overlay.scaleX = overlay.scaleY = bgScale;
+    overlay.__baseScale = bgScale;
+    overlay.visible = tile.visible;
+    try {
+      parent.setChildIndex(overlay, parent.getChildIndex(tile) + 1);
+    } catch (err) {}
+  }
 
-    if (pulse) {
-      pulse.x = tile.x;
-      pulse.y = tile.y;
-      pulse.scaleX = pulse.scaleY = baseScale * 1.2;
-      pulse.__baseScale = pulse.scaleX;
-      try {
-        parent.setChildIndex(pulse, parent.getChildIndex(tile) + 2);
-      } catch (err) {}
-    }
+  if (pulse) {
+    pulse.x = tile.x;
+    pulse.y = tile.y;
+    pulse.scaleX = pulse.scaleY = baseScale * 1.2;
+    pulse.__baseScale = pulse.scaleX;
+    try {
+      parent.setChildIndex(pulse, parent.getChildIndex(tile) + 2);
+    } catch (err) {}
+  }
 
-    if (badge) {
-      var badgeOffset = 74 * baseScale;
-      badge.x = tile.x;
-      badge.y = tile.y - badgeOffset;
-      try {
-        parent.setChildIndex(badge, parent.getChildIndex(tile) + 3);
-      } catch (err) {}
-    }
-
-    if (accent) {
-      var accentOffset = Math.max(76, baseScale * 92);
-      accent.x = tile.x;
-      accent.y = tile.y - accentOffset;
-      accent.__baseScale = baseScale * 1.05;
-      accent.scaleX = accent.scaleY = accent.__baseScale;
-      try {
-        parent.setChildIndex(accent, parent.getChildIndex(tile) + 4);
-      } catch (err) {}
-    }
+  if (badge) {
+    var badgeOffset = 74 * baseScale;
+    badge.x = tile.x;
+    badge.y = tile.y - badgeOffset;
+    try {
+      parent.setChildIndex(badge, parent.getChildIndex(tile) + 3);
+    } catch (err) {}
   }
 }
 
 function stopChoiceReadyPulse(index) {
-  if (index != null) {
-    if (choiceReadyTweenArr[index]) {
-      try {
-        choiceReadyTweenArr[index].setPaused(true);
-      } catch (err) {}
-      choiceReadyTweenArr[index] = null;
-    }
-
-    if (choiceReadyPulseArr[index]) {
-      var pulse = choiceReadyPulseArr[index];
-      createjs.Tween.removeTweens(pulse);
-      pulse.alpha = 0;
-      pulse.visible = false;
-      if (pulse.__baseScale) {
-        pulse.scaleX = pulse.scaleY = pulse.__baseScale;
-      }
-    }
+  if (index == null) {
+    return;
   }
-}
 
-function stopChoiceReadyBadgeAnimation(index) {
-  var badge = choiceReadyBadgeArr[index];
-  if (badge) {
-    if (choiceReadyBadgeTweenArr[index]) {
-      try {
-        choiceReadyBadgeTweenArr[index].setPaused(true);
-      } catch (err) {}
-      choiceReadyBadgeTweenArr[index] = null;
+  if (choiceReadyTweenArr[index]) {
+    try {
+      choiceReadyTweenArr[index].setPaused(true);
+    } catch (err) {}
+    choiceReadyTweenArr[index] = null;
+  }
+
+  if (choiceReadyPulseArr[index]) {
+    var pulse = choiceReadyPulseArr[index];
+    createjs.Tween.removeTweens(pulse);
+    pulse.alpha = 0;
+    pulse.visible = false;
+    if (pulse.__baseScale) {
+      pulse.scaleX = pulse.scaleY = pulse.__baseScale;
     }
-
-    createjs.Tween.removeTweens(badge);
-    badge.scaleX = badge.scaleY = 1;
-    badge.alpha = 0;
   }
 }
 
 function hideChoiceReadyBadge(index) {
   var badge = choiceReadyBadgeArr[index];
-  if (badge) {
-    stopChoiceReadyBadgeAnimation(index);
-    badge.visible = false;
-    badge.alpha = 0;
-    badge.scaleX = badge.scaleY = 1;
+  if (!badge) {
+    return;
   }
+
+  createjs.Tween.removeTweens(badge);
+  badge.visible = false;
+  badge.alpha = 0;
+  badge.scaleX = badge.scaleY = 1;
 }
 
 function hideChoiceDecorations(index) {
@@ -446,31 +548,31 @@ function hideChoiceDecorations(index) {
   }
 
   hideChoiceReadyBadge(index);
-  stopChoiceLiveAccent(index);
 }
 
 function setChoiceDisabledAppearance(index) {
-  if (choiceArr[index]) {
-    var overlay = choiceDisableOverlayArr[index];
-    var pulse = choiceReadyPulseArr[index];
-
-    if (overlay) {
-      overlay.visible = true;
-      overlay.alpha = 0.45;
-      if (overlay.__baseScale) {
-        overlay.scaleX = overlay.scaleY = overlay.__baseScale;
-      }
-    }
-
-    if (pulse) {
-      createjs.Tween.removeTweens(pulse);
-      pulse.alpha = 0;
-      pulse.visible = false;
-    }
-
-    hideChoiceReadyBadge(index);
-    stopChoiceLiveAccent(index);
+  if (!choiceArr[index]) {
+    return;
   }
+
+  var overlay = choiceDisableOverlayArr[index];
+  var pulse = choiceReadyPulseArr[index];
+
+  if (overlay) {
+    overlay.visible = true;
+    overlay.alpha = 0.62;
+    if (overlay.__baseScale) {
+      overlay.scaleX = overlay.scaleY = overlay.__baseScale;
+    }
+  }
+
+  if (pulse) {
+    createjs.Tween.removeTweens(pulse);
+    pulse.alpha = 0;
+    pulse.visible = false;
+  }
+
+  hideChoiceReadyBadge(index);
 }
 
 function activateChoiceReadyAppearance(index) {
@@ -500,22 +602,18 @@ function activateChoiceReadyAppearance(index) {
   }
 
   if (badge) {
-    stopChoiceReadyBadgeAnimation(index);
     badge.visible = true;
     badge.scaleX = badge.scaleY = 0.6;
     badge.alpha = 0;
-    choiceReadyBadgeTweenArr[index] = createjs.Tween.get(badge, { override: true })
+    createjs.Tween.get(badge, { override: true })
       .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.backOut)
       .wait(900)
       .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
       .call(function () {
         badge.visible = false;
         badge.scaleX = badge.scaleY = 1;
-        choiceReadyBadgeTweenArr[index] = null;
       });
   }
-
-  startChoiceLiveAccent(index);
 }
 
 function resetChoiceTileVisual(index) {
@@ -547,50 +645,6 @@ function resetChoiceTileVisual(index) {
     createjs.Tween.removeTweens(overlay);
     overlay.alpha = 0;
     overlay.visible = false;
-  }
-
-  stopChoiceLiveAccent(index);
-}
-
-function startChoiceLiveAccent(index) {
-  var accent = choiceLiveAccentArr[index];
-  var tile = choiceArr[index];
-  if (accent && tile) {
-    stopChoiceLiveAccent(index);
-
-    if (typeof positionChoiceDecorations === "function") {
-      positionChoiceDecorations(index);
-    }
-
-    accent.visible = true;
-    accent.alpha = 0;
-    var baseScale = accent.__baseScale || (tile.__baseScale || tile.scaleX || 1) * 1.05;
-    accent.scaleX = accent.scaleY = baseScale * 0.86;
-    accent.__baseScale = baseScale;
-
-    choiceLiveAccentTweenArr[index] = createjs.Tween.get(accent, { loop: true })
-      .to({ alpha: 0.55, scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.quadOut)
-      .to({ alpha: 0.18, scaleX: baseScale * 1.12, scaleY: baseScale * 1.12 }, 420, createjs.Ease.quadIn)
-      .wait(160);
-  }
-}
-
-function stopChoiceLiveAccent(index) {
-  var accent = choiceLiveAccentArr[index];
-  if (accent) {
-    if (choiceLiveAccentTweenArr[index]) {
-      try {
-        choiceLiveAccentTweenArr[index].setPaused(true);
-      } catch (err) {}
-      choiceLiveAccentTweenArr[index] = null;
-    }
-
-    createjs.Tween.removeTweens(accent);
-    accent.alpha = 0;
-    accent.visible = false;
-    if (accent.__baseScale) {
-      accent.scaleX = accent.scaleY = accent.__baseScale;
-    }
   }
 }
 
@@ -691,22 +745,6 @@ function ensureTimeUpOverlay() {
   timeUpIconHand.rotation = -42;
   timeUpIconContainer.addChild(timeUpIconHand);
 
-  timeUpIconGlow = new createjs.Shape();
-  timeUpIconGlow.graphics
-    .beginRadialGradientFill(
-      ["rgba(124,206,255,0.48)", "rgba(124,206,255,0)"] ,
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      86
-    )
-    .drawCircle(0, 0, 86);
-  timeUpIconGlow.alpha = 0;
-  timeUpIconContainer.addChildAt(timeUpIconGlow, 0);
-
   var iconSpark = new createjs.Shape();
   iconSpark.graphics
     .beginRadialGradientFill(
@@ -771,23 +809,6 @@ function showGameplayTimeUpBanner(onComplete) {
       .to({ rotation: -8 }, 260, createjs.Ease.quadInOut);
   }
 
-  if (timeUpIconGlow) {
-    createjs.Tween.removeTweens(timeUpIconGlow);
-    timeUpIconGlow.alpha = 0.08;
-    timeUpIconGlow.scaleX = timeUpIconGlow.scaleY = 0.9;
-    createjs.Tween.get(timeUpIconGlow, { override: true, loop: true })
-      .to({ alpha: 0.46, scaleX: 1.05, scaleY: 1.05 }, 360, createjs.Ease.quadOut)
-      .to({ alpha: 0.12, scaleX: 0.92, scaleY: 0.92 }, 420, createjs.Ease.quadIn);
-  }
-
-  if (timeUpIconContainer) {
-    createjs.Tween.removeTweens(timeUpIconContainer);
-    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
-    createjs.Tween.get(timeUpIconContainer, { override: true })
-      .to({ scaleX: 1.08, scaleY: 1.08 }, 320, createjs.Ease.backOut)
-      .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
-  }
-
   createjs.Tween.get(overlay)
     .wait(1180)
     .to({ alpha: 0 }, 240, createjs.Ease.quadIn)
@@ -809,16 +830,6 @@ function hideGameplayTimeUpBanner(force) {
   if (timeUpIconHand) {
     createjs.Tween.removeTweens(timeUpIconHand);
     timeUpIconHand.rotation = -42;
-  }
-
-  if (timeUpIconGlow) {
-    createjs.Tween.removeTweens(timeUpIconGlow);
-    timeUpIconGlow.alpha = 0;
-  }
-
-  if (timeUpIconContainer) {
-    createjs.Tween.removeTweens(timeUpIconContainer);
-    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
   }
 
   if (force) {
@@ -909,9 +920,8 @@ function ensureQuestionCard() {
 
   if (!questionCardContainer) {
     questionCardContainer = new createjs.Container();
-    questionCardContainer.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
-    questionCardContainer.y = 280;
-    questionCardContainer.__baseY = 280;
+    questionCardContainer.x = canvas.width / 2;
+    questionCardContainer.y = 308;
     questionCardContainer.alpha = 0;
     questionCardContainer.visible = false;
     questionCardContainer.mouseEnabled = false;
@@ -1063,23 +1073,6 @@ function layoutQuestionCardContents() {
   }
 }
 
-function layoutGameplayQuestionCard() {
-  if (!questionCardContainer) {
-    return;
-  }
-
-  var centerX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
-  questionCardContainer.x = centerX;
-  if (typeof questionCardContainer.__baseY === "number") {
-    questionCardContainer.y = questionCardContainer.__baseY;
-  } else {
-    questionCardContainer.y = questionCardContainer.y || 280;
-    questionCardContainer.__baseY = questionCardContainer.y;
-  }
-
-  layoutQuestionCardContents();
-}
-
 function emphasizeChoiceTile(index, isHover) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
@@ -1170,7 +1163,6 @@ function releaseChoiceTile(index) {
   }
 
 function markChoiceResult(index, isCorrect) {
-    stopChoiceLiveAccent(index);
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
@@ -1191,7 +1183,7 @@ function markChoiceResult(index, isCorrect) {
       createjs.Tween.get(bg, { override: true })
         .to({ scaleX: bgBase * 1.05, scaleY: bgBase * 1.05, alpha: 1 }, 160, createjs.Ease.quadOut)
         .to({ scaleX: bgBase, scaleY: bgBase }, 200, createjs.Ease.quadOut)
-        .wait(isCorrect ? 420 : 900)
+        .wait(680)
         .call(function () {
           drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
         });
@@ -1207,7 +1199,7 @@ function markChoiceResult(index, isCorrect) {
     if (glow) {
       createjs.Tween.get(glow, { override: true })
         .to({ alpha: isCorrect ? 0.5 : 0.2 }, 180, createjs.Ease.quadOut)
-        .wait(isCorrect ? 420 : 900)
+        .wait(isCorrect ? 520 : 760)
         .to({ alpha: 0.38 }, 220, createjs.Ease.quadOut);
     }
 
@@ -2678,39 +2670,39 @@ function ChoiceFX_addGlow(ch, on){
 }
 
 function ChoiceFX_pressRipple(parent, x, y){
-  var r = new createjs.Shape();
+  const r = new createjs.Shape();
   r.alpha = 0.25;
   r.graphics.setStrokeStyle(6).beginStroke("#2EC4B6").drawCircle(0,0,1);
   r.x = x; r.y = y;
   parent.addChild(r);
   createjs.Tween.get(r)
     .to({ scaleX: 28, scaleY: 28, alpha: 0 }, 420, createjs.Ease.quadOut)
-    .call(function(){ parent.removeChild(r); });
+    .call(()=> parent.removeChild(r));
 }
 
 function ChoiceFX_randomConfetti(){
-  var colors = ["#FF9F1C","#2EC4B6","#E71D36","#FDFFFC","#7F5AF0"];
+  const colors = ["#FF9F1C","#2EC4B6","#E71D36","#FDFFFC","#7F5AF0"];
   return colors[(Math.random()*colors.length)|0];
 }
 
 function ChoiceFX_confettiBurst(container, x, y){
-  for (var i=0; i<16; i++){
-    var p = new createjs.Shape();
-    var sz = 6 + Math.random()*6;
+  for (let i=0; i<16; i++){
+    const p = new createjs.Shape();
+    const sz = 6 + Math.random()*6;
     p.graphics.beginFill(ChoiceFX_randomConfetti()).drawRect(-sz/2, -sz/2, sz, sz);
     p.x = x; p.y = y; p.rotation = Math.random()*360;
     container.addChild(p);
-    var dx = (-80 + Math.random()*160);
-    var dy = (-140 + Math.random()*100);
-    var tt = 500 + Math.random()*400;
+    const dx = (-80 + Math.random()*160);
+    const dy = (-140 + Math.random()*100);
+    const tt = 500 + Math.random()*400;
     createjs.Tween.get(p)
       .to({ x: x+dx, y: y+dy, alpha: 0, rotation: p.rotation+360 }, tt, createjs.Ease.quadOut)
-      .call(function(){ container.removeChild(p); });
+      .call(()=> container.removeChild(p));
   }
 }
 
 function ChoiceFX_wrongShake(target){
-  var baseX = target.x;
+  const baseX = target.x;
   createjs.Tween.get(target)
     .to({ x: baseX - 10 }, 60)
     .to({ x: baseX + 10 }, 60)
@@ -2720,7 +2712,7 @@ function ChoiceFX_wrongShake(target){
 }
 
 function ChoiceFX_redFlash(obj){
-  var old = obj.alpha;
+  const old = obj.alpha;
   createjs.Tween.get(obj)
     .to({ alpha: 0.3 }, 70)
     .to({ alpha: old }, 120);
@@ -2731,7 +2723,7 @@ function ChoiceFX_drawFocusRing(target, on){
 
   if (on){
     if (!target._ring){
-      var ring = new createjs.Shape();
+      const ring = new createjs.Shape();
       ring.mouseEnabled = false;
       ring.mouseChildren = false;
       ring.graphics.setStrokeStyle(4)
@@ -2746,9 +2738,9 @@ function ChoiceFX_drawFocusRing(target, on){
       ring.regY = target.regY || 0;
 
       // Insert just below the target in the parent's display list
-      var parent = target.parent;
+      const parent = target.parent;
       if (parent){
-        var idx = parent.getChildIndex(target);
+        const idx = parent.getChildIndex(target);
         if (typeof parent.addChildAt === "function"){
           parent.addChildAt(ring, Math.max(0, idx));
         } else {
@@ -2762,46 +2754,46 @@ function ChoiceFX_drawFocusRing(target, on){
       target._ring.y = target.y;
     }
   } else if (target._ring){
-    var r = target._ring;
+    const r = target._ring;
     if (r.parent) r.parent.removeChild(r);
     target._ring = null;
   }
 }
 
 function ChoiceFX_addGlowPulse(obj){
-  var offShadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
+  const offShadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
   obj.shadow = new createjs.Shadow("rgba(255,200,0,0.8)", 0, 0, 20);
-  createjs.Tween.get(obj).wait(100).call(function(){ obj.shadow = offShadow; });
+  createjs.Tween.get(obj).wait(100).call(()=> obj.shadow = offShadow);
 }
 
 /* Entrance animation for a passed array of choices */
 function ChoiceFX_entrance(choiceArr, baseDelay){
   var startDelay = typeof baseDelay === "number" ? baseDelay : 1600;
-  for (var i = 0; i < choiceArr.length; i++) {
-    var ch = choiceArr[i];
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
     if(!ch) continue;
     if (typeof ch.scaleX === "undefined") continue;
     if (!ch.shadow) ch.shadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
     ch.scaleX = ch.scaleY = 0.55;
     ch.alpha = 0;
-    var baseY = ch.y || 620;
+    const baseY = ch.y || 620;
    // ch.y = baseY + 20;
 
     createjs.Tween.get(ch)
       .wait(startDelay + i*120)
       .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: baseY, rotation: 15 }, 220, createjs.Ease.quadOut)
       .to({ rotation: 0 }, 180, createjs.Ease.quadOut)
-      .call(function(){ ChoiceFX_startIdleBob(ch); });
+      .call(()=> ChoiceFX_startIdleBob(ch));
   }
 }
 
 /* Hover/HitArea wiring */
 function ChoiceFX_bindHover(choiceArr){
-  for (var i = 0; i < choiceArr.length; i++) {
-    var ch = choiceArr[i];
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
     if(!ch) continue;
 
-    var hit = new createjs.Shape();
+    const hit = new createjs.Shape();
     hit.graphics.beginFill("#000").drawRoundRect(-70, -70, 140, 140, 20);
     ch.hitArea = hit;
 
@@ -2809,19 +2801,19 @@ function ChoiceFX_bindHover(choiceArr){
     ch.mouseEnabled = true;
 
     ch.addEventListener("mouseover", function(e){
-      var t = e.currentTarget;
+      const t = e.currentTarget;
       createjs.Tween.get(t, { override:true })
         .to({ scaleX: 0.78, scaleY: 0.78 }, 160, createjs.Ease.quadOut);
       ChoiceFX_addGlow(t, true);
       //ChoiceFX_drawFocusRing(t, true);
     });
     ch.addEventListener("mouseout", function(e){
-      var t = e.currentTarget;
+      const t = e.currentTarget;
       createjs.Tween.get(t, { override:true })
         .to({ scaleX: 0.72, scaleY: 0.72}, 160, createjs.Ease.quadIn);
       ChoiceFX_addGlow(t, false);
      //ChoiceFX_drawFocusRing(t, false);
-         //t.y = t.y +4;
+	 //t.y = t.y +4;
 	 ChoiceFX_startIdleBob(t);
     });
   }
@@ -2829,7 +2821,7 @@ function ChoiceFX_bindHover(choiceArr){
 
 /* Reveal pop animation helper */
 function ChoiceFX_revealPop(displayObj, style){
-  var qObj = displayObj;
+  const qObj = displayObj;
   if(!qObj) return;
   switch(style){
     case "spin":
@@ -2839,7 +2831,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, rotation: 0, scaleX: 1.3, scaleY: 1.3 }, 280, createjs.Ease.backOut)
         .to({ scaleX: 1, scaleY: 1 }, 120)
-        .call(function(){ ChoiceFX_addGlowPulse(qObj); });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
       break;
     case "soft":
       qObj.alpha = 0.2;
@@ -2847,7 +2839,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, scaleX: 1.1, scaleY: 1.1 }, 200, createjs.Ease.sineOut)
         .to({ scaleX: 1, scaleY: 1 }, 180, createjs.Ease.sineInOut)
-        .call(function(){ ChoiceFX_addGlowPulse(qObj); });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
       break;
     default: // "pop"
       qObj.scaleX = qObj.scaleY = 0;
@@ -2855,7 +2847,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, scaleX: 1.4, scaleY: 1.4 }, 200, createjs.Ease.backOut)
         .to({ scaleX: 1, scaleY: 1 }, 150, createjs.Ease.quadOut)
-        .call(function(){ ChoiceFX_addGlowPulse(qObj); });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
   }
 }
 /* ===== End ChoiceFX Helpers ===== */
@@ -2866,47 +2858,28 @@ function ChoiceFX_revealPop(displayObj, style){
  * Keeps your original Text (QusTxtString) untouched; mirrors visibility/alpha.
  */
 function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
-  var defaults = {
-    padX: 24,
-    padY: 12,
+  const cfg = Object.assign({
+    padX: 24, padY: 12,
     fill: "rgba(0,0,0,0.55)",
-    stroke: "rgba(255,255,255,0.12)",
-    strokeW: 2,
-    maxRadius: 20,
-    addShadow: true,
-    autoTick: true
-  };
+    stroke: "rgba(255,255,255,0.12)", strokeW: 2,
+    maxRadius: 20, addShadow: true, autoTick: true
+  }, opts || {});
 
-  var cfg = {};
-  for (var defKey in defaults) {
-    if (Object.prototype.hasOwnProperty.call(defaults, defKey)) {
-      cfg[defKey] = defaults[defKey];
-    }
-  }
-
-  if (opts) {
-    for (var optKey in opts) {
-      if (Object.prototype.hasOwnProperty.call(opts, optKey)) {
-        cfg[optKey] = opts[optKey];
-      }
-    }
-  }
-
-  var bg = new createjs.Shape();
-  var idx = parent.getChildIndex(textObj);
+  const bg = new createjs.Shape();
+  const idx = parent.getChildIndex(textObj);
   parent.addChildAt(bg, Math.max(0, idx)); // directly under the text
 
   function measure() {
-    var b = textObj.getBounds();
+    let b = textObj.getBounds();
     if (!b) { textObj.cache(0,0,1,1); textObj.uncache(); b = textObj.getBounds(); }
     return b;
   }
 
   function draw() {
-    var b = measure(); if (!b) return;
-    var w = b.width + cfg.padX * 2, h = b.height + cfg.padY * 2;
-    var r = Math.min(cfg.maxRadius, h/2);
-    var left = textObj.x - w/2, top = textObj.y - h/2;
+    const b = measure(); if (!b) return;
+    const w = b.width + cfg.padX * 2, h = b.height + cfg.padY * 2;
+    const r = Math.min(cfg.maxRadius, h/2);
+    const left = textObj.x - w/2, top = textObj.y - h/2;
 
     bg.graphics.clear()
       .setStrokeStyle(cfg.strokeW)
@@ -2922,9 +2895,9 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
 
   draw();
 
-  var tickH = null;
+  let tickH = null;
   if (cfg.autoTick) {
-    tickH = createjs.Ticker.on("tick", function() {
+    tickH = createjs.Ticker.on("tick", () => {
       if (!bg.parent || !textObj.parent) { if (tickH) createjs.Ticker.off("tick", tickH); tickH = null; return; }
       bg.visible = textObj.visible;
       bg.alpha = textObj.alpha;
@@ -2933,45 +2906,8 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
   }
 
   return {
-    bg: bg,
+    bg,
     refresh: draw,
-    destroy: function () {
-      if (tickH) {
-        createjs.Ticker.off("tick", tickH);
-      }
-      if (bg.parent) {
-        bg.parent.removeChild(bg);
-      }
-    }
+    destroy: () => { if (tickH) createjs.Ticker.off("tick", tickH); if (bg.parent) bg.parent.removeChild(bg); }
   };
-}
-
-var GameUIGlobal = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : this;
-if (GameUIGlobal) {
-  GameUIGlobal.call_UI_ambientOverlay = call_UI_ambientOverlay;
-  GameUIGlobal.call_UI_gameQuestion = call_UI_gameQuestion;
-  GameUIGlobal.call_UI_introQuestionCardContainer = call_UI_introQuestionCardContainer;
-  GameUIGlobal.drawChoiceTileBackground = drawChoiceTileBackground;
-  GameUIGlobal.drawClueSlotBackground = drawClueSlotBackground;
-  GameUIGlobal.buildChoiceReadyBadge = buildChoiceReadyBadge;
-  GameUIGlobal.ensureChoiceDecorations = ensureChoiceDecorations;
-  GameUIGlobal.positionChoiceDecorations = positionChoiceDecorations;
-  GameUIGlobal.stopChoiceReadyPulse = stopChoiceReadyPulse;
-  GameUIGlobal.stopChoiceReadyBadgeAnimation = stopChoiceReadyBadgeAnimation;
-  GameUIGlobal.hideChoiceReadyBadge = hideChoiceReadyBadge;
-  GameUIGlobal.hideChoiceDecorations = hideChoiceDecorations;
-  GameUIGlobal.setChoiceDisabledAppearance = setChoiceDisabledAppearance;
-  GameUIGlobal.activateChoiceReadyAppearance = activateChoiceReadyAppearance;
-  GameUIGlobal.resetChoiceTileVisual = resetChoiceTileVisual;
-  GameUIGlobal.startChoiceLiveAccent = startChoiceLiveAccent;
-  GameUIGlobal.stopChoiceLiveAccent = stopChoiceLiveAccent;
-  GameUIGlobal.showGameplayTimeUpBanner = showGameplayTimeUpBanner;
-  GameUIGlobal.hideGameplayTimeUpBanner = hideGameplayTimeUpBanner;
-  GameUIGlobal.SAUI_attachQuestionLabelBG = SAUI_attachQuestionLabelBG;
-  if (typeof renderQuestionCardBackground === "function") {
-    GameUIGlobal.renderQuestionCardBackground = renderQuestionCardBackground;
-  }
-  if (typeof renderQuestionCardBackground_htp === "function") {
-    GameUIGlobal.renderQuestionCardBackground_htp = renderQuestionCardBackground_htp;
-  }
 }
