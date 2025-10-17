@@ -922,14 +922,31 @@ function showGameplayTimeUpBanner(onComplete) {
       .to({ alpha: 0 }, 440, createjs.Ease.quadIn);
   }
 
+  var overlayDisplayDuration = 3000;
+  var overlayFadeDuration = 320;
+  var overlayCompleteFired = false;
+
+  function fireOverlayComplete() {
+    if (overlayCompleteFired) {
+      return;
+    }
+    overlayCompleteFired = true;
+
+    if (typeof onComplete === "function") {
+      try {
+        onComplete();
+      } catch (overlayCompleteError) {
+        console.log("Error: time up complete handler", overlayCompleteError);
+      }
+    }
+  }
+
   createjs.Tween.get(overlay)
-    .wait(3600)
-    .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
+    .wait(overlayDisplayDuration)
+    .call(fireOverlayComplete)
+    .to({ alpha: 0 }, overlayFadeDuration, createjs.Ease.quadIn)
     .call(function () {
       hideGameplayTimeUpBanner(true);
-      if (typeof onComplete === "function") {
-        onComplete();
-      }
     });
 }
 

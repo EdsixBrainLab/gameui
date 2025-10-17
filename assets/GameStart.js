@@ -221,7 +221,9 @@ if (questionOverImg) {
                 createjs.Tween.get(questionOverImg).wait(100).to({ alpha: 1, x: 0, y: 0 }, 8000);*/
 
                 if (typeof showGameplayTimeUpBanner === "function") {
-                    showGameplayTimeUpBanner(removeTimeOverImg);
+                    showGameplayTimeUpBanner(function () {
+                        removeTimeOverImg({ deferOverlayHide: true });
+                    });
                 } else {
                     timeOverImgTimer = setInterval(removeTimeOverImg, 300);
                 }
@@ -274,9 +276,12 @@ if (questionOverImg) {
     }
 }
 
-function removeTimeOverImg() {
+function removeTimeOverImg(options) {
     clearInterval(timeOverImgTimer);
-    if (typeof hideGameplayTimeUpBanner === "function") {
+    var opts = options || {};
+    var deferOverlayHide = !!opts.deferOverlayHide;
+
+    if (!deferOverlayHide && typeof hideGameplayTimeUpBanner === "function") {
         hideGameplayTimeUpBanner(true);
     }
     timeOverImg.visible = false;
