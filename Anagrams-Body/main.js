@@ -338,6 +338,10 @@ function CreateGameElements() {
 
   ensureQuestionCard();
 
+  if (typeof hideGameplayTimeUpBanner === "function") {
+    hideGameplayTimeUpBanner(true);
+  }
+
   for (i = 0; i < maxLetterCnt; i++) {
     if (!clueBgArr[i]) {
       clueBgArr[i] = new createjs.Shape();
@@ -398,6 +402,11 @@ function CreateGameElements() {
     container.parent.addChild(choiceArr[i]);
     choiceArr[i].x = 205 + i * 120;
     choiceArr[i].y = 620;
+
+    if (typeof ensureChoiceDecorations === "function") {
+      ensureChoiceDecorations(i);
+      hideChoiceDecorations(i);
+    }
   }
 
   if (questionCardContainer && container.parent) {
@@ -512,6 +521,13 @@ function enablechoices() {
       clueBgArr[i].visible = false;
       clueBgArr[i].alpha = 0;
     }
+
+    if (typeof resetChoiceTileVisual === "function") {
+      resetChoiceTileVisual(i);
+      if (!choiceArr[i] || !choiceArr[i].visible) {
+        hideChoiceDecorations(i);
+      }
+    }
   }
 
   for (i = 0; i < cLen; i++) {
@@ -622,6 +638,11 @@ function enablechoices() {
     choiceArr[i].mouseEnabled = true;
     choiceArr[i].cursor = "pointer";
     choiceArr[i].__baseScale = choiceArr[i].scaleX;
+
+    if (typeof positionChoiceDecorations === "function") {
+      positionChoiceDecorations(i);
+      setChoiceDisabledAppearance(i);
+    }
   }
 
 
@@ -704,13 +725,40 @@ function createTween() {
         .to({ alpha: 0.38, scaleX: glowTargetScale, scaleY: glowTargetScale }, 260, createjs.Ease.quadOut);
     }
 
+    var endChoiceY = choiceArr[i].y;
+    var startChoiceY = endChoiceY - 30;
+    choiceArr[i].y = startChoiceY;
+
+    if (typeof positionChoiceDecorations === "function") {
+      positionChoiceDecorations(i);
+    }
+
+    if (typeof stopChoiceReadyPulse === "function") {
+      stopChoiceReadyPulse(i);
+    }
+
+    if (typeof hideChoiceReadyBadge === "function") {
+      hideChoiceReadyBadge(i);
+    }
+
+    if (typeof choiceDisableOverlayArr !== "undefined" && choiceDisableOverlayArr[i]) {
+      var overlay = choiceDisableOverlayArr[i];
+      var overlayScale = overlay.__baseScale || (bgTargetScale || targetScale * 1.18);
+      overlay.visible = true;
+      overlay.alpha = 0;
+      overlay.scaleX = overlay.scaleY = overlayScale * 0.94;
+      overlay.y = startChoiceY;
+      createjs.Tween.get(overlay, { override: true })
+        .wait(val + 80)
+        .to({ alpha: 0.6, scaleX: overlayScale, scaleY: overlayScale, y: endChoiceY }, 280, createjs.Ease.quadOut);
+    }
+
     choiceArr[i].visible = true;
     choiceArr[i].alpha = 0;
-    choiceArr[i].y = 570;
     choiceArr[i].scaleX = choiceArr[i].scaleY = targetScale * 1.12;
     createjs.Tween.get(choiceArr[i], { override: true })
       .wait(val)
-      .to({ y: 600, scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut);
+      .to({ y: endChoiceY, scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut);
 
     val += 140;
   }
@@ -724,6 +772,9 @@ function AddListenerFn() {
   for (i = 0; i < cLen; i++) {
     choiceArr[i].addEventListener("click", answerSelected);
     attachChoiceInteractions(i);
+    if (typeof activateChoiceReadyAppearance === "function") {
+      activateChoiceReadyAppearance(i);
+    }
   }
 
   rst = 0;
@@ -764,6 +815,10 @@ function disablechoices() {
     if (clueBgArr[i]) {
       createjs.Tween.get(clueBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
     }
+
+    if (typeof hideChoiceDecorations === "function") {
+      hideChoiceDecorations(i);
+    }
   }
   if (questionCardContainer) {
     questionCardContainer.visible = false;
@@ -791,6 +846,13 @@ e.currentTarget.visible=false;
   clueArr[lCnt].gotoAndStop(indAnsVal);
   animateClueSlotFill(lCnt, getChar[lCnt] == str1);
   markChoiceResult(selectedIndex, getChar[lCnt] == str1);
+
+  if (typeof stopChoiceReadyPulse === "function") {
+    stopChoiceReadyPulse(selectedIndex);
+  }
+  if (typeof hideChoiceReadyBadge === "function") {
+    hideChoiceReadyBadge(selectedIndex);
+  }
 
   gameResponseTimerStop();
   // pauseTimer();
