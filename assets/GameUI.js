@@ -897,7 +897,7 @@ function showGameplayTimeUpBanner(onComplete) {
   }
 
   createjs.Tween.get(overlay)
-    .wait(1320)
+    .wait(2200)
     .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
     .call(function () {
       hideGameplayTimeUpBanner(true);
