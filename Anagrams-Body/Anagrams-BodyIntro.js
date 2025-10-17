@@ -594,9 +594,37 @@ function setArrowTween() {
             .wait(400)
             .call(this.onComplete1)
 
-    }
+        if (TempIntroVal > 1) {
+            var prevChoiceIndex = introChoiceIndexFromStep(TempIntroVal - 1);
+            if (prevChoiceIndex) {
+                highlightIntroChoiceTile(prevChoiceIndex, false);
+            }
+        }
 
-}
+        if (targetChoiceIndex && targetChoice && targetChoice.alpha >= 0.9) {
+            highlightIntroChoiceTile(targetChoiceIndex, true);
+        }
+
+        var pendingClue = introClueArr[TempIntroVal];
+        if (pendingClue && (!pendingClue.text || pendingClue.text === "")) {
+            highlightIntroClueTarget(TempIntroVal);
+        }
+
+         container.parent.addChild(introArrow);
+ 
+         introArrow.visible = true;
+         introfingure.visible = false;
+         introArrow.x = ArrowXArr[TempIntroVal];
+         introArrow.y = ArrowYArr[TempIntroVal];
+         highlightTweenArr[0] = new createjs.MovieClip()
+         container.parent.addChild(highlightTweenArr[0])
+         highlightTweenArr[0] = createjs.Tween.get(introArrow).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250).to({ y: ArrowYArr[TempIntroVal] }, 250).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250)
+             .to({ y: ArrowYArr[TempIntroVal] }, 250).wait(400).call(this.onComplete1)
+ 
+     }
+ 
+ }
+
 
 
 function setFingureTween() {
