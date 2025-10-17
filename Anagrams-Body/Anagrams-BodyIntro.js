@@ -597,9 +597,58 @@ function setArrowTween() {
             .wait(400)
             .call(this.onComplete1)
 
-    }
+        var arrowTargetX = typeof ArrowXArr[TempIntroVal] === "number" ? ArrowXArr[TempIntroVal] : introClu1X;
+        var defaultTipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
+        var fallbackTipY = introClu1Y - (56 + defaultTipGap);
+        var arrowTipY = typeof ArrowYArr[TempIntroVal] === "number" ? ArrowYArr[TempIntroVal] : fallbackTipY;
+        var arrowBounce = introArrow && introArrow.__bounceOffset ? introArrow.__bounceOffset : 18;
+        var arrowUpY = arrowTipY - arrowBounce;
 
-}
+        introArrow.x = arrowTargetX;
+        introArrow.y = arrowTipY;
+
+        highlightTweenArr[0] = new createjs.MovieClip();
+        container.parent.addChild(highlightTweenArr[0]);
+        highlightTweenArr[0] = createjs.Tween.get(introArrow)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .wait(400)
+            .call(this.onComplete1)
+
+        if (TempIntroVal > 1) {
+            var prevChoiceIndex = introChoiceIndexFromStep(TempIntroVal - 1);
+            if (prevChoiceIndex) {
+                highlightIntroChoiceTile(prevChoiceIndex, false);
+            }
+        }
+
+        if (targetChoiceIndex && targetChoice && targetChoice.alpha >= 0.9) {
+            highlightIntroChoiceTile(targetChoiceIndex, true);
+        }
+
+        var pendingClue = introClueArr[TempIntroVal];
+        if (pendingClue && (!pendingClue.text || pendingClue.text === "")) {
+            highlightIntroClueTarget(TempIntroVal);
+        }
+
+         container.parent.addChild(introArrow);
+ 
+         introArrow.visible = true;
+         introfingure.visible = false;
+         introArrow.x = ArrowXArr[TempIntroVal];
+         introArrow.y = ArrowYArr[TempIntroVal];
+         highlightTweenArr[0] = new createjs.MovieClip()
+         container.parent.addChild(highlightTweenArr[0])
+         highlightTweenArr[0] = createjs.Tween.get(introArrow).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250).to({ y: ArrowYArr[TempIntroVal] }, 250).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250)
+             .to({ y: ArrowYArr[TempIntroVal] }, 250).wait(400).call(this.onComplete1)
+ 
+     }
+ 
+ }
+
+
 
 
 function setFingureTween() {
