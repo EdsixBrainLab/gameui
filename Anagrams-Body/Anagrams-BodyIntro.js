@@ -17,14 +17,83 @@ var introClu3X = 700, introClu3Y = 470;
 var introClu4X = 820, introClu4Y = 470;
 var introArrowX = introChoice2X, introArrowY = introClu1Y - 46;
 var introfingureX = introChoice2X, introfingureY = introChoice2Y + 32;
-var ArrowXArr = [, introChoice2X, introChoice4X, introChoice3X, introChoice1X],FingXArr = [, introChoice2X + 20, introChoice4X + 20, introChoice3X + 20, introChoice1X + 20]
-var ArrowYArr = [, introClu1Y - 46, introClu1Y - 46, introClu1Y - 46, introClu1Y - 46], FingYArr = [, introChoice2Y + 32, introChoice4Y + 32, introChoice3Y + 32, introChoice1Y + 32]
+var ArrowXArr = [null], FingXArr = [null];
+var ArrowYArr = [null], FingYArr = [null];
 var introClueArr = []
 var introClueBgArr = []
 var introChoiceBgArr = []
 var introChoiceGlowArr = []
 var introChoiceRevealOrder = [, 2, 4, 3, 1]
 var introGlobalScope = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this)
+
+function getBitmapNaturalBounds(bitmap) {
+    if (!bitmap) {
+        return null;
+    }
+
+    if (typeof bitmap.getBounds === "function") {
+        var cached = bitmap.getBounds();
+        if (cached) {
+            return cached;
+        }
+    }
+
+    if (bitmap.image) {
+        return {
+            x: 0,
+            y: 0,
+            width: bitmap.image.width || 0,
+            height: bitmap.image.height || 0
+        };
+    }
+
+    return null;
+}
+
+function configureIntroArrowSprite(sprite) {
+    if (!sprite) {
+        return;
+    }
+
+    var bounds = getBitmapNaturalBounds(sprite);
+    var scale = 0.94;
+
+    sprite.scaleX = sprite.scaleY = scale;
+    sprite.mouseEnabled = false;
+    sprite.mouseChildren = false;
+    sprite.visible = false;
+    sprite.alpha = 0;
+    sprite.__tipGap = 22;
+    sprite.__bounceOffset = 18;
+
+    if (bounds) {
+        sprite.regX = bounds.width / 2;
+        sprite.regY = bounds.height;
+    }
+}
+
+function configureIntroFingerSprite(sprite) {
+    if (!sprite) {
+        return;
+    }
+
+    var bounds = getBitmapNaturalBounds(sprite);
+    var scale = 0.9;
+
+    sprite.scaleX = sprite.scaleY = scale;
+    sprite.mouseEnabled = false;
+    sprite.mouseChildren = false;
+    sprite.visible = false;
+    sprite.alpha = 0;
+
+    if (bounds) {
+        sprite.__pointerOffsetX = bounds.width * 0.42 * scale;
+        sprite.__pointerOffsetY = bounds.height * 0.82 * scale;
+    } else {
+        sprite.__pointerOffsetX = 0;
+        sprite.__pointerOffsetY = 0;
+    }
+}
 
 function getFallbackChoiceBuilder() {
     var txt = new createjs.Text("", "700 64px 'Nunito Sans'", "#FFFFFF");
@@ -193,6 +262,10 @@ function commongameintro() {
     introClueBgArr = [null];
     introChoiceBgArr = [null];
     introChoiceGlowArr = [null];
+    ArrowXArr = [null];
+    ArrowYArr = [null];
+    FingXArr = [null];
+    FingYArr = [null];
 
     introTitle = Title.clone();
     introClu1 = buildIntroClueLetter();
@@ -205,6 +278,8 @@ function commongameintro() {
     introChoice4 = buildIntroChoiceLetter();
     introArrow = arrow1.clone();
     introfingure = fingure.clone();
+    configureIntroArrowSprite(introArrow);
+    configureIntroFingerSprite(introfingure);
 
     container.parent.addChild(introTitle);
     introTitle.visible = true;
@@ -222,6 +297,7 @@ function commongameintro() {
         introQuestxt.__labelBG.update();
     }
 
+    var choicePointerTargets = {};
     var choiceConfigs = [
         { index: 1, x: introChoice1X, y: introChoice1Y, letter: "N" },
         { index: 2, x: introChoice2X, y: introChoice2Y, letter: "S" },
@@ -245,7 +321,7 @@ function commongameintro() {
         bg.y = cfg.y;
         bg.visible = false;
         bg.alpha = 0;
-        bg.__baseScale = 0.8 * 1.18;
+        bg.__baseScale = 0.8 * 1.12;
         bg.shadow = new createjs.Shadow("rgba(10,18,44,0.45)", 0, 12, 28);
         bg.mouseEnabled = false;
         bg.mouseChildren = false;
@@ -267,6 +343,16 @@ function commongameintro() {
         container.parent.addChild(letter);
 
         glow.scaleX = glow.scaleY = letter.__baseScale * 1.3;
+
+        var tileScale = letter.__baseScale || 0.8;
+        var bgScale = bg.__baseScale || tileScale * 1.12;
+        var tileHeight = 148 * bgScale;
+        var tileTop = cfg.y - tileHeight / 2;
+        var tipTargetY = tileTop + tileHeight * 0.28;
+        choicePointerTargets[cfg.index] = {
+            x: cfg.x,
+            tipY: tipTargetY
+        };
     }
 
     var clueConfigs = [
@@ -305,6 +391,23 @@ function commongameintro() {
         updateIntroClueLetter(clueLetter, "");
         container.parent.addChild(clueLetter);
         introClueArr.push(clueLetter);
+
+        var clueScale = clueBg.__baseScale || 1;
+        var slotHeight = 112 * clueScale;
+        var clueTop = clueCfg.y - slotHeight / 2;
+        var tipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
+        ArrowXArr[clueCfg.index] = clueCfg.x;
+        ArrowYArr[clueCfg.index] = clueTop - tipGap;
+    }
+
+    for (var step = 1; step < introChoiceRevealOrder.length; step++) {
+        var choiceIndex = introChoiceIndexFromStep(step);
+        var pointer = choicePointerTargets[choiceIndex];
+
+        if (pointer) {
+            FingXArr[step] = pointer.x;
+            FingYArr[step] = pointer.tipY;
+        }
     }
 
     cluegotoArr = ["", "S", "K", "I", "N"];
@@ -466,6 +569,47 @@ function setArrowTween() {
             highlightIntroClueTarget(TempIntroVal);
         }
 
+        container.parent.addChild(introArrow);
+
+        introArrow.visible = true;
+        introfingure.visible = false;
+
+        var arrowTargetX = typeof ArrowXArr[TempIntroVal] === "number" ? ArrowXArr[TempIntroVal] : introClu1X;
+        var defaultTipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
+        var fallbackTipY = introClu1Y - (56 + defaultTipGap);
+        var arrowTipY = typeof ArrowYArr[TempIntroVal] === "number" ? ArrowYArr[TempIntroVal] : fallbackTipY;
+        var arrowBounce = introArrow && introArrow.__bounceOffset ? introArrow.__bounceOffset : 18;
+        var arrowUpY = arrowTipY - arrowBounce;
+
+        introArrow.x = arrowTargetX;
+        introArrow.y = arrowTipY;
+
+        highlightTweenArr[0] = new createjs.MovieClip();
+        container.parent.addChild(highlightTweenArr[0]);
+        highlightTweenArr[0] = createjs.Tween.get(introArrow)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .to({ y: arrowUpY }, 250)
+            .to({ y: arrowTipY }, 250)
+            .wait(400)
+            .call(this.onComplete1)
+
+        if (TempIntroVal > 1) {
+            var prevChoiceIndex = introChoiceIndexFromStep(TempIntroVal - 1);
+            if (prevChoiceIndex) {
+                highlightIntroChoiceTile(prevChoiceIndex, false);
+            }
+        }
+
+        if (targetChoiceIndex && targetChoice && targetChoice.alpha >= 0.9) {
+            highlightIntroChoiceTile(targetChoiceIndex, true);
+        }
+
+        var pendingClue = introClueArr[TempIntroVal];
+        if (pendingClue && (!pendingClue.text || pendingClue.text === "")) {
+            highlightIntroClueTarget(TempIntroVal);
+        }
+
          container.parent.addChild(introArrow);
  
          introArrow.visible = true;
@@ -482,6 +626,7 @@ function setArrowTween() {
  }
 
 
+
 function setFingureTween() {
     if (stopValue == 0) {
         console.log("setFingureTween  == stopValue")
@@ -494,9 +639,17 @@ function setFingureTween() {
         introArrow.visible = false;
         container.parent.addChild(introfingure);
 
+        var pointerOffsetX = introfingure.__pointerOffsetX || 0;
+        var pointerOffsetY = introfingure.__pointerOffsetY || 0;
+        var fingerTargetX = typeof FingXArr[TempIntroVal] === "number" ? FingXArr[TempIntroVal] : introfingureX;
+        var fingerTargetY = typeof FingYArr[TempIntroVal] === "number" ? FingYArr[TempIntroVal] : introfingureY;
+        var fingerBaseX = fingerTargetX - pointerOffsetX;
+        var fingerBaseY = fingerTargetY - pointerOffsetY;
+        var fingerPressX = fingerBaseX - 18;
+
         introfingure.visible = true;
-        introfingure.x = FingXArr[TempIntroVal];
-        introfingure.y = FingYArr[TempIntroVal];
+        introfingure.x = fingerBaseX;
+        introfingure.y = fingerBaseY;
         var activeChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
         if (activeChoiceIndex) {
             var activeChoice = introGlobalScope && introGlobalScope["introChoice" + activeChoiceIndex];
@@ -507,12 +660,22 @@ function setFingureTween() {
         highlightTweenArr[1] = new createjs.MovieClip()
         container.parent.addChild(highlightTweenArr[1])
         if (TempIntroVal == 4) {
-            highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300)
-                .to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300).wait(200).call(this.onComplete2)
+            highlightTweenArr[1] = createjs.Tween.get(introfingure)
+                .to({ x: fingerBaseX }, 300)
+                .to({ x: fingerPressX }, 300)
+                .to({ x: fingerBaseX }, 300)
+                .to({ x: fingerPressX }, 300)
+                .wait(200)
+                .call(this.onComplete2)
         }
         else {
-            highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300)
-                .to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300).wait(200).call(handleComplete4_1)
+            highlightTweenArr[1] = createjs.Tween.get(introfingure)
+                .to({ x: fingerBaseX }, 300)
+                .to({ x: fingerPressX }, 300)
+                .to({ x: fingerBaseX }, 300)
+                .to({ x: fingerPressX }, 300)
+                .wait(200)
+                .call(handleComplete4_1)
         }
 
 

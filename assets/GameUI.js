@@ -8,7 +8,7 @@ var ambientLayer,
 var questionSubtitle,  questionCardContainer,  questionCardBackground, questionCardHighlight,  questionCardShadow,  circleOutline, questionCardContainer_htp,questionCardShadow_htp,in_introQues1;
 var INTRO_TITLE_Y = 75;
 var INTRO_PROMPT_Y = 210;
-var QUESTION_CARD_WIDTH = 600;
+var QUESTION_CARD_WIDTH = 720;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 

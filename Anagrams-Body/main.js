@@ -633,7 +633,7 @@ function pickques() {
   if (questionCardContainer) {
     questionCardContainer.visible = true;
     questionCardContainer.alpha = 0;
-    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.5;
+    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
   }
 
   ans = correctAnswer;
@@ -711,7 +711,7 @@ function enablechoices() {
     baseSpacing: 176,
     baseScale: 0.8,
     minScale: 0.58,
-    maxSpan: 860,
+    maxSpan: 720,
     tileSpan: 176
   });
 
@@ -740,7 +740,7 @@ function enablechoices() {
       tileContainer.mouseEnabled = false;
 
       if (tileContainer.__hitArea) {
-        var hitSize = 184 * tileScale;
+        var hitSize = 172 * tileScale;
         tileContainer.__hitArea.graphics
           .clear()
           .beginFill("#000")
@@ -764,8 +764,8 @@ function enablechoices() {
       drawChoiceTileBackground(choiceBgArr[i]);
       choiceBgArr[i].x = 0;
       choiceBgArr[i].y = 0;
-      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.18;
-      choiceBgArr[i].__baseScale = tileScale * 1.18;
+      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.12;
+      choiceBgArr[i].__baseScale = tileScale * 1.12;
       choiceBgArr[i].visible = true;
       choiceBgArr[i].alpha = 0;
     }
@@ -773,7 +773,7 @@ function enablechoices() {
     if (choicePulseArr[i]) {
       drawChoiceSpeechWave(choicePulseArr[i]);
       choicePulseArr[i].x = 0;
-      choicePulseArr[i].y = -86 * tileScale;
+      choicePulseArr[i].y = -74 * tileScale;
       choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = tileScale;
       choicePulseArr[i].alpha = 0;
       choicePulseArr[i].visible = true;
@@ -834,10 +834,10 @@ function createTween() {
   if (questionCardContainer) {
     questionCardContainer.visible = true;
     questionCardContainer.alpha = 0;
-    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.5;
+    questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
     createjs.Tween.get(questionCardContainer, { override: true })
       .wait(180)
-      .to({ alpha: 1, scaleX: .5, scaleY: .5 }, 380, createjs.Ease.quadOut);
+      .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 380, createjs.Ease.quadOut);
   }
 
 
@@ -981,8 +981,6 @@ function disablechoices() {
     if (choiceArr[i]) {
       choiceArr[i].visible = false;
     }
-
-    stopChoiceIdleAnimation(i);
 
     stopChoiceIdleAnimation(i);
 
