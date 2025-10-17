@@ -1515,6 +1515,13 @@ console.log("minimumTop::"+minimumTop)
         }
     }
 
+    if (typeof questionCardContainer_htp !== "undefined" && questionCardContainer_htp) {
+        questionCardContainer_htp.x = stageWidth / 2;
+        if (typeof questionCardContainer_htp.__baseY === "number") {
+            questionCardContainer_htp.y = questionCardContainer_htp.__baseY;
+        }
+    }
+
     if (typeof SkipBtnMc !== "undefined" && SkipBtnMc) {
         var halfWidth = typeof SkipBtnMc.__layoutHalfWidth === "number" ? SkipBtnMc.__layoutHalfWidth : 160;
         var halfHeight = typeof SkipBtnMc.__layoutHalfHeight === "number" ? SkipBtnMc.__layoutHalfHeight : 44;
@@ -1546,6 +1553,9 @@ function refreshResponsiveLayout(force) {
 
     layoutHudElements(width, height);
     layoutIntroElements(width, height);
+    if (typeof layoutGameplayQuestionCard === "function") {
+        layoutGameplayQuestionCard();
+    }
 
     layoutOverlayToCanvas(HowToPlayScreenImg, 1280, 720);
     layoutOverlayToCanvas(howToPlayImageMc, 1280, 720);

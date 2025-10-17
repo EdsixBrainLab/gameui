@@ -509,6 +509,66 @@ var url = "";
 var nav = "";
 var isResp = true;
 var respDim = "both";
+
+function getGameplayCenterX() {
+  if (typeof getCanvasCenterX === "function") {
+    return getCanvasCenterX();
+  }
+  if (typeof canvas !== "undefined" && canvas && !isNaN(canvas.width)) {
+    return canvas.width / 2;
+  }
+  return 640;
+}
+
+function buildChoiceLayout(letterCount) {
+  var count = Math.max(1, letterCount || 1);
+  var centerX = getGameplayCenterX();
+  var layout = {
+    choiceScale: 0.82,
+    choiceSpacing: 150,
+    clueScale: 1,
+    clueSpacing: 110,
+    choiceY: 620,
+    clueY: 455
+  };
+
+  if (count <= 3) {
+    layout.choiceScale = 0.86;
+    layout.choiceSpacing = 176;
+    layout.clueSpacing = 120;
+  } else if (count <= 5) {
+    layout.choiceScale = 0.82;
+    layout.choiceSpacing = 162;
+    layout.clueSpacing = 112;
+  } else if (count <= 7) {
+    layout.choiceScale = 0.78;
+    layout.choiceSpacing = 150;
+    layout.clueSpacing = 106;
+  } else if (count <= 9) {
+    layout.choiceScale = 0.72;
+    layout.choiceSpacing = 138;
+    layout.clueScale = 0.94;
+    layout.clueSpacing = 102;
+  } else if (count <= 11) {
+    layout.choiceScale = 0.66;
+    layout.choiceSpacing = 124;
+    layout.clueScale = 0.9;
+    layout.clueSpacing = 96;
+  } else {
+    layout.choiceScale = 0.6;
+    layout.choiceSpacing = 116;
+    layout.clueScale = 0.86;
+    layout.clueSpacing = 92;
+  }
+
+  layout.choiceStart = centerX - ((count - 1) * layout.choiceSpacing) / 2;
+  layout.clueStart = centerX - ((count - 1) * layout.clueSpacing) / 2;
+  layout.choiceBgScale = layout.choiceScale * 1.18;
+  layout.choiceGlowScale = layout.choiceScale * 1.32;
+  layout.clueBgScale = layout.clueScale * 1.08;
+
+  return layout;
+}
 var isScale = true;
 var scaleType = 1;
 
@@ -953,146 +1013,55 @@ function enablechoices() {
   }
 
 
-  var choiceLayout = computeRowLayout(cLen, {
-    baseSpacing: 176,
-    baseScale: 0.8,
-    minScale: 0.58,
-    maxSpan: 720,
-    tileSpan: 176
-  });
-
-  var clueLayout = computeRowLayout(cLen, {
-    baseSpacing: 120,
-    baseScale: 1,
-    minScale: 0.82,
-    maxSpan: 720,
-    tileSpan: 120
-  });
+  choiceArrScale = 0.8;
+  var layout = buildChoiceLayout(cLen);
+  choiceArrScale = layout.choiceScale;
 
   for (i = 0; i < cLen; i++) {
-    var tileScale = choiceLayout.scale;
-    var slotScale = clueLayout.scale;
-    var tileX = choiceLayout.positions[i] || 0;
-    var slotX = clueLayout.positions[i] || 0;
-    var tileContainer = choiceMcArr[i];
+    var choiceX = layout.choiceStart + i * layout.choiceSpacing;
+    var clueX = layout.clueStart + i * layout.clueSpacing;
 
-    if (tileContainer) {
-      tileContainer.visible = true;
-      tileContainer.alpha = 0;
-      tileContainer.x = tileX;
-      tileContainer.y = CHOICE_ROW_Y;
-      tileContainer.__targetY = CHOICE_ROW_Y;
-      tileContainer.cursor = "default";
-      tileContainer.mouseEnabled = false;
+    choiceArr[i].scaleX = choiceArr[i].scaleY = layout.choiceScale;
+    choiceArr[i].x = choiceX;
+    choiceArr[i].y = layout.choiceY;
+    choiceArr[i].visible = true;
+    choiceArr[i].id = i;
+    choiceArr[i].mouseEnabled = false;
+    choiceArr[i].cursor = "default";
+    choiceArr[i].__baseScale = layout.choiceScale;
 
-      if (tileContainer.__hitArea) {
-        var hitSize = 172 * tileScale;
-        tileContainer.__hitArea.graphics
-          .clear()
-          .beginFill("#000")
-          .drawRoundRect(-hitSize / 2, -hitSize / 2, hitSize, hitSize, 52 * tileScale);
-      }
-    }
+    clueArr[i].x = clueX;
+    clueArr[i].y = layout.clueY;
+    clueArr[i].scaleX = clueArr[i].scaleY = layout.clueScale;
 
-    if (choiceArr[i]) {
-      choiceArr[i].visible = true;
-      choiceArr[i].alpha = 0;
-      choiceArr[i].x = 0;
-      choiceArr[i].y = 0;
-      choiceArr[i].scaleX = choiceArr[i].scaleY = tileScale;
-      choiceArr[i].__baseScale = tileScale;
-      choiceArr[i].id = i;
-      choiceArr[i].cursor = "default";
-      choiceArr[i].mouseEnabled = false;
+    if (clueBgArr[i]) {
+      drawClueSlotBackground(clueBgArr[i]);
+      clueBgArr[i].x = clueX;
+      clueBgArr[i].y = layout.clueY;
+      clueBgArr[i].visible = true;
+      clueBgArr[i].alpha = 0;
+      clueBgArr[i].scaleX = clueBgArr[i].scaleY = layout.clueBgScale;
+      clueBgArr[i].__baseScale = layout.clueBgScale;
     }
 
     if (choiceBgArr[i]) {
       drawChoiceTileBackground(choiceBgArr[i]);
-      choiceBgArr[i].x = 0;
-      choiceBgArr[i].y = 0;
-      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.12;
-      choiceBgArr[i].__baseScale = tileScale * 1.12;
+      choiceBgArr[i].x = choiceX;
+      choiceBgArr[i].y = layout.choiceY;
+      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = layout.choiceBgScale;
+      choiceBgArr[i].__baseScale = layout.choiceBgScale;
       choiceBgArr[i].visible = true;
       choiceBgArr[i].alpha = 0;
     }
 
-    if (choiceDisabledOverlayArr[i]) {
-      drawChoiceDisabledOverlay(choiceDisabledOverlayArr[i]);
-      choiceDisabledOverlayArr[i].x = 0;
-      choiceDisabledOverlayArr[i].y = 0;
-      choiceDisabledOverlayArr[i].scaleX = choiceDisabledOverlayArr[i].scaleY = tileScale * 1.12;
-      choiceDisabledOverlayArr[i].visible = false;
-      choiceDisabledOverlayArr[i].alpha = 0;
-    }
-
-    if (choicePulseArr[i]) {
-      drawChoiceSpeechWave(choicePulseArr[i]);
-      choicePulseArr[i].x = 0;
-      choicePulseArr[i].y = 0;
-      choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = tileScale;
-      choicePulseArr[i].alpha = 0;
-      choicePulseArr[i].visible = true;
-      choicePulseArr[i].__baseScale = tileScale;
-    }
-
     if (choiceGlowArr[i]) {
-      choiceGlowArr[i].x = 0;
-      choiceGlowArr[i].y = 6 * tileScale;
-      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = tileScale * 1.3;
-      choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
+      choiceGlowArr[i].x = choiceX;
+      choiceGlowArr[i].y = layout.choiceY + 6;
+      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = layout.choiceGlowScale;
+      choiceGlowArr[i].__targetScale = layout.choiceGlowScale;
       choiceGlowArr[i].visible = true;
       choiceGlowArr[i].alpha = 0;
     }
-
-    if (choiceReadyBadgeArr[i]) {
-      var badge = choiceReadyBadgeArr[i];
-      var badgeOffset = (148 * tileScale) / 2 + 34;
-      badge.x = 0;
-      badge.y = -badgeOffset;
-      var badgeDesignScale = badge.__designScale || badge.__baseScale || 1;
-      badge.__designScale = badgeDesignScale;
-      badge.scaleX = badge.scaleY = tileScale * badgeDesignScale;
-      badge.__baseScale = tileScale * badgeDesignScale;
-      badge.visible = false;
-      badge.alpha = 0;
-    }
-
-    if (typeof SA_setChoiceInteractiveState === "function") {
-      SA_setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
-    }
-
-    if (clueArr[i]) {
-      clueArr[i].visible = true;
-      clueArr[i].alpha = 0;
-      clueArr[i].x = slotX;
-      clueArr[i].y = CLUE_ROW_Y;
-      clueArr[i].scaleX = clueArr[i].scaleY = slotScale;
-    }
-
-    if (clueBgArr[i]) {
-      drawClueSlotBackground(clueBgArr[i]);
-      clueBgArr[i].x = slotX;
-      clueBgArr[i].y = CLUE_ROW_Y;
-      clueBgArr[i].scaleX = clueBgArr[i].scaleY = slotScale;
-      clueBgArr[i].visible = true;
-      clueBgArr[i].alpha = 0;
-      clueBgArr[i].__baseScale = slotScale;
-    }
-
-    if (choiceGlowArr[i]) {
-      choiceGlowArr[i].x = choiceArr[i].x;
-      choiceGlowArr[i].y = choiceArr[i].y + 6;
-      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = (choiceArr[i].scaleX || choiceArrScale) * 1.3;
-      choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
-      choiceGlowArr[i].visible = true;
-      choiceGlowArr[i].alpha = 0;
-    }
-
-    choiceArr[i].visible = true;
-    choiceArr[i].id = i;
-    choiceArr[i].mouseEnabled = true;
-    choiceArr[i].cursor = "pointer";
-    choiceArr[i].__baseScale = choiceArr[i].scaleX;
 
     if (typeof positionChoiceDecorations === "function") {
       positionChoiceDecorations(i);
@@ -1102,7 +1071,7 @@ function enablechoices() {
 
 
   if (questionCardContainer) {
-    var targetCenterX = canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
+    var targetCenterX = getGameplayCenterX();
 
     if (cLen > 0 && clueArr[0] && clueArr[cLen - 1]) {
       var firstSlotX = clueArr[0].x;
@@ -1114,6 +1083,8 @@ function enablechoices() {
     }
 
     questionCardContainer.x = targetCenterX;
+    questionCardContainer.y = 280;
+    questionCardContainer.__baseY = 280;
     layoutQuestionCardContents();
   }
 
@@ -1251,6 +1222,8 @@ function AddListenerFn() {
       choiceMcArr[i].cursor = "pointer";
     }
     attachChoiceInteractions(i);
+    choiceArr[i].mouseEnabled = true;
+    choiceArr[i].cursor = "pointer";
     if (typeof activateChoiceReadyAppearance === "function") {
       activateChoiceReadyAppearance(i);
     }

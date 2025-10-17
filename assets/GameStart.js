@@ -231,9 +231,9 @@ if (questionOverImg) {
                 bgSnd.stop();
             }
 
-            container.parent.addChild(timeOverImg);
-            timeOverImg.visible = true;
-            stage.update();
+            if (timeOverImg) {
+                timeOverImg.visible = false;
+            }
 
             correctSnd.stop();
             wrongSnd.stop();
@@ -255,6 +255,12 @@ if (questionOverImg) {
                 timeOverSnd.play();
                 timeOverSnd.volume = 1;
                 timeOverSnd.addEventListener("complete", handleTimeOverComplete);
+            }
+
+            if (typeof showGameplayTimeUpBanner === "function") {
+                showGameplayTimeUpBanner(handleTimeOverComplete);
+            } else {
+                timeOverImgTimer = setInterval(removeTimeOverImg, 300);
             }
 
             setTimeout(handleTimeOverComplete, 1500);
