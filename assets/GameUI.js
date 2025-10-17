@@ -82,6 +82,35 @@ var timeUpOverlay,
   timeUpIconSpark,
   timeUpText;
 
+function layoutTimeUpOverlay() {
+  if (!timeUpOverlay) {
+    return;
+  }
+
+  var metrics =
+    typeof getCanvasMetrics === "function"
+      ? getCanvasMetrics()
+      : {
+          centerX:
+            typeof getCanvasCenterX === "function"
+              ? getCanvasCenterX()
+              : canvas && !isNaN(canvas.width)
+              ? canvas.width / 2
+              : 0,
+          centerY:
+            canvas && !isNaN(canvas.height) ? canvas.height / 2 : 0
+        };
+
+  if (metrics) {
+    timeUpOverlay.x = metrics.centerX || 0;
+    timeUpOverlay.y = metrics.centerY || 0;
+  }
+}
+
+if (typeof globalThis !== "undefined") {
+  globalThis.layoutTimeUpOverlay = layoutTimeUpOverlay;
+}
+
 function call_UI_ambientOverlay(incontainer)
 {
 ambientLayer = new createjs.Container();
@@ -827,6 +856,7 @@ function ensureTimeUpOverlay() {
   timeUpOverlay.addChild(timeUpText);
 
   container.parent.addChild(timeUpOverlay);
+  layoutTimeUpOverlay();
 
   return timeUpOverlay;
 }
@@ -845,11 +875,7 @@ function showGameplayTimeUpBanner(onComplete) {
     parent.setChildIndex(overlay, parent.getNumChildren() - 1);
   }
 
-  var centerX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
-  var centerY = canvas && !isNaN(canvas.height) ? canvas.height / 2 : 360;
-
-  overlay.x = centerX;
-  overlay.y = centerY;
+  layoutTimeUpOverlay();
   overlay.scaleX = overlay.scaleY = 0.9;
   overlay.alpha = 0;
   overlay.visible = true;
@@ -897,7 +923,7 @@ function showGameplayTimeUpBanner(onComplete) {
   }
 
   createjs.Tween.get(overlay)
-    .wait(2200)
+    .wait(3600)
     .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
     .call(function () {
       hideGameplayTimeUpBanner(true);

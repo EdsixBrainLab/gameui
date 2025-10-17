@@ -766,7 +766,7 @@ function buildGameplayBackdrop() {
 
     var base = new createjs.Shape();
     base.graphics
-        .beginLinearGradientFill(["#050822", "#101d45", "#1f1f63", "#331a78"], [0, 0.4, 0.78, 1], 0, 0, width, height)
+        .beginLinearGradientFill(["#040619", "#081437", "#101d4b", "#1d1f60"], [0, 0.38, 0.74, 1], 0, 0, width, height)
         .drawRect(0, 0, width, height);
     backdrop.addChild(base);
 
@@ -783,7 +783,7 @@ function buildGameplayBackdrop() {
             width * 0.76
         )
         .drawRect(0, 0, width, height);
-    horizonGlow.alpha = 0.92;
+    horizonGlow.alpha = 0.58;
     horizonGlow.compositeOperation = "lighter";
     backdrop.addChild(horizonGlow);
 
@@ -800,7 +800,7 @@ function buildGameplayBackdrop() {
             width * 0.34
         )
         .drawRect(0, 0, width, height);
-    topGlow.alpha = 0.8;
+    topGlow.alpha = 0.45;
     topGlow.compositeOperation = "lighter";
     backdrop.addChild(topGlow);
 
@@ -1575,6 +1575,10 @@ function refreshResponsiveLayout(force) {
             uniquebackGround.__baseWidth || 1280,
             uniquebackGround.__baseHeight || 720
         );
+    }
+
+    if (typeof layoutTimeUpOverlay === "function") {
+        layoutTimeUpOverlay();
     }
 
     // SAUIX: reflow tooltip positions
