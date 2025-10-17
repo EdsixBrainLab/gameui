@@ -310,22 +310,37 @@ function drawClueSlotBackground(targetShape, colors) {
 
   var gradient = colors || CLUE_SLOT_BASE_COLORS;
   var stroke = ["rgba(222,205,255,0.85)", "rgba(142,114,255,0.6)"];
+  var width = 108;
+  var height = 112;
+  var cornerRadius = 36;
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+
   var g = targetShape.graphics;
   g.clear();
   g.setStrokeStyle(4, "round", "round");
-  g.beginLinearGradientStroke(stroke, [0, 1], -54, -54, 54, 54);
-  g.beginLinearGradientFill(gradient, [0, 1], -62, -62, 62, 62);
-  g.drawRoundRect(-44, -52, 108, 112, 36);
+  g.beginLinearGradientStroke(stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight);
+  g.beginLinearGradientFill(gradient, [0, 1], 0, -halfHeight, 0, halfHeight);
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
 
+  var highlightInset = 10;
+  var highlightHeight = height * 0.52;
+  var highlightRadius = Math.max(cornerRadius - highlightInset, 14);
   g.beginLinearGradientFill(
-    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
+    ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
     [0, 1],
     0,
-    -50,
+    -halfHeight + highlightInset,
     0,
-    30
+    -halfHeight + highlightInset + highlightHeight
   );
-  g.drawRoundRect(-36, -44, 92, 88, 28);
+  g.drawRoundRect(
+    -halfWidth + highlightInset,
+    -halfHeight + highlightInset,
+    width - highlightInset * 2,
+    highlightHeight,
+    highlightRadius
+  );
 }
 
 function startChoiceReadyBadgeAnimation(badge) {

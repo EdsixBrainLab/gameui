@@ -491,7 +491,6 @@ var btnPaddArr = ["", "", "", "365", "335", "305", "275", "245", "215", "185"];
 var indx = [];
 var btnPadding = 50;
 var btnTxtPaddding = 483;
-var repTimeClearInterval = 0;
 var rst1 = 0,
   crst = 0,
   wrst = 0,
@@ -1136,6 +1135,16 @@ function createTween() {
       .to({ alpha: 1 }, 240, createjs.Ease.quadOut);
   }
 
+  var hasEnabledChoices = false;
+  var lastRevealTween = null;
+  function ensureChoicesInteractive() {
+    if (hasEnabledChoices) {
+      return;
+    }
+    hasEnabledChoices = true;
+    AddListenerFn();
+  }
+
   var val = 420;
   for (i = 0; i < cLen; i++) {
     var tileContainer = choiceMcArr[i];
@@ -1188,7 +1197,7 @@ function createTween() {
       choiceArr[i].visible = true;
       choiceArr[i].alpha = 0;
       choiceArr[i].scaleX = choiceArr[i].scaleY = targetScale * 1.12;
-      createjs.Tween.get(choiceArr[i], { override: true })
+      var revealTween = createjs.Tween.get(choiceArr[i], { override: true })
         .wait(val)
         .to({ scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut)
         .call(
@@ -1200,17 +1209,21 @@ function createTween() {
             };
           })(i)
         );
+      lastRevealTween = revealTween;
     }
 
     val += 140;
   }
 
-  repTimeClearInterval = setTimeout(AddListenerFn, 3000);
+  if (lastRevealTween) {
+    lastRevealTween.call(ensureChoicesInteractive);
+  } else {
+    ensureChoicesInteractive();
+  }
 }
 
 
 function AddListenerFn() {
-  clearTimeout(repTimeClearInterval);
   for (i = 0; i < cLen; i++) {
     if (typeof SA_setChoiceInteractiveState === "function") {
       SA_setChoiceInteractiveState(i, true);
