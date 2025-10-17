@@ -12,99 +12,20 @@ var QUESTION_CARD_WIDTH = 720;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 
-var CHOICE_TILE_BASE_COLORS = ["rgba(123,104,238,0.96)", "rgba(76,53,163,0.96)"];
-var CHOICE_TILE_HOVER_COLORS = ["rgba(155,132,255,0.98)", "rgba(94,66,206,0.98)"];
-var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,210,190,0.96)", "rgba(30,140,126,0.96)"];
-var CHOICE_TILE_WRONG_COLORS = ["rgba(255,137,162,0.96)", "rgba(178,54,110,0.96)"];
-var CHOICE_TILE_DISABLED_COLORS = ["rgba(94,78,166,0.8)", "rgba(54,36,122,0.82)"];
-var CLUE_SLOT_BASE_COLORS = ["rgba(114,86,232,0.94)", "rgba(58,38,148,0.94)"];
-var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94)"];
-var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
-var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
-var choiceIdleStates = [];
-
-function computeCenteredRowLayout(count, options) {
-  options = options || {};
-  var centerX =
-    typeof options.centerX === "number"
-      ? options.centerX
-      : typeof getCanvasCenterX === "function"
-      ? getCanvasCenterX()
-      : 640;
-  var baseSpacing = options.baseSpacing != null ? options.baseSpacing : 174;
-  var baseScale = options.baseScale != null ? options.baseScale : 1;
-  var minScale = options.minScale != null ? options.minScale : 0.6;
-  var maxSpan = options.maxSpan != null ? options.maxSpan : 900;
-  var tileSpan = options.tileSpan != null ? options.tileSpan : baseSpacing;
-
-  if (count <= 0) {
-    return {
-      positions: [],
-      scale: baseScale,
-      spacing: baseSpacing
-    };
-  }
-
-  var totalSpan = (count - 1) * baseSpacing + tileSpan;
-  var spanRatio = totalSpan > maxSpan && totalSpan > 0 ? maxSpan / totalSpan : 1;
-  var scale = Math.max(minScale, baseScale * spanRatio);
-  var spacing = baseSpacing * spanRatio;
-
-  var positions = [];
-  var startX = centerX - ((count - 1) * spacing) / 2;
-
-  for (var i = 0; i < count; i++) {
-    positions.push(startX + i * spacing);
-  }
-
-  return {
-    positions: positions,
-    scale: scale,
-    spacing: spacing
-  };
-}
-
-if (typeof window !== "undefined") {
-  window.SAUI_computeCenteredRow = computeCenteredRowLayout;
-}
+var CHOICE_TILE_BASE_COLORS = ["rgba(104,84,214,0.98)", "rgba(68,52,158,0.98)"];
+var CHOICE_TILE_HOVER_COLORS = ["rgba(140,110,248,1)", "rgba(94,68,208,1)"];
+var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,204,164,0.98)", "rgba(38,132,110,0.98)"];
+var CHOICE_TILE_WRONG_COLORS = ["rgba(242,132,152,0.98)", "rgba(170,64,102,0.98)"];
+var CLUE_SLOT_BASE_COLORS = ["rgba(32,58,104,0.92)", "rgba(19,36,74,0.92)"];
+var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"];
+var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
+var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
 
 var choiceDisableOverlayArr = [];
 var choiceReadyPulseArr = [];
 var choiceReadyBadgeArr = [];
 var choiceReadyTweenArr = [];
-
-var timeUpOverlay,
-  timeUpOverlayBg,
-  timeUpIconContainer,
-  timeUpIconHand,
-  timeUpText;
-
-var choiceDisableOverlayArr = [];
-var choiceReadyPulseArr = [];
-var choiceReadyBadgeArr = [];
-var choiceReadyTweenArr = [];
-
-var timeUpOverlay,
-  timeUpOverlayBg,
-  timeUpIconContainer,
-  timeUpIconHand,
-  timeUpText;
-
-var choiceDisableOverlayArr = [];
-var choiceReadyPulseArr = [];
-var choiceReadyBadgeArr = [];
-var choiceReadyTweenArr = [];
-
-var timeUpOverlay,
-  timeUpOverlayBg,
-  timeUpIconContainer,
-  timeUpIconHand,
-  timeUpText;
-
-var choiceDisableOverlayArr = [];
-var choiceReadyPulseArr = [];
-var choiceReadyBadgeArr = [];
-var choiceReadyTweenArr = [];
+var choiceReadyBadgeTweenArr = [];
 var choiceLiveAccentArr = [];
 var choiceLiveAccentTweenArr = [];
 
@@ -126,35 +47,29 @@ ambientLayer = new createjs.Container();
 
 function call_UI_gameQuestion(incontainer,in_questiontext)
 {
-         QusTxtString = new createjs.Text(
+    QusTxtString = new createjs.Text(
       in_questiontext,
-      "700 36px 'Baloo 2'",
-      "#EAF2FF"
+      "700 40px 'Baloo 2'",
+      "#F6F1FF"
     );
-    QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
+    QusTxtString.shadow = new createjs.Shadow("rgba(8,14,32,0.45)", 0, 12, 24);
     QusTxtString.textAlign = "center";
     QusTxtString.textBaseline = "middle";
     QusTxtString.lineWidth = 1000;
     QusTxtString.lineHeight = 40;
     var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
     QusTxtString.x = promptCenterX;
-    QusTxtString.y = INTRO_PROMPT_Y-55;
+    QusTxtString.y = INTRO_PROMPT_Y - 20;
     QusTxtString.alpha = 0.98;
     incontainer.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
         QusTxtString.__labelBG = SAUI_attachQuestionLabelBG(QusTxtString, incontainer.parent, {
-    padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22
+    padX: 32, padY: 18, fill: "rgba(34,24,78,0.68)", stroke: "rgba(255,255,255,0.18)", strokeW: 2, maxRadius: 28
   });
 
-    QusTxtString.__layoutHalfHeight = (QusTxtString.lineHeight || 34) / 2;
+  container.parent.addChild(timeUpOverlay);
 
-    if (typeof refreshResponsiveLayout === "function") {
-      refreshResponsiveLayout(true);
-    }
-	
-	
-	
-	
+  return timeUpOverlay;
 }
 
 function call_UI_introQuestionCardContainer(incontainer,in_question)
@@ -187,8 +102,10 @@ function call_UI_introQuestionCardContainer(incontainer,in_question)
     questionCardShadow_htp.alpha = 0.32;
     questionCardContainer_htp.addChild(questionCardShadow_htp);
 
-    questionCardBackground_htp = new createjs.Shape();
-    questionCardContainer_htp.addChild(questionCardBackground_htp);
+  var parent = container.parent;
+  if (parent) {
+    parent.setChildIndex(overlay, parent.getNumChildren() - 1);
+  }
 
     questionCardHighlight_htp = new createjs.Shape();
     questionCardContainer_htp.addChild(questionCardHighlight_htp);
@@ -206,1035 +123,21 @@ function call_UI_introQuestionCardContainer(incontainer,in_question)
 	 questionCardContainer_htp.addChild(in_introQues1)
 incontainer.parent.addChild(questionCardContainer_htp);
 
-}
-
-
-
-function drawChoiceTileBackground(targetShape, colors) {
-  if (!targetShape) {
-    return;
+  if (timeUpIconGlow) {
+    createjs.Tween.removeTweens(timeUpIconGlow);
+    timeUpIconGlow.alpha = 0.08;
+    timeUpIconGlow.scaleX = timeUpIconGlow.scaleY = 0.9;
+    createjs.Tween.get(timeUpIconGlow, { override: true, loop: true })
+      .to({ alpha: 0.46, scaleX: 1.05, scaleY: 1.05 }, 360, createjs.Ease.quadOut)
+      .to({ alpha: 0.12, scaleX: 0.92, scaleY: 0.92 }, 420, createjs.Ease.quadIn);
   }
 
-  var gradient = colors || CHOICE_TILE_BASE_COLORS;
-  var stroke = ["rgba(228,215,255,0.85)", "rgba(142,114,255,0.65)"];
-
-  var width = 148;
-  var height = 148;
-  var halfWidth = width / 2;
-  var halfHeight = height / 2;
-  var cornerRadius = 48;
-
-  var g = targetShape.graphics;
-  g.clear();
-  g.setStrokeStyle(5, "round", "round");
-  g.beginLinearGradientStroke(stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight);
-  g.beginLinearGradientFill(gradient, [0, 1], 0, -halfHeight, 0, halfHeight);
-  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
-
-  g.beginLinearGradientFill(
-    ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
-    [0, 1],
-    0,
-    -halfHeight,
-    0,
-    halfHeight
-  );
-  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
-}
-
-function drawChoiceSpeechWave(targetShape) {
-  if (!targetShape) {
-    return;
-  }
-
-  var g = targetShape.graphics;
-  g.clear();
-
-  g.beginRadialGradientFill(
-    ["rgba(206,190,255,0.45)", "rgba(140,110,255,0)"] ,
-    [0, 1],
-    0,
-    0,
-    0,
-    0,
-    0,
-    92
-  );
-  g.drawCircle(0, 0, 92);
-}
-
-function drawChoiceDisabledOverlay(targetShape) {
-  if (!targetShape) {
-    return;
-  }
-
-  var g = targetShape.graphics;
-  g.clear();
-  var overlayWidth = 148;
-  var overlayHeight = 148;
-  var overlayRadius = 48;
-
-  g.beginLinearGradientFill(
-    ["rgba(30,26,74,0.75)", "rgba(56,38,112,0.75)"],
-    [0, 1],
-    0,
-    -overlayHeight / 2,
-    0,
-    overlayHeight / 2
-  );
-  g.drawRoundRect(
-    -overlayWidth / 2,
-    -overlayHeight / 2,
-    overlayWidth,
-    overlayHeight,
-    overlayRadius
-  );
-
-  g.beginStroke("rgba(224,212,255,0.4)");
-  g.setStrokeStyle(3, "round", "round");
-  g.drawRoundRect(
-    -overlayWidth / 2 + 6,
-    -overlayHeight / 2 + 6,
-    overlayWidth - 12,
-    overlayHeight - 12,
-    overlayRadius - 10
-  );
-}
-
-function buildChoiceReadyBadge() {
-  var badge = new createjs.Container();
-  badge.mouseEnabled = false;
-  badge.mouseChildren = false;
-  badge.visible = false;
-  badge.alpha = 0;
-
-  var base = new createjs.Shape();
-  base.graphics
-    .beginLinearGradientFill(
-      ["rgba(242,227,255,0.95)", "rgba(168,132,255,0.95)"],
-      [0, 1],
-      -32,
-      -18,
-      32,
-      18
-    )
-    .drawRoundRect(-32, -18, 64, 36, 18);
-  badge.addChild(base);
-
-  var spark = new createjs.Shape();
-  spark.graphics
-    .beginFill("#5B2DE1")
-    .moveTo(0, -10)
-    .lineTo(8, 2)
-    .lineTo(-8, 2)
-    .closePath();
-  badge.addChild(spark);
-
-  var dot = new createjs.Shape();
-  dot.graphics.beginFill("#FFFFFF").drawCircle(0, 8, 4.5);
-  badge.addChild(dot);
-
-  badge.__baseScale = 1;
-  badge.__designScale = 1;
-
-  return badge;
-}
-
-function drawClueSlotBackground(targetShape, colors) {
-  if (!targetShape) {
-    return;
-  }
-
-  var gradient = colors || CLUE_SLOT_BASE_COLORS;
-  var stroke = ["rgba(222,205,255,0.85)", "rgba(142,114,255,0.6)"];
-  var g = targetShape.graphics;
-  g.clear();
-  g.setStrokeStyle(4, "round", "round");
-  g.beginLinearGradientStroke(stroke, [0, 1], -54, -54, 54, 54);
-  g.beginLinearGradientFill(gradient, [0, 1], -62, -62, 62, 62);
-  g.drawRoundRect(-44, -52, 108, 112, 36);
-
-  g.beginLinearGradientFill(
-    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
-    [0, 1],
-    0,
-    -50,
-    0,
-    30
-  );
-  g.drawRoundRect(-36, -44, 92, 88, 28);
-}
-
-function ensureChoiceDecorations(index) {
-  if (index == null || index < 0) {
-    return;
-  }
-
-  if (!container || !container.parent) {
-    return;
-  }
-
-  var parent = container.parent;
-
-  if (!choiceDisableOverlayArr[index]) {
-    var overlay = new createjs.Shape();
-    overlay.graphics
-      .beginLinearGradientFill(
-        ["rgba(8,14,30,0.78)", "rgba(12,20,42,0.6)"],
-        [0, 1],
-        -40,
-        -40,
-        40,
-        40
-      )
-      .drawRoundRect(-42, -50, 130, 130, 30);
-    overlay.visible = false;
-    overlay.alpha = 0;
-    overlay.mouseEnabled = false;
-    overlay.mouseChildren = false;
-    choiceDisableOverlayArr[index] = overlay;
-    parent.addChild(overlay);
-  }
-
-  if (!choiceReadyPulseArr[index]) {
-    var pulse = new createjs.Shape();
-    pulse.graphics
-      .setStrokeStyle(4)
-      .beginLinearGradientStroke(
-        ["rgba(120,196,255,0.8)", "rgba(120,196,255,0)"],
-        [0, 1],
-        0,
-        -60,
-        0,
-        60
-      )
-      .drawRoundRect(-40, -48, 124, 124, 32);
-    pulse.visible = false;
-    pulse.alpha = 0;
-    pulse.mouseEnabled = false;
-    pulse.mouseChildren = false;
-    choiceReadyPulseArr[index] = pulse;
-    parent.addChild(pulse);
-  }
-
-  if (!choiceReadyBadgeArr[index]) {
-    var badge = new createjs.Container();
-    badge.mouseEnabled = false;
-    badge.mouseChildren = false;
-
-    var badgeBg = new createjs.Shape();
-    badgeBg.graphics
-      .beginLinearGradientFill(
-        ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
-        [0, 1],
-        -30,
-        -18,
-        30,
-        18
-      )
-      .drawRoundRect(-32, -18, 64, 36, 18);
-    badge.addChild(badgeBg);
-
-    var badgeHighlight = new createjs.Shape();
-    badgeHighlight.graphics
-      .beginLinearGradientFill(
-        ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
-        [0, 1],
-        -28,
-        -12,
-        28,
-        12
-      )
-      .drawRoundRect(-28, -14, 56, 24, 14);
-    badgeHighlight.alpha = 0.8;
-    badge.addChild(badgeHighlight);
-
-    var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
-    badgeTxt.textAlign = "center";
-    badgeTxt.textBaseline = "middle";
-    badgeTxt.y = 1;
-    badge.addChild(badgeTxt);
-
-    badge.visible = false;
-    badge.alpha = 0;
-
-    choiceReadyBadgeArr[index] = badge;
-    parent.addChild(badge);
-  }
-}
-
-function positionChoiceDecorations(index) {
-  if (!choiceArr[index]) {
-    return;
-  }
-
-  if (!container || !container.parent) {
-    return;
-  }
-
-  var parent = container.parent;
-  var tile = choiceArr[index];
-  var bg = choiceBgArr[index];
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-  var badge = choiceReadyBadgeArr[index];
-  var baseScale = tile.__baseScale || tile.scaleX || 1;
-  var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.18;
-
-  if (overlay) {
-    overlay.x = tile.x;
-    overlay.y = tile.y;
-    overlay.scaleX = overlay.scaleY = bgScale;
-    overlay.__baseScale = bgScale;
-    overlay.visible = tile.visible;
-    try {
-      parent.setChildIndex(overlay, parent.getChildIndex(tile) + 1);
-    } catch (err) {}
-  }
-
-  if (pulse) {
-    pulse.x = tile.x;
-    pulse.y = tile.y;
-    pulse.scaleX = pulse.scaleY = baseScale * 1.2;
-    pulse.__baseScale = pulse.scaleX;
-    try {
-      parent.setChildIndex(pulse, parent.getChildIndex(tile) + 2);
-    } catch (err) {}
-  }
-
-  if (badge) {
-    var badgeOffset = 74 * baseScale;
-    badge.x = tile.x;
-    badge.y = tile.y - badgeOffset;
-    try {
-      parent.setChildIndex(badge, parent.getChildIndex(tile) + 3);
-    } catch (err) {}
-  }
-}
-
-function stopChoiceReadyPulse(index) {
-  if (index == null) {
-    return;
-  }
-
-  if (choiceReadyTweenArr[index]) {
-    try {
-      choiceReadyTweenArr[index].setPaused(true);
-    } catch (err) {}
-    choiceReadyTweenArr[index] = null;
-  }
-
-  if (choiceReadyPulseArr[index]) {
-    var pulse = choiceReadyPulseArr[index];
-    createjs.Tween.removeTweens(pulse);
-    pulse.alpha = 0;
-    pulse.visible = false;
-    if (pulse.__baseScale) {
-      pulse.scaleX = pulse.scaleY = pulse.__baseScale;
-    }
-  }
-}
-
-function hideChoiceReadyBadge(index) {
-  var badge = choiceReadyBadgeArr[index];
-  if (!badge) {
-    return;
-  }
-
-  createjs.Tween.removeTweens(badge);
-  badge.visible = false;
-  badge.alpha = 0;
-  badge.scaleX = badge.scaleY = 1;
-}
-
-function hideChoiceDecorations(index) {
-  stopChoiceReadyPulse(index);
-
-  var overlay = choiceDisableOverlayArr[index];
-  if (overlay) {
-    createjs.Tween.removeTweens(overlay);
-    overlay.alpha = 0;
-    overlay.visible = false;
-  }
-
-  hideChoiceReadyBadge(index);
-}
-
-function setChoiceDisabledAppearance(index) {
-  if (!choiceArr[index]) {
-    return;
-  }
-
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-
-  if (overlay) {
-    overlay.visible = true;
-    overlay.alpha = 0.62;
-    if (overlay.__baseScale) {
-      overlay.scaleX = overlay.scaleY = overlay.__baseScale;
-    }
-  }
-
-  if (pulse) {
-    createjs.Tween.removeTweens(pulse);
-    pulse.alpha = 0;
-    pulse.visible = false;
-  }
-
-  hideChoiceReadyBadge(index);
-}
-
-function activateChoiceReadyAppearance(index) {
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-  var badge = choiceReadyBadgeArr[index];
-  var tile = choiceArr[index];
-
-  if (overlay) {
-    createjs.Tween.get(overlay, { override: true })
-      .to({ alpha: 0 }, 240, createjs.Ease.quadOut)
-      .call(function () {
-        overlay.visible = false;
-      });
-  }
-
-  if (pulse && tile) {
-    var baseScale = tile.__baseScale || tile.scaleX || 1;
-    stopChoiceReadyPulse(index);
-    pulse.visible = true;
-    pulse.alpha = 0;
-    var pulseBase = pulse.__baseScale || baseScale * 1.2;
-    pulse.scaleX = pulse.scaleY = pulseBase * 0.96;
-    choiceReadyTweenArr[index] = createjs.Tween.get(pulse, { loop: true })
-      .to({ alpha: 0.32, scaleX: pulseBase * 1.08, scaleY: pulseBase * 1.08 }, 360, createjs.Ease.quadOut)
-      .to({ alpha: 0, scaleX: pulseBase * 1.24, scaleY: pulseBase * 1.24 }, 420, createjs.Ease.quadIn);
-  }
-
-  if (badge) {
-    badge.visible = true;
-    badge.scaleX = badge.scaleY = 0.6;
-    badge.alpha = 0;
-    createjs.Tween.get(badge, { override: true })
-      .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.backOut)
-      .wait(900)
-      .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
-      .call(function () {
-        badge.visible = false;
-        badge.scaleX = badge.scaleY = 1;
-      });
-  }
-}
-
-function resetChoiceTileVisual(index) {
-  if (choiceArr[index]) {
-    createjs.Tween.removeTweens(choiceArr[index]);
-    var baseScale = choiceArr[index].__baseScale || choiceArr[index].scaleX || 1;
-    choiceArr[index].scaleX = choiceArr[index].scaleY = baseScale;
-    choiceArr[index].alpha = choiceArr[index].visible ? choiceArr[index].alpha : 1;
-  }
-
-  if (choiceBgArr[index]) {
-    createjs.Tween.removeTweens(choiceBgArr[index]);
-    drawChoiceTileBackground(choiceBgArr[index]);
-    var bgScale = choiceBgArr[index].__baseScale || 1;
-    choiceBgArr[index].scaleX = choiceBgArr[index].scaleY = bgScale;
-    choiceBgArr[index].alpha = choiceBgArr[index].visible ? choiceBgArr[index].alpha : 0;
-  }
-
-  if (choiceGlowArr[index]) {
-    createjs.Tween.removeTweens(choiceGlowArr[index]);
-    choiceGlowArr[index].alpha = 0;
-  }
-
-  stopChoiceReadyPulse(index);
-  hideChoiceReadyBadge(index);
-
-  var overlay = choiceDisableOverlayArr[index];
-  if (overlay) {
-    createjs.Tween.removeTweens(overlay);
-    overlay.alpha = 0;
-    overlay.visible = false;
-  }
-}
-
-function ensureTimeUpOverlay() {
-  if (timeUpOverlay) {
-    return timeUpOverlay;
-  }
-
-  if (!container || !container.parent) {
-    return null;
-  }
-
-  timeUpOverlay = new createjs.Container();
-  timeUpOverlay.mouseEnabled = false;
-  timeUpOverlay.mouseChildren = false;
-  timeUpOverlay.visible = false;
-  timeUpOverlay.alpha = 0;
-  timeUpOverlay.scaleX = timeUpOverlay.scaleY = 1;
-
-  timeUpOverlayBg = new createjs.Shape();
-  timeUpOverlayBg.graphics
-    .beginLinearGradientFill(
-      ["rgba(18,34,72,0.96)", "rgba(12,24,52,0.96)"],
-      [0, 1],
-      -200,
-      -80,
-      200,
-      80
-    )
-    .drawRoundRect(-220, -92, 440, 184, 36);
-  timeUpOverlay.addChild(timeUpOverlayBg);
-
-  var overlayHighlight = new createjs.Shape();
-  overlayHighlight.graphics
-    .beginLinearGradientFill(
-      ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -180,
-      -60,
-      180,
-      60
-    )
-    .drawRoundRect(-184, -66, 368, 132, 28);
-  overlayHighlight.alpha = 0.65;
-  timeUpOverlay.addChild(overlayHighlight);
-
-  timeUpIconContainer = new createjs.Container();
-  timeUpIconContainer.x = -110;
-  timeUpOverlay.addChild(timeUpIconContainer);
-
-  var iconBg = new createjs.Shape();
-  iconBg.graphics
-    .beginLinearGradientFill(
-      ["#623ff5", "#8d65ff"],
-      [0, 1],
-      -42,
-      -42,
-      42,
-      42
-    )
-    .drawCircle(0, 0, 46);
-  timeUpIconContainer.addChild(iconBg);
-
-  var iconInner = new createjs.Shape();
-  iconInner.graphics
-    .beginLinearGradientFill(
-      ["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -26,
-      -26,
-      26,
-      26
-    )
-    .drawCircle(0, 0, 32);
-  iconInner.y = -4;
-  timeUpIconContainer.addChild(iconInner);
-
-  var iconTick = new createjs.Shape();
-  iconTick.graphics
-    .setStrokeStyle(4, "round")
-    .beginStroke("rgba(255,255,255,0.88)")
-    .moveTo(0, -30)
-    .lineTo(0, 0)
-    .lineTo(24, 0);
-  iconTick.shadow = new createjs.Shadow("rgba(18,26,52,0.55)", 0, 6, 8);
-  iconTick.rotation = -6;
-  timeUpIconContainer.addChild(iconTick);
-
-  timeUpIconHand = new createjs.Shape();
-  timeUpIconHand.graphics
-    .setStrokeStyle(6, "round")
-    .beginStroke("#F9F0FF")
-    .moveTo(0, 0)
-    .lineTo(0, -24)
-    .moveTo(0, 0)
-    .lineTo(20, 0);
-  timeUpIconHand.shadow = new createjs.Shadow("rgba(18,26,52,0.65)", 0, 4, 6);
-  timeUpIconHand.rotation = -42;
-  timeUpIconContainer.addChild(timeUpIconHand);
-
-  var iconSpark = new createjs.Shape();
-  iconSpark.graphics
-    .beginRadialGradientFill(
-      ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      64
-    )
-    .drawCircle(0, 0, 64);
-  iconSpark.alpha = 0.65;
-  timeUpIconContainer.addChild(iconSpark);
-
-  timeUpText = new createjs.Text("Time's Up!", "800 44px 'Baloo 2'", "#F7F2FF");
-  timeUpText.textAlign = "left";
-  timeUpText.textBaseline = "middle";
-  timeUpText.shadow = new createjs.Shadow("rgba(6,12,28,0.6)", 0, 6, 10);
-  timeUpText.x = -42;
-  timeUpOverlay.addChild(timeUpText);
-
-  container.parent.addChild(timeUpOverlay);
-
-  return timeUpOverlay;
-}
-
-function ensureChoiceDecorations(index) {
-  if (index == null || index < 0) {
-    return;
-  }
-
-  if (!container || !container.parent) {
-    return;
-  }
-
-  var parent = container.parent;
-
-  if (!choiceDisableOverlayArr[index]) {
-    var overlay = new createjs.Shape();
-    overlay.graphics
-      .beginLinearGradientFill(
-        ["rgba(8,14,30,0.78)", "rgba(12,20,42,0.6)"],
-        [0, 1],
-        -40,
-        -40,
-        40,
-        40
-      )
-      .drawRoundRect(-42, -50, 130, 130, 30);
-    overlay.visible = false;
-    overlay.alpha = 0;
-    overlay.mouseEnabled = false;
-    overlay.mouseChildren = false;
-    choiceDisableOverlayArr[index] = overlay;
-    parent.addChild(overlay);
-  }
-
-  if (!choiceReadyPulseArr[index]) {
-    var pulse = new createjs.Shape();
-    pulse.graphics
-      .setStrokeStyle(4)
-      .beginLinearGradientStroke(
-        ["rgba(120,196,255,0.8)", "rgba(120,196,255,0)"],
-        [0, 1],
-        0,
-        -60,
-        0,
-        60
-      )
-      .drawRoundRect(-40, -48, 124, 124, 32);
-    pulse.visible = false;
-    pulse.alpha = 0;
-    pulse.mouseEnabled = false;
-    pulse.mouseChildren = false;
-    choiceReadyPulseArr[index] = pulse;
-    parent.addChild(pulse);
-  }
-
-  if (!choiceReadyBadgeArr[index]) {
-    var badge = new createjs.Container();
-    badge.mouseEnabled = false;
-    badge.mouseChildren = false;
-
-    var badgeBg = new createjs.Shape();
-    badgeBg.graphics
-      .beginLinearGradientFill(
-        ["rgba(102,72,214,0.95)", "rgba(144,102,240,0.95)"],
-        [0, 1],
-        -30,
-        -18,
-        30,
-        18
-      )
-      .drawRoundRect(-32, -18, 64, 36, 18);
-    badge.addChild(badgeBg);
-
-    var badgeHighlight = new createjs.Shape();
-    badgeHighlight.graphics
-      .beginLinearGradientFill(
-        ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"],
-        [0, 1],
-        -28,
-        -12,
-        28,
-        12
-      )
-      .drawRoundRect(-28, -14, 56, 24, 14);
-    badgeHighlight.alpha = 0.8;
-    badge.addChild(badgeHighlight);
-
-    var badgeTxt = new createjs.Text("Ready", "700 20px 'Baloo 2'", "#FDF7FF");
-    badgeTxt.textAlign = "center";
-    badgeTxt.textBaseline = "middle";
-    badgeTxt.y = 1;
-    badge.addChild(badgeTxt);
-
-    badge.visible = false;
-    badge.alpha = 0;
-
-    choiceReadyBadgeArr[index] = badge;
-    parent.addChild(badge);
-  }
-}
-
-function positionChoiceDecorations(index) {
-  if (!choiceArr[index]) {
-    return;
-  }
-
-  if (!container || !container.parent) {
-    return;
-  }
-
-  var parent = container.parent;
-  var tile = choiceArr[index];
-  var bg = choiceBgArr[index];
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-  var badge = choiceReadyBadgeArr[index];
-  var baseScale = tile.__baseScale || tile.scaleX || 1;
-  var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.18;
-
-  if (overlay) {
-    overlay.x = tile.x;
-    overlay.y = tile.y;
-    overlay.scaleX = overlay.scaleY = bgScale;
-    overlay.__baseScale = bgScale;
-    overlay.visible = tile.visible;
-    try {
-      parent.setChildIndex(overlay, parent.getChildIndex(tile) + 1);
-    } catch (err) {}
-  }
-
-  if (pulse) {
-    pulse.x = tile.x;
-    pulse.y = tile.y;
-    pulse.scaleX = pulse.scaleY = baseScale * 1.2;
-    pulse.__baseScale = pulse.scaleX;
-    try {
-      parent.setChildIndex(pulse, parent.getChildIndex(tile) + 2);
-    } catch (err) {}
-  }
-
-  if (badge) {
-    var badgeOffset = 74 * baseScale;
-    badge.x = tile.x;
-    badge.y = tile.y - badgeOffset;
-    try {
-      parent.setChildIndex(badge, parent.getChildIndex(tile) + 3);
-    } catch (err) {}
-  }
-}
-
-function stopChoiceReadyPulse(index) {
-  if (index == null) {
-    return;
-  }
-
-  if (choiceReadyTweenArr[index]) {
-    try {
-      choiceReadyTweenArr[index].setPaused(true);
-    } catch (err) {}
-    choiceReadyTweenArr[index] = null;
-  }
-
-  if (choiceReadyPulseArr[index]) {
-    var pulse = choiceReadyPulseArr[index];
-    createjs.Tween.removeTweens(pulse);
-    pulse.alpha = 0;
-    pulse.visible = false;
-    if (pulse.__baseScale) {
-      pulse.scaleX = pulse.scaleY = pulse.__baseScale;
-    }
-  }
-}
-
-function hideChoiceReadyBadge(index) {
-  var badge = choiceReadyBadgeArr[index];
-  if (!badge) {
-    return;
-  }
-
-  createjs.Tween.removeTweens(badge);
-  badge.visible = false;
-  badge.alpha = 0;
-  badge.scaleX = badge.scaleY = 1;
-}
-
-function hideChoiceDecorations(index) {
-  stopChoiceReadyPulse(index);
-
-  var overlay = choiceDisableOverlayArr[index];
-  if (overlay) {
-    createjs.Tween.removeTweens(overlay);
-    overlay.alpha = 0;
-    overlay.visible = false;
-  }
-
-  hideChoiceReadyBadge(index);
-}
-
-function setChoiceDisabledAppearance(index) {
-  if (!choiceArr[index]) {
-    return;
-  }
-
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-
-  if (overlay) {
-    overlay.visible = true;
-    overlay.alpha = 0.62;
-    if (overlay.__baseScale) {
-      overlay.scaleX = overlay.scaleY = overlay.__baseScale;
-    }
-  }
-
-  if (pulse) {
-    createjs.Tween.removeTweens(pulse);
-    pulse.alpha = 0;
-    pulse.visible = false;
-  }
-
-  hideChoiceReadyBadge(index);
-}
-
-function activateChoiceReadyAppearance(index) {
-  var overlay = choiceDisableOverlayArr[index];
-  var pulse = choiceReadyPulseArr[index];
-  var badge = choiceReadyBadgeArr[index];
-  var tile = choiceArr[index];
-
-  if (overlay) {
-    createjs.Tween.get(overlay, { override: true })
-      .to({ alpha: 0 }, 240, createjs.Ease.quadOut)
-      .call(function () {
-        overlay.visible = false;
-      });
-  }
-
-  if (pulse && tile) {
-    var baseScale = tile.__baseScale || tile.scaleX || 1;
-    stopChoiceReadyPulse(index);
-    pulse.visible = true;
-    pulse.alpha = 0;
-    var pulseBase = pulse.__baseScale || baseScale * 1.2;
-    pulse.scaleX = pulse.scaleY = pulseBase * 0.96;
-    choiceReadyTweenArr[index] = createjs.Tween.get(pulse, { loop: true })
-      .to({ alpha: 0.32, scaleX: pulseBase * 1.08, scaleY: pulseBase * 1.08 }, 360, createjs.Ease.quadOut)
-      .to({ alpha: 0, scaleX: pulseBase * 1.24, scaleY: pulseBase * 1.24 }, 420, createjs.Ease.quadIn);
-  }
-
-  if (badge) {
-    badge.visible = true;
-    badge.scaleX = badge.scaleY = 0.6;
-    badge.alpha = 0;
-    createjs.Tween.get(badge, { override: true })
-      .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.backOut)
-      .wait(900)
-      .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
-      .call(function () {
-        badge.visible = false;
-        badge.scaleX = badge.scaleY = 1;
-      });
-  }
-}
-
-function resetChoiceTileVisual(index) {
-  if (choiceArr[index]) {
-    createjs.Tween.removeTweens(choiceArr[index]);
-    var baseScale = choiceArr[index].__baseScale || choiceArr[index].scaleX || 1;
-    choiceArr[index].scaleX = choiceArr[index].scaleY = baseScale;
-    choiceArr[index].alpha = choiceArr[index].visible ? choiceArr[index].alpha : 1;
-  }
-
-  if (choiceBgArr[index]) {
-    createjs.Tween.removeTweens(choiceBgArr[index]);
-    drawChoiceTileBackground(choiceBgArr[index]);
-    var bgScale = choiceBgArr[index].__baseScale || 1;
-    choiceBgArr[index].scaleX = choiceBgArr[index].scaleY = bgScale;
-    choiceBgArr[index].alpha = choiceBgArr[index].visible ? choiceBgArr[index].alpha : 0;
-  }
-
-  if (choiceGlowArr[index]) {
-    createjs.Tween.removeTweens(choiceGlowArr[index]);
-    choiceGlowArr[index].alpha = 0;
-  }
-
-  stopChoiceReadyPulse(index);
-  hideChoiceReadyBadge(index);
-
-  var overlay = choiceDisableOverlayArr[index];
-  if (overlay) {
-    createjs.Tween.removeTweens(overlay);
-    overlay.alpha = 0;
-    overlay.visible = false;
-  }
-}
-
-function ensureTimeUpOverlay() {
-  if (timeUpOverlay) {
-    return timeUpOverlay;
-  }
-
-  if (!container || !container.parent) {
-    return null;
-  }
-
-  timeUpOverlay = new createjs.Container();
-  timeUpOverlay.mouseEnabled = false;
-  timeUpOverlay.mouseChildren = false;
-  timeUpOverlay.visible = false;
-  timeUpOverlay.alpha = 0;
-  timeUpOverlay.scaleX = timeUpOverlay.scaleY = 1;
-
-  timeUpOverlayBg = new createjs.Shape();
-  timeUpOverlayBg.graphics
-    .beginLinearGradientFill(
-      ["rgba(18,34,72,0.96)", "rgba(12,24,52,0.96)"],
-      [0, 1],
-      -200,
-      -80,
-      200,
-      80
-    )
-    .drawRoundRect(-220, -92, 440, 184, 36);
-  timeUpOverlay.addChild(timeUpOverlayBg);
-
-  var overlayHighlight = new createjs.Shape();
-  overlayHighlight.graphics
-    .beginLinearGradientFill(
-      ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -180,
-      -60,
-      180,
-      60
-    )
-    .drawRoundRect(-184, -66, 368, 132, 28);
-  overlayHighlight.alpha = 0.65;
-  timeUpOverlay.addChild(overlayHighlight);
-
-  timeUpIconContainer = new createjs.Container();
-  timeUpIconContainer.x = -110;
-  timeUpOverlay.addChild(timeUpIconContainer);
-
-  var iconBg = new createjs.Shape();
-  iconBg.graphics
-    .beginLinearGradientFill(
-      ["#623ff5", "#8d65ff"],
-      [0, 1],
-      -42,
-      -42,
-      42,
-      42
-    )
-    .drawCircle(0, 0, 46);
-  timeUpIconContainer.addChild(iconBg);
-
-  var iconInner = new createjs.Shape();
-  iconInner.graphics
-    .beginLinearGradientFill(
-      ["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -26,
-      -26,
-      26,
-      26
-    )
-    .drawCircle(0, 0, 32);
-  iconInner.y = -4;
-  timeUpIconContainer.addChild(iconInner);
-
-  var iconTick = new createjs.Shape();
-  iconTick.graphics
-    .setStrokeStyle(4, "round")
-    .beginStroke("rgba(255,255,255,0.88)")
-    .moveTo(0, -30)
-    .lineTo(0, 0)
-    .lineTo(24, 0);
-  iconTick.shadow = new createjs.Shadow("rgba(18,26,52,0.55)", 0, 6, 8);
-  iconTick.rotation = -6;
-  timeUpIconContainer.addChild(iconTick);
-
-  timeUpIconHand = new createjs.Shape();
-  timeUpIconHand.graphics
-    .setStrokeStyle(6, "round")
-    .beginStroke("#F9F0FF")
-    .moveTo(0, 0)
-    .lineTo(0, -24)
-    .moveTo(0, 0)
-    .lineTo(20, 0);
-  timeUpIconHand.shadow = new createjs.Shadow("rgba(18,26,52,0.65)", 0, 4, 6);
-  timeUpIconHand.rotation = -42;
-  timeUpIconContainer.addChild(timeUpIconHand);
-
-  var iconSpark = new createjs.Shape();
-  iconSpark.graphics
-    .beginRadialGradientFill(
-      ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      64
-    )
-    .drawCircle(0, 0, 64);
-  iconSpark.alpha = 0.65;
-  timeUpIconContainer.addChild(iconSpark);
-
-  timeUpText = new createjs.Text("Time's Up!", "800 44px 'Baloo 2'", "#F7F2FF");
-  timeUpText.textAlign = "left";
-  timeUpText.textBaseline = "middle";
-  timeUpText.shadow = new createjs.Shadow("rgba(6,12,28,0.6)", 0, 6, 10);
-  timeUpText.x = -42;
-  timeUpOverlay.addChild(timeUpText);
-
-  container.parent.addChild(timeUpOverlay);
-
-  return timeUpOverlay;
-}
-
-function showGameplayTimeUpBanner(onComplete) {
-  var overlay = ensureTimeUpOverlay();
-  if (!overlay) {
-    if (typeof onComplete === "function") {
-      setTimeout(onComplete, 0);
-    }
-    return;
-  }
-
-  var parent = container.parent;
-  if (parent) {
-    parent.setChildIndex(overlay, parent.getNumChildren() - 1);
-  }
-
-  var centerX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas && !isNaN(canvas.width) ? canvas.width / 2 : 0;
-  var centerY = canvas && !isNaN(canvas.height) ? canvas.height / 2 : 360;
-
-  overlay.x = centerX;
-  overlay.y = centerY - 20;
-  overlay.scaleX = overlay.scaleY = 0.92;
-  overlay.alpha = 0;
-  overlay.visible = true;
-
-  createjs.Tween.removeTweens(overlay);
-  createjs.Tween.get(overlay, { override: true })
-    .to({ alpha: 1, scaleX: 1.04, scaleY: 1.04 }, 260, createjs.Ease.quadOut)
-    .to({ scaleX: 1, scaleY: 1 }, 180, createjs.Ease.quadInOut);
-
-  if (timeUpIconHand) {
-    createjs.Tween.removeTweens(timeUpIconHand);
-    timeUpIconHand.rotation = -42;
-    createjs.Tween.get(timeUpIconHand, { override: true })
-      .to({ rotation: 12 }, 420, createjs.Ease.quadOut)
-      .to({ rotation: -8 }, 260, createjs.Ease.quadInOut);
+  if (timeUpIconContainer) {
+    createjs.Tween.removeTweens(timeUpIconContainer);
+    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
+    createjs.Tween.get(timeUpIconContainer, { override: true })
+      .to({ scaleX: 1.08, scaleY: 1.08 }, 320, createjs.Ease.backOut)
+      .to({ scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadInOut);
   }
 
   createjs.Tween.get(overlay)
@@ -1245,6 +148,51 @@ function showGameplayTimeUpBanner(onComplete) {
       if (typeof onComplete === "function") {
         onComplete();
       }
+    });
+}
+
+function hideGameplayTimeUpBanner(force) {
+  if (!timeUpOverlay) {
+    return;
+  }
+
+  var gradient = colors || CHOICE_TILE_BASE_COLORS;
+  targetShape.graphics
+    .clear()
+    .beginLinearGradientFill(gradient, [0, 1], -120, -80, 120, 80)
+    .drawRoundRect(-68, -54, 152, 132, 38)
+    .beginLinearGradientStroke(["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"] , [0, 1], -120, -64, 120, 64)
+    .setStrokeStyle(2)
+    .drawRoundRect(-68, -54, 152, 132, 38);
+}
+
+  if (timeUpIconHand) {
+    createjs.Tween.removeTweens(timeUpIconHand);
+    timeUpIconHand.rotation = -42;
+  }
+
+  if (timeUpIconGlow) {
+    createjs.Tween.removeTweens(timeUpIconGlow);
+    timeUpIconGlow.alpha = 0;
+  }
+
+  if (timeUpIconContainer) {
+    createjs.Tween.removeTweens(timeUpIconContainer);
+    timeUpIconContainer.scaleX = timeUpIconContainer.scaleY = 1;
+  }
+
+  if (force) {
+    timeUpOverlay.visible = false;
+    timeUpOverlay.alpha = 0;
+    timeUpOverlay.scaleX = timeUpOverlay.scaleY = 1;
+    return;
+  }
+
+  createjs.Tween.get(timeUpOverlay, { override: true })
+    .to({ alpha: 0 }, 180, createjs.Ease.quadIn)
+    .call(function () {
+      timeUpOverlay.visible = false;
+      timeUpOverlay.scaleX = timeUpOverlay.scaleY = 1;
     });
 }
 
@@ -1395,9 +343,29 @@ function positionChoiceDecorations(index) {
   var overlay = choiceDisableOverlayArr[index];
   var pulse = choiceReadyPulseArr[index];
   var badge = choiceReadyBadgeArr[index];
+  var glow = choiceGlowArr ? choiceGlowArr[index] : null;
   var baseScale = tile.__baseScale || tile.scaleX || 1;
-  var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.18;
+  var bgScale = bg && bg.__baseScale ? bg.__baseScale : baseScale * 1.08;
   var accent = choiceLiveAccentArr[index];
+
+  if (bg) {
+    bg.x = tile.x;
+    bg.y = tile.y;
+    bg.visible = tile.visible;
+    bg.scaleX = bg.scaleY = bgScale;
+    try {
+      parent.setChildIndex(bg, Math.max(parent.getChildIndex(tile) - 1, 0));
+    } catch (err) {}
+  }
+
+  if (glow) {
+    glow.x = tile.x;
+    glow.y = tile.y + 6;
+    glow.scaleX = glow.scaleY = glow.__targetScale || baseScale * 1.26;
+    try {
+      parent.setChildIndex(glow, parent.getChildIndex(tile) - 1);
+    } catch (err) {}
+  }
 
   if (overlay) {
     overlay.x = tile.x;
@@ -1464,13 +432,31 @@ function stopChoiceReadyPulse(index) {
   }
 }
 
+function stopChoiceReadyBadgeAnimation(index) {
+  var badge = choiceReadyBadgeArr[index];
+  if (!badge) {
+    return;
+  }
+
+  if (choiceReadyBadgeTweenArr[index]) {
+    try {
+      choiceReadyBadgeTweenArr[index].setPaused(true);
+    } catch (err) {}
+    choiceReadyBadgeTweenArr[index] = null;
+  }
+
+  createjs.Tween.removeTweens(badge);
+  badge.scaleX = badge.scaleY = 1;
+  badge.alpha = 0;
+}
+
 function hideChoiceReadyBadge(index) {
   var badge = choiceReadyBadgeArr[index];
   if (!badge) {
     return;
   }
 
-  createjs.Tween.removeTweens(badge);
+  stopChoiceReadyBadgeAnimation(index);
   badge.visible = false;
   badge.alpha = 0;
   badge.scaleX = badge.scaleY = 1;
@@ -1500,7 +486,7 @@ function setChoiceDisabledAppearance(index) {
 
   if (overlay) {
     overlay.visible = true;
-    overlay.alpha = 0.62;
+    overlay.alpha = 0.45;
     if (overlay.__baseScale) {
       overlay.scaleX = overlay.scaleY = overlay.__baseScale;
     }
@@ -1543,16 +529,18 @@ function activateChoiceReadyAppearance(index) {
   }
 
   if (badge) {
+    stopChoiceReadyBadgeAnimation(index);
     badge.visible = true;
     badge.scaleX = badge.scaleY = 0.6;
     badge.alpha = 0;
-    createjs.Tween.get(badge, { override: true })
+    choiceReadyBadgeTweenArr[index] = createjs.Tween.get(badge, { override: true })
       .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.backOut)
       .wait(900)
       .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
       .call(function () {
         badge.visible = false;
         badge.scaleX = badge.scaleY = 1;
+        choiceReadyBadgeTweenArr[index] = null;
       });
   }
 
@@ -1880,6 +868,7 @@ function hideGameplayTimeUpBanner(force) {
       timeUpOverlay.scaleX = timeUpOverlay.scaleY = 1;
     });
 }
+
 
 
 

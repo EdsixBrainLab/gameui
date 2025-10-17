@@ -563,8 +563,8 @@ function buildChoiceLayout(letterCount) {
 
   layout.choiceStart = centerX - ((count - 1) * layout.choiceSpacing) / 2;
   layout.clueStart = centerX - ((count - 1) * layout.clueSpacing) / 2;
-  layout.choiceBgScale = layout.choiceScale * 1.18;
-  layout.choiceGlowScale = layout.choiceScale * 1.32;
+  layout.choiceBgScale = layout.choiceScale * 1.08;
+  layout.choiceGlowScale = layout.choiceScale * 1.26;
   layout.clueBgScale = layout.clueScale * 1.08;
 
   return layout;
@@ -838,6 +838,12 @@ function CreateGameElements() {
 
     updateChoiceLetterDisplay(choiceArr[i], "");
     choiceArr[i].visible = false;
+    choiceArr[i].mouseChildren = false;
+    var hitAreaShape = new createjs.Shape();
+    hitAreaShape.graphics
+      .beginFill("#000")
+      .drawRoundRect(-76, -62, 152, 128, 36);
+    choiceArr[i].hitArea = hitAreaShape;
     container.parent.addChild(choiceArr[i]);
     choiceArr[i].x = 205 + i * 120;
     choiceArr[i].y = 620;
@@ -1305,13 +1311,6 @@ function answerSelected(e) {
   e.currentTarget.mouseEnabled = false;
   e.currentTarget.cursor = "default";
   detachChoiceInteractions(selectedIndex);
-  stopChoiceIdleAnimation(selectedIndex);
-  if (choicePulseArr[selectedIndex]) {
-    choicePulseArr[selectedIndex].visible = false;
-  }
-  if (choiceArr[selectedIndex]) {
-    choiceArr[selectedIndex].visible = false;
-  }
   strArr.push(uans);
   var str1 = uans;
   var indAnsVal = alphabetArr.indexOf(str1);
