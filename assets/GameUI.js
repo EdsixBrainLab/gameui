@@ -16,6 +16,7 @@ var CHOICE_TILE_BASE_COLORS = ["rgba(123,104,238,0.96)", "rgba(76,53,163,0.96)"]
 var CHOICE_TILE_HOVER_COLORS = ["rgba(155,132,255,0.98)", "rgba(94,66,206,0.98)"];
 var CHOICE_TILE_CORRECT_COLORS = ["rgba(72,210,190,0.96)", "rgba(30,140,126,0.96)"];
 var CHOICE_TILE_WRONG_COLORS = ["rgba(255,137,162,0.96)", "rgba(178,54,110,0.96)"];
+var CHOICE_TILE_DISABLED_COLORS = ["rgba(94,78,166,0.8)", "rgba(54,36,122,0.82)"];
 var CLUE_SLOT_BASE_COLORS = ["rgba(114,86,232,0.94)", "rgba(58,38,148,0.94)"];
 var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(168,144,255,0.94)", "rgba(90,64,210,0.94)"];
 var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"];
@@ -80,14 +81,14 @@ function call_UI_gameQuestion(incontainer,in_questiontext)
 {
          QusTxtString = new createjs.Text(
       in_questiontext,
-      "800 32px 'Baloo 2'",
+      "800 38px 'Baloo 2'",
       "#EAF2FF"
     );
     QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
     QusTxtString.textAlign = "center";
     QusTxtString.textBaseline = "middle";
     QusTxtString.lineWidth = 1000;
-    QusTxtString.lineHeight = 36;
+    QusTxtString.lineHeight = 46;
     var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
     QusTxtString.x = promptCenterX;
     QusTxtString.y = INTRO_PROMPT_Y-55;
@@ -214,6 +215,83 @@ function drawChoiceSpeechWave(targetShape) {
   g.drawCircle(0, 0, 92);
 }
 
+function drawChoiceDisabledOverlay(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+
+  var g = targetShape.graphics;
+  g.clear();
+  var overlayWidth = 148;
+  var overlayHeight = 148;
+  var overlayRadius = 48;
+
+  g.beginLinearGradientFill(
+    ["rgba(30,26,74,0.75)", "rgba(56,38,112,0.75)"],
+    [0, 1],
+    0,
+    -overlayHeight / 2,
+    0,
+    overlayHeight / 2
+  );
+  g.drawRoundRect(
+    -overlayWidth / 2,
+    -overlayHeight / 2,
+    overlayWidth,
+    overlayHeight,
+    overlayRadius
+  );
+
+  g.beginStroke("rgba(224,212,255,0.4)");
+  g.setStrokeStyle(3, "round", "round");
+  g.drawRoundRect(
+    -overlayWidth / 2 + 6,
+    -overlayHeight / 2 + 6,
+    overlayWidth - 12,
+    overlayHeight - 12,
+    overlayRadius - 10
+  );
+}
+
+function buildChoiceReadyBadge() {
+  var badge = new createjs.Container();
+  badge.mouseEnabled = false;
+  badge.mouseChildren = false;
+  badge.visible = false;
+  badge.alpha = 0;
+
+  var base = new createjs.Shape();
+  base.graphics
+    .beginLinearGradientFill(
+      ["rgba(242,227,255,0.95)", "rgba(168,132,255,0.95)"],
+      [0, 1],
+      -32,
+      -18,
+      32,
+      18
+    )
+    .drawRoundRect(-32, -18, 64, 36, 18);
+  badge.addChild(base);
+
+  var spark = new createjs.Shape();
+  spark.graphics
+    .beginFill("#5B2DE1")
+    .moveTo(0, -10)
+    .lineTo(8, 2)
+    .lineTo(-8, 2)
+    .closePath();
+  badge.addChild(spark);
+
+  var dot = new createjs.Shape();
+  dot.graphics.beginFill("#FFFFFF").drawCircle(0, 8, 4.5);
+  badge.addChild(dot);
+
+  badge.__baseScale = 1;
+  badge.__designScale = 1;
+
+  return badge;
+}
+
 function drawClueSlotBackground(targetShape, colors) {
   if (!targetShape) {
     return;
@@ -237,6 +315,33 @@ function drawClueSlotBackground(targetShape, colors) {
     30
   );
   g.drawRoundRect(-36, -44, 92, 88, 28);
+}
+
+function startChoiceReadyBadgeAnimation(badge) {
+  if (!badge) {
+    return;
+  }
+
+  stopChoiceReadyBadgeAnimation(badge);
+
+  var baseScale = badge.__baseScale || badge.scaleX || 1;
+  badge.scaleX = baseScale;
+  badge.scaleY = baseScale;
+  badge.__pulseTween = createjs.Tween.get(badge, { loop: true, override: false })
+    .to({ scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 320, createjs.Ease.sineOut)
+    .to({ scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.sineIn);
+}
+
+function stopChoiceReadyBadgeAnimation(badge) {
+  if (!badge) {
+    return;
+  }
+
+  if (badge.__pulseTween) {
+    badge.__pulseTween.setPaused(true);
+    badge.__pulseTween = null;
+  }
+  createjs.Tween.removeTweens(badge);
 }
 
 
@@ -557,9 +662,16 @@ function markChoiceResult(index, isCorrect) {
     var tile = choiceArr[index];
     var bg = choiceBgArr[index];
     var glow = choiceGlowArr[index];
+    var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+    var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
     var colors = isCorrect ? CHOICE_TILE_CORRECT_COLORS : CHOICE_TILE_WRONG_COLORS;
 
     stopChoiceIdleAnimation(index);
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
 
     if (bg) {
       drawChoiceTileBackground(bg, colors);
@@ -567,7 +679,7 @@ function markChoiceResult(index, isCorrect) {
       createjs.Tween.get(bg, { override: true })
         .to({ scaleX: bgBase * 1.05, scaleY: bgBase * 1.05, alpha: 1 }, 160, createjs.Ease.quadOut)
         .to({ scaleX: bgBase, scaleY: bgBase }, 200, createjs.Ease.quadOut)
-        .wait(900)
+        .wait(680)
         .call(function () {
           drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
         });
@@ -583,7 +695,7 @@ function markChoiceResult(index, isCorrect) {
     if (glow) {
       createjs.Tween.get(glow, { override: true })
         .to({ alpha: isCorrect ? 0.5 : 0.2 }, 180, createjs.Ease.quadOut)
-        .wait(isCorrect ? 600 : 900)
+        .wait(isCorrect ? 520 : 760)
         .to({ alpha: 0.38 }, 220, createjs.Ease.quadOut);
     }
 
@@ -591,6 +703,11 @@ function markChoiceResult(index, isCorrect) {
       var pulse = choicePulseArr[index];
       createjs.Tween.get(pulse, { override: true })
         .to({ alpha: 0 }, 200, createjs.Ease.quadOut);
+    }
+
+    if (overlay) {
+      createjs.Tween.get(overlay, { override: true })
+        .to({ alpha: 0, visible: false }, 140);
     }
   }
 
@@ -753,6 +870,186 @@ function stopChoiceIdleAnimation(index) {
     pulse.alpha = 0;
     pulse.__idleTween = null;
   }
+
+  if (typeof choiceReadyBadgeArr !== "undefined") {
+    var badge = choiceReadyBadgeArr[index];
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
+  }
+}
+
+function setChoiceInteractiveState(index, isInteractive, options) {
+  options = options || {};
+  var immediate = !!options.immediate;
+
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var glow = choiceGlowArr[index];
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+  var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
+
+  if (!tile && !bg && !overlay) {
+    return;
+  }
+
+  var baseScale = tile && (tile.__baseScale || tile.scaleX) ? tile.__baseScale || tile.scaleX : 1;
+  var bgScale = bg && (bg.__baseScale || bg.scaleX) ? bg.__baseScale || bg.scaleX : baseScale * 1.12;
+
+  if (isInteractive) {
+    if (bg) {
+      drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
+      if (immediate) {
+        bg.alpha = 0.95;
+        bg.scaleX = bgScale;
+        bg.scaleY = bgScale;
+      } else {
+        createjs.Tween.get(bg, { override: true })
+          .to({ alpha: 0.96, scaleX: bgScale, scaleY: bgScale }, 220, createjs.Ease.quadOut);
+      }
+    }
+    if (tile) {
+      if (immediate) {
+        tile.alpha = 1;
+      } else {
+        createjs.Tween.get(tile, { override: true }).to({ alpha: 1 }, 200, createjs.Ease.quadOut);
+      }
+    }
+    if (glow) {
+      glow.visible = true;
+      if (immediate) {
+        glow.alpha = Math.max(0.38, glow.alpha || 0.38);
+      } else {
+        createjs.Tween.get(glow, { override: true })
+          .to({ alpha: 0.42 }, 220, createjs.Ease.quadOut);
+      }
+    }
+    if (pulse) {
+      pulse.visible = true;
+      var pulseScale = pulse.__baseScale || baseScale;
+      if (immediate) {
+        pulse.alpha = 0.75;
+        pulse.scaleX = pulseScale;
+        pulse.scaleY = pulseScale;
+      } else {
+        pulse.alpha = 0;
+        pulse.scaleX = pulse.scaleY = pulseScale * 0.88;
+        createjs.Tween.get(pulse, { override: true })
+          .to({ alpha: 0.78, scaleX: pulseScale, scaleY: pulseScale }, 240, createjs.Ease.quadOut);
+      }
+    }
+    if (overlay) {
+      createjs.Tween.get(overlay, { override: true })
+        .to({ alpha: 0 }, 180, createjs.Ease.quadOut)
+        .call(function () {
+          overlay.visible = false;
+        });
+    }
+    if (badge && !options.suppressBadge) {
+      badge.visible = true;
+      var badgeScale = badge.__baseScale || badge.scaleX || 1;
+      badge.scaleX = badge.scaleY = badgeScale * (immediate ? 1 : 0.7);
+      badge.alpha = immediate ? 1 : 0;
+      createjs.Tween.removeTweens(badge);
+      if (immediate) {
+        badge.alpha = 1;
+        badge.scaleX = badge.scaleY = badgeScale;
+        startChoiceReadyBadgeAnimation(badge);
+      } else {
+        createjs.Tween.get(badge, { override: true })
+          .to({ alpha: 1, scaleX: badgeScale, scaleY: badgeScale }, 260, createjs.Ease.backOut)
+          .call(function () {
+            startChoiceReadyBadgeAnimation(badge);
+          });
+      }
+    }
+  } else {
+    stopChoiceIdleAnimation(index);
+    if (badge) {
+      stopChoiceReadyBadgeAnimation(badge);
+      badge.visible = false;
+      badge.alpha = 0;
+    }
+    if (bg) {
+      drawChoiceTileBackground(bg, CHOICE_TILE_DISABLED_COLORS);
+      if (immediate) {
+        bg.alpha = 0.62;
+        bg.scaleX = bgScale;
+        bg.scaleY = bgScale;
+      } else {
+        createjs.Tween.get(bg, { override: true })
+          .to({ alpha: 0.62, scaleX: bgScale, scaleY: bgScale }, 180, createjs.Ease.quadOut);
+      }
+    }
+    if (tile) {
+      if (immediate) {
+        tile.alpha = 0.58;
+      } else {
+        createjs.Tween.get(tile, { override: true })
+          .to({ alpha: 0.58 }, 160, createjs.Ease.quadOut);
+      }
+    }
+    if (glow) {
+      createjs.Tween.get(glow, { override: true })
+        .to({ alpha: 0.22 }, 160, createjs.Ease.quadOut);
+    }
+    if (pulse) {
+      createjs.Tween.removeTweens(pulse);
+      pulse.visible = false;
+      pulse.alpha = 0;
+    }
+    if (overlay) {
+      drawChoiceDisabledOverlay(overlay);
+      overlay.visible = true;
+      if (immediate) {
+        overlay.alpha = 0.78;
+      } else {
+        overlay.alpha = 0;
+        createjs.Tween.get(overlay, { override: true })
+          .to({ alpha: 0.78 }, 180, createjs.Ease.quadOut);
+      }
+    }
+  }
+}
+
+function resetChoiceTileTweens(index) {
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var glow = choiceGlowArr[index];
+  var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
+  var overlay = typeof choiceDisabledOverlayArr !== "undefined" ? choiceDisabledOverlayArr[index] : null;
+  var badge = typeof choiceReadyBadgeArr !== "undefined" ? choiceReadyBadgeArr[index] : null;
+
+  if (tile) {
+    createjs.Tween.removeTweens(tile);
+  }
+  if (bg) {
+    createjs.Tween.removeTweens(bg);
+  }
+  if (glow) {
+    createjs.Tween.removeTweens(glow);
+  }
+  if (pulse) {
+    createjs.Tween.removeTweens(pulse);
+  }
+  if (overlay) {
+    createjs.Tween.removeTweens(overlay);
+  }
+  if (badge) {
+    stopChoiceReadyBadgeAnimation(badge);
+    createjs.Tween.removeTweens(badge);
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.SA_setChoiceInteractiveState = setChoiceInteractiveState;
+  window.SA_resetChoiceTileTweens = resetChoiceTileTweens;
+  window.SA_buildChoiceReadyBadge = buildChoiceReadyBadge;
+  window.SA_drawChoiceDisabledOverlay = drawChoiceDisabledOverlay;
+  window.SA_stopChoiceReadyBadgeAnimation = stopChoiceReadyBadgeAnimation;
 }
   
   function renderQuestionCardBackground_htp() {

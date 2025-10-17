@@ -6,6 +6,8 @@ var choiceBgArr = [];
 var choiceGlowArr = [];
 var choiceMcArr = [];
 var choicePulseArr = [];
+var choiceDisabledOverlayArr = [];
+var choiceReadyBadgeArr = [];
 var textArr = [];
 var qno = [];
 var strArr = [];
@@ -53,7 +55,8 @@ var startBtn,
   selectedAnswer = "",
   cLen = 0;
 var timeExpiredNotice,
-  timeExpiredLabel;
+  timeExpiredLabel,
+  timeExpiredIcon;
 var parrotWowMc,
   parrotOopsMc,
   parrotGameOverMc,
@@ -297,10 +300,78 @@ function ensureTimeExpiredNotice() {
     .drawRoundRect(-noticeWidth / 2, -noticeHeight / 2, noticeWidth, noticeHeight, noticeRadius);
   timeExpiredNotice.addChild(outline);
 
+  timeExpiredIcon = new createjs.Container();
+  timeExpiredIcon.mouseEnabled = false;
+  timeExpiredIcon.mouseChildren = false;
+  timeExpiredIcon.x = -noticeWidth / 2 + 78;
+  timeExpiredIcon.y = 0;
+
+  var clockGlow = new createjs.Shape();
+  clockGlow.graphics
+    .beginRadialGradientFill(
+      ["rgba(226,215,255,0.6)", "rgba(132,110,232,0)"] ,
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      40
+    )
+    .drawCircle(0, 0, 40);
+  clockGlow.alpha = 0.85;
+  timeExpiredIcon.addChild(clockGlow);
+
+  var clockFace = new createjs.Shape();
+  clockFace.graphics
+    .beginLinearGradientFill(
+      ["#F7F2FF", "#D8C8FF"],
+      [0, 1],
+      -28,
+      -28,
+      28,
+      28
+    )
+    .drawCircle(0, 0, 28);
+  timeExpiredIcon.addChild(clockFace);
+
+  var clockBorder = new createjs.Shape();
+  clockBorder.graphics
+    .setStrokeStyle(4, "round", "round")
+    .beginStroke("rgba(94,70,210,0.9)")
+    .drawCircle(0, 0, 30);
+  timeExpiredIcon.addChild(clockBorder);
+
+  var clockMark = new createjs.Shape();
+  clockMark.graphics
+    .beginFill("rgba(94,70,210,0.85)")
+    .drawRoundRectComplex(-4, -22, 8, 12, 4, 4, 2, 2)
+    .drawRoundRectComplex(-4, 10, 8, 12, 2, 2, 4, 4);
+  timeExpiredIcon.addChild(clockMark);
+
+  var clockHand = new createjs.Shape();
+  clockHand.graphics
+    .beginFill("#5B2DE1")
+    .drawRoundRect(-3, -18, 6, 20, 3);
+  clockHand.regY = 0;
+  clockHand.y = 0;
+  clockHand.x = 0;
+  timeExpiredIcon.addChild(clockHand);
+  timeExpiredIcon.__hand = clockHand;
+
+  var clockSpark = new createjs.Shape();
+  clockSpark.graphics
+    .beginFill("#FFFFFF")
+    .drawCircle(16, -14, 4);
+  timeExpiredIcon.addChild(clockSpark);
+
+  timeExpiredNotice.addChild(timeExpiredIcon);
+
   timeExpiredLabel = new createjs.Text("Time's Up!", "800 48px 'Baloo 2'", "#F4FAFF");
-  timeExpiredLabel.textAlign = "center";
+  timeExpiredLabel.textAlign = "left";
   timeExpiredLabel.textBaseline = "middle";
   timeExpiredLabel.shadow = new createjs.Shadow("rgba(5,12,28,0.6)", 0, 12, 28);
+  timeExpiredLabel.x = -noticeWidth / 2 + 128;
   timeExpiredNotice.addChild(timeExpiredLabel);
 
   if (container && container.parent) {
@@ -331,6 +402,27 @@ function showTimeExpiredNotice(onComplete) {
   notice.y = centerY;
   notice.visible = true;
   notice.alpha = 0;
+
+  if (timeExpiredIcon) {
+    timeExpiredIcon.scaleX = timeExpiredIcon.scaleY = 0.4;
+    timeExpiredIcon.rotation = -24;
+    createjs.Tween.removeTweens(timeExpiredIcon);
+    createjs.Tween.get(timeExpiredIcon, { override: true })
+      .to({ scaleX: 1, scaleY: 1, rotation: 0 }, 320, createjs.Ease.backOut)
+      .to({ rotation: 6 }, 200, createjs.Ease.sineInOut)
+      .to({ rotation: -4 }, 200, createjs.Ease.sineInOut)
+      .to({ rotation: 0 }, 160, createjs.Ease.sineOut);
+
+    if (timeExpiredIcon.__hand) {
+      var iconHand = timeExpiredIcon.__hand;
+      iconHand.rotation = -26;
+      createjs.Tween.removeTweens(iconHand);
+      createjs.Tween.get(iconHand, { override: true })
+        .wait(160)
+        .to({ rotation: 18 }, 300, createjs.Ease.quadOut)
+        .to({ rotation: 0 }, 260, createjs.Ease.quadInOut);
+    }
+  }
 
   createjs.Tween.removeTweens(notice);
   createjs.Tween.get(notice, { override: true })
@@ -624,6 +716,15 @@ function CreateGameElements() {
       choiceBgArr[i].mouseChildren = false;
     }
 
+    if (!choiceDisabledOverlayArr[i]) {
+      choiceDisabledOverlayArr[i] = new createjs.Shape();
+      drawChoiceDisabledOverlay(choiceDisabledOverlayArr[i]);
+      choiceDisabledOverlayArr[i].alpha = 0;
+      choiceDisabledOverlayArr[i].visible = false;
+      choiceDisabledOverlayArr[i].mouseEnabled = false;
+      choiceDisabledOverlayArr[i].mouseChildren = false;
+    }
+
     if (!choicePulseArr[i]) {
       choicePulseArr[i] = new createjs.Shape();
       drawChoiceSpeechWave(choicePulseArr[i]);
@@ -639,6 +740,10 @@ function CreateGameElements() {
       choiceArr[i].mouseChildren = false;
     }
 
+    if (!choiceReadyBadgeArr[i] && typeof SA_buildChoiceReadyBadge === "function") {
+      choiceReadyBadgeArr[i] = SA_buildChoiceReadyBadge();
+    }
+
     if (choiceMcArr[i]) {
       var tileContainer = choiceMcArr[i];
 
@@ -648,11 +753,17 @@ function CreateGameElements() {
       if (choiceBgArr[i] && choiceBgArr[i].parent !== tileContainer) {
         tileContainer.addChild(choiceBgArr[i]);
       }
+      if (choiceDisabledOverlayArr[i] && choiceDisabledOverlayArr[i].parent !== tileContainer) {
+        tileContainer.addChild(choiceDisabledOverlayArr[i]);
+      }
       if (choicePulseArr[i] && choicePulseArr[i].parent !== tileContainer) {
         tileContainer.addChild(choicePulseArr[i]);
       }
       if (choiceArr[i] && choiceArr[i].parent !== tileContainer) {
         tileContainer.addChild(choiceArr[i]);
+      }
+      if (choiceReadyBadgeArr[i] && choiceReadyBadgeArr[i].parent !== tileContainer) {
+        tileContainer.addChild(choiceReadyBadgeArr[i]);
       }
 
       if (!tileContainer.__hitArea) {
@@ -666,6 +777,10 @@ function CreateGameElements() {
     choiceArr[i].scaleX = choiceArr[i].scaleY = choiceArr[i].__baseScale || 0.8;
     choiceArr[i].x = 0;
     choiceArr[i].y = 0;
+
+    if (typeof SA_resetChoiceTileTweens === "function") {
+      SA_resetChoiceTileTweens(i);
+    }
   }
 
   if (questionCardContainer && container.parent) {
@@ -686,6 +801,9 @@ function helpDisable() {
       choiceMcArr[i].mouseEnabled = false;
       choiceMcArr[i].cursor = "default";
     }
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
+    }
   }
 }
 
@@ -695,6 +813,10 @@ function helpEnable() {
       choiceMcArr[i].mouseEnabled = true;
       choiceMcArr[i].cursor = "pointer";
     }
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, true);
+    }
+    startChoiceIdleAnimation(i, true);
   }
 }
 //=================================================================================================================================//
@@ -786,6 +908,10 @@ function enablechoices() {
       choiceGlowArr[i].visible = false;
       choiceGlowArr[i].alpha = 0;
     }
+    if (choiceDisabledOverlayArr[i]) {
+      choiceDisabledOverlayArr[i].visible = false;
+      choiceDisabledOverlayArr[i].alpha = 0;
+    }
     if (choicePulseArr[i]) {
       drawChoiceSpeechWave(choicePulseArr[i]);
       choicePulseArr[i].visible = false;
@@ -800,6 +926,14 @@ function enablechoices() {
       drawClueSlotBackground(clueBgArr[i]);
       clueBgArr[i].visible = false;
       clueBgArr[i].alpha = 0;
+    }
+
+    if (choiceReadyBadgeArr[i]) {
+      choiceReadyBadgeArr[i].visible = false;
+      choiceReadyBadgeArr[i].alpha = 0;
+      if (typeof SA_stopChoiceReadyBadgeAnimation === "function") {
+        SA_stopChoiceReadyBadgeAnimation(choiceReadyBadgeArr[i]);
+      }
     }
 
     stopChoiceIdleAnimation(i);
@@ -880,6 +1014,15 @@ function enablechoices() {
       choiceBgArr[i].alpha = 0;
     }
 
+    if (choiceDisabledOverlayArr[i]) {
+      drawChoiceDisabledOverlay(choiceDisabledOverlayArr[i]);
+      choiceDisabledOverlayArr[i].x = 0;
+      choiceDisabledOverlayArr[i].y = 0;
+      choiceDisabledOverlayArr[i].scaleX = choiceDisabledOverlayArr[i].scaleY = tileScale * 1.12;
+      choiceDisabledOverlayArr[i].visible = false;
+      choiceDisabledOverlayArr[i].alpha = 0;
+    }
+
     if (choicePulseArr[i]) {
       drawChoiceSpeechWave(choicePulseArr[i]);
       choicePulseArr[i].x = 0;
@@ -897,6 +1040,23 @@ function enablechoices() {
       choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
       choiceGlowArr[i].visible = true;
       choiceGlowArr[i].alpha = 0;
+    }
+
+    if (choiceReadyBadgeArr[i]) {
+      var badge = choiceReadyBadgeArr[i];
+      var badgeOffset = (148 * tileScale) / 2 + 34;
+      badge.x = 0;
+      badge.y = -badgeOffset;
+      var badgeDesignScale = badge.__designScale || badge.__baseScale || 1;
+      badge.__designScale = badgeDesignScale;
+      badge.scaleX = badge.scaleY = tileScale * badgeDesignScale;
+      badge.__baseScale = tileScale * badgeDesignScale;
+      badge.visible = false;
+      badge.alpha = 0;
+    }
+
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
     }
 
     if (clueArr[i]) {
@@ -1034,7 +1194,9 @@ function createTween() {
         .call(
           (function (index) {
             return function () {
-              startChoiceIdleAnimation(index, true);
+              if (choiceMcArr[index] && choiceMcArr[index].mouseEnabled) {
+                startChoiceIdleAnimation(index, true);
+              }
             };
           })(i)
         );
@@ -1050,12 +1212,16 @@ function createTween() {
 function AddListenerFn() {
   clearTimeout(repTimeClearInterval);
   for (i = 0; i < cLen; i++) {
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, true);
+    }
     if (choiceMcArr[i]) {
       choiceMcArr[i].addEventListener("click", answerSelected);
       choiceMcArr[i].mouseEnabled = true;
       choiceMcArr[i].cursor = "pointer";
     }
     attachChoiceInteractions(i);
+    startChoiceIdleAnimation(i, true);
   }
 
   rst = 0;
@@ -1093,6 +1259,10 @@ function disablechoices() {
     }
 
     stopChoiceIdleAnimation(i);
+
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
+    }
 
     if (choiceBgArr[i]) {
       createjs.Tween.get(choiceBgArr[i], { override: true }).to({ alpha: 0 }, 160, createjs.Ease.quadOut);
@@ -1168,6 +1338,9 @@ function disableMouse() {
       choiceMcArr[i].mouseEnabled = false;
       choiceMcArr[i].cursor = "default";
     }
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
+    }
   }
 }
 
@@ -1178,6 +1351,10 @@ function enableMouse() {
       choiceMcArr[i].mouseEnabled = true;
       choiceMcArr[i].cursor = "pointer";
     }
+    if (typeof SA_setChoiceInteractiveState === "function") {
+      SA_setChoiceInteractiveState(i, true);
+    }
+    startChoiceIdleAnimation(i, true);
   }
 }
 
