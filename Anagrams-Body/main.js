@@ -148,7 +148,7 @@ var words_arry = [
 
 var CHOICE_LETTER_FONT = "800 66px 'Baloo 2'";
 var CLUE_LETTER_FONT = "800 60px 'Baloo 2'";
-var CLUE_LETTER_VERTICAL_OFFSET = 4;
+var CLUE_LETTER_VERTICAL_OFFSET = 6;
 var LETTER_FILL_COLOR = "#FFFFFF";
 var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
@@ -752,19 +752,19 @@ function enablechoices() {
 
 
   var choiceLayout = computeRowLayout(cLen, {
-    baseSpacing: 176,
+    baseSpacing: 182,
     baseScale: 0.8,
     minScale: 0.58,
     maxSpan: 720,
-    tileSpan: 176
+    tileSpan: 158
   });
 
   var clueLayout = computeRowLayout(cLen, {
-    baseSpacing: 120,
+    baseSpacing: 134,
     baseScale: 1,
     minScale: 0.82,
     maxSpan: 720,
-    tileSpan: 120
+    tileSpan: 108
   });
 
   for (i = 0; i < cLen; i++) {
