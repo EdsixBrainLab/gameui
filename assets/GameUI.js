@@ -309,23 +309,53 @@ function drawClueSlotBackground(targetShape, colors) {
   }
 
   var gradient = colors || CLUE_SLOT_BASE_COLORS;
-  var stroke = ["rgba(222,205,255,0.85)", "rgba(142,114,255,0.6)"];
+  var stroke = ["rgba(230,216,255,0.92)", "rgba(124,98,232,0.68)"];
+  var width = 116;
+  var height = 120;
+  var cornerRadius = 40;
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+
   var g = targetShape.graphics;
   g.clear();
-  g.setStrokeStyle(4, "round", "round");
-  g.beginLinearGradientStroke(stroke, [0, 1], -54, -54, 54, 54);
-  g.beginLinearGradientFill(gradient, [0, 1], -62, -62, 62, 62);
-  g.drawRoundRect(-44, -52, 108, 112, 36);
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight);
+  g.beginLinearGradientFill(gradient, [0, 1], 0, -halfHeight, 0, halfHeight);
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
 
+  var highlightInset = 12;
+  var highlightHeight = height * 0.56;
+  var highlightTopRadius = Math.max(cornerRadius - highlightInset, 26);
+  var highlightBottomRadius = Math.max(highlightTopRadius - 12, 14);
+  g.beginStroke(null);
   g.beginLinearGradientFill(
-    ["rgba(255,255,255,0.28)", "rgba(255,255,255,0)"],
+    ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
     [0, 1],
     0,
-    -50,
+    -halfHeight + highlightInset,
     0,
-    30
+    -halfHeight + highlightInset + highlightHeight
   );
-  g.drawRoundRect(-36, -44, 92, 88, 28);
+  if (typeof g.drawRoundRectComplex === "function") {
+    g.drawRoundRectComplex(
+      -halfWidth + highlightInset,
+      -halfHeight + highlightInset,
+      width - highlightInset * 2,
+      highlightHeight,
+      highlightTopRadius,
+      highlightTopRadius,
+      highlightBottomRadius,
+      highlightBottomRadius
+    );
+  } else {
+    g.drawRoundRect(
+      -halfWidth + highlightInset,
+      -halfHeight + highlightInset,
+      width - highlightInset * 2,
+      highlightHeight,
+      highlightBottomRadius
+    );
+  }
 }
 
 function startChoiceReadyBadgeAnimation(badge) {
@@ -1313,32 +1343,68 @@ function startChoiceIdleAnimation(index, force) {
   label.scaleX = baseScale;
   label.scaleY = baseScale;
 
+  createjs.Tween.removeTweens(label);
   var idleLabelTween = createjs.Tween.get(label, { loop: true, override: false })
-    .to({ scaleX: baseScale * 1.02, scaleY: baseScale * 0.98 }, 340, createjs.Ease.sineInOut)
+    .wait((index % 3) * 80)
+    .to({ scaleX: baseScale * 1.06, scaleY: baseScale * 0.96 }, 360, createjs.Ease.sineOut)
+    .to({ scaleX: baseScale * 0.98, scaleY: baseScale * 1.02 }, 360, createjs.Ease.sineInOut)
     .to({ scaleX: baseScale, scaleY: baseScale }, 320, createjs.Ease.sineInOut);
   label.__idleTween = idleLabelTween;
+
+  var tileContainer = typeof choiceMcArr !== "undefined" && choiceMcArr[index] ? choiceMcArr[index] : null;
+  if (tileContainer) {
+    createjs.Tween.removeTweens(tileContainer);
+    var baseY = typeof tileContainer.__targetY === "number" ? tileContainer.__targetY : tileContainer.y;
+    tileContainer.__idleBaseY = baseY;
+    tileContainer.y = baseY;
+    tileContainer.__idleTween = createjs.Tween.get(tileContainer, { loop: true, override: false })
+      .wait((index % 3) * 90)
+      .to({ y: baseY - 10 }, 360, createjs.Ease.sineOut)
+      .to({ y: baseY }, 420, createjs.Ease.sineInOut);
+  }
+
+  var bg = choiceBgArr[index];
+  if (bg) {
+    createjs.Tween.removeTweens(bg);
+    var bgScale = bg.__baseScale || bg.scaleX || 1;
+    bg.scaleX = bgScale;
+    bg.scaleY = bgScale;
+    bg.__idleTween = createjs.Tween.get(bg, { loop: true, override: false })
+      .wait((index % 3) * 80 + 120)
+      .to({ scaleX: bgScale * 1.06, scaleY: bgScale * 1.06 }, 360, createjs.Ease.sineOut)
+      .to({ scaleX: bgScale * 0.97, scaleY: bgScale * 0.97 }, 320, createjs.Ease.sineInOut)
+      .to({ scaleX: bgScale, scaleY: bgScale }, 320, createjs.Ease.sineOut);
+  }
 
   var pulse = typeof choicePulseArr !== "undefined" ? choicePulseArr[index] : null;
   if (pulse) {
     var pulseScale = pulse.__baseScale || baseScale;
+    createjs.Tween.removeTweens(pulse);
     pulse.visible = true;
-    pulse.alpha = pulse.alpha && pulse.alpha > 0 ? pulse.alpha : 0.7;
+    pulse.alpha = 0.78;
     pulse.scaleX = pulseScale;
     pulse.scaleY = pulseScale;
     pulse.__idleTween = createjs.Tween.get(pulse, { loop: true, override: false })
-      .to({ scaleX: pulseScale * 1.1, scaleY: pulseScale * 1.1, alpha: 0.86 }, 520, createjs.Ease.sineOut)
-      .to({ scaleX: pulseScale * 0.92, scaleY: pulseScale * 0.92, alpha: 0.5 }, 460, createjs.Ease.sineIn);
+      .wait((index % 4) * 100)
+      .to({ scaleX: pulseScale * 1.18, scaleY: pulseScale * 1.18, alpha: 0.92 }, 420, createjs.Ease.quadOut)
+      .to({ scaleX: pulseScale * 1.32, scaleY: pulseScale * 1.32, alpha: 0 }, 320, createjs.Ease.quadIn)
+      .call(function () {
+        pulse.alpha = 0.78;
+        pulse.scaleX = pulse.scaleY = pulseScale;
+      });
   }
 
   var glow = choiceGlowArr[index];
   if (glow) {
-    var glowTargetScale = glow.__targetScale || (baseScale * 1.3);
+    createjs.Tween.removeTweens(glow);
+    var glowTargetScale = glow.__targetScale || baseScale * 1.3;
     glow.scaleX = glow.scaleY = glowTargetScale;
-    var baseAlpha = glow.alpha && glow.alpha > 0 ? glow.alpha : 0.38;
+    var baseAlpha = glow.alpha && glow.alpha > 0 ? glow.alpha : 0.42;
     glow.alpha = baseAlpha;
     glow.__idleTween = createjs.Tween.get(glow, { loop: true, override: false })
-      .to({ alpha: Math.min(0.54, baseAlpha + 0.14) }, 520, createjs.Ease.sineInOut)
-      .to({ alpha: baseAlpha }, 480, createjs.Ease.sineInOut);
+      .wait((index % 3) * 110)
+      .to({ alpha: Math.min(0.62, baseAlpha + 0.2) }, 360, createjs.Ease.sineInOut)
+      .to({ alpha: baseAlpha }, 360, createjs.Ease.sineInOut);
   }
 
   choiceIdleStates[index] = true;
@@ -1351,18 +1417,39 @@ function stopChoiceIdleAnimation(index) {
 
   choiceIdleStates[index] = false;
 
+  var baseScale = 1;
   var label = choiceArr[index];
   if (label) {
     createjs.Tween.removeTweens(label);
-    var baseScale = label.__baseScale || label.scaleX || 1;
+    baseScale = label.__baseScale || label.scaleX || 1;
     label.scaleX = baseScale;
     label.scaleY = baseScale;
     label.__idleTween = null;
   }
 
+  var tileContainer = typeof choiceMcArr !== "undefined" && choiceMcArr[index] ? choiceMcArr[index] : null;
+  if (tileContainer) {
+    createjs.Tween.removeTweens(tileContainer);
+    if (typeof tileContainer.__idleBaseY === "number") {
+      tileContainer.y = tileContainer.__idleBaseY;
+    }
+    tileContainer.__idleTween = null;
+  }
+
+  var bg = choiceBgArr[index];
+  if (bg) {
+    createjs.Tween.removeTweens(bg);
+    var bgScale = bg.__baseScale || bg.scaleX || 1;
+    bg.scaleX = bgScale;
+    bg.scaleY = bgScale;
+    bg.__idleTween = null;
+  }
+
   var glow = choiceGlowArr[index];
   if (glow) {
     createjs.Tween.removeTweens(glow);
+    var glowScale = glow.__targetScale || baseScale * 1.3;
+    glow.scaleX = glow.scaleY = glowScale;
     glow.alpha = 0.38;
     glow.__idleTween = null;
   }
@@ -1372,6 +1459,8 @@ function stopChoiceIdleAnimation(index) {
     createjs.Tween.removeTweens(pulse);
     pulse.visible = false;
     pulse.alpha = 0;
+    var pulseBase = pulse.__baseScale || (label ? label.__baseScale || label.scaleX || 1 : 1);
+    pulse.scaleX = pulse.scaleY = pulseBase;
     pulse.__idleTween = null;
   }
 

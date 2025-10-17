@@ -54,9 +54,6 @@ var startBtn,
   resultLoading,
   selectedAnswer = "",
   cLen = 0;
-var timeExpiredNotice,
-  timeExpiredLabel,
-  timeExpiredIcon;
 var parrotWowMc,
   parrotOopsMc,
   parrotGameOverMc,
@@ -151,6 +148,7 @@ var words_arry = [
 
 var CHOICE_LETTER_FONT = "800 66px 'Baloo 2'";
 var CLUE_LETTER_FONT = "800 60px 'Baloo 2'";
+var CLUE_LETTER_VERTICAL_OFFSET = 4;
 var LETTER_FILL_COLOR = "#FFFFFF";
 var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
@@ -251,203 +249,6 @@ function updateClueLetterDisplay(display, letter) {
   display.alpha = value ? 1 : 0;
 }
 
-function ensureTimeExpiredNotice() {
-  if (typeof createjs === "undefined") {
-    return null;
-  }
-
-  if (timeExpiredNotice) {
-    if (!timeExpiredNotice.parent && container && container.parent) {
-      container.parent.addChild(timeExpiredNotice);
-    }
-    return timeExpiredNotice;
-  }
-
-  timeExpiredNotice = new createjs.Container();
-  timeExpiredNotice.visible = false;
-  timeExpiredNotice.alpha = 0;
-  timeExpiredNotice.mouseEnabled = false;
-  timeExpiredNotice.mouseChildren = false;
-
-  var noticeWidth = 420;
-  var noticeHeight = 126;
-  var noticeRadius = 40;
-
-  var backdrop = new createjs.Shape();
-  backdrop.graphics
-    .beginLinearGradientFill(
-      ["rgba(24,20,58,0.94)", "rgba(54,40,120,0.94)"],
-      [0, 1],
-      0,
-      -noticeHeight / 2,
-      0,
-      noticeHeight / 2
-    )
-    .drawRoundRect(-noticeWidth / 2, -noticeHeight / 2, noticeWidth, noticeHeight, noticeRadius);
-  timeExpiredNotice.addChild(backdrop);
-
-  var outline = new createjs.Shape();
-  outline.graphics
-    .setStrokeStyle(4, "round", "round")
-    .beginLinearGradientStroke(
-      ["rgba(228,215,255,0.9)", "rgba(142,114,255,0.6)"],
-      [0, 1],
-      -noticeWidth / 2,
-      -noticeHeight / 2,
-      noticeWidth / 2,
-      noticeHeight / 2
-    )
-    .drawRoundRect(-noticeWidth / 2, -noticeHeight / 2, noticeWidth, noticeHeight, noticeRadius);
-  timeExpiredNotice.addChild(outline);
-
-  timeExpiredIcon = new createjs.Container();
-  timeExpiredIcon.mouseEnabled = false;
-  timeExpiredIcon.mouseChildren = false;
-  timeExpiredIcon.x = -noticeWidth / 2 + 78;
-  timeExpiredIcon.y = 0;
-
-  var clockGlow = new createjs.Shape();
-  clockGlow.graphics
-    .beginRadialGradientFill(
-      ["rgba(226,215,255,0.6)", "rgba(132,110,232,0)"] ,
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      40
-    )
-    .drawCircle(0, 0, 40);
-  clockGlow.alpha = 0.85;
-  timeExpiredIcon.addChild(clockGlow);
-
-  var clockFace = new createjs.Shape();
-  clockFace.graphics
-    .beginLinearGradientFill(
-      ["#F7F2FF", "#D8C8FF"],
-      [0, 1],
-      -28,
-      -28,
-      28,
-      28
-    )
-    .drawCircle(0, 0, 28);
-  timeExpiredIcon.addChild(clockFace);
-
-  var clockBorder = new createjs.Shape();
-  clockBorder.graphics
-    .setStrokeStyle(4, "round", "round")
-    .beginStroke("rgba(94,70,210,0.9)")
-    .drawCircle(0, 0, 30);
-  timeExpiredIcon.addChild(clockBorder);
-
-  var clockMark = new createjs.Shape();
-  clockMark.graphics
-    .beginFill("rgba(94,70,210,0.85)")
-    .drawRoundRectComplex(-4, -22, 8, 12, 4, 4, 2, 2)
-    .drawRoundRectComplex(-4, 10, 8, 12, 2, 2, 4, 4);
-  timeExpiredIcon.addChild(clockMark);
-
-  var clockHand = new createjs.Shape();
-  clockHand.graphics
-    .beginFill("#5B2DE1")
-    .drawRoundRect(-3, -18, 6, 20, 3);
-  clockHand.regY = 0;
-  clockHand.y = 0;
-  clockHand.x = 0;
-  timeExpiredIcon.addChild(clockHand);
-  timeExpiredIcon.__hand = clockHand;
-
-  var clockSpark = new createjs.Shape();
-  clockSpark.graphics
-    .beginFill("#FFFFFF")
-    .drawCircle(16, -14, 4);
-  timeExpiredIcon.addChild(clockSpark);
-
-  timeExpiredNotice.addChild(timeExpiredIcon);
-
-  timeExpiredLabel = new createjs.Text("Time's Up!", "800 48px 'Baloo 2'", "#F4FAFF");
-  timeExpiredLabel.textAlign = "left";
-  timeExpiredLabel.textBaseline = "middle";
-  timeExpiredLabel.shadow = new createjs.Shadow("rgba(5,12,28,0.6)", 0, 12, 28);
-  timeExpiredLabel.x = -noticeWidth / 2 + 128;
-  timeExpiredNotice.addChild(timeExpiredLabel);
-
-  if (container && container.parent) {
-    container.parent.addChild(timeExpiredNotice);
-  }
-
-  return timeExpiredNotice;
-}
-
-function showTimeExpiredNotice(onComplete) {
-  var notice = ensureTimeExpiredNotice();
-  if (!notice) {
-    if (typeof onComplete === "function") {
-      onComplete();
-    }
-    return;
-  }
-
-  var centerX =
-    typeof getCanvasCenterX === "function"
-      ? getCanvasCenterX()
-      : canvas && !isNaN(canvas.width)
-      ? canvas.width / 2
-      : 640;
-  var centerY = CLUE_ROW_Y - 40;
-
-  notice.x = centerX;
-  notice.y = centerY;
-  notice.visible = true;
-  notice.alpha = 0;
-
-  if (timeExpiredIcon) {
-    timeExpiredIcon.scaleX = timeExpiredIcon.scaleY = 0.4;
-    timeExpiredIcon.rotation = -24;
-    createjs.Tween.removeTweens(timeExpiredIcon);
-    createjs.Tween.get(timeExpiredIcon, { override: true })
-      .to({ scaleX: 1, scaleY: 1, rotation: 0 }, 320, createjs.Ease.backOut)
-      .to({ rotation: 6 }, 200, createjs.Ease.sineInOut)
-      .to({ rotation: -4 }, 200, createjs.Ease.sineInOut)
-      .to({ rotation: 0 }, 160, createjs.Ease.sineOut);
-
-    if (timeExpiredIcon.__hand) {
-      var iconHand = timeExpiredIcon.__hand;
-      iconHand.rotation = -26;
-      createjs.Tween.removeTweens(iconHand);
-      createjs.Tween.get(iconHand, { override: true })
-        .wait(160)
-        .to({ rotation: 18 }, 300, createjs.Ease.quadOut)
-        .to({ rotation: 0 }, 260, createjs.Ease.quadInOut);
-    }
-  }
-
-  createjs.Tween.removeTweens(notice);
-  createjs.Tween.get(notice, { override: true })
-    .to({ alpha: 1 }, 240, createjs.Ease.quadOut)
-    .wait(760)
-    .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
-    .call(function () {
-      notice.visible = false;
-      if (typeof onComplete === "function") {
-        onComplete();
-      }
-    });
-}
-
-if (typeof window !== "undefined") {
-  window.SA_handleTimeExpiredBeforeNextQuestion = function (proceed) {
-    showTimeExpiredNotice(function () {
-      if (typeof proceed === "function") {
-        proceed();
-      }
-    });
-    return true;
-  };
-}
-
 if (typeof window !== "undefined") {
   window.SA_buildChoiceLetterDisplay = buildChoiceLetterDisplay;
   window.SA_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
@@ -491,7 +292,6 @@ var btnPaddArr = ["", "", "", "365", "335", "305", "275", "245", "215", "185"];
 var indx = [];
 var btnPadding = 50;
 var btnTxtPaddding = 483;
-var repTimeClearInterval = 0;
 var rst1 = 0,
   crst = 0,
   wrst = 0,
@@ -677,7 +477,7 @@ function CreateGameElements() {
     updateClueLetterDisplay(clueArr[i], "");
     clueArr[i].visible = false;
     clueArr[i].x = 355 + i * 70 - 14;
-    clueArr[i].y = 490;
+    clueArr[i].y = CLUE_ROW_Y + CLUE_LETTER_VERTICAL_OFFSET;
   }
 
   for (i = 0; i < maxLetterCnt; i++) {
@@ -1063,7 +863,7 @@ function enablechoices() {
       clueArr[i].visible = true;
       clueArr[i].alpha = 0;
       clueArr[i].x = slotX;
-      clueArr[i].y = CLUE_ROW_Y;
+      clueArr[i].y = CLUE_ROW_Y + CLUE_LETTER_VERTICAL_OFFSET;
       clueArr[i].scaleX = clueArr[i].scaleY = slotScale;
     }
 
@@ -1136,6 +936,16 @@ function createTween() {
       .to({ alpha: 1 }, 240, createjs.Ease.quadOut);
   }
 
+  var hasEnabledChoices = false;
+  var lastRevealTween = null;
+  function ensureChoicesInteractive() {
+    if (hasEnabledChoices) {
+      return;
+    }
+    hasEnabledChoices = true;
+    AddListenerFn();
+  }
+
   var val = 420;
   for (i = 0; i < cLen; i++) {
     var tileContainer = choiceMcArr[i];
@@ -1188,7 +998,7 @@ function createTween() {
       choiceArr[i].visible = true;
       choiceArr[i].alpha = 0;
       choiceArr[i].scaleX = choiceArr[i].scaleY = targetScale * 1.12;
-      createjs.Tween.get(choiceArr[i], { override: true })
+      var revealTween = createjs.Tween.get(choiceArr[i], { override: true })
         .wait(val)
         .to({ scaleX: targetScale, scaleY: targetScale, alpha: 1 }, 320, createjs.Ease.quadOut)
         .call(
@@ -1200,17 +1010,21 @@ function createTween() {
             };
           })(i)
         );
+      lastRevealTween = revealTween;
     }
 
     val += 140;
   }
 
-  repTimeClearInterval = setTimeout(AddListenerFn, 3000);
+  if (lastRevealTween) {
+    lastRevealTween.call(ensureChoicesInteractive);
+  } else {
+    ensureChoicesInteractive();
+  }
 }
 
 
 function AddListenerFn() {
-  clearTimeout(repTimeClearInterval);
   for (i = 0; i < cLen; i++) {
     if (typeof SA_setChoiceInteractiveState === "function") {
       SA_setChoiceInteractiveState(i, true);

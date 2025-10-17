@@ -307,41 +307,50 @@ function buildVectorCursorIcon() {
     halo.graphics
         .clear()
         .beginRadialGradientFill([
-            "rgba(198,181,255,0.55)",
+            "rgba(198,181,255,0.45)",
             "rgba(198,181,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 72)
-        .drawCircle(0, 0, 72);
-    halo.alpha = 0.85;
+        ], [0, 1], 0, 0, 0, 0, 0, 48)
+        .drawCircle(0, 0, 48);
+    halo.alpha = 0.82;
 
     var inner = new createjs.Shape();
     inner.graphics
         .clear()
-        .beginLinearGradientFill(["#22D3EE", "#6366F1"], [0, 1], -32, -32, 36, 36)
-        .drawCircle(0, 0, 32);
-    inner.shadow = new createjs.Shadow("rgba(14,18,48,0.35)", 0, 8, 20);
+        .beginLinearGradientFill(["#22D3EE", "#6366F1"], [0, 1], -24, -24, 28, 28)
+        .drawCircle(0, 0, 24);
+    inner.shadow = new createjs.Shadow("rgba(14,18,48,0.28)", 0, 6, 16);
 
     var ring = new createjs.Shape();
     ring.graphics
         .clear()
-        .setStrokeStyle(4)
-        .beginLinearGradientStroke(["rgba(255,255,255,0.95)", "rgba(255,255,255,0.35)"], [0, 1], -34, -34, 34, 34)
-        .drawCircle(0, 0, 36);
+        .setStrokeStyle(3)
+        .beginLinearGradientStroke(["rgba(255,255,255,0.95)", "rgba(255,255,255,0.25)"], [0, 1], -26, -26, 26, 26)
+        .drawCircle(0, 0, 28);
 
     var tip = new createjs.Shape();
     tip.graphics
         .clear()
-        .beginLinearGradientFill(["#F8FAFC", "#C084FC"], [0, 1], -12, -40, 28, 20)
-        .moveTo(-12, -12)
-        .lineTo(28, 12)
-        .lineTo(0, 44)
+        .beginLinearGradientFill(["#F8FAFC", "#C084FC"], [0, 1], -9, -30, 21, 16)
+        .moveTo(-9, -9)
+        .lineTo(21, 9)
+        .lineTo(0, 32)
         .closePath();
-    tip.shadow = new createjs.Shadow("rgba(18,16,46,0.3)", 0, 6, 16);
+    tip.shadow = new createjs.Shadow("rgba(18,16,46,0.26)", 0, 4, 12);
 
-    icon.addChild(halo, inner, ring, tip);
+    var tipHighlight = new createjs.Shape();
+    tipHighlight.graphics
+        .clear()
+        .beginLinearGradientStroke(["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"], [0, 1], -6, -18, 12, 10)
+        .moveTo(-4, -6)
+        .lineTo(12, 6)
+        .lineTo(0, 22);
+    tipHighlight.alpha = 0.65;
+
+    icon.addChild(halo, inner, ring, tip, tipHighlight);
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
-    icon.shadow = new createjs.Shadow("rgba(18,16,48,0.22)", 0, 8, 20);
-    icon.cache(-90, -90, 180, 180);
+    icon.shadow = new createjs.Shadow("rgba(18,16,48,0.2)", 0, 6, 18);
+    icon.cache(-70, -70, 140, 140);
 
     icon.clone = function () {
         var clone = buildVectorCursorIcon();
@@ -3351,7 +3360,7 @@ function doneLoading(event) {
                 handCursor = buildVectorCursorIcon();
                 container.parent.addChild(handCursor);
                 handCursor.visible = false;
-                handCursor.scaleX = handCursor.scaleY = 0.9;
+                handCursor.scaleX = handCursor.scaleY = 0.65;
 
                 continue;
             }
