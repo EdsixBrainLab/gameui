@@ -3125,8 +3125,8 @@ function doneLoading(event) {
                 var badgePadding = 200;
                 var minBadgeWidth = 360;
                 var maxBadgeWidth = 640;
-                var minBadgeHeight = 64;
-                var badgeVerticalPadding = 36;
+                var minBadgeHeight = 52;
+                var badgeVerticalPadding = 28;
                 var fontSizes = [44, 40, 36, 32, 28];
                 var titleLabel;
 
@@ -3260,10 +3260,10 @@ function doneLoading(event) {
                         0,
                         0,
                         0,
-                        36
+                        32
                     )
-                    .drawCircle(0, 0, 30);
-                iconOrb.x = -badgeWidth / 2 + 58;
+                    .drawCircle(0, 0, 26);
+                iconOrb.x = -badgeWidth / 2 + 54;
                 iconOrb.y = 0;
                 iconOrb.alpha = 0.9;
                 iconOrb.compositeOperation = "lighter";
@@ -3285,7 +3285,7 @@ function doneLoading(event) {
                 TitleContaier.addChild(iconGlyph);
 
                 titleLabel.lineWidth = badgeWidth - 180;
-                titleLabel.x = iconOrb.x + 42;
+                titleLabel.x = iconOrb.x + 40;
                 titleLabel.y = 2;
                 TitleContaier.addChild(titleLabel);
 
