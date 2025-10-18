@@ -180,6 +180,8 @@ function buildVectorHandIcon() {
         .drawEllipse(-120, -60, 240, 120);
     baseGlow.alpha = 0.58;
 
+    var fingerGraphics = new createjs.Container();
+
     var gestureTrail = new createjs.Shape();
     gestureTrail.graphics
         .clear()
