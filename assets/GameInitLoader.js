@@ -4550,7 +4550,7 @@ function buildHowToPlayOverlay() {
     //   var duskCurrent = ["#101936", "#1E2F4F", "#234565"];
     //   var velvetBloom = ["#1B153A", "#35295F", "#4B3F7F"];
     background.graphics
-        .beginLinearGradientFill(["#160B35", "#24124C", "#351B62"], [0, 0.5, 1], 0, 0, 0, 720)
+        .beginLinearGradientFill(["#1C0F43", "#2D1A5E", "#412975"], [0, 0.5, 1], 0, 0, 0, 720)
         .drawRect(0, 0, 1280, 720);
     overlay.addChild(background);
 
@@ -4558,9 +4558,9 @@ function buildHowToPlayOverlay() {
     colorWash.graphics
         .beginLinearGradientFill(
             [
-                "rgba(112, 72, 192, 0.36)",
-                "rgba(162, 86, 210, 0.3)",
-                "rgba(226, 120, 214, 0.28)"
+                "rgba(122, 86, 206, 0.44)",
+                "rgba(176, 104, 220, 0.36)",
+                "rgba(236, 138, 224, 0.32)"
             ],
             [0, 0.52, 1],
             0,
@@ -4575,7 +4575,7 @@ function buildHowToPlayOverlay() {
     var vignette = new createjs.Shape();
     vignette.graphics
         .beginRadialGradientFill(
-            ["rgba(24, 12, 48, 0)", "rgba(24, 10, 40, 0.7)"],
+            ["rgba(24, 12, 48, 0)", "rgba(28, 14, 52, 0.58)"],
             [0, 1],
             640,
             360,
