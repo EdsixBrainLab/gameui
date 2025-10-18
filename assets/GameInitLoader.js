@@ -275,6 +275,7 @@ function buildVectorHandIcon() {
         .quadraticCurveTo(28, 202, -6, 148)
         .quadraticCurveTo(-28, 116, -62, 110)
         .closePath();
+    palmShadow.alpha = 0.72;
 
     var thumbShadow = new createjs.Shape();
     thumbShadow.graphics
