@@ -182,6 +182,8 @@ function buildVectorHandIcon() {
         .drawEllipse(-94, 168, 188, 96);
     baseGlow.alpha = 0.54;
 
+    var fingerGraphics = new createjs.Container();
+
     var gestureTrail = new createjs.Shape();
     gestureTrail.graphics
         .clear()
@@ -364,8 +366,12 @@ function buildVectorHandIcon() {
         .wait(420)
         .set({ scaleX: 1, scaleY: 1 });
 
-    content.addChild(
-        baseGlow,
+    content.addChild(baseGlow, fingerGraphics);
+
+    fingerGraphics.regX = 0;
+    fingerGraphics.regY = 0;
+
+    fingerGraphics.addChild(
         gestureTrail,
         palm,
         ringFinger,
@@ -381,6 +387,8 @@ function buildVectorHandIcon() {
         sparkle
     );
 
+    fingerGraphics.rotation = -45;
+
     var fingertip = { x: 48, y: 44 };
     content.x = -fingertip.x;
     content.y = -fingertip.y;
@@ -388,7 +396,7 @@ function buildVectorHandIcon() {
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
     icon.shadow = new createjs.Shadow("rgba(22,16,66,0.36)", 0, 12, 26);
-    icon.cache(-208, -138, 416, 312);
+    icon.cache(-256, -216, 512, 432);
 
     icon.__pointerTipBase = { x: 0, y: 0 };
     icon.__pointerTip = icon.__pointerTipBase;
