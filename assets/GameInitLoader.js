@@ -390,13 +390,16 @@ function buildVectorHandIcon() {
     fingerGraphics.rotation = -45;
 
     var fingertip = { x: 48, y: 44 };
-    content.x = -fingertip.x;
-    content.y = -fingertip.y;
+    content.regX = fingertip.x;
+    content.regY = fingertip.y;
+    content.x = 0;
+    content.y = 0;
+    content.rotation = -45;
 
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
     icon.shadow = new createjs.Shadow("rgba(22,16,66,0.36)", 0, 12, 26);
-    icon.cache(-256, -216, 512, 432);
+    icon.cache(-264, -228, 528, 456);
 
     icon.__pointerTipBase = { x: 0, y: 0 };
     icon.__pointerTip = icon.__pointerTipBase;
