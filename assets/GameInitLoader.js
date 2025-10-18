@@ -39,91 +39,100 @@ var howToPlayWaveTransferred = false;
 function buildVectorArrowIcon() {
     var icon = new createjs.Container();
 
-    var bloom = new createjs.Shape();
-    bloom.graphics
+    var baseGlow = new createjs.Shape();
+    baseGlow.graphics
         .clear()
         .beginRadialGradientFill(
-            ["rgba(168,120,255,0.46)", "rgba(90,34,172,0)"],
+            ["rgba(168,120,255,0.42)", "rgba(90,34,172,0)"],
             [0, 1],
             0,
-            -10,
             0,
             0,
-            -10,
-            96
+            0,
+            0,
+            118
         )
-        .drawCircle(0, 22, 96);
-    bloom.alpha = 0.62;
+        .drawEllipse(-92, -92, 184, 178);
+    baseGlow.alpha = 0.62;
 
     var arrow = new createjs.Shape();
     var g = arrow.graphics;
     g.clear();
-    g.setStrokeStyle(3, "round", "round");
+    g.setStrokeStyle(3.2, "round", "round");
     g.beginLinearGradientStroke(
-        ["rgba(255,255,255,0.92)", "rgba(255,255,255,0.24)"],
+        ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.18)"],
         [0, 1],
         0,
-        -86,
+        -74,
         0,
-        96
+        86
     );
-    g.beginLinearGradientFill(["#F6CCFF", "#D697FF", "#7C3AED"], [0, 0.5, 1], 0, -86, 0, 96);
-    g.moveTo(0, 96);
-    g.lineTo(26, 64);
-    g.quadraticCurveTo(18, 44, 18, 8);
-    g.lineTo(18, -54);
-    g.quadraticCurveTo(18, -76, 0, -86);
-    g.quadraticCurveTo(-18, -76, -18, -54);
-    g.lineTo(-18, 8);
-    g.quadraticCurveTo(-18, 44, -26, 64);
+    g.beginLinearGradientFill(["#F8C7FF", "#D697FF", "#7C3AED"], [0, 0.55, 1], 0, -74, 0, 86);
+    g.moveTo(0, 86);
+    g.lineTo(40, 34);
+    g.quadraticCurveTo(50, 18, 34, 10);
+    g.lineTo(24, 10);
+    g.quadraticCurveTo(46, -4, 32, -38);
+    g.quadraticCurveTo(18, -68, 0, -72);
+    g.quadraticCurveTo(-18, -68, -32, -38);
+    g.quadraticCurveTo(-46, -4, -24, 10);
+    g.lineTo(-34, 10);
+    g.quadraticCurveTo(-50, 18, -40, 34);
     g.closePath();
 
     var inner = new createjs.Shape();
     inner.graphics
         .clear()
         .beginLinearGradientFill(
-            ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.1)"],
+            ["rgba(255,255,255,0.92)", "rgba(255,255,255,0.12)"],
             [0, 1],
             0,
-            -68,
+            -60,
             0,
-            78
+            70
         )
-        .moveTo(0, 82)
-        .lineTo(14, 58)
-        .quadraticCurveTo(10, 38, 10, 6)
-        .lineTo(10, -52)
-        .quadraticCurveTo(10, -70, 0, -80)
-        .quadraticCurveTo(-10, -70, -10, -52)
-        .lineTo(-10, 6)
-        .quadraticCurveTo(-10, 38, -14, 58)
+        .moveTo(0, 70)
+        .lineTo(28, 32)
+        .quadraticCurveTo(36, 18, 24, 12)
+        .lineTo(12, 12)
+        .quadraticCurveTo(36, 0, 24, -32)
+        .quadraticCurveTo(12, -56, 0, -60)
+        .quadraticCurveTo(-12, -56, -24, -32)
+        .quadraticCurveTo(-36, 0, -12, 12)
+        .lineTo(-24, 12)
+        .quadraticCurveTo(-36, 18, -28, 32)
         .closePath();
-    inner.alpha = 0.92;
+    inner.alpha = 0.9;
 
-    var sheen = new createjs.Shape();
-    sheen.graphics
+    var edgeHighlight = new createjs.Shape();
+    edgeHighlight.graphics
         .clear()
-        .beginLinearGradientFill(
-            ["rgba(255,255,255,0.78)", "rgba(255,255,255,0)"],
+        .beginLinearGradientStroke(
+            ["rgba(255,255,255,0.58)", "rgba(255,255,255,0)"],
             [0, 1],
-            -12,
-            -36,
-            24,
-            86
+            -32,
+            -52,
+            32,
+            54
         )
-        .moveTo(-12, -24)
-        .quadraticCurveTo(-2, -56, 8, -24)
-        .lineTo(18, 40)
-        .quadraticCurveTo(6, 76, -6, 88)
-        .quadraticCurveTo(-18, 74, -12, -24)
-        .closePath();
-    sheen.alpha = 0.68;
-    icon.addChild(bloom, arrow, inner, sheen);
-    icon.shadow = new createjs.Shadow("rgba(20,14,60,0.28)", 0, 8, 20);
+        .setStrokeStyle(4, "round", "round")
+        .moveTo(-30, -34)
+        .quadraticCurveTo(-42, -4, -18, 10)
+        .lineTo(-18, 24)
+        .quadraticCurveTo(-8, 48, 0, 58)
+        .quadraticCurveTo(8, 48, 18, 24)
+        .lineTo(18, 10)
+        .quadraticCurveTo(42, -4, 30, -34);
+    edgeHighlight.alpha = 0.6;
+
+    icon.addChild(baseGlow, arrow, inner, edgeHighlight);
+    icon.shadow = new createjs.Shadow("rgba(20,14,60,0.25)", 0, 8, 18);
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
-    icon.cache(-64, -108, 128, 228);
-    icon.setBounds(-64, -108, 128, 228);
+    icon.cache(-96, -108, 192, 214);
+    icon.setBounds(-92, -96, 184, 182);
+    icon.__tipGap = 24;
+    icon.__bounceOffset = 14;
 
     icon.clone = function () {
         var clone = buildVectorArrowIcon();
