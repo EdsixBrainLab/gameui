@@ -5774,7 +5774,7 @@ function createLoaderProceedButton() {
     var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.6)", "rgba(255, 255, 255, 0)"],
+            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.42)", "rgba(255, 255, 255, 0)"],
             [0, 0.5, 1],
             -72,
             0,
@@ -6083,7 +6083,7 @@ function createIntroActionButton() {
     highlight.x = highlight.baseX;
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.9)", "rgba(255, 255, 255, 0)"],
+            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.6)", "rgba(255, 255, 255, 0)"],
             [0, 0.5, 1],
             -72,
             0,
@@ -6214,7 +6214,7 @@ function applyHowToPlayButtonState(button, state) {
 
         highlightFill = [
             "rgba(255, 255, 255, 0)",
-            "rgba(255, 246, 255, 0.96)",
+            "rgba(255, 246, 255, 0.64)",
             "rgba(255, 255, 255, 0)"
         ];
 
@@ -6289,7 +6289,7 @@ function applyHowToPlayButtonState(button, state) {
 
         highlightFill = [
             "rgba(255, 255, 255, 0)",
-            "rgba(248, 236, 255, 0.88)",
+            "rgba(248, 236, 255, 0.58)",
             "rgba(255, 255, 255, 0)"
         ];
 
@@ -6393,7 +6393,7 @@ function startIntroActionButtonAnimations(button) {
             var startX = typeof highlight.baseX === "number" ? highlight.baseX : -148;
             var travelSpan = 296;
             var endX = startX + travelSpan;
-            var sweepAlpha = state === "start" ? 0.96 : 0.88;
+            var sweepAlpha = state === "start" ? 0.62 : 0.48;
             var travelDuration = 1280;
 
             createjs.Tween.removeTweens(highlight);
@@ -6698,7 +6698,7 @@ function startProceedButtonHighlightSweep(button) {
     button.__highlightSweepAttached = true;
 
     createjs.Tween.get(sweep, { loop: true })
-        .to({ alpha: 0.6 }, 280, createjs.Ease.quadOut)
+        .to({ alpha: 0.45 }, 280, createjs.Ease.quadOut)
         .to({ x: endX }, 1280, createjs.Ease.quadInOut)
         .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
         .set({ x: startX })
