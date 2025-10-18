@@ -4875,7 +4875,7 @@ function createHowToPlayInstructions() {
             320
         )
         .drawEllipse(-90, -60, 800, 360);
-    glow.alpha = 0.68;
+    glow.alpha = 0.72;
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
