@@ -4546,8 +4546,11 @@ function buildHowToPlayOverlay() {
     overlay.name = "HowToPlayOverlay";
 
     var background = new createjs.Shape();
+    // Alternative palette ideas:
+    //   var duskCurrent = ["#101936", "#1E2F4F", "#234565"];
+    //   var velvetBloom = ["#1B153A", "#35295F", "#4B3F7F"];
     background.graphics
-        .beginLinearGradientFill(["#161b3d", "#231d58", "#321f77"], [0, 0.5, 1], 0, 0, 0, 720)
+        .beginLinearGradientFill(["#0B1226", "#152449", "#1F3B5C"], [0, 0.52, 1], 0, 0, 0, 720)
         .drawRect(0, 0, 1280, 720);
     overlay.addChild(background);
 
@@ -4555,11 +4558,11 @@ function buildHowToPlayOverlay() {
     colorWash.graphics
         .beginLinearGradientFill(
             [
-                "rgba(101, 132, 255, 0.38)",
-                "rgba(173, 103, 255, 0.32)",
-                "rgba(255, 126, 209, 0.28)"
+                "rgba(40, 108, 168, 0.35)",
+                "rgba(74, 125, 194, 0.3)",
+                "rgba(144, 188, 255, 0.28)"
             ],
-            [0, 0.55, 1],
+            [0, 0.5, 1],
             0,
             0,
             1280,
@@ -4572,7 +4575,7 @@ function buildHowToPlayOverlay() {
     var vignette = new createjs.Shape();
     vignette.graphics
         .beginRadialGradientFill(
-            ["rgba(26, 19, 63, 0)", "rgba(24, 21, 60, 0.75)"],
+            ["rgba(8, 12, 28, 0)", "rgba(7, 17, 43, 0.68)"],
             [0, 1],
             640,
             360,
@@ -4585,65 +4588,10 @@ function buildHowToPlayOverlay() {
     overlay.addChild(vignette);
 
     var pattern = drawHoneycombPattern(1280, 720, 44);
-    pattern.alpha = 0.14;
+    pattern.alpha = 0.05;
     overlay.addChild(pattern);
 
-    var orbOne = new createjs.Shape();
-    orbOne.graphics
-        .beginRadialGradientFill(
-            ["rgba(255, 171, 224, 0.85)", "rgba(255, 124, 210, 0.2)", "rgba(255, 124, 210, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            190
-        )
-        .drawCircle(0, 0, 190);
-    orbOne.x = 1100;
-    orbOne.y = 160;
-    orbOne.alpha = 0.78;
-    overlay.addChild(orbOne);
-
-    var orbTwo = new createjs.Shape();
-    orbTwo.graphics
-        .beginRadialGradientFill(
-            ["rgba(130, 196, 255, 0.8)", "rgba(114, 142, 255, 0.24)", "rgba(114, 142, 255, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            220
-        )
-        .drawCircle(0, 0, 220);
-    orbTwo.x = 240;
-    orbTwo.y = 640;
-    orbTwo.alpha = 0.68;
-    overlay.addChild(orbTwo);
-
-    var orbThree = new createjs.Shape();
-    orbThree.graphics
-        .beginRadialGradientFill(
-            ["rgba(146, 121, 255, 0.78)", "rgba(101, 96, 215, 0.24)", "rgba(101, 96, 215, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            180
-        )
-        .drawCircle(0, 0, 180);
-    orbThree.x = 360;
-    orbThree.y = 180;
-    orbThree.alpha = 0.7;
-    overlay.addChild(orbThree);
-
-    var particleLayer = createHowToPlayParticleField(1280, 720, 24);
-    overlay.addChild(particleLayer);
+    overlay.particleLayer = null;
 
     var header = createHowToPlayHeader();
     overlay.addChild(header);
@@ -4672,49 +4620,12 @@ function buildHowToPlayOverlay() {
     overlay.addChild(proceedButton);
     overlay.proceedButton = proceedButton;
 
-    var accentLarge = new createjs.Shape();
-    accentLarge.graphics
-        .beginRadialGradientFill(
-            ["rgba(122, 180, 255, 0.48)", "rgba(122, 180, 255, 0)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            148
-        )
-        .drawCircle(0, 0, 148);
-    accentLarge.x = 1040;
-    accentLarge.y = 540;
-    overlay.addChild(accentLarge);
-
-    var accentSmall = new createjs.Shape();
-    accentSmall.graphics
-        .beginRadialGradientFill(
-            ["rgba(199, 124, 255, 0.5)", "rgba(199, 124, 255, 0)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            110
-        )
-        .drawCircle(0, 0, 110);
-    accentSmall.x = 180;
-    accentSmall.y = 320;
-    overlay.addChild(accentSmall);
-
     header.baseY = header.y;
     instructions.baseY = instructions.y;
     progress.baseY = progress.y;
-    accentLarge.baseScale = accentLarge.scaleX = accentLarge.scaleY = 1;
-    accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
-    overlay.accentLarge = accentLarge;
-    overlay.accentSmall = accentSmall;
-    overlay.ambientOrbs = [orbOne, orbTwo, orbThree];
-    overlay.particleLayer = particleLayer;
+    overlay.accentLarge = null;
+    overlay.accentSmall = null;
+    overlay.ambientOrbs = [];
 
     overlay.__baseWidth = 1280;
     overlay.__baseHeight = 720;
@@ -4921,7 +4832,7 @@ function createHowToPlayInstructions() {
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(
-            ["rgba(18, 10, 52, 0.95)", "rgba(31, 16, 82, 0.93)", "rgba(50, 22, 116, 0.9)"],
+            ["rgba(244, 248, 255, 0.95)", "rgba(230, 241, 255, 0.95)", "rgba(218, 233, 255, 0.94)"],
             [0, 0.55, 1],
             0,
             0,
@@ -4929,7 +4840,7 @@ function createHowToPlayInstructions() {
             292
         )
         .drawRoundRect(0, 0, 648, 292, 42);
-    card.shadow = new createjs.Shadow("rgba(7, 9, 26, 0.58)", 0, 26, 52);
+    card.shadow = new createjs.Shadow("rgba(6, 10, 28, 0.54)", 0, 26, 52);
     card.regX = 324;
     card.regY = 146;
     card.x = 324;
@@ -4939,7 +4850,7 @@ function createHowToPlayInstructions() {
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(178, 148, 255, 0.5)")
+        .beginStroke("rgba(96, 150, 241, 0.32)")
         .drawRoundRect(0, 0, 648, 292, 42);
     cardStroke.regX = 324;
     cardStroke.regY = 146;
@@ -4951,11 +4862,11 @@ function createHowToPlayInstructions() {
     glow.graphics
         .beginRadialGradientFill(
             [
-                "rgba(118, 83, 224, 0.5)",
-                "rgba(255, 124, 224, 0.28)",
-                "rgba(46, 24, 110, 0)"
+                "rgba(56, 189, 248, 0.4)",
+                "rgba(99, 102, 241, 0.28)",
+                "rgba(148, 163, 255, 0)"
             ],
-            [0, 0.6, 1],
+            [0, 0.62, 1],
             324,
             146,
             0,
@@ -4972,19 +4883,19 @@ function createHowToPlayInstructions() {
     var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0.72)", "rgba(224, 210, 255, 0.3)", "rgba(183, 175, 255, 0)"],
-            [0, 0.65, 1],
+            ["rgba(255, 255, 255, 0.82)", "rgba(228, 242, 255, 0.38)", "rgba(199, 222, 255, 0.12)"],
+            [0, 0.6, 1],
             36,
             28,
             612,
             120
         )
         .drawRoundRect(24, 24, 600, 52, 22);
-    highlight.alpha = 0.78;
+    highlight.alpha = 0.86;
     container.addChild(highlight);
     container.glassHighlight = highlight;
 
-    var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#f6eaff");
+    var title = new createjs.Text("Before you start", "700 30px 'Baloo 2'", "#153863");
     title.x = 46;
     title.y = 38;
     container.addChild(title);
@@ -5002,22 +4913,23 @@ function createHowToPlayInstructions() {
         var itemY = 116 + i * 46;
 
         var badge = new createjs.Shape();
+        // Alternate bullet options: ["#2DD4BF", "#0EA5E9"] for a teal hue or ["#818CF8", "#6366F1"] for a softer purple.
         badge.graphics
-            .beginRadialGradientFill(["#ff7ed3", "#7d8fff"], [0, 1], 0, 0, 0, 0, 0, 22)
+            .beginRadialGradientFill(["#38BDF8", "#2563EB"], [0, 1], 0, 0, 0, 0, 0, 22)
             .drawCircle(0, 0, 22);
         badge.x = 68;
         badge.y = itemY;
         badge.alpha = 0.95;
         container.addChild(badge);
 
-        var badgeText = new createjs.Text((i + 1).toString(), "700 20px 'Baloo 2'", "#FFFFFF");
+        var badgeText = new createjs.Text((i + 1).toString(), "700 20px 'Baloo 2'", "#0f1f36");
         badgeText.textAlign = "center";
         badgeText.textBaseline = "middle";
         badgeText.x = badge.x;
         badgeText.y = badge.y;
         container.addChild(badgeText);
 
-        var stepText = new createjs.Text(steps[i], "500 18px 'Baloo 2'", "rgba(232, 226, 255, 0.94)");
+        var stepText = new createjs.Text(steps[i], "500 18px 'Baloo 2'", "rgba(24, 51, 88, 0.96)");
         stepText.lineHeight = 30;
         stepText.lineWidth = 496;
         stepText.x = 114;
@@ -5026,7 +4938,7 @@ function createHowToPlayInstructions() {
 
         if (i < steps.length - 1) {
             var divider = new createjs.Shape();
-            divider.graphics.beginFill("rgba(103, 86, 178, 0.45)").drawRoundRect(114, itemY + 18, 484, 2, 1);
+            divider.graphics.beginFill("rgba(120, 164, 237, 0.38)").drawRoundRect(114, itemY + 18, 484, 2, 1);
             container.addChild(divider);
         }
     }
@@ -5050,7 +4962,7 @@ function drawHoneycombPattern(width, height, radius) {
         var offsetX = (row % 2) ? horizontalSpacing / 2 : 0;
         for (var x = radius; x < width + radius; x += horizontalSpacing) {
             var centerX = x + offsetX;
-            var fill = row % 2 === 0 ? "rgba(123, 99, 220, 0.14)" : "rgba(86, 123, 255, 0.12)";
+            var fill = row % 2 === 0 ? "rgba(43, 91, 158, 0.12)" : "rgba(34, 78, 126, 0.1)";
             graphics.beginFill(fill).drawPolyStar(centerX, y, radius, 6, 0, 30);
         }
     }
@@ -5068,8 +4980,8 @@ function createHowToPlayHeader() {
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
-            ["rgba(118, 77, 255, 0.42)", "rgba(255, 122, 214, 0.22)", "rgba(54, 30, 122, 0)"],
-            [0, 0.6, 1],
+            ["rgba(56, 189, 248, 0.55)", "rgba(37, 99, 235, 0.32)", "rgba(30, 64, 175, 0)"],
+            [0, 0.62, 1],
             0,
             0,
             0,
@@ -5078,7 +4990,7 @@ function createHowToPlayHeader() {
             260
         )
         .drawCircle(0, 0, 240);
-    glow.alpha = 0.82;
+    glow.alpha = 0.74;
     glow.x = 252;
     glow.y = 60;
     glow.compositeOperation = "lighter";
@@ -5088,15 +5000,15 @@ function createHowToPlayHeader() {
     var card = new createjs.Shape();
     card.graphics
         .beginLinearGradientFill(
-            ["rgba(22, 12, 56, 0.96)", "rgba(38, 18, 88, 0.94)", "rgba(57, 30, 126, 0.92)"],
-            [0, 0.45, 1],
+            ["rgba(244, 248, 255, 0.96)", "rgba(226, 238, 255, 0.96)", "rgba(210, 229, 255, 0.95)"],
+            [0, 0.55, 1],
             0,
             0,
             520,
             0
         )
         .drawRoundRect(0, 0, 520, 120, 42);
-    card.shadow = new createjs.Shadow("rgba(9, 12, 36, 0.55)", 0, 28, 48);
+    card.shadow = new createjs.Shadow("rgba(4, 12, 30, 0.55)", 0, 28, 48);
     container.addChild(card);
     container.cardShape = card;
     container.cardWidth = 520;
@@ -5104,7 +5016,7 @@ function createHowToPlayHeader() {
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(168, 136, 255, 0.55)")
+        .beginStroke("rgba(92, 143, 240, 0.35)")
         .drawRoundRect(1, 1, 518, 118, 40);
     container.addChild(cardStroke);
 
@@ -5118,7 +5030,7 @@ function createHowToPlayHeader() {
         .beginLinearGradientFill(
             [
                 "rgba(255, 255, 255, 0)",
-                "rgba(255, 246, 255, 0.65)",
+                "rgba(232, 244, 255, 0.72)",
                 "rgba(255, 255, 255, 0)"
             ],
             [0, 0.5, 1],
@@ -5146,8 +5058,8 @@ function createHowToPlayHeader() {
     var iconHalo = new createjs.Shape();
     iconHalo.graphics
         .beginRadialGradientFill(
-            ["rgba(124, 180, 255, 0.85)", "rgba(124, 180, 255, 0.24)", "rgba(84, 75, 168, 0)"],
-            [0, 0.55, 1],
+            ["rgba(56, 189, 248, 0.9)", "rgba(56, 189, 248, 0.28)", "rgba(14, 116, 144, 0)"],
+            [0, 0.6, 1],
             0,
             0,
             0,
@@ -5162,35 +5074,47 @@ function createHowToPlayHeader() {
     container.addChild(iconHalo);
 
     var iconBackground = new createjs.Shape();
+    // Swap this gradient for ["#2DD4BF", "#0EA5E9"] or ["#A855F7", "#6366F1"] if you want a different accent mood.
     iconBackground.graphics
-        .beginRadialGradientFill(["#ff7cd6", "#7c8aff"], [0, 1], 0, 0, 0, 0, 0, 44)
+        .beginRadialGradientFill(["#38BDF8", "#2563EB"], [0, 1], 0, 0, 0, 0, 0, 44)
         .drawCircle(0, 0, 42);
     iconBackground.x = 98;
     iconBackground.y = 60;
     container.addChild(iconBackground);
 
-    var icon = new createjs.Text("\u2139", "700 50px 'Baloo 2'", "#FFFFFF");
+    var icon = new createjs.Text("\u2139", "700 50px 'Baloo 2'", "#0f1f36");
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = iconBackground.x;
     icon.y = iconBackground.y + 8;
     container.addChild(icon);
 
-    var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#f5ecff");
+    var label = new createjs.Text("How to Play", "700 40px 'Baloo 2'", "#132d4f");
     label.x = 182;
     label.y = 26;
     container.addChild(label);
 
-    var subtitle = new createjs.Text("Follow these quick tips before you start", "500 18px 'Baloo 2'", "rgba(212, 202, 255, 0.8)");
+    var subtitle = new createjs.Text(
+        "Follow these quick tips before you start",
+        "500 18px 'Baloo 2'",
+        "rgba(19, 49, 86, 0.78)"
+    );
     subtitle.x = 182;
     subtitle.y = 70;
     container.addChild(subtitle);
 
     var accent = new createjs.Shape();
     accent.graphics
-        .beginLinearGradientFill(["rgba(112, 147, 255, 0.48)", "rgba(196, 137, 255, 0.12)", "rgba(255, 255, 255, 0)"], [0, 0.6, 1], 0, 18, 0, 102)
+        .beginLinearGradientFill(
+            ["rgba(56, 189, 248, 0.45)", "rgba(99, 102, 241, 0.2)", "rgba(255, 255, 255, 0)"],
+            [0, 0.6, 1],
+            0,
+            18,
+            0,
+            102
+        )
         .drawRoundRect(420, 18, 72, 84, 34);
-    accent.alpha = 0.5;
+    accent.alpha = 0.58;
     container.addChild(accent);
 
     return container;
@@ -5206,7 +5130,7 @@ function createHowToPlayProgressBar() {
     var frame = new createjs.Shape();
     frame.graphics
         .beginLinearGradientFill(
-            ["rgba(20, 12, 60, 0.95)", "rgba(33, 17, 84, 0.93)", "rgba(50, 26, 118, 0.9)"],
+            ["rgba(12, 20, 40, 0.95)", "rgba(19, 36, 64, 0.93)", "rgba(29, 60, 93, 0.9)"],
             [0, 0.55, 1],
             0,
             0,
@@ -5214,23 +5138,23 @@ function createHowToPlayProgressBar() {
             108
         )
         .drawRoundRect(0, 0, 648, 108, 34);
-    frame.shadow = new createjs.Shadow("rgba(6, 8, 24, 0.55)", 0, 24, 48);
+    frame.shadow = new createjs.Shadow("rgba(4, 9, 24, 0.55)", 0, 24, 48);
     container.addChild(frame);
 
     var frameStroke = new createjs.Shape();
     frameStroke.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(178, 148, 255, 0.45)")
+        .beginStroke("rgba(82, 132, 208, 0.45)")
         .drawRoundRect(1, 1, 646, 106, 32);
     container.addChild(frameStroke);
 
-    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "rgba(223, 214, 255, 0.9)");
+    var status = new createjs.Text("Collecting game assets", "600 22px 'Baloo 2'", "rgba(206, 224, 255, 0.9)");
     status.x = 48;
     status.y = 26;
     status.lineWidth = 432;
     container.addChild(status);
 
-    var percent = new createjs.Text("0%", "700 32px 'Baloo 2'", "#ff96e0");
+    var percent = new createjs.Text("0%", "700 32px 'Baloo 2'", "#5fd4ff");
     percent.textAlign = "right";
     percent.x = 600;
     percent.y = 22;
@@ -5239,7 +5163,7 @@ function createHowToPlayProgressBar() {
     var track = new createjs.Shape();
     track.graphics
         .beginLinearGradientFill(
-            ["rgba(66, 45, 142, 0.55)", "rgba(95, 57, 170, 0.45)", "rgba(125, 69, 195, 0.45)"],
+            ["rgba(32, 84, 149, 0.55)", "rgba(46, 108, 182, 0.48)", "rgba(59, 130, 246, 0.46)"],
             [0, 0.55, 1],
             0,
             0,
@@ -5255,8 +5179,8 @@ function createHowToPlayProgressBar() {
     glow.graphics
         .beginRadialGradientFill(
             [
-                "rgba(118, 83, 224, 0.42)",
-                "rgba(118, 83, 224, 0)"
+                "rgba(37, 99, 235, 0.32)",
+                "rgba(37, 99, 235, 0)"
             ],
             [0, 1],
             324,
@@ -5283,7 +5207,7 @@ function createHowToPlayProgressBar() {
 
     var fill = new createjs.Shape();
     fill.graphics
-        .beginLinearGradientFill(["#7e6bff", "#b366ff", "#ff8fe2"], [0, 0.55, 1], 0, 0, 560, 0)
+        .beginLinearGradientFill(["#2563EB", "#38BDF8", "#22D3EE"], [0, 0.55, 1], 0, 0, 560, 0)
         .drawRoundRect(0, 0, 560, 20, 12);
     fillContainer.addChild(fill);
 
@@ -5291,9 +5215,9 @@ function createHowToPlayProgressBar() {
     pulse.graphics
         .beginLinearGradientFill(
             [
-                "rgba(255, 255, 255, 0.2)",
-                "rgba(247, 223, 255, 0.8)",
-                "rgba(255, 255, 255, 0.2)"
+                "rgba(255, 255, 255, 0.12)",
+                "rgba(148, 214, 255, 0.62)",
+                "rgba(255, 255, 255, 0.12)"
             ],
             [0, 0.5, 1],
             0,
@@ -5309,7 +5233,7 @@ function createHowToPlayProgressBar() {
 
     var shine = new createjs.Shape();
     shine.graphics
-        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(248, 234, 255, 0.9)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 220, 0)
+        .beginLinearGradientFill(["rgba(255,255,255,0)", "rgba(210, 239, 255, 0.85)", "rgba(255,255,255,0)"], [0, 0.55, 1], 0, 0, 220, 0)
         .drawRect(-110, -12, 220, 40);
     shine.alpha = 0;
     shine.compositeOperation = "lighter";
