@@ -4875,7 +4875,7 @@ function createHowToPlayInstructions() {
             320
         )
         .drawEllipse(-90, -60, 800, 360);
-    glow.alpha = 0.68;
+    glow.alpha = 0.72;
     glow.compositeOperation = "lighter";
     container.addChildAt(glow, 0);
     container.glowShape = glow;
@@ -4913,6 +4913,7 @@ function createHowToPlayInstructions() {
         var itemY = 116 + i * 46;
 
         var badge = new createjs.Shape();
+        // Alternate bullet options: ["#2DD4BF", "#0EA5E9"] for a teal hue or ["#818CF8", "#6366F1"] for a softer purple.
         badge.graphics
             .beginRadialGradientFill(["#7C3AED", "#EC4899"], [0, 1], 0, 0, 0, 0, 0, 22)
             .drawCircle(0, 0, 22);
@@ -5073,6 +5074,7 @@ function createHowToPlayHeader() {
     container.addChild(iconHalo);
 
     var iconBackground = new createjs.Shape();
+    // Swap this gradient for ["#2DD4BF", "#0EA5E9"] or ["#A855F7", "#6366F1"] if you want a different accent mood.
     iconBackground.graphics
         .beginRadialGradientFill(["#7C3AED", "#EC4899"], [0, 1], 0, 0, 0, 0, 0, 44)
         .drawCircle(0, 0, 42);
