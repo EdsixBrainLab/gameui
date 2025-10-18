@@ -102,12 +102,6 @@ else
     <div class="floating-orb orb-two"></div>
     <div class="floating-orb orb-three"></div>
 
-    <div class="background-aurora" aria-hidden="true">
-      <span class="aurora-layer layer-one"></span>
-      <span class="aurora-layer layer-two"></span>
-      <span class="aurora-layer layer-three"></span>
-    </div>
-
     <div class="loading-card">
       <div class="card-heading">
         <span class="badge">SkillAngels</span>
@@ -143,13 +137,9 @@ else
   body {
     margin: 0;
     padding: 0;
-    min-height: 100vh;
     font-family: 'Baloo 2', sans-serif;
-    background: radial-gradient(circle at 20% 20%, #ffffff 0%, rgba(255, 255, 255, 0) 32%),
-                radial-gradient(circle at 80% 10%, #ffe6ff 0%, rgba(255, 230, 255, 0) 42%),
-                linear-gradient(135deg, #ebe6ff 0%, #d9edff 48%, #f6f0ff 100%);
-    color: #140939;
-    overflow: hidden;
+    background-color: #0e0b24;
+    color: #ffffff;
   }
 
   #content1 {
@@ -162,173 +152,62 @@ else
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(130deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 239, 255, 0.9) 52%, rgba(232, 240, 255, 0.95) 100%);
-    isolation: isolate;
-  }
-
-  #content1::before {
-    content: "";
-    position: absolute;
-    inset: -20%;
-    background: conic-gradient(from 90deg, rgba(123, 102, 255, 0.22), rgba(255, 153, 255, 0.15), rgba(110, 198, 255, 0.2), rgba(123, 102, 255, 0.22));
-    filter: blur(80px);
-    animation: aurora-wave 20s ease-in-out infinite;
-    opacity: 0.9;
-    z-index: -1;
+    background: radial-gradient(circle at top left, rgba(255, 161, 223, 0.5), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(114, 191, 255, 0.45), transparent 60%),
+                linear-gradient(135deg, #120835 0%, #1a0f4b 35%, #2a1e62 68%, #3a2c7a 100%);
   }
 
   .loading-wrapper {
     position: relative;
-    width: min(560px, 92vw);
-    max-width: 92vw;
-    padding: clamp(24px, 4vw, 36px);
+    width: min(540px, 90vw);
+    max-width: 90vw;
+    padding: clamp(20px, 4vw, 32px);
     z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 36px;
-    box-shadow: 0 40px 90px rgba(56, 40, 120, 0.25);
-  }
-
-  .loading-wrapper::before {
-    content: "";
-    position: absolute;
-    inset: clamp(6px, 1.5vw, 12px);
-    border-radius: inherit;
-    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0)),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
-    filter: blur(18px);
-    opacity: 0.65;
-    animation: shimmer 12s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
   }
 
   .floating-orb {
     position: absolute;
     border-radius: 50%;
-    mix-blend-mode: screen;
-    opacity: 0.75;
+    filter: blur(0);
+    opacity: 0.65;
     pointer-events: none;
-    filter: blur(0px);
-    animation: drift var(--duration, 18s) ease-in-out infinite alternate;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    animation: float 12s ease-in-out infinite;
     z-index: 0;
   }
 
-  .floating-orb::after {
-    content: "";
-    position: absolute;
-    inset: 12%;
-    border-radius: inherit;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0));
-    filter: blur(12px);
-  }
-
-  .background-aurora {
-    position: absolute;
-    inset: clamp(10px, 2.5vw, 22px);
-    border-radius: clamp(22px, 5vw, 32px);
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 1;
-    mix-blend-mode: lighten;
-  }
-
-  .aurora-layer {
-    position: absolute;
-    inset: -60%;
-    background: radial-gradient(circle, rgba(255, 168, 255, 0.5) 0%, rgba(255, 255, 255, 0) 55%);
-    opacity: 0.55;
-    animation: aurora-drift 24s ease-in-out infinite;
-  }
-
-  .layer-one {
-    background: radial-gradient(circle, rgba(255, 200, 248, 0.5) 0%, rgba(255, 255, 255, 0) 55%);
-    animation-duration: 22s;
-    animation-delay: -4s;
-  }
-
-  .layer-two {
-    background: radial-gradient(circle, rgba(180, 219, 255, 0.5) 0%, rgba(255, 255, 255, 0) 55%);
-    animation-duration: 26s;
-    animation-delay: -10s;
-  }
-
-  .layer-three {
-    background: radial-gradient(circle, rgba(255, 245, 215, 0.45) 0%, rgba(255, 255, 255, 0) 55%);
-    animation-duration: 28s;
-    animation-delay: -16s;
-  }
-
   .orb-one {
-    --duration: 16s;
-    top: -90px;
-    right: -120px;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 191, 250, 0.85), rgba(255, 255, 255, 0));
-    animation-delay: -4s;
+    top: -60px;
+    right: -50px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 111, 220, 0.15));
+    animation-delay: 0s;
   }
 
   .orb-two {
-    --duration: 20s;
-    bottom: -110px;
-    left: -100px;
-    width: 260px;
-    height: 260px;
-    background: radial-gradient(circle at 70% 70%, rgba(151, 213, 255, 0.8), rgba(255, 255, 255, 0));
-    animation-delay: -2s;
+    bottom: -70px;
+    left: -80px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.8), rgba(106, 152, 255, 0.2));
+    animation-delay: 2s;
   }
 
   .orb-three {
-    --duration: 18s;
-    top: 48%;
-    left: 62%;
+    top: 40%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 240, 196, 0.75), rgba(255, 255, 255, 0));
-    animation-delay: -6s;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    mix-blend-mode: screen;
+    animation-delay: 4s;
   }
 
   @keyframes float {
     0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
     50% { transform: translate3d(0, -12px, 0) scale(1.08); }
-  }
-
-  @keyframes shimmer {
-    0%, 100% { opacity: 0.45; transform: translate3d(0, 0, 0) scale(1); }
-    50% { opacity: 0.85; transform: translate3d(6px, -6px, 0) scale(1.03); }
-  }
-
-  @keyframes aurora-wave {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(12deg) scale(1.05); }
-    100% { transform: rotate(-12deg) scale(1); }
-  }
-
-  @keyframes aurora-drift {
-    0% { transform: translate3d(-12%, -8%, 0) scale(1); opacity: 0.45; }
-    50% { transform: translate3d(8%, 12%, 0) scale(1.1); opacity: 0.7; }
-    100% { transform: translate3d(-10%, -6%, 0) scale(1); opacity: 0.45; }
-  }
-
-  @keyframes drift {
-    0% { transform: translate3d(0, 0, 0) scale(1); }
-    50% { transform: translate3d(22px, -18px, 0) scale(1.08); }
-    100% { transform: translate3d(-18px, 16px, 0) scale(1); }
-  }
-
-  @keyframes sweep {
-    0% { transform: translateX(-60%) rotate(6deg); opacity: 0; }
-    30% { opacity: 0.55; }
-    60% { opacity: 0.35; }
-    100% { transform: translateX(120%) rotate(6deg); opacity: 0; }
-  }
-
-  @keyframes track-shine {
-    0% { transform: translateX(-120%); }
-    100% { transform: translateX(120%); }
   }
 
   .loading-card {
@@ -341,8 +220,6 @@ else
     padding: clamp(28px, 5vw, 42px);
     overflow: hidden;
     z-index: 3;
-    color: #1e1150;
-    animation: float 8s ease-in-out infinite;
   }
 
   .loading-card::before {
@@ -353,20 +230,6 @@ else
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
     opacity: 0.2;
     pointer-events: none;
-  }
-
-  .loading-card::after {
-    content: "";
-    position: absolute;
-    top: -40%;
-    left: -10%;
-    width: 120%;
-    height: 40%;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 75%);
-    transform: translateX(-60%) rotate(6deg);
-    opacity: 0.5;
-    animation: sweep 9s ease-in-out infinite;
-    animation-delay: -3s;
   }
 
   .card-heading {
@@ -401,10 +264,8 @@ else
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    background: linear-gradient(120deg, rgba(111, 75, 255, 0.75), rgba(240, 98, 192, 0.65));
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    color: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 12px 25px rgba(111, 75, 255, 0.35);
+    background: rgba(20, 9, 57, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .status-pill .dot {
@@ -429,11 +290,6 @@ else
     font-size: clamp(1.65rem, 5vw, 2.25rem);
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: #2a1c7c;
-    background: linear-gradient(90deg, #6f4bff 0%, #f062c0 45%, #f7b563 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
 
   .card-subtitle {
@@ -442,7 +298,7 @@ else
     margin: 12px 0 32px;
     font-size: clamp(0.95rem, 2.4vw, 1.1rem);
     line-height: 1.5;
-    color: rgba(32, 20, 102, 0.76);
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .progress-visual {
@@ -460,7 +316,7 @@ else
 
   .pulse-ring {
     inset: 0;
-    border: 2px solid rgba(111, 75, 255, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.25);
     animation: pulse 2.8s ease-out infinite;
   }
 
@@ -487,18 +343,9 @@ else
     width: 100%;
     height: 10px;
     border-radius: 999px;
-    background: rgba(111, 75, 255, 0.18);
+    background: rgba(255, 255, 255, 0.16);
     overflow: hidden;
     margin-bottom: 18px;
-  }
-
-  .progress-track::before {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.6) 40%, rgba(255, 255, 255, 0));
-    animation: track-shine 3s ease-in-out infinite;
-    pointer-events: none;
   }
 
   .progress-bar {
@@ -507,9 +354,7 @@ else
     width: 45%;
     border-radius: inherit;
     background: linear-gradient(90deg, rgba(255, 147, 226, 0.95) 0%, rgba(123, 102, 255, 0.95) 100%);
-    box-shadow: 0 0 18px rgba(240, 98, 192, 0.45), 0 0 32px rgba(111, 75, 255, 0.35);
     animation: load 2.8s ease-in-out infinite;
-    z-index: 1;
   }
 
   .progress-glow {
@@ -536,7 +381,7 @@ else
     font-size: clamp(0.75rem, 2vw, 0.9rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(33, 21, 96, 0.62);
+    color: rgba(255, 255, 255, 0.75);
   }
 
   .meta-item {
@@ -545,7 +390,21 @@ else
   }
 
   .particle {
-    display: none;
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.75);
+    opacity: 0.75;
+    animation: drift 6s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes drift {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+    100% { transform: translate3d(0, -120vh, 0) scale(0.6); opacity: 0; }
   }
 
   @media (max-width: 640px) {
@@ -567,36 +426,25 @@ else
 
     .meta-item {
       padding: 6px 0;
-      background: rgba(111, 75, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 12px;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    #content1::before,
-    .loading-wrapper::before,
-    .floating-orb,
-    .floating-orb::after,
-    .background-aurora .aurora-layer,
-    .loading-card,
-    .loading-card::after,
-    .status-pill .dot,
-    .pulse-ring,
-    .pulse-core,
-    .progress-track::before,
-    .progress-bar {
-      animation: none !important;
-    }
-
-    .loading-card::after {
-      transform: rotate(6deg);
-      opacity: 0.2;
     }
   }
 </style>
 
-<!-- Loader helpers -->
+<!-- Particle Generator -->
 <script>
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = '100vh';
+    p.style.animationDelay = (Math.random() * 5) + 's';
+    p.style.animationDuration = (3 + Math.random() * 2) + 's';
+    document.getElementById('content1').appendChild(p);
+  }
+
+  // Call this once game is fully loaded
   function hideLoader() {
     const loader = document.getElementById('content1');
     if (loader) loader.style.display = 'none';
@@ -667,3 +515,6 @@ var getJSName ="<?php echo $gamename; ?>";
 
 </body>
 </html>
+
+
+ 
