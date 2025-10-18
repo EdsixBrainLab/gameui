@@ -78,20 +78,31 @@ function configureIntroFingerSprite(sprite) {
     }
 
     var bounds = getBitmapNaturalBounds(sprite);
-    var scale = 0.9;
+    var baseScale = typeof sprite.__baseScale === "number" ? sprite.__baseScale : 0.78;
 
-    sprite.scaleX = sprite.scaleY = scale;
+    sprite.scaleX = sprite.scaleY = baseScale;
     sprite.mouseEnabled = false;
     sprite.mouseChildren = false;
     sprite.visible = false;
     sprite.alpha = 0;
 
-    if (bounds) {
-        sprite.__pointerOffsetX = bounds.width * 0.42 * scale;
-        sprite.__pointerOffsetY = bounds.height * 0.82 * scale;
+    var pointerTip = sprite.__pointerTipBase || sprite.__pointerTip;
+    if (pointerTip && typeof pointerTip.x === "number" && typeof pointerTip.y === "number") {
+        sprite.__pointerOffsetX = pointerTip.x * baseScale;
+        sprite.__pointerOffsetY = pointerTip.y * baseScale;
+    } else if (bounds) {
+        sprite.__pointerOffsetX = bounds.width * 0.42 * baseScale;
+        sprite.__pointerOffsetY = bounds.height * 0.82 * baseScale;
     } else {
         sprite.__pointerOffsetX = 0;
         sprite.__pointerOffsetY = 0;
+    }
+
+    var pressDistanceBase = typeof sprite.__pressDistanceBase === "number" ? sprite.__pressDistanceBase : sprite.__pressDistance;
+    if (typeof pressDistanceBase === "number") {
+        sprite.__pressDistance = pressDistanceBase * baseScale;
+    } else {
+        sprite.__pressDistance = 18 * baseScale;
     }
 }
 
@@ -626,7 +637,8 @@ function setFingureTween() {
         var fingerTargetY = typeof FingYArr[TempIntroVal] === "number" ? FingYArr[TempIntroVal] : introfingureY;
         var fingerBaseX = fingerTargetX - pointerOffsetX;
         var fingerBaseY = fingerTargetY - pointerOffsetY;
-        var fingerPressX = fingerBaseX - 18;
+        var pressDistance = typeof introfingure.__pressDistance === "number" ? introfingure.__pressDistance : 18;
+        var fingerPressX = fingerBaseX - pressDistance;
 
         introfingure.visible = true;
         introfingure.alpha = 0;
