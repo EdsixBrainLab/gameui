@@ -221,7 +221,17 @@ if (questionOverImg) {
                 createjs.Tween.get(questionOverImg).wait(100).to({ alpha: 1, x: 0, y: 0 }, 8000);*/
 
                 if (typeof showGameplayTimeUpBanner === "function") {
-                    showGameplayTimeUpBanner(removeTimeOverImg);
+                    showGameplayTimeUpBanner(function (done) {
+                        try {
+                            removeTimeOverImg({
+                                deferOverlayHide: true,
+                                onReady: done
+                            });
+                        } catch (timeOverError) {
+                            console.log("Error: remove time over", timeOverError);
+                            done();
+                        }
+                    });
                 } else {
                     timeOverImgTimer = setInterval(removeTimeOverImg, 300);
                 }
@@ -274,9 +284,13 @@ if (questionOverImg) {
     }
 }
 
-function removeTimeOverImg() {
+function removeTimeOverImg(options) {
     clearInterval(timeOverImgTimer);
-    if (typeof hideGameplayTimeUpBanner === "function") {
+    var opts = options || {};
+    var deferOverlayHide = !!opts.deferOverlayHide;
+    var onReadyCallback = typeof opts.onReady === "function" ? opts.onReady : null;
+
+    if (!deferOverlayHide && typeof hideGameplayTimeUpBanner === "function") {
         hideGameplayTimeUpBanner(true);
     }
     timeOverImg.visible = false;
@@ -301,7 +315,21 @@ function removeTimeOverImg() {
             return;
         }
         proceedCalled = true;
-        pickques();
+        try {
+            pickques();
+        } catch (pickError) {
+            console.log("Error: next question setup", pickError);
+        }
+
+        if (onReadyCallback) {
+            var ready = onReadyCallback;
+            onReadyCallback = null;
+            try {
+                ready();
+            } catch (onReadyError) {
+                console.log("Error: time expired ready handler", onReadyError);
+            }
+        }
     }
 
     var hookHandled = false;
@@ -325,6 +353,7 @@ function removeTimeOverImg() {
     if (!hookHandled) {
         continueToNextQuestion();
     }
+
 }
 
 function pauseTimer() {
