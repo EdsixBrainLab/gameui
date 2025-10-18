@@ -3125,6 +3125,8 @@ function doneLoading(event) {
                 var badgePadding = 200;
                 var minBadgeWidth = 360;
                 var maxBadgeWidth = 640;
+                var minBadgeHeight = 64;
+                var badgeVerticalPadding = 36;
                 var fontSizes = [44, 40, 36, 32, 28];
                 var titleLabel;
 
@@ -3155,7 +3157,12 @@ function doneLoading(event) {
 
                 titleLabel.lineWidth = badgeWidth - 180;
                 var textHeight = titleLabel.getMeasuredHeight();
-                var badgeHeight = Math.max(76, Math.round(textHeight + 48));
+                var badgeHeight = Math.max(
+                    minBadgeHeight,
+                    Math.round(textHeight + badgeVerticalPadding)
+                );
+                var badgeCornerRadius = Math.min(40, Math.round(badgeHeight * 0.45));
+                var highlightCornerRadius = Math.max(16, badgeCornerRadius - 8);
 
                 TitleContaier = new createjs.Container();
                 TitleContaier.mouseEnabled = false;
@@ -3164,7 +3171,13 @@ function doneLoading(event) {
                 var badgeShadow = new createjs.Shape();
                 badgeShadow.graphics
                     .beginFill("rgba(6,12,28,0.55)")
-                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2 + 10, badgeWidth, badgeHeight, 40);
+                    .drawRoundRect(
+                        -badgeWidth / 2,
+                        -badgeHeight / 2 + 10,
+                        badgeWidth,
+                        badgeHeight,
+                        Math.min(badgeCornerRadius + 4, 44)
+                    );
                 badgeShadow.alpha = 0.34;
                 TitleContaier.addChild(badgeShadow);
 
@@ -3180,7 +3193,13 @@ function doneLoading(event) {
                         0,
                         badgeWidth
                     )
-                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
+                    .drawRoundRect(
+                        -badgeWidth / 2,
+                        -badgeHeight / 2,
+                        badgeWidth,
+                        badgeHeight,
+                        Math.min(badgeCornerRadius + 2, 42)
+                    );
                 badgeGlow.alpha = 0.65;
                 badgeGlow.compositeOperation = "lighter";
                 TitleContaier.addChild(badgeGlow);
@@ -3192,14 +3211,26 @@ function doneLoading(event) {
                         "#7044E2",
                         "#FF6FB5"
                     ], [0, 0.55, 1], -badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, badgeHeight / 2)
-                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
+                    .drawRoundRect(
+                        -badgeWidth / 2,
+                        -badgeHeight / 2,
+                        badgeWidth,
+                        badgeHeight,
+                        Math.min(badgeCornerRadius + 2, 42)
+                    );
                 TitleContaier.addChild(badgeBackground);
 
                 var badgeOutline = new createjs.Shape();
                 badgeOutline.graphics
                     .setStrokeStyle(2)
                     .beginStroke("rgba(255,255,255,0.45)")
-                    .drawRoundRect(-badgeWidth / 2 + 1, -badgeHeight / 2 + 1, badgeWidth - 2, badgeHeight - 2, 40);
+                    .drawRoundRect(
+                        -badgeWidth / 2 + 1,
+                        -badgeHeight / 2 + 1,
+                        badgeWidth - 2,
+                        badgeHeight - 2,
+                        Math.max(badgeCornerRadius - 2, 20)
+                    );
                 badgeOutline.alpha = 0.6;
                 TitleContaier.addChild(badgeOutline);
 
@@ -3209,7 +3240,13 @@ function doneLoading(event) {
                         "rgba(255,255,255,0.55)",
                         "rgba(255,255,255,0)"
                     ], [0, 1], -badgeWidth / 2 + 8, -badgeHeight / 2 + 6, badgeWidth / 2, 0)
-                    .drawRoundRect(-badgeWidth / 2 + 6, -badgeHeight / 2 + 6, badgeWidth - 12, badgeHeight / 2, 32);
+                    .drawRoundRect(
+                        -badgeWidth / 2 + 6,
+                        -badgeHeight / 2 + 6,
+                        badgeWidth - 12,
+                        badgeHeight / 2,
+                        highlightCornerRadius
+                    );
                 badgeHighlight.alpha = 0.5;
                 TitleContaier.addChild(badgeHighlight);
 
