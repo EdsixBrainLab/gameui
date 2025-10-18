@@ -1923,194 +1923,67 @@ function createAmbientBackground() {
   ambientLayer.addChild(ambientAuroraLayer);
   ambientLayer.addChild(ambientSparkLayer);
 
-  ambientSparkGeneration += 1;
-  var sparkGeneration = ambientSparkGeneration;
-
   var gradientShape = new createjs.Shape();
   gradientShape.graphics
     .beginLinearGradientFill(
-      ["#050916", "#0f1a33", "#172848", "#21335a"],
-      [0, 0.4, 0.74, 1],
+      ["#3c4cf7", "#6a6fff", "#a56bff"],
+      [0, 0.55, 1],
       0,
       0,
       0,
       canvas.height
     )
     .drawRect(0, 0, canvas.width, canvas.height);
-  gradientShape.alpha = 0.94;
+  gradientShape.alpha = 0.9;
   ambientGradientLayer.addChild(gradientShape);
 
-  var dawnBloom = createAmbientGlowOrb(Math.max(canvas.width, canvas.height) * 0.48, [
-    "rgba(150, 203, 255, 0.32)",
-    "rgba(150, 203, 255, 0)"
-  ]);
-  dawnBloom.x = canvas.width * 0.56;
-  dawnBloom.y = canvas.height * 0.44;
-  dawnBloom.alpha = 0.56;
-  dawnBloom.compositeOperation = "lighter";
-  ambientGradientLayer.addChild(dawnBloom);
-
-  var horizonGlow = createAmbientGlowOrb(Math.max(canvas.width, canvas.height) * 0.68, [
-    "rgba(108, 173, 255, 0.26)",
-    "rgba(108, 173, 255, 0)"
-  ]);
-  horizonGlow.x = canvas.width * 0.2;
-  horizonGlow.y = canvas.height * 0.24;
-  horizonGlow.alpha = 0.48;
-  horizonGlow.compositeOperation = "lighter";
-  ambientGradientLayer.addChild(horizonGlow);
-
-  var lowerGlow = createAmbientGlowOrb(Math.max(canvas.width, canvas.height) * 0.58, [
-    "rgba(120, 214, 246, 0.28)",
-    "rgba(120, 214, 246, 0)"
-  ]);
-  lowerGlow.x = canvas.width * 0.8;
-  lowerGlow.y = canvas.height * 0.76;
-  lowerGlow.alpha = 0.44;
-  lowerGlow.compositeOperation = "lighter";
-  ambientGradientLayer.addChild(lowerGlow);
-
-  var softWash = new createjs.Shape();
-  softWash.graphics
+  var topGlow = new createjs.Shape();
+  topGlow.graphics
     .beginLinearGradientFill(
-      [
-        "rgba(68, 108, 173, 0.18)",
-        "rgba(83, 138, 203, 0.12)",
-        "rgba(96, 87, 186, 0.14)"
-      ],
-      [0, 0.52, 1],
-      -canvas.width * 0.38,
-      -canvas.height * 0.18,
-      canvas.width * 0.38,
-      canvas.height * 0.52
+      ["rgba(255,255,255,0.24)", "rgba(255,255,255,0)"],
+      [0, 1],
+      0,
+      0,
+      0,
+      canvas.height * 0.65
     )
-    .drawRoundRectComplex(
-      -canvas.width * 0.5,
-      -canvas.height * 0.32,
-      canvas.width * 1.1,
-      canvas.height * 0.95,
-      260,
-      260,
-      320,
-      320
-    );
-  softWash.x = canvas.width * 0.56;
-  softWash.y = canvas.height * 0.46;
-  softWash.alpha = 0.24;
-  softWash.compositeOperation = "lighter";
-  ambientGradientLayer.addChild(softWash);
+    .drawRect(0, 0, canvas.width, canvas.height * 0.65);
+  topGlow.alpha = 0.6;
+  ambientGradientLayer.addChild(topGlow);
 
-  var bokehLayer = createAmbientBokehLayer(canvas.width, canvas.height, 12);
-  ambientGradientLayer.addChild(bokehLayer);
-
-  var auroraBackdrop = new createjs.Shape();
-  var auroraWidth = canvas.width * 1.15;
-  var auroraHeight = Math.max(canvas.height * 0.68, 340);
-  auroraBackdrop.graphics
-    .beginLinearGradientFill(
-      [
-        "rgba(80, 134, 214, 0.24)",
-        "rgba(112, 102, 205, 0.22)",
-        "rgba(130, 94, 198, 0.18)"
-      ],
-      [0, 0.6, 1],
-      -auroraWidth / 2,
-      -auroraHeight / 2,
-      auroraWidth / 2,
-      auroraHeight / 2
-    )
-    .drawEllipse(-auroraWidth / 2, -auroraHeight / 2, auroraWidth, auroraHeight);
-  auroraBackdrop.x = canvas.width * 0.5;
-  auroraBackdrop.y = canvas.height * 0.45;
-  auroraBackdrop.alpha = 0.48;
-  auroraBackdrop.compositeOperation = "lighter";
-  ambientAuroraLayer.addChild(auroraBackdrop);
-  animateAmbientAurora(auroraBackdrop);
-
-  var crestWave = createAmbientWave(canvas.width * 0.84, 110, 0.22, [
-    "rgba(114, 170, 237, 0.24)",
-    "rgba(182, 148, 240, 0.16)"
-  ]);
-  crestWave.x = canvas.width * 0.5;
-  crestWave.y = canvas.height * 0.34;
-  crestWave.alpha = 0.38;
-  crestWave.compositeOperation = "lighter";
-  ambientAuroraLayer.addChild(crestWave);
-  animateAmbientWave(crestWave);
-
-  var innerWave = createAmbientWave(canvas.width * 0.7, 140, 0.28, [
-    "rgba(82, 195, 212, 0.2)",
-    "rgba(120, 158, 238, 0.16)"
-  ]);
-  innerWave.x = canvas.width * 0.58;
-  innerWave.y = canvas.height * 0.5;
-  innerWave.alpha = 0.34;
-  innerWave.rotation = -6;
-  innerWave.compositeOperation = "lighter";
-  ambientAuroraLayer.addChild(innerWave);
-  animateAmbientWave(innerWave);
-
-  var trailingWave = createAmbientWave(canvas.width * 0.92, 90, 0.18, [
-    "rgba(174, 154, 235, 0.2)",
-    "rgba(112, 158, 230, 0.14)"
-  ]);
-  trailingWave.x = canvas.width * 0.36;
-  trailingWave.y = canvas.height * 0.6;
-  trailingWave.alpha = 0.32;
-  trailingWave.rotation = 7;
-  trailingWave.compositeOperation = "lighter";
-  ambientAuroraLayer.addChild(trailingWave);
-  animateAmbientWave(trailingWave);
-
-  var constellationLayer = new createjs.Container();
-  constellationLayer.alpha = 0.52;
-  ambientAuroraLayer.addChild(constellationLayer);
-
-  for (var c = 0; c < 5; c++) {
-    constellationLayer.addChild(createAmbientConstellation());
-  }
-
-  var shimmerConstellations = createAmbientShimmerConstellations();
-  shimmerConstellations.alpha = 0.65;
-  shimmerConstellations.compositeOperation = "lighter";
-  ambientAuroraLayer.addChild(shimmerConstellations);
-
-  var starField = createAmbientStarField(canvas.width, canvas.height, 26);
-  ambientAuroraLayer.addChild(starField);
-
-  var glowOrbs = createAmbientGlowOrbs(canvas.width, canvas.height, 5);
-  ambientAuroraLayer.addChild(glowOrbs);
-
-  var particleField = createAmbientParticleField(canvas.width, canvas.height, 44, {
-    minRadius: 1.4,
-    maxRadius: 3.4
-  });
-  ambientSparkLayer.addChild(particleField);
-
-  for (var p = 0; p < particleField.numChildren; p++) {
-    startAmbientParticleFloat(particleField.getChildAt(p), true);
-  }
-
-  var vignette = new createjs.Shape();
-  var radius = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
-  vignette.graphics
+  var centerHighlight = new createjs.Shape();
+  centerHighlight.graphics
     .beginRadialGradientFill(
-      ["rgba(0,0,0,0)", "rgba(5, 8, 24, 0.68)"],
-      [0.55, 1],
+      ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
+      [0, 1],
       0,
       0,
-      radius * 0.36,
+      Math.max(canvas.width, canvas.height) * 0.18,
       0,
       0,
-      radius
+      Math.max(canvas.width, canvas.height) * 0.68
     )
-    .drawRect(0, 0, canvas.width, canvas.height);
-  vignette.alpha = 0.92;
-  ambientGradientLayer.addChild(vignette);
+    .drawRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+  centerHighlight.x = canvas.width * 0.5;
+  centerHighlight.y = canvas.height * 0.48;
+  centerHighlight.alpha = 0.75;
+  centerHighlight.compositeOperation = "lighter";
+  ambientGradientLayer.addChild(centerHighlight);
 
-  for (var s = 0; s < 7; s++) {
-    spawnAmbientSpark(sparkGeneration);
-  }
+  var bottomSheen = new createjs.Shape();
+  bottomSheen.graphics
+    .beginLinearGradientFill(
+      ["rgba(255,255,255,0.12)", "rgba(255,255,255,0)"],
+      [0, 1],
+      0,
+      0,
+      0,
+      -canvas.height * 0.5
+    )
+    .drawRect(0, 0, canvas.width, canvas.height * 0.5);
+  bottomSheen.y = canvas.height * 0.5;
+  bottomSheen.alpha = 0.5;
+  ambientGradientLayer.addChild(bottomSheen);
 }
 
 
