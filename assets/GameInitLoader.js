@@ -4547,7 +4547,7 @@ function buildHowToPlayOverlay() {
 
     var background = new createjs.Shape();
     background.graphics
-        .beginLinearGradientFill(["#161b3d", "#231d58", "#321f77"], [0, 0.5, 1], 0, 0, 0, 720)
+        .beginLinearGradientFill(["#2f3f9d", "#4a52d4", "#6c78ff"], [0, 0.5, 1], 0, 0, 0, 720)
         .drawRect(0, 0, 1280, 720);
     overlay.addChild(background);
 
@@ -4555,9 +4555,9 @@ function buildHowToPlayOverlay() {
     colorWash.graphics
         .beginLinearGradientFill(
             [
-                "rgba(101, 132, 255, 0.38)",
-                "rgba(173, 103, 255, 0.32)",
-                "rgba(255, 126, 209, 0.28)"
+                "rgba(161, 189, 255, 0.52)",
+                "rgba(209, 165, 255, 0.42)",
+                "rgba(255, 189, 236, 0.36)"
             ],
             [0, 0.55, 1],
             0,
@@ -4572,7 +4572,7 @@ function buildHowToPlayOverlay() {
     var vignette = new createjs.Shape();
     vignette.graphics
         .beginRadialGradientFill(
-            ["rgba(26, 19, 63, 0)", "rgba(24, 21, 60, 0.75)"],
+            ["rgba(35, 29, 88, 0)", "rgba(46, 45, 128, 0.35)"],
             [0, 1],
             640,
             360,
@@ -4585,65 +4585,10 @@ function buildHowToPlayOverlay() {
     overlay.addChild(vignette);
 
     var pattern = drawHoneycombPattern(1280, 720, 44);
-    pattern.alpha = 0.14;
+    pattern.alpha = 0.1;
     overlay.addChild(pattern);
 
-    var orbOne = new createjs.Shape();
-    orbOne.graphics
-        .beginRadialGradientFill(
-            ["rgba(255, 171, 224, 0.85)", "rgba(255, 124, 210, 0.2)", "rgba(255, 124, 210, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            190
-        )
-        .drawCircle(0, 0, 190);
-    orbOne.x = 1100;
-    orbOne.y = 160;
-    orbOne.alpha = 0.78;
-    overlay.addChild(orbOne);
-
-    var orbTwo = new createjs.Shape();
-    orbTwo.graphics
-        .beginRadialGradientFill(
-            ["rgba(130, 196, 255, 0.8)", "rgba(114, 142, 255, 0.24)", "rgba(114, 142, 255, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            220
-        )
-        .drawCircle(0, 0, 220);
-    orbTwo.x = 240;
-    orbTwo.y = 640;
-    orbTwo.alpha = 0.68;
-    overlay.addChild(orbTwo);
-
-    var orbThree = new createjs.Shape();
-    orbThree.graphics
-        .beginRadialGradientFill(
-            ["rgba(146, 121, 255, 0.78)", "rgba(101, 96, 215, 0.24)", "rgba(101, 96, 215, 0)"],
-            [0, 0.6, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            180
-        )
-        .drawCircle(0, 0, 180);
-    orbThree.x = 360;
-    orbThree.y = 180;
-    orbThree.alpha = 0.7;
-    overlay.addChild(orbThree);
-
-    var particleLayer = createHowToPlayParticleField(1280, 720, 24);
-    overlay.addChild(particleLayer);
+    overlay.particleLayer = null;
 
     var header = createHowToPlayHeader();
     overlay.addChild(header);
@@ -4672,49 +4617,12 @@ function buildHowToPlayOverlay() {
     overlay.addChild(proceedButton);
     overlay.proceedButton = proceedButton;
 
-    var accentLarge = new createjs.Shape();
-    accentLarge.graphics
-        .beginRadialGradientFill(
-            ["rgba(122, 180, 255, 0.48)", "rgba(122, 180, 255, 0)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            148
-        )
-        .drawCircle(0, 0, 148);
-    accentLarge.x = 1040;
-    accentLarge.y = 540;
-    overlay.addChild(accentLarge);
-
-    var accentSmall = new createjs.Shape();
-    accentSmall.graphics
-        .beginRadialGradientFill(
-            ["rgba(199, 124, 255, 0.5)", "rgba(199, 124, 255, 0)"],
-            [0, 1],
-            0,
-            0,
-            0,
-            0,
-            0,
-            110
-        )
-        .drawCircle(0, 0, 110);
-    accentSmall.x = 180;
-    accentSmall.y = 320;
-    overlay.addChild(accentSmall);
-
     header.baseY = header.y;
     instructions.baseY = instructions.y;
     progress.baseY = progress.y;
-    accentLarge.baseScale = accentLarge.scaleX = accentLarge.scaleY = 1;
-    accentSmall.baseScale = accentSmall.scaleX = accentSmall.scaleY = 1;
-    overlay.accentLarge = accentLarge;
-    overlay.accentSmall = accentSmall;
-    overlay.ambientOrbs = [orbOne, orbTwo, orbThree];
-    overlay.particleLayer = particleLayer;
+    overlay.accentLarge = null;
+    overlay.accentSmall = null;
+    overlay.ambientOrbs = [];
 
     overlay.__baseWidth = 1280;
     overlay.__baseHeight = 720;
