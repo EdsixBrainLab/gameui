@@ -55,33 +55,6 @@ function buildVectorArrowIcon() {
         .drawCircle(0, 22, 96);
     bloom.alpha = 0.62;
 
-    var tail = new createjs.Shape();
-    tail.graphics
-        .clear()
-        .beginLinearGradientFill(
-            ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
-            [0, 1],
-            0,
-            -90,
-            0,
-            56
-        )
-        .moveTo(-14, -86)
-        .quadraticCurveTo(-24, -66, -16, -48)
-        .quadraticCurveTo(-8, -32, -6, -4)
-        .lineTo(-6, 28)
-        .quadraticCurveTo(-6, 52, -16, 70)
-        .quadraticCurveTo(-24, 80, -12, 90)
-        .lineTo(0, 96)
-        .lineTo(12, 90)
-        .quadraticCurveTo(24, 80, 16, 70)
-        .quadraticCurveTo(6, 52, 6, 28)
-        .lineTo(6, -4)
-        .quadraticCurveTo(8, -32, 16, -48)
-        .quadraticCurveTo(24, -66, 14, -86)
-        .closePath();
-    tail.alpha = 0.28;
-
     var arrow = new createjs.Shape();
     var g = arrow.graphics;
     g.clear();
@@ -145,7 +118,7 @@ function buildVectorArrowIcon() {
         .quadraticCurveTo(-18, 74, -12, -24)
         .closePath();
     sheen.alpha = 0.68;
-    icon.addChild(bloom, tail, arrow, inner, sheen);
+    icon.addChild(bloom, arrow, inner, sheen);
     icon.shadow = new createjs.Shadow("rgba(20,14,60,0.28)", 0, 8, 20);
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
@@ -1384,18 +1357,20 @@ function applyGameplayBackdropAnimations(backdrop) {
 }
 
 function ensureTitleShimmerAnimation() {
-    if (typeof Title === "undefined" || !Title || Title.__shimmerAnimating || !Title.__shimmer) {
+    if (typeof Title === "undefined" || !Title || Title.__shimmerAnimating) {
         return;
     }
 
-    var shimmer = Title.__shimmer;
     var badgeWidth = (Title.__layoutHalfWidth || 220) * 2;
     Title.__shimmerAnimating = true;
 
-    shimmer.x = -badgeWidth;
-    createjs.Tween.get(shimmer, { loop: true })
-        .to({ x: badgeWidth }, 4200, createjs.Ease.quadInOut)
-        .wait(1600);
+    if (Title.__shimmer) {
+        var shimmer = Title.__shimmer;
+        shimmer.x = -badgeWidth;
+        createjs.Tween.get(shimmer, { loop: true })
+            .to({ x: badgeWidth }, 4200, createjs.Ease.quadInOut)
+            .wait(1600);
+    }
 
     if (!Title.__breathingAnimationAttached) {
         Title.__breathingAnimationAttached = true;
@@ -3277,31 +3252,6 @@ function doneLoading(event) {
                 titleLabel.y = 2;
                 TitleContaier.addChild(titleLabel);
 
-                var shimmerMask = new createjs.Shape();
-                shimmerMask.graphics.drawRoundRect(-badgeWidth / 2 + 5, -badgeHeight / 2 + 5, badgeWidth - 10, badgeHeight - 10, 38);
-
-                var shimmer = new createjs.Shape();
-                shimmer.graphics
-                    .beginLinearGradientFill([
-                        "rgba(255,255,255,0)",
-                        "rgba(255,255,255,0.75)",
-                        "rgba(255,255,255,0)"
-                    ], [0, 0.5, 1], -badgeWidth, 0, badgeWidth, 0)
-                    .drawRoundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 44);
-                shimmer.alpha = 0.45;
-                shimmer.compositeOperation = "lighter";
-                shimmer.mask = shimmerMask;
-                shimmer.x = -badgeWidth;
-                TitleContaier.addChild(shimmer);
-                TitleContaier.__shimmer = shimmer;
-                TitleContaier.__shimmerMask = shimmerMask;
-
-                createjs.Tween.get(shimmer, { loop: true })
-                    .to({ x: badgeWidth * 0.65 }, 2200, createjs.Ease.sineInOut)
-                    .to({ x: badgeWidth }, 420, createjs.Ease.quadOut)
-                    .wait(1600)
-                    .set({ x: -badgeWidth });
-
                 TitleContaier.x = getCanvasCenterX();
                 TitleContaier.y = badgeHeight / 2;
                 TitleContaier.__layoutHalfWidth = badgeWidth / 2;
@@ -5121,6 +5071,7 @@ function createHowToPlayHeader() {
     container.addChild(card);
     container.cardShape = card;
     container.cardWidth = 520;
+    container.__highlightSweepAttached = false;
 
     var cardStroke = new createjs.Shape();
     cardStroke.graphics
@@ -5128,35 +5079,6 @@ function createHowToPlayHeader() {
         .beginStroke("rgba(167, 123, 255, 0.38)")
         .drawRoundRect(1, 1, 518, 118, 40);
     container.addChild(cardStroke);
-
-    var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(0, 0, 520, 120, 42);
-    highlightMask.visible = false;
-    container.addChild(highlightMask);
-
-    var animatedHighlight = new createjs.Shape();
-    animatedHighlight.graphics
-        .beginLinearGradientFill(
-            [
-                "rgba(255, 255, 255, 0)",
-                "rgba(247, 236, 255, 0.76)",
-                "rgba(255, 255, 255, 0)"
-            ],
-            [0, 0.52, 1],
-            -160,
-            0,
-            160,
-            0
-        )
-        .drawRoundRect(-160, -12, 320, 144, 58);
-    animatedHighlight.alpha = 0;
-    animatedHighlight.x = -200;
-    animatedHighlight.y = -12;
-    animatedHighlight.mask = highlightMask;
-    animatedHighlight.compositeOperation = "lighter";
-    animatedHighlight.baseX = -160;
-    container.addChild(animatedHighlight);
-    container.highlightSweep = animatedHighlight;
 
     var tildeWave = createHowToPlayTildeWave(260, 16);
     tildeWave.x = 186;
@@ -5687,11 +5609,12 @@ function stopHowToPlayHeaderIdleAnimation(header) {
 
     header.__idleAnimationAttached = false;
 
+    header.__highlightSweepAttached = false;
+
     if (header.highlightSweep) {
         createjs.Tween.removeTweens(header.highlightSweep);
         header.highlightSweep.alpha = 0;
         header.highlightSweep.x = typeof header.highlightSweep.baseX === "number" ? header.highlightSweep.baseX : -160;
-        header.__highlightSweepAttached = false;
     }
 
     if (header.tildeWave) {
@@ -5798,12 +5721,15 @@ function resetHowToPlayWaveStates(overlay) {
         }
     }
 
+    if (overlay.header) {
+        overlay.header.__highlightSweepAttached = false;
+    }
+
     if (overlay.header && overlay.header.highlightSweep) {
         var headerHighlight = overlay.header.highlightSweep;
         createjs.Tween.removeTweens(headerHighlight);
         headerHighlight.alpha = 0;
         headerHighlight.x = typeof headerHighlight.baseX === "number" ? headerHighlight.baseX : -160;
-        overlay.header.__highlightSweepAttached = false;
     }
 
     if (overlay.proceedButton && overlay.proceedButton.tildeWave) {
@@ -6020,31 +5946,7 @@ function createIntroHowToPlayHeader() {
         .beginStroke("rgba(198, 152, 255, 0.55)")
         .drawRoundRect(1, 1, 234, 72, 30);
     container.addChild(frameStroke);
-
-    var highlightMask = new createjs.Shape();
-    highlightMask.graphics.drawRoundRect(0, 0, 236, 74, 32);
-    highlightMask.visible = false;
-    container.addChild(highlightMask);
-
-    var highlight = new createjs.Shape();
-    highlight.graphics
-        .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0)", "rgba(247, 234, 255, 0.92)", "rgba(255, 255, 255, 0)"],
-            [0, 0.52, 1],
-            -120,
-            0,
-            120,
-            0
-        )
-        .drawRoundRect(-120, -38, 240, 148, 44);
-    highlight.alpha = 0;
-    highlight.mask = highlightMask;
-    highlight.compositeOperation = "lighter";
-    highlight.x = -160;
-    highlight.baseX = -160;
-    container.addChild(highlight);
-    container.highlightSweep = highlight;
-    container.highlightMask = highlightMask;
+    container.__highlightSweepAttached = false;
 
     var sparkleGlow = new createjs.Shape();
     sparkleGlow.graphics
