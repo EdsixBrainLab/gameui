@@ -56,19 +56,22 @@ function configureIntroArrowSprite(sprite) {
     }
 
     var bounds = getBitmapNaturalBounds(sprite);
-    var scale = 0.94;
+    var scale = 0.82;
 
     sprite.scaleX = sprite.scaleY = scale;
     sprite.mouseEnabled = false;
     sprite.mouseChildren = false;
     sprite.visible = false;
     sprite.alpha = 0;
-    sprite.__tipGap = 22;
-    sprite.__bounceOffset = 18;
+    sprite.__tipGap = 28;
+    sprite.__bounceOffset = 14;
 
     if (bounds) {
-        sprite.regX = bounds.width / 2;
-        sprite.regY = bounds.height;
+        var originX = (bounds.x || 0) + bounds.width / 2;
+        var originY = (bounds.y || 0) + bounds.height;
+
+        sprite.regX = originX;
+        sprite.regY = originY;
     }
 }
 

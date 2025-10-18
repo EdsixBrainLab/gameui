@@ -39,90 +39,139 @@ var howToPlayWaveTransferred = false;
 function buildVectorArrowIcon() {
     var icon = new createjs.Container();
 
-    var halo = new createjs.Shape();
-    halo.graphics
+    var bloom = new createjs.Shape();
+    bloom.graphics
         .clear()
-        .beginRadialGradientFill([
-            "rgba(252,210,255,0.7)",
-            "rgba(125,86,209,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 100)
-        .drawCircle(0, 0, 100);
-    halo.alpha = 0.8;
+        .beginRadialGradientFill(
+            ["rgba(144,108,255,0.55)", "rgba(76,32,158,0)"],
+            [0, 1],
+            0,
+            -30,
+            0,
+            0,
+            -30,
+            150
+        )
+        .drawCircle(0, 90, 120);
+    bloom.alpha = 0.7;
 
     var tail = new createjs.Shape();
     tail.graphics
         .clear()
-        .beginLinearGradientFill([
-            "rgba(255,255,255,0.24)",
-            "rgba(255,255,255,0)"
-        ], [0, 1], -140, 0, 24, 0)
-        .moveTo(-136, -18)
-        .quadraticCurveTo(-58, -58, -18, -36)
-        .lineTo(4, -20)
-        .lineTo(-26, 20)
-        .quadraticCurveTo(-74, 56, -136, 22)
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0.18)", "rgba(255,255,255,0)"],
+            [0, 1],
+            0,
+            -160,
+            0,
+            -24
+        )
+        .moveTo(-24, -156)
+        .quadraticCurveTo(-46, -120, -22, -88)
+        .quadraticCurveTo(-4, -54, -4, -10)
+        .lineTo(-4, 42)
+        .quadraticCurveTo(-4, 84, -32, 118)
+        .quadraticCurveTo(-50, 136, -30, 156)
+        .lineTo(0, 188)
+        .lineTo(30, 156)
+        .quadraticCurveTo(50, 136, 32, 118)
+        .quadraticCurveTo(4, 84, 4, 42)
+        .lineTo(4, -10)
+        .quadraticCurveTo(4, -54, 22, -88)
+        .quadraticCurveTo(46, -120, 24, -156)
         .closePath();
-    tail.alpha = 0.65;
+    tail.alpha = 0.5;
 
     var arrow = new createjs.Shape();
     var g = arrow.graphics;
     g.clear();
-    g.setStrokeStyle(5, "round", "round");
-    g.beginLinearGradientStroke([
-        "rgba(255,255,255,0.92)",
-        "rgba(255,255,255,0.3)"
-    ], [0, 1], -96, -52, 118, 60);
-    g.beginLinearGradientFill([
-        "#FFB9F4",
-        "#F472B6",
-        "#7C3AED"
-    ], [0, 0.42, 1], -102, -48, 124, 56);
-    g.moveTo(-104, -26);
-    g.quadraticCurveTo(-36, -76, 12, -48);
-    g.lineTo(120, 0);
-    g.lineTo(12, 48);
-    g.quadraticCurveTo(-36, 76, -104, 26);
+    g.setStrokeStyle(4, "round", "round");
+    g.beginLinearGradientStroke(
+        ["rgba(255,255,255,0.9)", "rgba(255,255,255,0.3)"],
+        [0, 1],
+        0,
+        -160,
+        0,
+        188
+    );
+    g.beginLinearGradientFill(["#F7B8FF", "#D07BFF", "#7235F5"], [0, 0.42, 1], 0, -164, 0, 188);
+    g.moveTo(-44, -148);
+    g.quadraticCurveTo(-78, -82, -32, -22);
+    g.lineTo(-32, 46);
+    g.quadraticCurveTo(-32, 88, -56, 118);
+    g.lineTo(0, 178);
+    g.lineTo(56, 118);
+    g.quadraticCurveTo(32, 88, 32, 46);
+    g.lineTo(32, -22);
+    g.quadraticCurveTo(78, -82, 44, -148);
     g.closePath();
 
     var inner = new createjs.Shape();
     inner.graphics
         .clear()
-        .beginLinearGradientFill([
-            "rgba(255,255,255,0.94)",
-            "rgba(255,255,255,0.04)"
-        ], [0, 1], -54, -22, 52, 26)
-        .moveTo(-64, -14)
-        .quadraticCurveTo(-12, -40, 24, -8)
-        .lineTo(-8, 28)
-        .quadraticCurveTo(-46, 36, -64, 6)
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0.88)", "rgba(255,255,255,0.06)"],
+            [0, 1],
+            0,
+            -124,
+            0,
+            150
+        )
+        .moveTo(-24, -128)
+        .quadraticCurveTo(-54, -72, -18, -18)
+        .lineTo(-18, 44)
+        .quadraticCurveTo(-18, 84, -40, 112)
+        .lineTo(0, 156)
+        .lineTo(40, 112);
+    inner.graphics
+        .quadraticCurveTo(18, 84, 18, 44)
+        .lineTo(18, -18)
+        .quadraticCurveTo(54, -72, 24, -128)
         .closePath();
+    inner.alpha = 0.96;
+
+    var sheen = new createjs.Shape();
+    sheen.graphics
+        .clear()
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0.92)", "rgba(255,255,255,0)"],
+            [0, 1],
+            -18,
+            -46,
+            26,
+            116
+        )
+        .moveTo(-20, -40)
+        .quadraticCurveTo(-4, -78, 10, -42)
+        .lineTo(24, 38)
+        .quadraticCurveTo(8, 82, -14, 92)
+        .quadraticCurveTo(-34, 72, -20, -40)
+        .closePath();
+    sheen.alpha = 0.8;
 
     var tipSpark = new createjs.Shape();
     tipSpark.graphics
         .clear()
-        .beginRadialGradientFill([
-            "rgba(255,255,255,0.95)",
-            "rgba(255,255,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 26)
-        .drawCircle(0, 0, 26);
-    tipSpark.x = 112;
-    tipSpark.y = 0;
-    tipSpark.alpha = 0.92;
+        .beginRadialGradientFill(
+            ["rgba(255,255,255,0.95)", "rgba(255,255,255,0)"],
+            [0, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            32
+        )
+        .drawCircle(0, 0, 32);
+    tipSpark.y = 178;
+    tipSpark.alpha = 0.9;
 
-    var rim = new createjs.Shape();
-    rim.graphics
-        .clear()
-        .setStrokeStyle(3, "round", "round")
-        .beginStroke("rgba(255,255,255,0.32)")
-        .moveTo(98, -18)
-        .quadraticCurveTo(124, 0, 98, 18);
-    rim.alpha = 0.7;
-
-    icon.addChild(halo, tail, arrow, inner, rim, tipSpark);
-    icon.shadow = new createjs.Shadow("rgba(20,14,60,0.45)", 0, 14, 32);
+    icon.addChild(bloom, tail, arrow, inner, sheen, tipSpark);
+    icon.shadow = new createjs.Shadow("rgba(20,14,60,0.38)", 0, 16, 34);
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
-    icon.cache(-160, -120, 320, 240);
+    icon.cache(-84, -188, 168, 376);
+    icon.setBounds(-84, -188, 168, 376);
 
     icon.clone = function () {
         var clone = buildVectorArrowIcon();
@@ -3054,7 +3103,7 @@ function doneLoading(event) {
                 arrow1 = buildVectorArrowIcon();
                 container.parent.addChild(arrow1);
                 arrow1.visible = false;
-                arrow1.scaleX = arrow1.scaleY = 0.78;
+                arrow1.scaleX = arrow1.scaleY = 0.72;
                 continue;
             }
             if (id == "fingure") {
