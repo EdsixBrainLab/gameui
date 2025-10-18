@@ -56,15 +56,15 @@ function configureIntroArrowSprite(sprite) {
     }
 
     var bounds = getBitmapNaturalBounds(sprite);
-    var scale = 0.82;
+    var scale = 0.72;
 
     sprite.scaleX = sprite.scaleY = scale;
     sprite.mouseEnabled = false;
     sprite.mouseChildren = false;
     sprite.visible = false;
     sprite.alpha = 0;
-    sprite.__tipGap = 28;
-    sprite.__bounceOffset = 14;
+    sprite.__tipGap = 26;
+    sprite.__bounceOffset = 16;
 
     if (bounds) {
         var originX = (bounds.x || 0) + bounds.width / 2;
@@ -366,7 +366,9 @@ function commongameintro() {
         var tipTargetY = tileTop + tileHeight * 0.28;
         choicePointerTargets[cfg.index] = {
             x: cfg.x,
-            tipY: tipTargetY
+            tipY: tipTargetY,
+            tileTop: tileTop,
+            tileHeight: tileHeight
         };
     }
 
@@ -422,6 +424,11 @@ function commongameintro() {
         if (pointer) {
             FingXArr[step] = pointer.x;
             FingYArr[step] = pointer.tipY;
+            ArrowXArr[step] = pointer.x;
+            var arrowTipGap = introArrow && typeof introArrow.__tipGap === "number" ? introArrow.__tipGap : 24;
+            var pointerTileTop = typeof pointer.tileTop === "number" ? pointer.tileTop : pointer.tipY - 32;
+            var effectiveGap = Math.max(arrowTipGap - 12, arrowTipGap * 0.6);
+            ArrowYArr[step] = pointerTileTop - effectiveGap;
         }
     }
 
