@@ -138,7 +138,7 @@ else
     margin: 0;
     padding: 0;
     font-family: 'Baloo 2', sans-serif;
-    background-color: #0e0b24;
+    background-color: #181047;
     color: #ffffff;
   }
 
@@ -152,9 +152,9 @@ else
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top left, rgba(255, 161, 223, 0.5), transparent 55%),
-                radial-gradient(circle at bottom right, rgba(114, 191, 255, 0.45), transparent 60%),
-                linear-gradient(135deg, #120835 0%, #1a0f4b 35%, #2a1e62 68%, #3a2c7a 100%);
+    background: radial-gradient(circle at top left, rgba(255, 196, 229, 0.55), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(169, 210, 255, 0.5), transparent 60%),
+                linear-gradient(135deg, #20186a 0%, #2c2480 35%, #3a3095 68%, #4a3cac 100%);
   }
 
   .loading-wrapper {
@@ -166,14 +166,7 @@ else
   }
 
   .floating-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(0);
-    opacity: 0.65;
-    pointer-events: none;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
-    animation: float 12s ease-in-out infinite;
-    z-index: 0;
+    display: none;
   }
 
   .orb-one {
@@ -390,21 +383,7 @@ else
   }
 
   .particle {
-    position: absolute;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 0 14px rgba(255, 255, 255, 0.75);
-    opacity: 0.75;
-    animation: drift 6s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  @keyframes drift {
-    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
-    100% { transform: translate3d(0, -120vh, 0) scale(0.6); opacity: 0; }
+    display: none;
   }
 
   @media (max-width: 640px) {
@@ -432,19 +411,8 @@ else
   }
 </style>
 
-<!-- Particle Generator -->
+<!-- Loader helpers -->
 <script>
-  for (let i = 0; i < 25; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.top = '100vh';
-    p.style.animationDelay = (Math.random() * 5) + 's';
-    p.style.animationDuration = (3 + Math.random() * 2) + 's';
-    document.getElementById('content1').appendChild(p);
-  }
-
-  // Call this once game is fully loaded
   function hideLoader() {
     const loader = document.getElementById('content1');
     if (loader) loader.style.display = 'none';
