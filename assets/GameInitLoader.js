@@ -4550,7 +4550,7 @@ function buildHowToPlayOverlay() {
     //   var duskCurrent = ["#101936", "#1E2F4F", "#234565"];
     //   var velvetBloom = ["#1B153A", "#35295F", "#4B3F7F"];
     background.graphics
-        .beginLinearGradientFill(["#1C0F43", "#2D1A5E", "#412975"], [0, 0.5, 1], 0, 0, 0, 720)
+        .beginLinearGradientFill(["#25145A", "#3A1F77", "#54359B"], [0, 0.5, 1], 0, 0, 0, 720)
         .drawRect(0, 0, 1280, 720);
     overlay.addChild(background);
 
@@ -4558,9 +4558,9 @@ function buildHowToPlayOverlay() {
     colorWash.graphics
         .beginLinearGradientFill(
             [
-                "rgba(122, 86, 206, 0.44)",
-                "rgba(176, 104, 220, 0.36)",
-                "rgba(236, 138, 224, 0.32)"
+                "rgba(157, 120, 236, 0.5)",
+                "rgba(202, 132, 238, 0.42)",
+                "rgba(248, 162, 235, 0.36)"
             ],
             [0, 0.52, 1],
             0,
@@ -4575,7 +4575,7 @@ function buildHowToPlayOverlay() {
     var vignette = new createjs.Shape();
     vignette.graphics
         .beginRadialGradientFill(
-            ["rgba(24, 12, 48, 0)", "rgba(28, 14, 52, 0.58)"],
+            ["rgba(38, 22, 74, 0)", "rgba(34, 16, 64, 0.42)"],
             [0, 1],
             640,
             360,
@@ -5744,17 +5744,17 @@ function createLoaderProceedButton() {
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill(
-            ["rgba(255, 184, 226, 0.6)", "rgba(129, 119, 255, 0.32)", "rgba(72, 59, 170, 0)"],
+            ["rgba(255, 184, 226, 0.48)", "rgba(129, 119, 255, 0.26)", "rgba(72, 59, 170, 0)"],
             [0, 0.6, 1],
             0,
             0,
             0,
             0,
             0,
-            160
+            130
         )
-        .drawCircle(0, 0, 160);
-    glow.alpha = 0.78;
+        .drawCircle(0, 0, 130);
+    glow.alpha = 0.64;
     glow.compositeOperation = "lighter";
     button.addChild(glow);
     button.glowShape = glow;
@@ -5774,7 +5774,7 @@ function createLoaderProceedButton() {
     var highlight = new createjs.Shape();
     highlight.graphics
         .beginLinearGradientFill(
-            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.85)", "rgba(255, 255, 255, 0)"],
+            ["rgba(255, 255, 255, 0)", "rgba(255, 246, 255, 0.6)", "rgba(255, 255, 255, 0)"],
             [0, 0.5, 1],
             -72,
             0,
@@ -6676,8 +6676,8 @@ function startProceedButtonGlow(button) {
     if (glow && !glow.__glowTweenAttached) {
         glow.__glowTweenAttached = true;
         createjs.Tween.get(glow, { loop: true })
-            .to({ alpha: 0.95, scaleX: 1.15, scaleY: 1.15 }, 520, createjs.Ease.quadOut)
-            .to({ alpha: 0.65, scaleX: 1, scaleY: 1 }, 560, createjs.Ease.quadIn);
+            .to({ alpha: 0.78, scaleX: 1.12, scaleY: 1.12 }, 520, createjs.Ease.quadOut)
+            .to({ alpha: 0.5, scaleX: 1, scaleY: 1 }, 560, createjs.Ease.quadIn);
     }
 
 }
@@ -6698,7 +6698,7 @@ function startProceedButtonHighlightSweep(button) {
     button.__highlightSweepAttached = true;
 
     createjs.Tween.get(sweep, { loop: true })
-        .to({ alpha: 0.9 }, 280, createjs.Ease.quadOut)
+        .to({ alpha: 0.6 }, 280, createjs.Ease.quadOut)
         .to({ x: endX }, 1280, createjs.Ease.quadInOut)
         .to({ alpha: 0 }, 260, createjs.Ease.quadIn)
         .set({ x: startX })
