@@ -138,96 +138,118 @@ function buildVectorArrowIcon() {
 function buildVectorHandIcon() {
     var icon = new createjs.Container();
 
-    var floorShadow = new createjs.Shape();
-    floorShadow.graphics
+    var baseGlow = new createjs.Shape();
+    baseGlow.graphics
         .clear()
-        .beginRadialGradientFill([
-            "rgba(20,16,68,0.42)",
-            "rgba(20,16,68,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 96)
-        .drawEllipse(-68, 190, 136, 70);
-    floorShadow.alpha = 0.62;
+        .beginRadialGradientFill(
+            ["rgba(98,60,214,0.55)", "rgba(53,28,130,0)"] ,
+            [0, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            120
+        )
+        .drawEllipse(-86, 172, 172, 84);
+    baseGlow.alpha = 0.7;
+
+    var gestureTrail = new createjs.Shape();
+    gestureTrail.graphics
+        .clear()
+        .setStrokeStyle(10, "round", "round")
+        .beginLinearGradientStroke([
+            "rgba(244,114,182,0.6)",
+            "rgba(129,140,248,0.6)"
+        ], [0, 1], -120, -36, 96, 78)
+        .moveTo(-110, -28)
+        .quadraticCurveTo(-42, 6, 16, 24)
+        .quadraticCurveTo(72, 44, 98, 72);
+    gestureTrail.alpha = 0.7;
 
     var cuff = new createjs.Shape();
     cuff.graphics
         .clear()
-        .setStrokeStyle(4, "round", "round")
-        .beginStroke("rgba(255,255,255,0.32)")
-        .beginLinearGradientFill(["#312E81", "#6D28D9"], [0, 1], -48, 178, 48, 236)
-        .drawRoundRectComplex(-48, 176, 96, 64, 28, 28, 36, 36);
+        .setStrokeStyle(3, "round", "round")
+        .beginStroke("rgba(255,255,255,0.4)")
+        .beginLinearGradientFill(["#5B21B6", "#9333EA", "#F472B6"], [0, 0.55, 1], -40, 164, 52, 238)
+        .drawRoundRectComplex(-44, 168, 96, 64, 28, 28, 32, 36);
 
     var cuffHighlight = new createjs.Shape();
     cuffHighlight.graphics
         .clear()
-        .beginLinearGradientFill(["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"] , [0, 1], -30, 186, 24, 214)
-        .drawRoundRect(-34, 184, 68, 32, 18);
+        .beginLinearGradientFill([
+            "rgba(255,255,255,0.5)",
+            "rgba(255,255,255,0)"
+        ], [0, 1], -32, 178, 28, 212)
+        .drawRoundRect(-32, 180, 68, 30, 16);
     cuffHighlight.alpha = 0.75;
 
     var palm = new createjs.Shape();
     var gp = palm.graphics;
     gp.clear();
-    gp.setStrokeStyle(3, "round", "round");
+    gp.setStrokeStyle(2.5, "round", "round");
     gp.beginLinearGradientStroke([
-        "rgba(255,255,255,0.6)",
-        "rgba(255,255,255,0.18)"
-    ], [0, 1], -34, 112, 38, 228);
+        "rgba(255,255,255,0.65)",
+        "rgba(255,255,255,0.2)"
+    ], [0, 1], -36, 106, 42, 226);
     gp.beginLinearGradientFill([
-        "#FFE6CC",
+        "#FFE7D6",
         "#FDBA74",
         "#FB7185",
-        "#F472B6"
-    ], [0, 0.32, 0.7, 1], -44, 92, 44, 236);
-    gp.moveTo(-42, 184);
-    gp.quadraticCurveTo(-68, 132, -26, 110);
-    gp.quadraticCurveTo(4, 96, 32, 118);
-    gp.quadraticCurveTo(56, 140, 54, 176);
-    gp.quadraticCurveTo(50, 232, 6, 236);
-    gp.quadraticCurveTo(-26, 238, -42, 208);
+        "#E879F9"
+    ], [0, 0.28, 0.62, 1], -44, 92, 48, 228);
+    gp.moveTo(-40, 178);
+    gp.quadraticCurveTo(-70, 128, -28, 108);
+    gp.quadraticCurveTo(6, 94, 34, 114);
+    gp.quadraticCurveTo(58, 136, 54, 170);
+    gp.quadraticCurveTo(48, 220, 8, 224);
+    gp.quadraticCurveTo(-20, 228, -38, 202);
     gp.closePath();
-
-    var indexFinger = new createjs.Shape();
-    var gi = indexFinger.graphics;
-    gi.clear();
-    gi.setStrokeStyle(3, "round", "round");
-    gi.beginLinearGradientStroke([
-        "rgba(255,255,255,0.68)",
-        "rgba(255,255,255,0.2)"
-    ], [0, 1], -14, 24, 24, 160);
-    gi.beginLinearGradientFill([
-        "#FFF3E5",
-        "#FDBA74",
-        "#FB7185"
-    ], [0, 0.35, 1], -18, 12, 26, 184);
-    gi.moveTo(-10, 96);
-    gi.quadraticCurveTo(-22, 40, 12, 26);
-    gi.quadraticCurveTo(48, 12, 54, 46);
-    gi.quadraticCurveTo(60, 86, 38, 154);
-    gi.quadraticCurveTo(18, 190, -8, 168);
-    gi.closePath();
 
     var thumb = new createjs.Shape();
     var gt = thumb.graphics;
     gt.clear();
     gt.beginLinearGradientFill([
-        "#FFE1C7",
+        "#FFE3CF",
         "#FDBA74",
         "#FB7185"
-    ], [0, 0.42, 1], -60, 128, 12, 210)
-        .moveTo(-42, 140)
-        .quadraticCurveTo(-86, 170, -62, 204)
-        .quadraticCurveTo(-32, 234, -8, 206)
-        .quadraticCurveTo(8, 186, -2, 158)
-        .quadraticCurveTo(-10, 142, -42, 140)
+    ], [0, 0.42, 1], -56, 128, 18, 210)
+        .moveTo(-40, 142)
+        .quadraticCurveTo(-82, 170, -60, 202)
+        .quadraticCurveTo(-30, 230, -6, 202)
+        .quadraticCurveTo(10, 184, 0, 158)
+        .quadraticCurveTo(-6, 142, -40, 142)
         .closePath();
+
+    var indexFinger = new createjs.Shape();
+    var gi = indexFinger.graphics;
+    gi.clear();
+    gi.setStrokeStyle(2.5, "round", "round");
+    gi.beginLinearGradientStroke([
+        "rgba(255,255,255,0.7)",
+        "rgba(255,255,255,0.2)"
+    ], [0, 1], -16, 32, 26, 156);
+    gi.beginLinearGradientFill([
+        "#FFF6EE",
+        "#FDBA74",
+        "#FB7185"
+    ], [0, 0.32, 1], -18, 18, 28, 172);
+    gi.moveTo(-12, 100);
+    gi.quadraticCurveTo(-22, 42, 8, 30);
+    gi.quadraticCurveTo(44, 16, 52, 46);
+    gi.quadraticCurveTo(58, 84, 38, 146);
+    gi.quadraticCurveTo(20, 184, -4, 164);
+    gi.closePath();
 
     var knuckleHighlight = new createjs.Shape();
     knuckleHighlight.graphics
         .clear()
         .beginRadialGradientFill([
-            "rgba(255,255,255,0.82)",
+            "rgba(255,255,255,0.85)",
             "rgba(255,255,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 34)
-        .drawCircle(-6, 190, 22);
+        ], [0, 1], 0, 0, 0, 0, 0, 36)
+        .drawCircle(-4, 184, 20);
 
     var fingerHighlight = new createjs.Shape();
     fingerHighlight.graphics
@@ -235,44 +257,110 @@ function buildVectorHandIcon() {
         .beginRadialGradientFill([
             "rgba(255,255,255,0.8)",
             "rgba(255,255,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 38)
-        .drawEllipse(-6, 60, 28, 52);
-    fingerHighlight.x = 20;
-    fingerHighlight.y = 22;
+        ], [0, 1], 0, 0, 0, 0, 0, 42)
+        .drawEllipse(-6, 54, 30, 54);
+    fingerHighlight.x = 18;
+    fingerHighlight.y = 24;
 
     var fingertipAura = new createjs.Shape();
     fingertipAura.graphics
         .clear()
         .beginRadialGradientFill([
-            "rgba(255,248,240,0.95)",
-            "rgba(253,186,116,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 56)
-        .drawCircle(0, 0, 56);
-    fingertipAura.x = 50;
-    fingertipAura.y = 54;
-    fingertipAura.alpha = 0.92;
+            "rgba(255,245,255,0.95)",
+            "rgba(236,72,153,0)"
+        ], [0, 1], 0, 0, 0, 0, 0, 54)
+        .drawCircle(0, 0, 54);
+    fingertipAura.x = 56;
+    fingertipAura.y = 52;
+    fingertipAura.alpha = 0.9;
 
     var fingertipRing = new createjs.Shape();
     fingertipRing.graphics
         .clear()
         .setStrokeStyle(3, "round", "round")
-        .beginStroke("rgba(255,255,255,0.55)")
-        .drawCircle(50, 54, 30);
-    fingertipRing.alpha = 0.58;
+        .beginStroke("rgba(255,255,255,0.6)")
+        .drawCircle(56, 52, 26);
+    fingertipRing.alpha = 0.62;
 
     var sparkle = new createjs.Shape();
     sparkle.graphics
         .clear()
         .setStrokeStyle(2, "round", "round")
         .beginStroke("rgba(255,255,255,0.78)")
-        .moveTo(50, 30)
-        .lineTo(50, 78)
-        .moveTo(26, 54)
-        .lineTo(74, 54);
-    sparkle.alpha = 0.6;
+        .moveTo(56, 30)
+        .lineTo(56, 74)
+        .moveTo(34, 52)
+        .lineTo(78, 52);
+    sparkle.alpha = 0.55;
+
+    var stepIndicators = new createjs.Container();
+    var stepPositions = [
+        { x: -90, y: -36, label: "1" },
+        { x: -22, y: -2, label: "2" },
+        { x: 46, y: 34, label: "3" }
+    ];
+
+    for (var s = 0; s < stepPositions.length; s++) {
+        var stepData = stepPositions[s];
+        var step = new createjs.Container();
+        step.x = stepData.x;
+        step.y = stepData.y;
+
+        var stepHalo = new createjs.Shape();
+        stepHalo.graphics
+            .clear()
+            .beginRadialGradientFill([
+                "rgba(236,72,153,0.55)",
+                "rgba(236,72,153,0)"
+            ], [0, 1], 0, 0, 0, 0, 0, 32)
+            .drawCircle(0, 0, 32);
+        stepHalo.alpha = 0.9;
+
+        var stepCircle = new createjs.Shape();
+        stepCircle.graphics
+            .clear()
+            .setStrokeStyle(2)
+            .beginStroke("rgba(255,255,255,0.85)")
+            .beginLinearGradientFill(["#F472B6", "#C084FC"], [0, 1], -20, -20, 22, 22)
+            .drawCircle(0, 0, 18);
+
+        var stepLabel = new createjs.Text(stepData.label, "700 16px 'Baloo 2'", "#FFFFFF");
+        stepLabel.textAlign = "center";
+        stepLabel.textBaseline = "middle";
+
+        step.addChild(stepHalo, stepCircle, stepLabel);
+        stepIndicators.addChild(step);
+
+        (function (target, delay) {
+            createjs.Tween.get(target, { loop: true })
+                .wait(delay)
+                .to({ scaleX: 1.15, scaleY: 1.15, alpha: 1 }, 260, createjs.Ease.quadOut)
+                .to({ scaleX: 1, scaleY: 1, alpha: 0.9 }, 220, createjs.Ease.quadIn)
+                .wait(360);
+        })(step, s * 220);
+    }
+
+    var tapPulse = new createjs.Shape();
+    tapPulse.graphics
+        .clear()
+        .setStrokeStyle(4, "round", "round")
+        .beginStroke("rgba(255,255,255,0.75)")
+        .drawCircle(0, 0, 28);
+    tapPulse.x = 56;
+    tapPulse.y = 52;
+    tapPulse.alpha = 0;
+
+    createjs.Tween.get(tapPulse, { loop: true })
+        .wait(160)
+        .to({ alpha: 0.8, scaleX: 1.2, scaleY: 1.2 }, 280, createjs.Ease.quadOut)
+        .to({ alpha: 0, scaleX: 1.45, scaleY: 1.45 }, 260, createjs.Ease.quadIn)
+        .wait(360)
+        .set({ scaleX: 1, scaleY: 1 });
 
     icon.addChild(
-        floorShadow,
+        baseGlow,
+        gestureTrail,
+        stepIndicators,
         cuff,
         cuffHighlight,
         palm,
@@ -281,13 +369,14 @@ function buildVectorHandIcon() {
         fingerHighlight,
         knuckleHighlight,
         fingertipAura,
+        tapPulse,
         fingertipRing,
         sparkle
     );
     icon.mouseEnabled = false;
     icon.mouseChildren = false;
-    icon.shadow = new createjs.Shadow("rgba(20,14,64,0.48)", 0, 18, 34);
-    icon.cache(-150, 70, 300, 240);
+    icon.shadow = new createjs.Shadow("rgba(24,16,70,0.44)", 0, 16, 32);
+    icon.cache(-180, 40, 360, 260);
 
     icon.clone = function () {
         var clone = buildVectorHandIcon();
@@ -3002,7 +3091,7 @@ function doneLoading(event) {
                 fingure = buildVectorHandIcon();
                 container.parent.addChild(fingure);
                 fingure.visible = false;
-                fingure.scaleX = fingure.scaleY = 0.62;
+                fingure.scaleX = fingure.scaleY = 0.55;
                 continue;
             }
             ///////////////////////////////////////////////////////bg////////////////////////////
