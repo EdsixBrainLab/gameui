@@ -6294,7 +6294,7 @@ function createIntroActionButton() {
     var iconBadge = new createjs.Shape();
     iconBadge.name = "iconBadge";
     iconBadge.x = -82;
-    iconBadge.y = 0;
+    iconBadge.y = 4;
     button.addChild(iconBadge);
 
     var icon = new createjs.Text("", "700 30px 'Baloo 2'", "#FFFFFF");
@@ -6302,7 +6302,7 @@ function createIntroActionButton() {
     icon.textAlign = "center";
     icon.textBaseline = "middle";
     icon.x = -82;
-    icon.y = 0;
+    icon.y = 4;
     button.addChild(icon);
 
     var label = new createjs.Text("", "700 28px 'Baloo 2'", "#FFFFFF");
