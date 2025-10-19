@@ -156,10 +156,79 @@ var CHOICE_ROW_Y = 620;
 var CHOICE_ROW_ENTRY_OFFSET = 42;
 var CLUE_ROW_Y = 470;
 
-function computeRowLayout(count, options) {
-  var helper = typeof SAUI_computeCenteredRow === "function" ? SAUI_computeCenteredRow : null;
-  if (helper) {
-    return helper(count, options);
+var globalHelperScope =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof window !== "undefined"
+    ? window
+    : this;
+
+var buildChoiceLetterDisplay = function () {
+  if (globalHelperScope && typeof globalHelperScope.SA_buildChoiceLetterDisplay === "function") {
+    return globalHelperScope.SA_buildChoiceLetterDisplay({ interactive: true, baseScale: 0.8 });
+  }
+  var label = new createjs.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = true;
+  label.mouseChildren = false;
+  label.__baseScale = 0.8;
+  label.__isChoiceLetter = true;
+  var hitArea = new createjs.Shape();
+  hitArea.graphics.beginFill("#000").drawRoundRect(-78, -78, 156, 156, 52);
+  label.hitArea = hitArea;
+  label.__hitArea = hitArea;
+  return label;
+};
+
+var updateChoiceLetterDisplay = function (display, letter) {
+  if (globalHelperScope && typeof globalHelperScope.SA_updateChoiceLetterDisplay === "function") {
+    globalHelperScope.SA_updateChoiceLetterDisplay(display, letter);
+    return;
+  }
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+};
+
+var buildClueLetterDisplay = function () {
+  if (globalHelperScope && typeof globalHelperScope.SA_buildClueLetterDisplay === "function") {
+    return globalHelperScope.SA_buildClueLetterDisplay({ baseScale: 1, interactive: false });
+  }
+  var label = new createjs.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = LETTER_SHADOW;
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = 1;
+  label.__isClueLetter = true;
+  return label;
+};
+
+var updateClueLetterDisplay = function (display, letter) {
+  if (globalHelperScope && typeof globalHelperScope.SA_updateClueLetterDisplay === "function") {
+    globalHelperScope.SA_updateClueLetterDisplay(display, letter);
+    return;
+  }
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+};
+
+var computeRowLayout = function (count, options) {
+  if (globalHelperScope && typeof globalHelperScope.SAUI_computeRowLayout === "function") {
+    return globalHelperScope.SAUI_computeRowLayout(count, options);
+  }
+  if (globalHelperScope && typeof globalHelperScope.SAUI_computeCenteredRow === "function") {
+    return globalHelperScope.SAUI_computeCenteredRow(count, options);
   }
 
   options = options || {};
@@ -199,62 +268,7 @@ function computeRowLayout(count, options) {
     scale: scale,
     spacing: spacing
   };
-}
-
-function buildChoiceLetterDisplay() {
-  var label = new createjs.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
-  label.textAlign = "center";
-  label.textBaseline = "middle";
-  label.shadow = LETTER_SHADOW;
-  label.mouseEnabled = true;
-  label.mouseChildren = false;
-  label.__baseScale = 0.8;
-  label.__isChoiceLetter = true;
-  var hitArea = new createjs.Shape();
-  hitArea.graphics.beginFill("#000").drawRoundRect(-78, -78, 156, 156, 52);
-  label.hitArea = hitArea;
-  label.__hitArea = hitArea;
-  return label;
-}
-
-function updateChoiceLetterDisplay(display, letter) {
-  if (!display) {
-    return;
-  }
-
-  var value = letter ? String(letter).toUpperCase() : "";
-  display.text = value;
-  display.alpha = value ? 1 : 0;
-}
-
-function buildClueLetterDisplay() {
-  var label = new createjs.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
-  label.textAlign = "center";
-  label.textBaseline = "middle";
-  label.shadow = LETTER_SHADOW;
-  label.mouseEnabled = false;
-  label.mouseChildren = false;
-  label.__baseScale = 1;
-  label.__isClueLetter = true;
-  return label;
-}
-
-function updateClueLetterDisplay(display, letter) {
-  if (!display) {
-    return;
-  }
-
-  var value = letter ? String(letter).toUpperCase() : "";
-  display.text = value;
-  display.alpha = value ? 1 : 0;
-}
-
-if (typeof window !== "undefined") {
-  window.SA_buildChoiceLetterDisplay = buildChoiceLetterDisplay;
-  window.SA_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
-  window.SA_buildClueLetterDisplay = buildClueLetterDisplay;
-  window.SA_updateClueLetterDisplay = updateClueLetterDisplay;
-}
+};
 
 var maxLetterCnt = 13;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////

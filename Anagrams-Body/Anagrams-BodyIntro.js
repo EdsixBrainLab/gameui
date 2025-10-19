@@ -24,137 +24,32 @@ var introClueBgArr = []
 var introChoiceBgArr = []
 var introChoiceGlowArr = []
 var introChoiceRevealOrder = [, 2, 4, 3, 1]
-var introGlobalScope = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this)
+var introGlobalScope = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : this)
 
-function getBitmapNaturalBounds(bitmap) {
-    if (!bitmap) {
-        return null;
+function getIntroHelper(name) {
+    if (introGlobalScope && typeof introGlobalScope[name] === "function") {
+        return introGlobalScope[name];
     }
-
-    if (typeof bitmap.getBounds === "function") {
-        var cached = bitmap.getBounds();
-        if (cached) {
-            return cached;
-        }
-    }
-
-    if (bitmap.image) {
-        return {
-            x: 0,
-            y: 0,
-            width: bitmap.image.width || 0,
-            height: bitmap.image.height || 0
-        };
-    }
-
     return null;
 }
 
-function configureIntroArrowSprite(sprite) {
+var configureIntroArrowSprite = getIntroHelper("SAUI_configureIntroArrowSprite") || function (sprite) {
     if (!sprite) {
         return;
     }
-
-    var bounds = getBitmapNaturalBounds(sprite);
-    var scale = 0.72;
-
-    sprite.scaleX = sprite.scaleY = scale;
-    sprite.mouseEnabled = false;
-    sprite.mouseChildren = false;
     sprite.visible = false;
     sprite.alpha = 0;
-    sprite.__tipGap = 26;
-    sprite.__bounceOffset = 16;
+};
 
-    if (bounds) {
-        var originX = (bounds.x || 0) + bounds.width / 2;
-        var originY = (bounds.y || 0) + bounds.height;
-
-        sprite.regX = originX;
-        sprite.regY = originY;
-    }
-}
-
-function configureIntroFingerSprite(sprite) {
+var configureIntroFingerSprite = getIntroHelper("SAUI_configureIntroFingerSprite") || function (sprite) {
     if (!sprite) {
         return;
     }
-
-    var bounds = getBitmapNaturalBounds(sprite);
-    var baseScale = typeof sprite.__baseScale === "number" ? sprite.__baseScale : 0.78;
-
-    sprite.scaleX = sprite.scaleY = baseScale;
-    sprite.mouseEnabled = false;
-    sprite.mouseChildren = false;
     sprite.visible = false;
     sprite.alpha = 0;
+};
 
-    var pointerTip = sprite.__pointerTipBase || sprite.__pointerTip;
-    if (pointerTip && typeof pointerTip.x === "number" && typeof pointerTip.y === "number") {
-        sprite.__pointerOffsetX = pointerTip.x * baseScale;
-        sprite.__pointerOffsetY = pointerTip.y * baseScale;
-    } else if (bounds) {
-        sprite.__pointerOffsetX = bounds.width * 0.42 * baseScale;
-        sprite.__pointerOffsetY = bounds.height * 0.82 * baseScale;
-    } else {
-        sprite.__pointerOffsetX = 0;
-        sprite.__pointerOffsetY = 0;
-    }
-
-    var pressDistanceBase = typeof sprite.__pressDistanceBase === "number" ? sprite.__pressDistanceBase : sprite.__pressDistance;
-    if (typeof pressDistanceBase === "number") {
-        sprite.__pressDistance = pressDistanceBase * baseScale;
-    } else {
-        sprite.__pressDistance = 18 * baseScale;
-    }
-}
-
-function getFallbackChoiceBuilder() {
-    var txt = new createjs.Text("", "700 64px 'Baloo 2'", "#FFFFFF");
-    txt.textAlign = "center";
-    txt.textBaseline = "middle";
-    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
-    txt.mouseEnabled = true;
-    txt.mouseChildren = false;
-    txt.__baseScale = 0.8;
-    return txt;
-}
-
-function getFallbackClueBuilder() {
-    var txt = new createjs.Text("", "700 60px 'Baloo 2'", "#FFFFFF");
-    txt.textAlign = "center";
-    txt.textBaseline = "middle";
-    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
-    txt.mouseEnabled = false;
-    txt.mouseChildren = false;
-    txt.__baseScale = 1;
-    return txt;
-}
-
-function getFallbackLetterUpdater() {
-    return function (display, letter) {
-        if (!display) {
-            return;
-        }
-        var value = letter ? String(letter).toUpperCase() : "";
-        display.text = value;
-        display.alpha = value ? 1 : 0;
-    };
-}
-
-var buildIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_buildChoiceLetterDisplay === "function" && window.SA_buildChoiceLetterDisplay) || getFallbackChoiceBuilder;
-var updateIntroChoiceLetter = (typeof window !== "undefined" && typeof window.SA_updateChoiceLetterDisplay === "function" && window.SA_updateChoiceLetterDisplay) || getFallbackLetterUpdater();
-var buildIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_buildClueLetterDisplay === "function" && window.SA_buildClueLetterDisplay) || getFallbackClueBuilder;
-var updateIntroClueLetter = (typeof window !== "undefined" && typeof window.SA_updateClueLetterDisplay === "function" && window.SA_updateClueLetterDisplay) || getFallbackLetterUpdater();
-
-function introChoiceIndexFromStep(step) {
-    if (!step) {
-        return step;
-    }
-    return introChoiceRevealOrder && introChoiceRevealOrder[step] ? introChoiceRevealOrder[step] : step;
-}
-
-function buildIntroGlowShape() {
+var buildIntroGlowShape = getIntroHelper("SAUI_buildIntroGlowShape") || function () {
     var glow = new createjs.Shape();
     glow.graphics
         .beginRadialGradientFill([
@@ -167,6 +62,69 @@ function buildIntroGlowShape() {
     glow.mouseEnabled = false;
     glow.mouseChildren = false;
     return glow;
+};
+
+function buildIntroChoiceLetter() {
+    var builder = getIntroHelper("SA_buildChoiceLetterDisplay") || getIntroHelper("SAUI_buildChoiceLetterDisplay");
+    if (typeof builder === "function") {
+        return builder({ interactive: false, baseScale: 0.8 });
+    }
+    var txt = new createjs.Text("", "700 64px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 0.8;
+    return txt;
+}
+
+function updateIntroChoiceLetter(display, letter) {
+    var updater = getIntroHelper("SA_updateChoiceLetterDisplay") || getIntroHelper("SAUI_updateChoiceLetterDisplay");
+    if (typeof updater === "function") {
+        updater(display, letter);
+        return;
+    }
+    if (!display) {
+        return;
+    }
+    var value = letter ? String(letter).toUpperCase() : "";
+    display.text = value;
+    display.alpha = value ? 1 : 0;
+}
+
+function buildIntroClueLetter() {
+    var builder = getIntroHelper("SA_buildClueLetterDisplay") || getIntroHelper("SAUI_buildClueLetterDisplay");
+    if (typeof builder === "function") {
+        return builder({ baseScale: 1, interactive: false });
+    }
+    var txt = new createjs.Text("", "700 60px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 1;
+    return txt;
+}
+
+function updateIntroClueLetter(display, letter) {
+    var updater = getIntroHelper("SA_updateClueLetterDisplay") || getIntroHelper("SAUI_updateClueLetterDisplay");
+    if (typeof updater === "function") {
+        updater(display, letter);
+        return;
+    }
+    if (!display) {
+        return;
+    }
+    var value = letter ? String(letter).toUpperCase() : "";
+    display.text = value;
+    display.alpha = value ? 1 : 0;
+}
+
+function introChoiceIndexFromStep(step) {
+    if (!step) {
+        return step;
+    }
+    return introChoiceRevealOrder && introChoiceRevealOrder[step] ? introChoiceRevealOrder[step] : step;
 }
 
 function highlightIntroChoiceTile(index, isActive) {
