@@ -25,56 +25,7 @@ var timer_status=1;
 
 var question_count=10;
 
-var getAnagramScope = typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this);
-
-if (typeof getAnagramScope.detectAnagramGameName !== "function") {
-    getAnagramScope.detectAnagramGameName = function detectAnagramGameName(defaultName) {
-        var scope = getAnagramScope || {};
-
-        if (scope && typeof scope.ANAGRAM_GAME_NAME_OVERRIDE === "string") {
-            return scope.ANAGRAM_GAME_NAME_OVERRIDE;
-        }
-
-        if (scope && typeof scope.gameName === "string" && scope.gameName.indexOf("Anagrams-") === 0) {
-            return scope.gameName;
-        }
-
-        var path = scope.location && typeof scope.location.pathname === "string" ? scope.location.pathname : "";
-        if (path) {
-            var segments = path.split("/");
-            for (var idx = segments.length - 1; idx >= 0; idx--) {
-                var segment = segments[idx];
-                if (segment && segment.indexOf("Anagrams-") === 0) {
-                    return segment;
-                }
-            }
-        }
-
-        var doc = scope.document;
-        if (doc && typeof doc.getElementsByTagName === "function") {
-            var scripts = doc.getElementsByTagName("script");
-            for (var i = scripts.length - 1; i >= 0; i--) {
-                var src = scripts[i] && scripts[i].src ? scripts[i].src : "";
-                if (!src) {
-                    continue;
-                }
-                var match = src.match(/\/(Anagrams-[^\/]+)\//i);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-        }
-
-        return typeof defaultName === "string" && defaultName ? defaultName : "Anagrams-Body";
-    };
-}
-
-var GET_DEFAULT_GAME_NAME = "Anagrams-Schools";
-var detectedGameName = typeof getAnagramScope.detectAnagramGameName === "function"
-    ? getAnagramScope.detectAnagramGameName(GET_DEFAULT_GAME_NAME)
-    : GET_DEFAULT_GAME_NAME;
-
-var game_name="gname='" + detectedGameName + "'";
+var game_name="gname='Anagrams-Schools'";
 
 /////////////////////////////////////////////////////////////
 
