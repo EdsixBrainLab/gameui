@@ -653,7 +653,7 @@ function drawChoiceSpeechWave(targetShape) {
   g.clear();
 
   g.beginRadialGradientFill(
-    ["rgba(206,190,255,0.45)", "rgba(140,110,255,0)"] ,
+    ["rgba(206,190,255,0.45)", "rgba(140,110,255,0)"],
     [0, 1],
     0,
     0,
@@ -1275,131 +1275,217 @@ function ensureTimeUpOverlay() {
 
   timeUpOverlayBg = new createjs.Shape();
   timeUpOverlayBg.graphics
-    .setStrokeStyle(4, "round", "round")
-    .beginLinearGradientStroke(
-      ["rgba(208,198,255,0.66)", "rgba(124,104,226,0.54)"],
-      [0, 1],
-      -220,
-      -92,
-      220,
-      92
-    )
     .beginLinearGradientFill(
-      ["rgba(28,42,86,0.9)", "rgba(18,28,62,0.9)", "rgba(32,16,76,0.9)"],
-      [0, 0.48, 1],
+      ["#3A2CCB", "#6B39F7", "#9D3FFD"],
+      [0, 0.52, 1],
       0,
-      -102,
+      -118,
       0,
-      92
+      118
     )
-    .drawRoundRect(-232, -96, 464, 192, 38);
-  timeUpOverlayBg.shadow = new createjs.Shadow("rgba(8,12,30,0.55)", 0, 12, 32);
+    .drawRoundRect(-240, -104, 480, 208, 48);
+  timeUpOverlayBg.shadow = new createjs.Shadow("rgba(18,14,56,0.58)", 0, 18, 44);
   timeUpOverlay.addChild(timeUpOverlayBg);
 
   timeUpOverlayGlass = new createjs.Shape();
   timeUpOverlayGlass.graphics
     .beginLinearGradientFill(
-      ["rgba(255,255,255,0.35)", "rgba(255,255,255,0.04)"],
-      [0, 1],
-      -188,
-      -74,
-      188,
-      74
+      ["rgba(255,255,255,0.35)", "rgba(255,255,255,0.12)", "rgba(255,255,255,0)"],
+      [0, 0.45, 1],
+      0,
+      -110,
+      0,
+      110
     )
-    .drawRoundRect(-196, -72, 392, 144, 32);
-  timeUpOverlayGlass.alpha = 0.72;
+    .drawRoundRect(-220, -92, 440, 184, 44);
+  timeUpOverlayGlass.alpha = 0.88;
   timeUpOverlay.addChild(timeUpOverlayGlass);
+
+  var timeUpOverlayOutline = new createjs.Shape();
+  timeUpOverlayOutline.graphics
+    .setStrokeStyle(3)
+    .beginLinearGradientStroke(
+      ["rgba(212,198,255,0.65)", "rgba(136,108,255,0.55)"],
+      [0, 1],
+      0,
+      -96,
+      0,
+      96
+    )
+    .drawRoundRect(-224, -96, 448, 192, 46);
+  timeUpOverlayOutline.alpha = 0.72;
+  timeUpOverlay.addChild(timeUpOverlayOutline);
 
   timeUpOverlayShine = new createjs.Shape();
   timeUpOverlayShine.graphics
     .beginLinearGradientFill(
-      ["rgba(255,255,255,0)", "rgba(255,255,255,0.38)", "rgba(255,255,255,0)"],
+      ["rgba(255,255,255,0)", "rgba(255,255,255,0.8)", "rgba(255,255,255,0)"],
       [0, 0.5, 1],
-      -60,
+      -84,
       0,
-      60,
+      84,
       0
     )
-    .drawRoundRect(-60, -72, 120, 144, 32);
+    .drawRoundRect(-84, -92, 168, 184, 44);
   timeUpOverlayShine.alpha = 0;
   timeUpOverlayShine.compositeOperation = "lighter";
   timeUpOverlay.addChild(timeUpOverlayShine);
 
   timeUpIconContainer = new createjs.Container();
-  timeUpIconContainer.x = -126;
+  timeUpIconContainer.x = -128;
   timeUpOverlay.addChild(timeUpIconContainer);
 
-  var iconBg = new createjs.Shape();
-  iconBg.graphics
-    .beginLinearGradientFill(
-      ["rgba(124,86,255,0.95)", "rgba(176,150,255,0.95)"],
+  var iconHalo = new createjs.Shape();
+  iconHalo.graphics
+    .beginRadialGradientFill(
+      ["rgba(255,255,255,0.52)", "rgba(255,255,255,0)"],
       [0, 1],
-      -44,
-      -44,
-      44,
-      44
+      0,
+      0,
+      0,
+      0,
+      0,
+      86
     )
-    .drawCircle(0, 0, 48);
-  timeUpIconContainer.addChild(iconBg);
+    .drawCircle(0, 4, 86);
+  iconHalo.alpha = 0.38;
+  timeUpIconContainer.addChild(iconHalo);
 
-  var iconInner = new createjs.Shape();
-  iconInner.graphics
+  var iconPlate = new createjs.Shape();
+  iconPlate.graphics
     .beginLinearGradientFill(
-      ["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"],
-      [0, 1],
-      -26,
-      -26,
-      26,
-      26
+      ["#5F36FF", "#7E4CFF", "#B471FF"],
+      [0, 0.58, 1],
+      -68,
+      -68,
+      68,
+      68
     )
-    .drawCircle(0, 0, 32);
-  iconInner.y = -6;
-  timeUpIconContainer.addChild(iconInner);
+    .drawRoundRect(-68, -64, 136, 128, 46);
+  iconPlate.shadow = new createjs.Shadow("rgba(15,11,48,0.5)", 0, 12, 18);
+  timeUpIconContainer.addChild(iconPlate);
 
-  var iconTick = new createjs.Shape();
-  iconTick.graphics
-    .setStrokeStyle(4, "round")
-    .beginStroke("rgba(255,255,255,0.88)")
-    .moveTo(0, -30)
-    .lineTo(0, 0)
-    .lineTo(24, 0);
-  iconTick.shadow = new createjs.Shadow("rgba(18,26,52,0.55)", 0, 6, 8);
-  iconTick.rotation = -6;
-  timeUpIconContainer.addChild(iconTick);
+  var iconInset = new createjs.Shape();
+  iconInset.graphics
+    .beginLinearGradientFill(
+      ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
+      [0, 1],
+      0,
+      -60,
+      0,
+      60
+    )
+    .drawRoundRect(-60, -56, 120, 112, 38);
+  iconInset.y = -6;
+  timeUpIconContainer.addChild(iconInset);
 
-  timeUpIconHand = new createjs.Shape();
-  timeUpIconHand.graphics
+  var clockFace = new createjs.Shape();
+  clockFace.graphics
+    .beginRadialGradientFill(
+      ["#3E2C93", "#231A66"],
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      52
+    )
+    .drawCircle(0, -4, 46);
+  clockFace.shadow = new createjs.Shadow("rgba(12,10,40,0.55)", 0, 8, 14);
+  timeUpIconContainer.addChild(clockFace);
+
+  var clockRing = new createjs.Shape();
+  clockRing.graphics
+    .setStrokeStyle(4)
+    .beginLinearGradientStroke(
+      ["rgba(200,188,255,0.92)", "rgba(255,255,255,0.72)"],
+      [0, 1],
+      -32,
+      -32,
+      32,
+      32
+    )
+    .drawCircle(0, -4, 46);
+  timeUpIconContainer.addChild(clockRing);
+
+  var clockTickMarks = new createjs.Shape();
+  clockTickMarks.graphics
+    .setStrokeStyle(3, "round")
+    .beginStroke("rgba(255,255,255,0.42)");
+  for (var i = 0; i < 12; i++) {
+    var angle = (i / 12) * Math.PI * 2;
+    var inner = 34;
+    var outer = 42;
+    clockTickMarks.graphics
+      .moveTo(Math.cos(angle) * inner, -4 + Math.sin(angle) * inner)
+      .lineTo(Math.cos(angle) * outer, -4 + Math.sin(angle) * outer);
+  }
+  clockTickMarks.alpha = 0.4;
+  timeUpIconContainer.addChild(clockTickMarks);
+
+  timeUpIconHand = new createjs.Container();
+  var minuteHand = new createjs.Shape();
+  minuteHand.graphics
     .setStrokeStyle(6, "round")
-    .beginStroke("#F9F0FF")
-    .moveTo(0, 0)
-    .lineTo(0, -24)
-    .moveTo(0, 0)
-    .lineTo(20, 0);
-  timeUpIconHand.shadow = new createjs.Shadow("rgba(18,26,52,0.65)", 0, 4, 6);
-  timeUpIconHand.rotation = -42;
+    .beginStroke("#F9F6FF")
+    .moveTo(0, 6)
+    .lineTo(0, -30);
+  var hourHand = new createjs.Shape();
+  hourHand.graphics
+    .setStrokeStyle(6, "round")
+    .beginStroke("rgba(255,255,255,0.82)")
+    .moveTo(0, 6)
+    .lineTo(20, -2);
+  hourHand.rotation = -42;
+  timeUpIconHand.addChild(minuteHand, hourHand);
+  timeUpIconHand.y = -4;
+  timeUpIconHand.shadow = new createjs.Shadow("rgba(12,10,40,0.6)", 0, 4, 10);
+  timeUpIconHand.rotation = -26;
   timeUpIconContainer.addChild(timeUpIconHand);
+
+  var clockHub = new createjs.Shape();
+  clockHub.graphics.beginRadialGradientFill(
+    ["#FFFFFF", "#E5D9FF"],
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    12
+  ).drawCircle(0, -4, 8);
+  clockHub.shadow = new createjs.Shadow("rgba(18,16,52,0.45)", 0, 2, 4);
+  timeUpIconContainer.addChild(clockHub);
 
   timeUpIconSpark = new createjs.Shape();
   timeUpIconSpark.graphics
     .beginRadialGradientFill(
-      ["rgba(255,255,255,0.42)", "rgba(255,255,255,0)"],
+      ["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"],
       [0, 1],
       0,
       0,
       0,
       0,
       0,
-      64
+      72
     )
-    .drawCircle(0, 0, 64);
-  timeUpIconSpark.alpha = 0.62;
+    .drawCircle(0, -4, 70);
+  timeUpIconSpark.alpha = 0.48;
+  timeUpIconSpark.compositeOperation = "lighter";
   timeUpIconContainer.addChild(timeUpIconSpark);
 
-  timeUpText = new createjs.Text("Time's Up!", "800 46px 'Baloo 2'", "#F7F2FF");
+  timeUpText = new createjs.Text("Time's Up!", "800 46px 'Baloo 2'", "#FEF7FF");
   timeUpText.textAlign = "left";
   timeUpText.textBaseline = "middle";
-  timeUpText.shadow = new createjs.Shadow("rgba(6,12,28,0.6)", 0, 6, 10);
-  timeUpText.x = -18;
+  timeUpText.shadow = new createjs.Shadow("rgba(6,12,28,0.55)", 0, 6, 12);
+  timeUpText.x = 32;
+  var timeUpTextGlow = timeUpText.clone();
+  timeUpTextGlow.color = "#20134F";
+  timeUpTextGlow.outline = 6;
+  timeUpTextGlow.alpha = 0.22;
+  timeUpTextGlow.shadow = null;
+  timeUpOverlay.addChild(timeUpTextGlow);
   timeUpOverlay.addChild(timeUpText);
 
   container.parent.addChild(timeUpOverlay);
@@ -1436,37 +1522,37 @@ function showGameplayTimeUpBanner(onComplete) {
     createjs.Tween.removeTweens(timeUpOverlayGlass);
     timeUpOverlayGlass.alpha = 0;
     createjs.Tween.get(timeUpOverlayGlass, { override: true })
-      .to({ alpha: 0.74 }, 320, createjs.Ease.quadOut)
-      .to({ alpha: 0.6 }, 520, createjs.Ease.quadInOut);
+      .to({ alpha: 0.78 }, 360, createjs.Ease.quadOut)
+      .to({ alpha: 0.58 }, 540, createjs.Ease.quadInOut);
   }
 
   if (timeUpOverlayShine) {
     createjs.Tween.removeTweens(timeUpOverlayShine);
     timeUpOverlayShine.alpha = 0;
-    timeUpOverlayShine.x = -188;
+    timeUpOverlayShine.x = -176;
     createjs.Tween.get(timeUpOverlayShine, { override: true })
       .wait(60)
-      .to({ alpha: 0.85 }, 200, createjs.Ease.quadOut)
-      .to({ x: 188 }, 620, createjs.Ease.sineInOut)
+      .to({ alpha: 0.75 }, 220, createjs.Ease.quadOut)
+      .to({ x: 176 }, 640, createjs.Ease.sineInOut)
       .to({ alpha: 0 }, 200, createjs.Ease.quadIn);
   }
 
   if (timeUpIconHand) {
     createjs.Tween.removeTweens(timeUpIconHand);
-    timeUpIconHand.rotation = -42;
+    timeUpIconHand.rotation = -32;
     createjs.Tween.get(timeUpIconHand, { override: true })
-      .to({ rotation: 12 }, 420, createjs.Ease.quadOut)
-      .to({ rotation: -10 }, 260, createjs.Ease.quadInOut);
+      .to({ rotation: 16 }, 480, createjs.Ease.quadOut)
+      .to({ rotation: -8 }, 300, createjs.Ease.quadInOut);
   }
 
   if (timeUpIconSpark) {
     createjs.Tween.removeTweens(timeUpIconSpark);
     timeUpIconSpark.alpha = 0;
-    timeUpIconSpark.scaleX = timeUpIconSpark.scaleY = 0.6;
+    timeUpIconSpark.scaleX = timeUpIconSpark.scaleY = 0.66;
     createjs.Tween.get(timeUpIconSpark, { override: true })
       .wait(40)
-      .to({ alpha: 0.7, scaleX: 1, scaleY: 1 }, 360, createjs.Ease.quadOut)
-      .to({ alpha: 0 }, 440, createjs.Ease.quadIn);
+      .to({ alpha: 0.6, scaleX: 1.08, scaleY: 1.08 }, 420, createjs.Ease.quadOut)
+      .to({ alpha: 0 }, 460, createjs.Ease.quadIn);
   }
 
   var overlayDisplayDuration = 3000;
