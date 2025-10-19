@@ -3347,12 +3347,10 @@ function spawnAmbientSpark(generation) {
 
 /* ===== ChoiceFX Helpers (CreateJS) - injected ===== */
 function ChoiceFX_startIdleBob(displayObj){
-	createjs.Tween.removeTweens(displayObj);
-  //const baseY = displayObj.y;
+  createjs.Tween.removeTweens(displayObj);
   createjs.Tween.get(displayObj, { loop: true })
-    .to({ scaleX: 0.72, scaleY: 0.72}, 900, createjs.Ease.quadOut)
-    .to({ scaleX: 0.74, scaleY: 0.74 }, 900, createjs.Ease.quadIn);
-	
+    .to({ scaleX: 0.72, scaleY: 0.72}, 1200, createjs.Ease.quadOut)
+    .to({ scaleX: 0.74, scaleY: 0.74 }, 1200, createjs.Ease.quadIn);
 }
 
 function ChoiceFX_addGlow(ch, on){
@@ -3473,8 +3471,8 @@ function ChoiceFX_entrance(choiceArr, baseDelay){
 
     createjs.Tween.get(ch)
       .wait(startDelay + i*120)
-      .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: baseY, rotation: 15 }, 220, createjs.Ease.quadOut)
-      .to({ rotation: 0 }, 180, createjs.Ease.quadOut)
+      .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: baseY, rotation: 15 }, 320, createjs.Ease.quadOut)
+      .to({ rotation: 0 }, 240, createjs.Ease.quadOut)
       .call(()=> ChoiceFX_startIdleBob(ch));
   }
 }
