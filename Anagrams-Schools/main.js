@@ -470,6 +470,7 @@ function CreateGameElements() {
   QusTxtString.visible = false;
 
 
+  ensureQuestionCard();
 
   ensureQuestionCard();
 
