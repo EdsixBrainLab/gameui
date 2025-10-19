@@ -487,7 +487,8 @@ var timeUpOverlay,
   timeUpIconContainer,
   timeUpIconHand,
   timeUpIconSpark,
-  timeUpText;
+  timeUpText,
+  timeUpTextGlow;
 
 function layoutTimeUpOverlay() {
   if (!timeUpOverlay) {
@@ -512,10 +513,58 @@ function layoutTimeUpOverlay() {
     timeUpOverlay.x = metrics.centerX || 0;
     timeUpOverlay.y = metrics.centerY || 0;
   }
+
+  layoutTimeUpContent();
 }
 
 if (typeof globalThis !== "undefined") {
   globalThis.layoutTimeUpOverlay = layoutTimeUpOverlay;
+}
+
+function layoutTimeUpContent() {
+  if (!timeUpOverlay || !timeUpIconContainer || !timeUpText) {
+    return;
+  }
+
+  var iconWidth =
+    typeof timeUpIconContainer.__width === "number"
+      ? timeUpIconContainer.__width
+      : 136;
+  var spacing =
+    typeof timeUpIconContainer.__spacing === "number"
+      ? timeUpIconContainer.__spacing
+      : 36;
+  var maxTextWidth = 260;
+
+  if (timeUpText.lineWidth !== maxTextWidth) {
+    timeUpText.lineWidth = maxTextWidth;
+  }
+  if (timeUpTextGlow) {
+    timeUpTextGlow.lineWidth = maxTextWidth;
+  }
+
+  var measuredWidth = maxTextWidth;
+  if (typeof timeUpText.getMeasuredWidth === "function") {
+    measuredWidth = timeUpText.getMeasuredWidth();
+  }
+  if (measuredWidth > maxTextWidth) {
+    measuredWidth = maxTextWidth;
+  }
+
+  var totalWidth = iconWidth + spacing + measuredWidth;
+  var start = -totalWidth / 2;
+  var iconCenter = start + iconWidth / 2;
+  var textCenter = start + iconWidth + spacing + measuredWidth / 2;
+
+  timeUpIconContainer.x = iconCenter;
+
+  timeUpText.textAlign = "center";
+  timeUpText.x = textCenter;
+
+  if (timeUpTextGlow) {
+    timeUpTextGlow.textAlign = "center";
+    timeUpTextGlow.x = textCenter;
+  }
 }
 
 function call_UI_ambientOverlay(incontainer)
@@ -1332,7 +1381,6 @@ function ensureTimeUpOverlay() {
   timeUpOverlay.addChild(timeUpOverlayShine);
 
   timeUpIconContainer = new createjs.Container();
-  timeUpIconContainer.x = -128;
   timeUpOverlay.addChild(timeUpIconContainer);
 
   var iconHalo = new createjs.Shape();
@@ -1474,13 +1522,15 @@ function ensureTimeUpOverlay() {
   timeUpIconSpark.alpha = 0.48;
   timeUpIconSpark.compositeOperation = "lighter";
   timeUpIconContainer.addChild(timeUpIconSpark);
+  timeUpIconContainer.__width = 136;
+  timeUpIconContainer.__spacing = 36;
 
   timeUpText = new createjs.Text("Time's Up!", "800 46px 'Baloo 2'", "#FEF7FF");
-  timeUpText.textAlign = "left";
+  timeUpText.textAlign = "center";
   timeUpText.textBaseline = "middle";
   timeUpText.shadow = new createjs.Shadow("rgba(6,12,28,0.55)", 0, 6, 12);
-  timeUpText.x = 32;
-  var timeUpTextGlow = timeUpText.clone();
+  timeUpText.x = 0;
+  timeUpTextGlow = timeUpText.clone();
   timeUpTextGlow.color = "#20134F";
   timeUpTextGlow.outline = 6;
   timeUpTextGlow.alpha = 0.22;

@@ -8,7 +8,8 @@ var isGamePlay = false;
         isMobile1 = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent),
         init = false,
         orientationMediaQuery = null,
-        orientationCheckTimer = null;
+        orientationCheckTimer = null,
+        visualViewportListenerAttached = false;
 
     var options = {
         startOnPageLoad: true,
@@ -24,35 +25,44 @@ var isGamePlay = false;
     };
 
     var cssRules = [
-        "#pleaserotate-backdrop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: clamp(24px, 6vw, 48px); background: radial-gradient(circle at 12% 18%, rgba(149, 115, 255, 0.6), transparent 58%), radial-gradient(circle at 88% 22%, rgba(255, 150, 241, 0.55), transparent 62%), linear-gradient(135deg, rgba(10, 6, 32, 0.96) 0%, rgba(26, 12, 72, 0.94) 38%, rgba(47, 20, 118, 0.92) 76%, rgba(73, 26, 144, 0.9) 100%); color: #f6f2ff; font-family: 'Baloo 2','Questrial-Regular',sans-serif; letter-spacing: 0.02em; text-transform: none; opacity: 0; transition: opacity 260ms ease; z-index: 9999; box-sizing: border-box; }",
+        "#pleaserotate-backdrop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: clamp(24px, 6vw, 48px); background: radial-gradient(circle at 12% 20%, rgba(143, 110, 255, 0.6), transparent 58%), radial-gradient(circle at 86% 24%, rgba(255, 144, 240, 0.52), transparent 64%), linear-gradient(135deg, rgba(10, 6, 38, 0.96) 0%, rgba(28, 12, 74, 0.94) 38%, rgba(52, 20, 122, 0.92) 76%, rgba(78, 28, 152, 0.9) 100%); color: #f6f2ff; font-family: 'Baloo 2','Questrial-Regular',sans-serif; letter-spacing: 0.02em; text-transform: none; opacity: 0; transition: opacity 260ms ease; z-index: 9999; box-sizing: border-box; }",
         "#pleaserotate-backdrop.is-visible { opacity: 1; }",
-        "#pleaserotate-container { position: relative; width: min(430px, 92vw); display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 4vw, 26px); padding: clamp(28px, 7vw, 40px) clamp(30px, 7vw, 42px); border-radius: 30px; background: linear-gradient(165deg, rgba(108, 71, 235, 0.82), rgba(147, 92, 245, 0.78) 58%, rgba(197, 124, 255, 0.74)); box-shadow: 0 28px 70px rgba(22, 6, 58, 0.5), 0 8px 18px rgba(76, 33, 180, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.25); text-align: center; backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); overflow: hidden; }",
-        "#pleaserotate-container::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(145deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.04) 48%, rgba(255, 255, 255, 0.12) 100%); mix-blend-mode: screen; opacity: 0.65; pointer-events: none; }",
-        "#pleaserotate-container::after { content: ''; position: absolute; inset: 18%; border-radius: 24px; background: radial-gradient(circle at 40% 0%, rgba(255, 255, 255, 0.38), transparent 72%); pointer-events: none; }",
-        "#pleaserotate-graphic { position: relative; width: clamp(124px, 34vw, 168px); height: clamp(124px, 34vw, 168px); display: flex; align-items: center; justify-content: center; }",
-        "#pleaserotate-graphic .pr-icon__glow { position: absolute; inset: 0; border-radius: 34px; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.32), rgba(176, 132, 255, 0.08) 64%, transparent 82%); animation: pr-glow 5.6s ease-in-out infinite; filter: blur(0.2px); }",
-        "#pleaserotate-graphic .pr-icon__orbit { position: absolute; width: 94%; height: 94%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), rgba(113, 69, 235, 0.25) 58%, rgba(29, 12, 96, 0) 78%); box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.14); opacity: 0.85; }",
-        "#pleaserotate-graphic .pr-icon__ring { position: absolute; width: 78%; height: 78%; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.42); border-top-color: rgba(255, 255, 255, 0.88); border-left-color: rgba(255, 255, 255, 0.78); transform: rotate(-32deg); transform-origin: 50% 50%; animation: pr-ring 7.6s linear infinite; box-shadow: 0 0 16px rgba(255, 255, 255, 0.28); }",
-        "#pleaserotate-graphic .pr-icon__ring::after { content: ''; position: absolute; top: -5px; right: 20px; width: 11px; height: 11px; border-radius: 50%; background: linear-gradient(135deg, #ffe8ff, #ffffff 62%); box-shadow: 0 0 12px rgba(255, 255, 255, 0.68); }",
-        "#pleaserotate-graphic .pr-icon__device { position: relative; width: 58%; height: 74%; border-radius: 22px; background: linear-gradient(135deg, rgba(22, 14, 58, 0.95), rgba(76, 38, 158, 0.92)); box-shadow: 0 20px 34px rgba(10, 4, 32, 0.48), inset 0 0 0 1px rgba(255, 255, 255, 0.16); display: flex; align-items: center; justify-content: center; transform: rotate(16deg); animation: pr-device 5.2s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__device-screen { width: 72%; height: 68%; border-radius: 16px; background: linear-gradient(160deg, rgba(116, 80, 235, 0.82), rgba(194, 138, 255, 0.68)); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.24); }",
-        "#pleaserotate-graphic .pr-icon__arrow { position: absolute; width: 88%; height: 88%; transform-origin: 50% 50%; animation: pr-arrow 6.4s ease-in-out infinite; filter: drop-shadow(0 8px 14px rgba(38, 12, 112, 0.35)); }",
-        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__trail { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 190; stroke-dashoffset: 190; animation: pr-arrow-stroke 6.4s ease-in-out infinite; }",
+        "#pleaserotate-container { position: relative; width: min(430px, 92vw); display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 4vw, 26px); padding: clamp(28px, 7vw, 40px) clamp(30px, 7vw, 42px); border-radius: 30px; background: linear-gradient(165deg, rgba(98, 66, 224, 0.88), rgba(142, 88, 238, 0.84) 56%, rgba(192, 118, 255, 0.8)); box-shadow: 0 28px 70px rgba(22, 6, 58, 0.5), 0 8px 18px rgba(76, 33, 180, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.22); text-align: center; backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); overflow: hidden; }",
+        "#pleaserotate-container::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(145deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 48%, rgba(255, 255, 255, 0.16) 100%); mix-blend-mode: screen; opacity: 0.68; pointer-events: none; }",
+        "#pleaserotate-container::after { content: ''; position: absolute; inset: 18%; border-radius: 24px; background: radial-gradient(circle at 42% 0%, rgba(255, 255, 255, 0.42), transparent 74%); pointer-events: none; }",
+        "#pleaserotate-graphic { position: relative; width: clamp(132px, 34vw, 176px); height: clamp(132px, 34vw, 176px); display: flex; align-items: center; justify-items: center; justify-content: center; }",
+        "#pleaserotate-graphic .pr-icon__glow { position: absolute; inset: 0; border-radius: 36px; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.36), rgba(176, 132, 255, 0.1) 64%, transparent 82%); filter: blur(0.4px); opacity: 0.92; animation: pr-glow 6.2s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__orbit { position: absolute; width: 96%; height: 96%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(118, 82, 236, 0.3) 60%, rgba(24, 12, 74, 0) 80%); box-shadow: inset 0 0 26px rgba(120, 84, 240, 0.32); opacity: 0.9; }",
+        "#pleaserotate-graphic .pr-icon__ring { position: absolute; width: 80%; height: 80%; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.42); border-top-color: rgba(255, 255, 255, 0.88); border-left-color: rgba(255, 255, 255, 0.78); transform: rotate(-26deg); transform-origin: 50% 50%; animation: pr-ring 8s linear infinite; box-shadow: 0 0 16px rgba(255, 255, 255, 0.28); }",
+        "#pleaserotate-graphic .pr-icon__ring::after { content: ''; position: absolute; top: -6px; right: 18px; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #ffe8ff, #ffffff 62%); box-shadow: 0 0 12px rgba(255, 255, 255, 0.68); }",
+        "#pleaserotate-graphic .pr-icon__device { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 24px; box-shadow: 0 20px 32px rgba(14, 6, 46, 0.46), inset 0 0 0 1px rgba(255, 255, 255, 0.16); }",
+        "#pleaserotate-graphic .pr-icon__device-screen { width: 76%; height: 72%; border-radius: 18px; background: linear-gradient(165deg, rgba(122, 88, 236, 0.88), rgba(186, 134, 255, 0.72)); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.28); }",
+        "#pleaserotate-graphic .pr-icon__device-notch { position: absolute; top: 12%; left: 50%; width: 34%; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.38); transform: translateX(-50%); box-shadow: 0 0 6px rgba(255, 255, 255, 0.32); }",
+        "#pleaserotate-graphic .pr-icon__device--portrait { width: 58%; height: 76%; left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(12deg); background: linear-gradient(140deg, rgba(26, 14, 74, 0.96), rgba(78, 40, 164, 0.92)); animation: pr-device 6s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__device--landscape { width: 78%; height: 56%; left: 54%; top: 48%; transform: translate(-50%, -50%) rotate(-78deg); background: linear-gradient(145deg, rgba(36, 22, 92, 0.42), rgba(132, 94, 240, 0.28)); border: 1px solid rgba(255, 255, 255, 0.24); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); opacity: 0.72; animation: pr-device-ghost 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__device--landscape .pr-icon__device-screen { background: linear-gradient(160deg, rgba(158, 132, 255, 0.24), rgba(255, 255, 255, 0.08)); }",
+        "#pleaserotate-graphic .pr-icon__arrow { position: absolute; width: 92%; height: 92%; transform-origin: 50% 50%; animation: pr-arrow 6.6s ease-in-out infinite; filter: drop-shadow(0 10px 16px rgba(33, 12, 94, 0.35)); }",
+        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__trail { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 210; stroke-dashoffset: 210; animation: pr-arrow-stroke 6.6s ease-in-out infinite; }",
         "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__head { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }",
-        "#pleaserotate-graphic .pr-icon__hint { position: absolute; bottom: 8%; width: 44%; height: 44%; border-radius: 16px; border: 2px dashed rgba(255, 255, 255, 0.35); transform: rotate(-34deg); animation: pr-hint 6.8s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__spark { position: absolute; top: 18%; right: 20%; width: 24%; height: 24%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)); opacity: 0.7; animation: pr-spark 5.8s ease-in-out infinite; pointer-events: none; }",
+        "#pleaserotate-graphic .pr-icon__hint { position: absolute; bottom: 12%; left: 50%; width: 68%; height: 26%; border-radius: 18px; background: linear-gradient(140deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0)); border: 1px solid rgba(255, 255, 255, 0.32); transform: translateX(-50%) rotate(-6deg); opacity: 0.74; animation: pr-hint 6.6s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__hint::before { content: ''; position: absolute; inset: 20% 18%; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.4); opacity: 0.8; }",
+        "#pleaserotate-graphic .pr-icon__hint::after { content: ''; position: absolute; top: 42%; left: 50%; width: 16%; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.45); transform: translate(-50%, -50%); }",
         "#pleaserotate-message { position: relative; z-index: 1; margin: 0; font-size: clamp(20px, 5vw, 28px); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }",
         "#pleaserotate-message strong { display: block; color: #ffffff; font-size: clamp(20px, 5vw, 28px); }",
         "#pleaserotate-message small { display: block; margin-top: clamp(8px, 2vw, 12px); font-size: clamp(13px, 3.2vw, 15px); font-weight: 500; letter-spacing: 0.06em; color: rgba(255, 244, 255, 0.78); }",
-        "@media (prefers-reduced-motion: reduce) { #pleaserotate-backdrop, #pleaserotate-graphic .pr-icon__glow, #pleaserotate-graphic .pr-icon__ring, #pleaserotate-graphic .pr-icon__device, #pleaserotate-graphic .pr-icon__arrow, #pleaserotate-graphic .pr-icon__hint { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }"
+        "@media (prefers-reduced-motion: reduce) { #pleaserotate-backdrop, #pleaserotate-graphic .pr-icon__glow, #pleaserotate-graphic .pr-icon__ring, #pleaserotate-graphic .pr-icon__device, #pleaserotate-graphic .pr-icon__device--landscape, #pleaserotate-graphic .pr-icon__arrow, #pleaserotate-graphic .pr-icon__hint, #pleaserotate-graphic .pr-icon__spark { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }"
     ];
 
     var cssKeyframeRules = [
-        "pr-device { 0%,100% { transform: rotate(16deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-7px); } }",
-        "pr-ring { 0% { transform: rotate(-32deg); } 100% { transform: rotate(328deg); } }",
-        "pr-hint { 0%,100% { opacity: 0.32; transform: rotate(-34deg) scale(0.94); } 50% { opacity: 0.66; transform: rotate(-28deg) scale(1.05); } }",
-        "pr-glow { 0%,100% { opacity: 0.52; } 45% { opacity: 0.88; } }",
-        "pr-arrow { 0%,100% { transform: rotate(-10deg); } 45% { transform: rotate(8deg); } }",
-        "pr-arrow-stroke { 0% { stroke-dashoffset: 190; } 28% { stroke-dashoffset: 40; } 70% { stroke-dashoffset: -10; } 100% { stroke-dashoffset: -10; } }"
+        "pr-device { 0%,100% { transform: translate(-50%, -50%) rotate(12deg); } 50% { transform: translate(-50%, -54%) rotate(2deg); } }",
+        "pr-device-ghost { 0%,100% { opacity: 0.62; transform: translate(-50%, -50%) rotate(-78deg) scale(0.96); } 50% { opacity: 0.88; transform: translate(-50%, -54%) rotate(-92deg) scale(1); } }",
+        "pr-ring { 0% { transform: rotate(-26deg); } 100% { transform: rotate(334deg); } }",
+        "pr-hint { 0%,100% { opacity: 0.52; transform: translateX(-50%) rotate(-6deg) scale(0.96); } 50% { opacity: 0.82; transform: translateX(-50%) rotate(-2deg) scale(1.02); } }",
+        "pr-glow { 0%,100% { opacity: 0.72; } 45% { opacity: 1; } }",
+        "pr-arrow { 0%,100% { transform: rotate(-12deg); } 45% { transform: rotate(10deg); } }",
+        "pr-arrow-stroke { 0% { stroke-dashoffset: 210; } 28% { stroke-dashoffset: 38; } 70% { stroke-dashoffset: -16; } 100% { stroke-dashoffset: -16; } }",
+        "pr-spark { 0%,100% { opacity: 0.52; transform: scale(0.92); } 45% { opacity: 0.9; transform: scale(1.06); } }"
     ];
 
     /* private functions */
@@ -127,6 +137,29 @@ var isGamePlay = false;
             clearTimeout(orientationCheckTimer);
             orientationCheckTimer = null;
         }
+    }
+
+    function attachVisualViewportListeners(){
+        if(visualViewportListenerAttached){
+            return;
+        }
+
+        if(window.visualViewport && typeof window.visualViewport.addEventListener === 'function'){
+            window.visualViewport.addEventListener('resize', scheduleOrientationEvaluation, false);
+            visualViewportListenerAttached = true;
+        }
+    }
+
+    function detachVisualViewportListeners(){
+        if(!visualViewportListenerAttached){
+            return;
+        }
+
+        if(window.visualViewport && typeof window.visualViewport.removeEventListener === 'function'){
+            window.visualViewport.removeEventListener('resize', scheduleOrientationEvaluation, false);
+        }
+
+        visualViewportListenerAttached = false;
     }
 
     function attachOrientationMediaListener(){
@@ -206,10 +239,14 @@ var isGamePlay = false;
         var glow = document.createElement('span');
         var orbit = document.createElement('span');
         var ring = document.createElement('span');
-        var device = document.createElement('div');
-        var screen = document.createElement('div');
+        var portrait = document.createElement('div');
+        var portraitScreen = document.createElement('div');
+        var portraitNotch = document.createElement('span');
+        var landscape = document.createElement('div');
+        var landscapeScreen = document.createElement('div');
         var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         var hint = document.createElement('span');
+        var spark = document.createElement('span');
 
         wrapper.setAttribute('id', 'pleaserotate-graphic');
         wrapper.className = 'pr-icon';
@@ -217,11 +254,23 @@ var isGamePlay = false;
         glow.className = 'pr-icon__glow';
         orbit.className = 'pr-icon__orbit';
         ring.className = 'pr-icon__ring';
-        device.className = 'pr-icon__device';
-        screen.className = 'pr-icon__device-screen';
+        portrait.className = 'pr-icon__device pr-icon__device--portrait';
+        portraitScreen.className = 'pr-icon__device-screen';
+        portraitNotch.className = 'pr-icon__device-notch';
+        landscape.className = 'pr-icon__device pr-icon__device--landscape';
+        landscape.setAttribute('aria-hidden', 'true');
+        landscapeScreen.className = 'pr-icon__device-screen';
         arrow.setAttribute('class', 'pr-icon__arrow');
-        arrow.setAttribute('viewBox', '0 0 80 80');
+        arrow.setAttribute('viewBox', '0 0 90 90');
         arrow.setAttribute('role', 'presentation');
+        hint.className = 'pr-icon__hint';
+        hint.setAttribute('aria-hidden', 'true');
+        spark.className = 'pr-icon__spark';
+        spark.setAttribute('aria-hidden', 'true');
+
+        portrait.appendChild(portraitScreen);
+        portrait.appendChild(portraitNotch);
+        landscape.appendChild(landscapeScreen);
 
         var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         var gradientId = 'pr-arrow-gradient-' + Math.floor(Math.random() * 1000000);
@@ -234,18 +283,15 @@ var isGamePlay = false;
 
         var stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         stop1.setAttribute('offset', '0%');
-        stop1.setAttribute('stop-color', '#F4E7FF');
-        stop1.setAttribute('stop-opacity', '1');
+        stop1.setAttribute('stop-color', '#F9EDFF');
 
         var stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         stop2.setAttribute('offset', '52%');
-        stop2.setAttribute('stop-color', '#D2B3FF');
-        stop2.setAttribute('stop-opacity', '1');
+        stop2.setAttribute('stop-color', '#D6B9FF');
 
         var stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         stop3.setAttribute('offset', '100%');
-        stop3.setAttribute('stop-color', '#8F6CFF');
-        stop3.setAttribute('stop-opacity', '1');
+        stop3.setAttribute('stop-color', '#926CFF');
 
         gradient.appendChild(stop1);
         gradient.appendChild(stop2);
@@ -255,12 +301,12 @@ var isGamePlay = false;
 
         var arrowStroke = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         arrowStroke.setAttribute('class', 'pr-arrow__trail');
-        arrowStroke.setAttribute('d', 'M50 12c12.426 2.13 22 12.958 22 26 0 14.359-11.641 26-26 26-8.887 0-17.03-4.629-21.602-11.924');
+        arrowStroke.setAttribute('d', 'M28 22c6.6-12.6 19.3-21 33.8-21 19.2 0 34.2 15.4 34.2 34.2 0 15.8-10.6 29.8-25.8 33.6');
         arrowStroke.setAttribute('stroke', 'url(#' + gradientId + ')');
 
         var arrowHead = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         arrowHead.setAttribute('class', 'pr-arrow__head');
-        arrowHead.setAttribute('d', 'M47 10l13 5-9 8');
+        arrowHead.setAttribute('d', 'M24 26l4.8-13.8 12 9.6');
         arrowHead.setAttribute('stroke', 'url(#' + gradientId + ')');
 
         arrow.appendChild(defs);
@@ -273,14 +319,14 @@ var isGamePlay = false;
         arrowHead.setAttribute('stroke-linecap', 'round');
         arrowStroke.setAttribute('stroke-linejoin', 'round');
         arrowHead.setAttribute('stroke-linejoin', 'round');
-        hint.className = 'pr-icon__hint';
 
-        device.appendChild(screen);
         wrapper.appendChild(glow);
         wrapper.appendChild(orbit);
         wrapper.appendChild(ring);
-        wrapper.appendChild(device);
+        wrapper.appendChild(landscape);
+        wrapper.appendChild(portrait);
         wrapper.appendChild(arrow);
+        wrapper.appendChild(spark);
         wrapper.appendChild(hint);
 
         return wrapper;
@@ -351,6 +397,23 @@ var isGamePlay = false;
     }
 
     function isPortrait(){
+        if(window.screen && window.screen.orientation && typeof window.screen.orientation.type === 'string'){
+            if(window.screen.orientation.type.indexOf('portrait') !== -1){
+                return true;
+            }
+            if(window.screen.orientation.type.indexOf('landscape') !== -1){
+                return false;
+            }
+        }
+
+        if(typeof window.orientation === 'number'){
+            var angle = Math.abs(window.orientation);
+            if(angle === 90 || angle === 270){
+                return false;
+            }
+            return true;
+        }
+
         if(window.matchMedia){
             var query = window.matchMedia('(orientation: portrait)');
             if(query && typeof query.matches === 'boolean'){
@@ -358,7 +421,11 @@ var isGamePlay = false;
             }
         }
 
-        return ( window.innerWidth < window.innerHeight);
+        if(window.visualViewport){
+            return window.visualViewport.height >= window.visualViewport.width;
+        }
+
+        return window.innerHeight >= window.innerWidth;
     }
 
     function checkOrientationChange(){
@@ -400,6 +467,7 @@ var isGamePlay = false;
         createElements();
         checkOrientationChange();
         attachOrientationMediaListener();
+        attachVisualViewportListeners();
 
         window.addEventListener( 'resize', scheduleOrientationEvaluation, false );
         window.addEventListener( 'orientationchange', scheduleOrientationEvaluation, false );
@@ -430,6 +498,7 @@ var isGamePlay = false;
         }
 
         detachOrientationMediaListener();
+        detachVisualViewportListeners();
         clearOrientationEvaluation();
     }
 
