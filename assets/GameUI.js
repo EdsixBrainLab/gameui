@@ -797,6 +797,146 @@ function drawClueSlotBackground(targetShape, colors) {
   }
 }
 
+function animateChoiceTileHover(options) {
+  options = options || {};
+
+  var tile = options.tile;
+  var bg = options.background;
+  var glow = options.glow;
+  var isActive = !!options.active;
+  var hoverColors = options.hoverColors || CHOICE_TILE_HOVER_COLORS;
+  var baseColors = options.baseColors || CHOICE_TILE_BASE_COLORS;
+
+  if (bg) {
+    var bgBaseScale = bg.__baseScale || 1;
+    drawChoiceTileBackground(bg, isActive ? hoverColors : baseColors);
+    createjs.Tween.get(bg, { override: true })
+      .to(
+        {
+          scaleX: bgBaseScale * (isActive ? 1.05 : 1),
+          scaleY: bgBaseScale * (isActive ? 1.05 : 1),
+          alpha: isActive ? 1 : 0.95
+        },
+        200,
+        createjs.Ease.quadOut
+      );
+  }
+
+  if (tile) {
+    var tileBaseScale = options.tileBaseScale || tile.__baseScale || tile.scaleX || 0.8;
+    createjs.Tween.get(tile, { override: true })
+      .to(
+        {
+          scaleX: tileBaseScale * (isActive ? 1.08 : 1),
+          scaleY: tileBaseScale * (isActive ? 1.08 : 1),
+          alpha: isActive ? 1 : tile.alpha
+        },
+        200,
+        createjs.Ease.quadOut
+      );
+  }
+
+  if (glow) {
+    var targetAlpha = isActive ? 0.52 : 0.35;
+    createjs.Tween.get(glow, { override: true }).to({ alpha: targetAlpha }, 220, createjs.Ease.quadOut);
+  }
+}
+
+function markChoiceTileUsed(options) {
+  options = options || {};
+
+  var tile = options.tile;
+  var bg = options.background;
+  var glow = options.glow;
+
+  if (bg) {
+    drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
+    createjs.Tween.get(bg, { override: true }).to({ alpha: 0.55 }, 200, createjs.Ease.quadOut);
+  }
+
+  if (tile) {
+    createjs.Tween.get(tile, { override: true }).to({ alpha: 0.55 }, 200, createjs.Ease.quadOut);
+  }
+
+  if (glow) {
+    createjs.Tween.get(glow, { override: true }).to({ alpha: 0.2 }, 200, createjs.Ease.quadOut);
+  }
+}
+
+function styleClueSlotFill(options) {
+  options = options || {};
+
+  var bg = options.background;
+  var filled = !!options.filled;
+  var successColors = options.successColors || CLUE_SLOT_SUCCESS_COLORS;
+  var baseColors = options.baseColors || CLUE_SLOT_BASE_COLORS;
+
+  if (!bg) {
+    return;
+  }
+
+  var baseScale = bg.__baseScale || 1;
+  drawClueSlotBackground(bg, filled ? successColors : baseColors);
+  createjs.Tween.get(bg, { override: true })
+    .to(
+      {
+        scaleX: baseScale * (filled ? 1.06 : 1),
+        scaleY: baseScale * (filled ? 1.06 : 1),
+        alpha: filled ? 1 : 0.95
+      },
+      220,
+      createjs.Ease.quadOut
+    )
+    .to({ scaleX: baseScale, scaleY: baseScale }, 180, createjs.Ease.quadOut);
+}
+
+function highlightClueSlot(options) {
+  options = options || {};
+
+  var bg = options.background;
+  var highlightColors = options.highlightColors || CLUE_SLOT_HIGHLIGHT_COLORS;
+
+  if (!bg) {
+    return;
+  }
+
+  var baseScale = bg.__baseScale || 1;
+  drawClueSlotBackground(bg, highlightColors);
+  createjs.Tween.get(bg, { override: true })
+    .to(
+      { scaleX: baseScale * 1.04, scaleY: baseScale * 1.04, alpha: 1 },
+      220,
+      createjs.Ease.quadOut
+    )
+    .to({ scaleX: baseScale, scaleY: baseScale }, 200, createjs.Ease.quadOut);
+}
+
+if (globalHelperScope) {
+  if (!globalHelperScope.SAUI_highlightChoiceTile) {
+    globalHelperScope.SAUI_highlightChoiceTile = function (options) {
+      animateChoiceTileHover(options);
+    };
+  }
+
+  if (!globalHelperScope.SAUI_markChoiceTileUsed) {
+    globalHelperScope.SAUI_markChoiceTileUsed = function (options) {
+      markChoiceTileUsed(options);
+    };
+  }
+
+  if (!globalHelperScope.SAUI_styleClueSlot) {
+    globalHelperScope.SAUI_styleClueSlot = function (options) {
+      styleClueSlotFill(options);
+    };
+  }
+
+  if (!globalHelperScope.SAUI_highlightClueSlot) {
+    globalHelperScope.SAUI_highlightClueSlot = function (options) {
+      highlightClueSlot(options);
+    };
+  }
+}
+
 function startChoiceReadyBadgeAnimation(badge) {
   if (!badge) {
     return;

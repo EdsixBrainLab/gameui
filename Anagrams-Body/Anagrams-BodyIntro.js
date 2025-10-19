@@ -15,6 +15,20 @@ var introClu1X = 460, introClu1Y = 490;
 var introClu2X = 580, introClu2Y = 490;
 var introClu3X = 700, introClu3Y = 490;
 var introClu4X = 820, introClu4Y = 490;
+var introChoiceDefaultX = [
+    null,
+    introChoice1X,
+    introChoice2X,
+    introChoice3X,
+    introChoice4X
+];
+var introClueDefaultX = [
+    null,
+    introClu1X,
+    introClu2X,
+    introClu3X,
+    introClu4X
+];
 var introArrowX = introChoice2X, introArrowY = introClu1Y - 46;
 var introfingureX = introChoice2X, introfingureY = introChoice2Y + 32;
 var ArrowXArr = [null], FingXArr = [null];
@@ -32,6 +46,12 @@ function getIntroHelper(name) {
     }
     return null;
 }
+
+var computeIntroRow = getIntroHelper("SAUI_computeCenteredRow");
+var highlightChoiceHelper = getIntroHelper("SAUI_highlightChoiceTile");
+var markChoiceUsedHelper = getIntroHelper("SAUI_markChoiceTileUsed");
+var styleClueSlotHelper = getIntroHelper("SAUI_styleClueSlot");
+var highlightClueSlotHelper = getIntroHelper("SAUI_highlightClueSlot");
 
 var configureIntroArrowSprite = getIntroHelper("SAUI_configureIntroArrowSprite") || function (sprite) {
     if (!sprite) {
@@ -136,6 +156,16 @@ function highlightIntroChoiceTile(index, isActive) {
     var bg = introChoiceBgArr[index];
     var glow = introChoiceGlowArr[index];
 
+    if (typeof highlightChoiceHelper === "function") {
+        highlightChoiceHelper({
+            tile: tile,
+            background: bg,
+            glow: glow,
+            active: isActive
+        });
+        return;
+    }
+
     if (bg) {
         var baseScale = bg.__baseScale || 1;
         drawChoiceTileBackground(bg, isActive ? CHOICE_TILE_HOVER_COLORS : CHOICE_TILE_BASE_COLORS);
@@ -172,6 +202,15 @@ function setIntroChoiceUsed(index) {
     var bg = introChoiceBgArr[index];
     var glow = introChoiceGlowArr[index];
 
+    if (typeof markChoiceUsedHelper === "function") {
+        markChoiceUsedHelper({
+            tile: tile,
+            background: bg,
+            glow: glow
+        });
+        return;
+    }
+
     if (bg) {
         drawChoiceTileBackground(bg, CHOICE_TILE_BASE_COLORS);
         createjs.Tween.get(bg, { override: true })
@@ -199,6 +238,14 @@ function styleIntroClueSlot(index, isFilled) {
         return;
     }
 
+    if (typeof styleClueSlotHelper === "function") {
+        styleClueSlotHelper({
+            background: bg,
+            filled: isFilled
+        });
+        return;
+    }
+
     var baseScale = bg.__baseScale || 1;
     var colors = isFilled ? CLUE_SLOT_SUCCESS_COLORS : CLUE_SLOT_BASE_COLORS;
     drawClueSlotBackground(bg, colors);
@@ -218,6 +265,11 @@ function highlightIntroClueTarget(index) {
 
     var bg = introClueBgArr[index];
     if (!bg) {
+        return;
+    }
+
+    if (typeof highlightClueSlotHelper === "function") {
+        highlightClueSlotHelper({ background: bg });
         return;
     }
 
@@ -271,14 +323,41 @@ function commongameintro() {
 
     var choicePointerTargets = {};
     var choiceConfigs = [
-        { index: 1, x: introChoice1X, y: introChoice1Y, letter: "N" },
-        { index: 2, x: introChoice2X, y: introChoice2Y, letter: "S" },
-        { index: 3, x: introChoice3X, y: introChoice3Y, letter: "I" },
-        { index: 4, x: introChoice4X, y: introChoice4Y, letter: "K" }
+        { index: 1, letter: "N" },
+        { index: 2, letter: "S" },
+        { index: 3, letter: "I" },
+        { index: 4, letter: "K" }
     ];
+
+    var resolvedChoiceX = introChoiceDefaultX.slice();
+    if (typeof computeIntroRow === "function") {
+        var choiceLayout = computeIntroRow(choiceConfigs.length, {
+            centerX: introQuestxtX,
+            baseSpacing: 184,
+            maxSpan: 820
+        });
+
+        if (choiceLayout && choiceLayout.positions && choiceLayout.positions.length === choiceConfigs.length) {
+            resolvedChoiceX = [null];
+            for (var p = 0; p < choiceLayout.positions.length; p++) {
+                resolvedChoiceX.push(choiceLayout.positions[p]);
+            }
+        }
+    }
+
+    introChoice1X = resolvedChoiceX[1] != null ? resolvedChoiceX[1] : introChoiceDefaultX[1];
+    introChoice2X = resolvedChoiceX[2] != null ? resolvedChoiceX[2] : introChoiceDefaultX[2];
+    introChoice3X = resolvedChoiceX[3] != null ? resolvedChoiceX[3] : introChoiceDefaultX[3];
+    introChoice4X = resolvedChoiceX[4] != null ? resolvedChoiceX[4] : introChoiceDefaultX[4];
+    introArrowX = introChoice2X;
+    introArrowY = introClu1Y - 46;
+    introfingureX = introChoice2X;
+    introfingureY = introChoice2Y + 32;
 
     for (var c = 0; c < choiceConfigs.length; c++) {
         var cfg = choiceConfigs[c];
+        cfg.x = resolvedChoiceX[cfg.index] != null ? resolvedChoiceX[cfg.index] : introChoiceDefaultX[cfg.index];
+        cfg.y = introChoice1Y;
         var glow = buildIntroGlowShape();
         glow.x = cfg.x;
         glow.y = cfg.y + 6;
@@ -331,15 +410,39 @@ function commongameintro() {
     }
 
     var clueConfigs = [
-        { index: 1, x: introClu1X, y: introClu1Y },
-        { index: 2, x: introClu2X, y: introClu2Y },
-        { index: 3, x: introClu3X, y: introClu3Y },
-        { index: 4, x: introClu4X, y: introClu4Y }
+        { index: 1 },
+        { index: 2 },
+        { index: 3 },
+        { index: 4 }
     ];
+
+    var resolvedClueX = introClueDefaultX.slice();
+    if (typeof computeIntroRow === "function") {
+        var clueLayout = computeIntroRow(clueConfigs.length, {
+            centerX: introQuestxtX,
+            baseSpacing: 132,
+            maxSpan: 640
+        });
+
+        if (clueLayout && clueLayout.positions && clueLayout.positions.length === clueConfigs.length) {
+            resolvedClueX = [null];
+            for (var q = 0; q < clueLayout.positions.length; q++) {
+                resolvedClueX.push(clueLayout.positions[q]);
+            }
+        }
+    }
+
+    introClu1X = resolvedClueX[1] != null ? resolvedClueX[1] : introClueDefaultX[1];
+    introClu2X = resolvedClueX[2] != null ? resolvedClueX[2] : introClueDefaultX[2];
+    introClu3X = resolvedClueX[3] != null ? resolvedClueX[3] : introClueDefaultX[3];
+    introClu4X = resolvedClueX[4] != null ? resolvedClueX[4] : introClueDefaultX[4];
+    introArrowY = introClu1Y - 46;
 
     introClueArr.push("");
     for (var k = 0; k < clueConfigs.length; k++) {
         var clueCfg = clueConfigs[k];
+        clueCfg.x = resolvedClueX[clueCfg.index] != null ? resolvedClueX[clueCfg.index] : introClueDefaultX[clueCfg.index];
+        clueCfg.y = introClu1Y;
         var clueBg = new createjs.Shape();
         drawClueSlotBackground(clueBg);
         clueBg.x = clueCfg.x;
