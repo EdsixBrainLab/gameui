@@ -35,6 +35,12 @@ function commongameintro() {
     introChoice4 = choice1.clone()
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
+    if (typeof SAUI_configureIntroArrowSprite === "function") {
+        SAUI_configureIntroArrowSprite(introArrow);
+    }
+    if (typeof SAUI_configureIntroFingerSprite === "function") {
+        SAUI_configureIntroFingerSprite(introfingure);
+    }
 console.log("container.width ::"+container.width)
 console.log("stage.width ::"+stage.width)
 console.log("canvas.width ::"+canvas.width)

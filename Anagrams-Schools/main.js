@@ -35,6 +35,58 @@ var words_arry = ["read", "listen", "teach", "research", "report",
 
 
 var maxLetterCnt = 13
+var globalHelperScope =
+    typeof globalThis !== "undefined"
+        ? globalThis
+        : typeof window !== "undefined"
+        ? window
+        : this;
+
+var computeRowLayout = function (count, options) {
+    if (globalHelperScope && typeof globalHelperScope.SAUI_computeRowLayout === "function") {
+        return globalHelperScope.SAUI_computeRowLayout(count, options);
+    }
+    if (globalHelperScope && typeof globalHelperScope.SAUI_computeCenteredRow === "function") {
+        return globalHelperScope.SAUI_computeCenteredRow(count, options);
+    }
+
+    options = options || {};
+    var centerX = typeof options.centerX === "number"
+        ? options.centerX
+        : canvas && canvas.width
+            ? canvas.width / 2
+            : 640;
+    var baseSpacing = options.baseSpacing != null ? options.baseSpacing : 174;
+    var baseScale = options.baseScale != null ? options.baseScale : 1;
+    var minScale = options.minScale != null ? options.minScale : 0.6;
+    var maxSpan = options.maxSpan != null ? options.maxSpan : 900;
+    var tileSpan = options.tileSpan != null ? options.tileSpan : baseSpacing;
+
+    if (count <= 0) {
+        return {
+            positions: [],
+            scale: baseScale,
+            spacing: baseSpacing
+        };
+    }
+
+    var totalSpan = (count - 1) * baseSpacing + tileSpan;
+    var spanRatio = totalSpan > maxSpan && totalSpan > 0 ? maxSpan / totalSpan : 1;
+    var scale = Math.max(minScale, baseScale * spanRatio);
+    var spacing = baseSpacing * spanRatio;
+    var startX = centerX - ((count - 1) * spacing) / 2;
+    var positions = [];
+
+    for (var i = 0; i < count; i++) {
+        positions.push(startX + i * spacing);
+    }
+
+    return {
+        positions: positions,
+        scale: scale,
+        spacing: spacing
+    };
+};
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -401,121 +453,71 @@ function enablechoices() {
         clueArr[i].y = 445;
         clueArr[i].scaleX = clueArr[i].scaleY = 1
     };
-    choiceArrScale = .8
+    var choiceLayout = computeRowLayout(cLen, {
+        baseSpacing: 182,
+        baseScale: 0.8,
+        minScale: 0.58,
+        maxSpan: 780,
+        tileSpan: 158
+    });
+    var clueLayout = computeRowLayout(cLen, {
+        baseSpacing: 134,
+        baseScale: 1,
+        minScale: 0.82,
+        maxSpan: 720,
+        tileSpan: 108
+    });
+
+    choiceArrScale = choiceLayout.scale;
     for (i = 0; i < cLen; i++) {
+        var tileScale = choiceLayout.scale;
+        var slotScale = clueLayout.scale;
+        var tileX = choiceLayout.positions[i] != null ? choiceLayout.positions[i] : choiceArr[i].x;
+        var slotX = clueLayout.positions[i] != null ? clueLayout.positions[i] : clueArr[i].x;
 
-        if (cLen == 2) {
-            clueArr[i].x = 585 + (i * 90) - 14;
-            choiceArr[i].x = 430 + (i * 175);
+        choiceArr[i].x = tileX;
+        choiceArr[i].y = 600;
+        choiceArr[i].scaleX = choiceArr[i].scaleY = tileScale;
+        choiceArr[i].__baseScale = tileScale;
 
+        clueArr[i].x = slotX;
+        clueArr[i].y = 445;
+        clueArr[i].scaleX = clueArr[i].scaleY = slotScale;
+
+        if (clueBgArr[i]) {
+            drawClueSlotBackground(clueBgArr[i]);
+            clueBgArr[i].x = slotX;
+            clueBgArr[i].y = clueArr[i].y;
+            clueBgArr[i].visible = true;
+            clueBgArr[i].alpha = 0;
+            clueBgArr[i].__baseScale = slotScale;
+            clueBgArr[i].scaleX = clueBgArr[i].scaleY = slotScale;
         }
 
-        if (cLen == 3) {
-            clueArr[i].x = 510 + (i * 120) ;
-            choiceArr[i].x = 430 + (i * 175);
-
-        }
-        if (cLen == 4) {
-            clueArr[i].x = 465 + (i * 110);
-            choiceArr[i].x = 340 + (i * 175);
-
-        }
-        if (cLen == 5) {
-            clueArr[i].x = 410 + (i * 110) ;
-            choiceArr[i].x = 230 + (i * 185);
-
-        }
-        if (cLen == 6) {
-            clueArr[i].x = 370 + (i * 110) - 14;
-            choiceArr[i].x = 165 + (i * 175);
-
-        }
-        if (cLen == 7) {
-            clueArr[i].x = 320 + (i * 110) - 14;
-            choiceArr[i].x = 92 + (i * 170);
-
-        }
-        if (cLen == 8) {
-            clueArr[i].x = 260 + (i * 110) - 14;
-            choiceArr[i].x = 77 + (i * 150);
-
+        if (choiceBgArr[i]) {
+            var bgScale = tileScale * 1.18;
+            choiceBgArr[i].x = tileX;
+            choiceBgArr[i].y = choiceArr[i].y;
+            choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = bgScale;
+            choiceBgArr[i].__baseScale = bgScale;
+            choiceBgArr[i].visible = true;
+            choiceBgArr[i].alpha = 0;
         }
 
-        if (cLen == 9) {
-
-            choiceArrScale = .7
-            clueArr[i].x = 210 + (i * 110) - 14;
-            choiceArr[i].x = 43 + (i * 140);
-         // choiceArr[i].scaleX = choiceArr[i].scaleY = .6;
-            // choiceArr[i].scaleX = choiceArr[i].scaleY = .5;
-         // clueArr[i].scaleX = clueArr[i].scaleY = 1;
+        if (choiceGlowArr[i]) {
+            var glowScale = tileScale * 1.3;
+            choiceGlowArr[i].x = tileX;
+            choiceGlowArr[i].y = choiceArr[i].y + 6;
+            choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = glowScale;
+            choiceGlowArr[i].__targetScale = glowScale;
+            choiceGlowArr[i].visible = true;
+            choiceGlowArr[i].alpha = 0;
         }
-        if (cLen == 10) {
-            choiceArrScale = .7
-            choiceArr[i].scaleX = choiceArr[i].scaleY = .7;
-            clueArr[i].scaleX = clueArr[i].scaleY = 1
-            clueArr[i].x = 388 + (i * 63) - 14;
-            choiceArr[i].x = 65 + (i * 120);
 
-        }
-        if (cLen == 11) {
-            // choiceArrScale = .65
-            choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-            clueArr[i].scaleX = clueArr[i].scaleY = 1
-            clueArr[i].x = 358+ (i * 63) - 14;
-            choiceArr[i].x = 35 + (i * 114);
-
-        }
-        if (cLen == 12) {
-            choiceArrScale = .65
-            choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-            clueArr[i].scaleX = clueArr[i].scaleY = 1
-            clueArr[i].x = 326 + (i * 63) - 14;
-            choiceArr[i].x = 28 + (i * 105);
-
-        }
-        if (cLen == 13) {
-            choiceArrScale = .58
-            choiceArr[i].scaleX = choiceArr[i].scaleY = .58;
-            clueArr[i].scaleX = clueArr[i].scaleY = 1
-            clueArr[i].x = 295 + (i * 63) - 14;
-            choiceArr[i].x = 27 + (i * 97);
-
-        }
-		
-		if (clueBgArr[i]) {
-      drawClueSlotBackground(clueBgArr[i]);
-      clueBgArr[i].x = clueArr[i].x;
-      clueBgArr[i].y = clueArr[i].y;
-      clueBgArr[i].visible = true;
-      clueBgArr[i].alpha = 0;
-      clueBgArr[i].__baseScale = 1;
-    }
-
-    if (choiceBgArr[i]) {
-      var tileScale = choiceArr[i].scaleX || choiceArrScale;
-      choiceBgArr[i].x = choiceArr[i].x;
-      choiceBgArr[i].y = choiceArr[i].y;
-      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.18;
-      choiceBgArr[i].__baseScale = tileScale * 1.18;
-      choiceBgArr[i].visible = true;
-      choiceBgArr[i].alpha = 0;
-    }
-
-    if (choiceGlowArr[i]) {
-      choiceGlowArr[i].x = choiceArr[i].x;
-      choiceGlowArr[i].y = choiceArr[i].y + 6;
-      choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = (choiceArr[i].scaleX || choiceArrScale) * 1.3;
-      choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
-      choiceGlowArr[i].visible = true;
-      choiceGlowArr[i].alpha = 0;
-    }
-
-    choiceArr[i].visible = true;
-    choiceArr[i].id = i;
-    choiceArr[i].mouseEnabled = true;
-    choiceArr[i].cursor = "pointer";
-    choiceArr[i].__baseScale = choiceArr[i].scaleX;
+        choiceArr[i].visible = true;
+        choiceArr[i].id = i;
+        choiceArr[i].mouseEnabled = true;
+        choiceArr[i].cursor = "pointer";
     }
 
     if (questionCardContainer) {
