@@ -5,16 +5,16 @@ var highlightTweenArr = []
 var cluegotoArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introQuestxtX = 640; introQuestxtY = 150;
-var introQues1X = 640, introQues1Y = 294
-var introChoice1X = 376, introChoice1Y = 640;
-var introChoice2X = 552, introChoice2Y = 640;
-var introChoice3X = 728, introChoice3Y = 640;
-var introChoice4X = 904, introChoice4Y = 640;
-var introClu1X = 460, introClu1Y = 490;
-var introClu2X = 580, introClu2Y = 490;
-var introClu3X = 700, introClu3Y = 490;
-var introClu4X = 820, introClu4Y = 490;
+var introQuestxtX = 640; introQuestxtY = 160;
+var introQues1X = 640, introQues1Y = 312
+var introChoice1X = 376, introChoice1Y = 610;
+var introChoice2X = 552, introChoice2Y = 610;
+var introChoice3X = 728, introChoice3Y = 610;
+var introChoice4X = 904, introChoice4Y = 610;
+var introClu1X = 460, introClu1Y = 470;
+var introClu2X = 580, introClu2Y = 470;
+var introClu3X = 700, introClu3Y = 470;
+var introClu4X = 820, introClu4Y = 470;
 var introArrowX = introChoice2X, introArrowY = introClu1Y - 46;
 var introfingureX = introChoice2X, introfingureY = introChoice2Y + 32;
 var ArrowXArr = [null], FingXArr = [null];
