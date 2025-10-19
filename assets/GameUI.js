@@ -68,6 +68,242 @@ if (typeof window !== "undefined") {
   window.SAUI_computeCenteredRow = computeCenteredRowLayout;
 }
 
+var globalHelperScope =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof window !== "undefined"
+    ? window
+    : typeof self !== "undefined"
+    ? self
+    : this;
+
+function getBitmapNaturalBounds(bitmap) {
+  if (!bitmap) {
+    return null;
+  }
+
+  if (typeof bitmap.getBounds === "function") {
+    var cached = bitmap.getBounds();
+    if (cached) {
+      return cached;
+    }
+  }
+
+  if (bitmap.image) {
+    return {
+      x: 0,
+      y: 0,
+      width: bitmap.image.width || 0,
+      height: bitmap.image.height || 0
+    };
+  }
+
+  return null;
+}
+
+function configureIntroArrowSprite(sprite, options) {
+  if (!sprite) {
+    return;
+  }
+
+  options = options || {};
+  var scale = options.scale != null ? options.scale : 0.72;
+  sprite.scaleX = sprite.scaleY = scale;
+  sprite.mouseEnabled = false;
+  sprite.mouseChildren = false;
+  sprite.visible = false;
+  sprite.alpha = 0;
+  sprite.__tipGap = options.tipGap != null ? options.tipGap : 26;
+  sprite.__bounceOffset = options.bounceOffset != null ? options.bounceOffset : 16;
+
+  var bounds = getBitmapNaturalBounds(sprite);
+  if (bounds) {
+    var originX = (bounds.x || 0) + bounds.width / 2;
+    var originY = (bounds.y || 0) + bounds.height;
+    sprite.regX = originX;
+    sprite.regY = originY;
+  }
+}
+
+function configureIntroFingerSprite(sprite, options) {
+  if (!sprite) {
+    return;
+  }
+
+  options = options || {};
+  var baseScale =
+    typeof options.baseScale === "number"
+      ? options.baseScale
+      : typeof sprite.__baseScale === "number"
+      ? sprite.__baseScale
+      : 0.78;
+
+  sprite.scaleX = sprite.scaleY = baseScale;
+  sprite.mouseEnabled = false;
+  sprite.mouseChildren = false;
+  sprite.visible = false;
+  sprite.alpha = 0;
+
+  var pointerTip = options.pointerTip || sprite.__pointerTipBase || sprite.__pointerTip;
+  if (pointerTip && typeof pointerTip.x === "number" && typeof pointerTip.y === "number") {
+    sprite.__pointerOffsetX = pointerTip.x * baseScale;
+    sprite.__pointerOffsetY = pointerTip.y * baseScale;
+  } else {
+    var bounds = getBitmapNaturalBounds(sprite);
+    if (bounds) {
+      sprite.__pointerOffsetX = bounds.width * 0.42 * baseScale;
+      sprite.__pointerOffsetY = bounds.height * 0.82 * baseScale;
+    } else {
+      sprite.__pointerOffsetX = 0;
+      sprite.__pointerOffsetY = 0;
+    }
+  }
+
+  var pressDistanceBase =
+    typeof options.pressDistance === "number"
+      ? options.pressDistance
+      : typeof sprite.__pressDistanceBase === "number"
+      ? sprite.__pressDistanceBase
+      : sprite.__pressDistance;
+
+  sprite.__pressDistance =
+    typeof pressDistanceBase === "number" ? pressDistanceBase * baseScale : 18 * baseScale;
+}
+
+function buildChoiceLetterDisplay(options) {
+  options = options || {};
+  var font = options.font || "800 66px 'Baloo 2'";
+  var color = options.color || "#FFFFFF";
+  var baseScale = options.baseScale != null ? options.baseScale : 0.8;
+  var interactive = options.interactive !== false;
+  var shadow =
+    options.shadow || new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+
+  var label = new createjs.Text("", font, color);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = shadow;
+  label.mouseEnabled = interactive;
+  label.mouseChildren = false;
+  label.__baseScale = baseScale;
+  label.__isChoiceLetter = true;
+
+  var hitRadius = options.hitRadius != null ? options.hitRadius : 78;
+  if (interactive) {
+    var hitArea = new createjs.Shape();
+    hitArea.graphics
+      .beginFill("#000")
+      .drawRoundRect(-hitRadius, -hitRadius, hitRadius * 2, hitRadius * 2, 52);
+    label.hitArea = hitArea;
+    label.__hitArea = hitArea;
+  }
+
+  return label;
+}
+
+function updateChoiceLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function buildClueLetterDisplay(options) {
+  options = options || {};
+  var font = options.font || "800 60px 'Baloo 2'";
+  var color = options.color || "#FFFFFF";
+  var baseScale = options.baseScale != null ? options.baseScale : 1;
+  var shadow =
+    options.shadow || new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+
+  var label = new createjs.Text("", font, color);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = shadow;
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = baseScale;
+  label.__isClueLetter = true;
+  return label;
+}
+
+function updateClueLetterDisplay(display, letter) {
+  if (!display) {
+    return;
+  }
+
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function buildIntroGlowShape(options) {
+  options = options || {};
+  var innerColor = options.innerColor || "rgba(209,178,255,0.55)";
+  var outerColor = options.outerColor || "rgba(209,178,255,0)";
+  var radius = options.radius != null ? options.radius : 120;
+
+  var glow = new createjs.Shape();
+  glow.graphics
+    .beginRadialGradientFill([innerColor, outerColor], [0, 1], 0, 0, 0, 0, 0, radius)
+    .drawCircle(0, 0, radius);
+  glow.alpha = 0;
+  glow.visible = false;
+  glow.mouseEnabled = false;
+  glow.mouseChildren = false;
+  return glow;
+}
+
+function computeRowLayout(count, options) {
+  return computeCenteredRowLayout(count, options);
+}
+
+if (globalHelperScope) {
+  if (typeof globalHelperScope.SAUI_configureIntroArrowSprite !== "function") {
+    globalHelperScope.SAUI_configureIntroArrowSprite = configureIntroArrowSprite;
+  }
+  if (typeof globalHelperScope.SAUI_configureIntroFingerSprite !== "function") {
+    globalHelperScope.SAUI_configureIntroFingerSprite = configureIntroFingerSprite;
+  }
+  if (typeof globalHelperScope.SAUI_buildChoiceLetterDisplay !== "function") {
+    globalHelperScope.SAUI_buildChoiceLetterDisplay = buildChoiceLetterDisplay;
+  }
+  if (typeof globalHelperScope.SAUI_updateChoiceLetterDisplay !== "function") {
+    globalHelperScope.SAUI_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
+  }
+  if (typeof globalHelperScope.SAUI_buildClueLetterDisplay !== "function") {
+    globalHelperScope.SAUI_buildClueLetterDisplay = buildClueLetterDisplay;
+  }
+  if (typeof globalHelperScope.SAUI_updateClueLetterDisplay !== "function") {
+    globalHelperScope.SAUI_updateClueLetterDisplay = updateClueLetterDisplay;
+  }
+  if (typeof globalHelperScope.SAUI_buildIntroGlowShape !== "function") {
+    globalHelperScope.SAUI_buildIntroGlowShape = buildIntroGlowShape;
+  }
+  if (typeof globalHelperScope.SAUI_computeRowLayout !== "function") {
+    globalHelperScope.SAUI_computeRowLayout = computeRowLayout;
+  }
+  if (typeof globalHelperScope.SA_buildChoiceLetterDisplay !== "function") {
+    globalHelperScope.SA_buildChoiceLetterDisplay = function (options) {
+      return buildChoiceLetterDisplay(options);
+    };
+  }
+  if (typeof globalHelperScope.SA_updateChoiceLetterDisplay !== "function") {
+    globalHelperScope.SA_updateChoiceLetterDisplay = updateChoiceLetterDisplay;
+  }
+  if (typeof globalHelperScope.SA_buildClueLetterDisplay !== "function") {
+    globalHelperScope.SA_buildClueLetterDisplay = function (options) {
+      return buildClueLetterDisplay(options);
+    };
+  }
+  if (typeof globalHelperScope.SA_updateClueLetterDisplay !== "function") {
+    globalHelperScope.SA_updateClueLetterDisplay = updateClueLetterDisplay;
+  }
+}
+
 var choiceDisableOverlayArr = [];
 var choiceReadyPulseArr = [];
 var choiceReadyBadgeArr = [];

@@ -6906,17 +6906,28 @@ function startProceedButtonHighlightSweep(button) {
 
 
 //==========================================================================//
+var __isCreatingHowToPlay = false;
+
 function createHowToPlay() {
-    if (typeof handCursor !== "undefined" && handCursor) {
-        handCursor.visible = false;
-    }
-    hideLoaderProceedButton();
-
-    if (HowToPlayScreenImg) {
-        HowToPlayScreenImg.visible = false;
+    if (__isCreatingHowToPlay) {
+        return;
     }
 
-    createGameIntroAnimationPlay(true)
+    __isCreatingHowToPlay = true;
+    try {
+        if (typeof handCursor !== "undefined" && handCursor) {
+            handCursor.visible = false;
+        }
+        hideLoaderProceedButton();
+
+        if (HowToPlayScreenImg) {
+            HowToPlayScreenImg.visible = false;
+        }
+
+        createGameIntroAnimationPlay(true);
+    } finally {
+        __isCreatingHowToPlay = false;
+    }
 }
 //==========================================================================//
 function createHowToPlayHandler(evt) {
