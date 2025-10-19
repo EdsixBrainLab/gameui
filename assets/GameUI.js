@@ -198,6 +198,11 @@ function buildChoiceLetterDisplay(options) {
     label.__hitArea = hitArea;
   }
 
+  if (options.accessibleLabel) {
+    label.accessible = true;
+    label.accessibleLabel = options.accessibleLabel;
+  }
+
   return label;
 }
 
@@ -208,7 +213,7 @@ function updateChoiceLetterDisplay(display, letter) {
 
   var value = letter ? String(letter).toUpperCase() : "";
   display.text = value;
-  display.alpha = value ? 1 : 0;
+  display.alpha = value ? 1 : 0.15;
 }
 
 function buildClueLetterDisplay(options) {
@@ -216,8 +221,7 @@ function buildClueLetterDisplay(options) {
   var font = options.font || "800 60px 'Baloo 2'";
   var color = options.color || "#FFFFFF";
   var baseScale = options.baseScale != null ? options.baseScale : 1;
-  var shadow =
-    options.shadow || new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+  var shadow = options.shadow || new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
 
   var label = new createjs.Text("", font, color);
   label.textAlign = "center";
@@ -227,6 +231,12 @@ function buildClueLetterDisplay(options) {
   label.mouseChildren = false;
   label.__baseScale = baseScale;
   label.__isClueLetter = true;
+
+  if (options.accessibleLabel) {
+    label.accessible = true;
+    label.accessibleLabel = options.accessibleLabel;
+  }
+
   return label;
 }
 
@@ -237,7 +247,168 @@ function updateClueLetterDisplay(display, letter) {
 
   var value = letter ? String(letter).toUpperCase() : "";
   display.text = value;
+  display.alpha = value ? 1 : 0.15;
+}
+
+function cloneAnagramHelperOptions(base) {
+  var copy = {};
+  if (!base) {
+    return copy;
+  }
+  for (var key in base) {
+    if (Object.prototype.hasOwnProperty.call(base, key)) {
+      copy[key] = base[key];
+    }
+  }
+  return copy;
+}
+
+function createFallbackChoiceLetter(options) {
+  var opts = cloneAnagramHelperOptions(options);
+  var letter = new createjs.Text(
+    "",
+    opts.font || "800 66px 'Baloo 2'",
+    opts.color || "#FFFFFF"
+  );
+  letter.textAlign = "center";
+  letter.textBaseline = "middle";
+  letter.shadow =
+    opts.shadow || new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+  letter.mouseEnabled = opts.interactive !== false;
+  letter.mouseChildren = false;
+  var baseScale = opts.baseScale != null ? opts.baseScale : 0.8;
+  letter.__baseScale = baseScale;
+  if (letter.mouseEnabled) {
+    var hitRadius = opts.hitRadius != null ? opts.hitRadius : 78;
+    var hit = new createjs.Shape();
+    hit.graphics
+      .beginFill("#000")
+      .drawRoundRect(-hitRadius, -hitRadius, hitRadius * 2, hitRadius * 2, 52);
+    letter.hitArea = hit;
+    letter.__hitArea = hit;
+  }
+  return letter;
+}
+
+function fallbackChoiceUpdater(display, letter) {
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
   display.alpha = value ? 1 : 0;
+}
+
+function createFallbackClueLetter(options) {
+  var opts = cloneAnagramHelperOptions(options);
+  var label = new createjs.Text(
+    "",
+    opts.font || "800 60px 'Baloo 2'",
+    opts.color || "#FFFFFF"
+  );
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow =
+    opts.shadow || new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = opts.baseScale != null ? opts.baseScale : 1;
+  return label;
+}
+
+function fallbackClueUpdater(display, letter) {
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function createAnagramLetterHelpers(config) {
+  config = config || {};
+
+  var nativeChoiceBuilder =
+    typeof buildChoiceLetterDisplay === "function"
+      ? buildChoiceLetterDisplay
+      : null;
+  var nativeChoiceUpdater =
+    typeof updateChoiceLetterDisplay === "function"
+      ? updateChoiceLetterDisplay
+      : null;
+  var nativeClueBuilder =
+    typeof buildClueLetterDisplay === "function"
+      ? buildClueLetterDisplay
+      : null;
+  var nativeClueUpdater =
+    typeof updateClueLetterDisplay === "function"
+      ? updateClueLetterDisplay
+      : null;
+
+  var choiceBase = {
+    interactive: config.choiceInteractive !== false,
+    baseScale:
+      config.choiceScale != null ? config.choiceScale : config.choiceBaseScale,
+    font: config.choiceFont,
+    color: config.choiceColor,
+    shadow: config.choiceShadow,
+    hitRadius: config.choiceHitRadius
+  };
+  if (choiceBase.baseScale == null) {
+    choiceBase.baseScale = 0.8;
+  }
+
+  var clueBase = {
+    interactive: false,
+    baseScale: config.clueScale != null ? config.clueScale : 1,
+    font: config.clueFont,
+    color: config.clueColor,
+    shadow: config.clueShadow
+  };
+
+  var choiceBuilder = nativeChoiceBuilder
+    ? function () {
+        return nativeChoiceBuilder(cloneAnagramHelperOptions(choiceBase));
+      }
+    : function () {
+        return createFallbackChoiceLetter(choiceBase);
+      };
+
+  var choiceUpdater = nativeChoiceUpdater
+    ? function (display, letter) {
+        nativeChoiceUpdater(display, letter);
+      }
+    : fallbackChoiceUpdater;
+
+  var clueBuilder = nativeClueBuilder
+    ? function () {
+        return nativeClueBuilder(cloneAnagramHelperOptions(clueBase));
+      }
+    : function () {
+        return createFallbackClueLetter(clueBase);
+      };
+
+  var clueUpdater = nativeClueUpdater
+    ? function (display, letter) {
+        nativeClueUpdater(display, letter);
+      }
+    : fallbackClueUpdater;
+
+  return {
+    buildChoice: choiceBuilder,
+    updateChoice: choiceUpdater,
+    buildClue: clueBuilder,
+    updateClue: clueUpdater
+  };
+}
+
+if (typeof globalHelperScope !== "undefined") {
+  if (typeof globalHelperScope.SAUI_createAnagramLetterHelpers !== "function") {
+    globalHelperScope.SAUI_createAnagramLetterHelpers = createAnagramLetterHelpers;
+  }
+  if (typeof globalHelperScope.SA_createAnagramLetterHelpers !== "function") {
+    globalHelperScope.SA_createAnagramLetterHelpers = createAnagramLetterHelpers;
+  }
 }
 
 function buildIntroGlowShape(options) {
