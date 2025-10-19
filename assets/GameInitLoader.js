@@ -199,6 +199,8 @@ function buildVectorHandIcon() {
 
     var hand = new createjs.Container();
 
+    var hand = new createjs.Container();
+
     var cuff = new createjs.Shape();
     cuff.graphics
         .clear()
@@ -274,6 +276,7 @@ function buildVectorHandIcon() {
         .quadraticCurveTo(18, 188, -2, 142)
         .quadraticCurveTo(-18, 110, -40, 100)
         .closePath();
+    palmShadow.alpha = 0.72;
 
     var thumbShadow = new createjs.Shape();
     thumbShadow.graphics
@@ -408,7 +411,7 @@ function buildVectorHandIcon() {
     fingertipAura.graphics
         .clear()
         .beginRadialGradientFill(
-            ["rgba(255,248,255,0.9)", "rgba(236,72,153,0)"],
+            ["rgba(255,250,255,0.92)", "rgba(236,72,153,0)"],
             [0, 1],
             0,
             0,
