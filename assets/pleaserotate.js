@@ -30,41 +30,36 @@ var isGamePlay = false;
         "#pleaserotate-container { position: relative; width: min(430px, 92vw); display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 4vw, 26px); padding: clamp(28px, 7vw, 40px) clamp(30px, 7vw, 42px); border-radius: 30px; background: linear-gradient(165deg, rgba(98, 66, 224, 0.88), rgba(142, 88, 238, 0.84) 56%, rgba(192, 118, 255, 0.8)); box-shadow: 0 28px 70px rgba(22, 6, 58, 0.5), 0 8px 18px rgba(76, 33, 180, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.22); text-align: center; backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); overflow: hidden; }",
         "#pleaserotate-container::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(145deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 48%, rgba(255, 255, 255, 0.16) 100%); mix-blend-mode: screen; opacity: 0.68; pointer-events: none; }",
         "#pleaserotate-container::after { content: ''; position: absolute; inset: 18%; border-radius: 24px; background: radial-gradient(circle at 42% 0%, rgba(255, 255, 255, 0.42), transparent 74%); pointer-events: none; }",
-        "#pleaserotate-graphic { position: relative; width: clamp(132px, 34vw, 176px); height: clamp(132px, 34vw, 176px); display: flex; align-items: center; justify-items: center; justify-content: center; }",
-        "#pleaserotate-graphic .pr-icon__glow { position: absolute; inset: 0; border-radius: 36px; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.36), rgba(176, 132, 255, 0.1) 64%, transparent 82%); filter: blur(0.4px); opacity: 0.92; animation: pr-glow 6.2s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__orbit { position: absolute; width: 96%; height: 96%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(118, 82, 236, 0.3) 60%, rgba(24, 12, 74, 0) 80%); box-shadow: inset 0 0 26px rgba(120, 84, 240, 0.32); opacity: 0.9; }",
-        "#pleaserotate-graphic .pr-icon__ring { position: absolute; width: 80%; height: 80%; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.42); border-top-color: rgba(255, 255, 255, 0.88); border-left-color: rgba(255, 255, 255, 0.78); transform: rotate(-26deg); transform-origin: 50% 50%; animation: pr-ring 8s linear infinite; box-shadow: 0 0 16px rgba(255, 255, 255, 0.28); }",
-        "#pleaserotate-graphic .pr-icon__ring::after { content: ''; position: absolute; top: -6px; right: 18px; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #ffe8ff, #ffffff 62%); box-shadow: 0 0 12px rgba(255, 255, 255, 0.68); }",
-        "#pleaserotate-graphic .pr-icon__device { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 24px; box-shadow: 0 20px 32px rgba(14, 6, 46, 0.46), inset 0 0 0 1px rgba(255, 255, 255, 0.16); }",
-        "#pleaserotate-graphic .pr-icon__device-screen { width: 76%; height: 72%; border-radius: 18px; background: linear-gradient(165deg, rgba(122, 88, 236, 0.88), rgba(186, 134, 255, 0.72)); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.28); }",
-        "#pleaserotate-graphic .pr-icon__device-notch { position: absolute; top: 12%; left: 50%; width: 34%; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.38); transform: translateX(-50%); box-shadow: 0 0 6px rgba(255, 255, 255, 0.32); }",
-        "#pleaserotate-graphic .pr-icon__device--portrait { width: 58%; height: 76%; left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(12deg); background: linear-gradient(140deg, rgba(26, 14, 74, 0.96), rgba(78, 40, 164, 0.92)); animation: pr-device 6s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__device--landscape { width: 78%; height: 56%; left: 54%; top: 48%; transform: translate(-50%, -50%) rotate(-78deg); background: linear-gradient(145deg, rgba(36, 22, 92, 0.42), rgba(132, 94, 240, 0.28)); border: 1px solid rgba(255, 255, 255, 0.24); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); opacity: 0.72; animation: pr-device-ghost 6.4s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__device--landscape .pr-icon__device-screen { background: linear-gradient(160deg, rgba(158, 132, 255, 0.24), rgba(255, 255, 255, 0.08)); }",
-        "#pleaserotate-graphic .pr-icon__arrow { position: absolute; width: 92%; height: 92%; transform-origin: 50% 50%; animation: pr-arrow 6.6s ease-in-out infinite; filter: drop-shadow(0 10px 16px rgba(33, 12, 94, 0.35)); }",
-        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__trail { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 210; stroke-dashoffset: 210; animation: pr-arrow-stroke 6.6s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__head { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }",
-        "#pleaserotate-graphic .pr-icon__spark { position: absolute; top: 18%; right: 20%; width: 24%; height: 24%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)); opacity: 0.7; animation: pr-spark 5.8s ease-in-out infinite; pointer-events: none; }",
-        "#pleaserotate-graphic .pr-icon__hint { position: absolute; bottom: 12%; left: 50%; width: 68%; height: 26%; border-radius: 18px; background: linear-gradient(140deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0)); border: 1px solid rgba(255, 255, 255, 0.32); transform: translateX(-50%) rotate(-6deg); opacity: 0.74; animation: pr-hint 6.6s ease-in-out infinite; }",
-        "#pleaserotate-graphic .pr-icon__hint::before { content: ''; position: absolute; inset: 20% 18%; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.4); opacity: 0.8; }",
-        "#pleaserotate-graphic .pr-icon__hint::after { content: ''; position: absolute; top: 42%; left: 50%; width: 16%; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.45); transform: translate(-50%, -50%); }",
+        "#pleaserotate-graphic { position: relative; width: clamp(138px, 34vw, 188px); height: clamp(138px, 34vw, 188px); display: grid; place-items: center; }",
+        "#pleaserotate-graphic .pr-icon__glow { position: absolute; inset: 6%; border-radius: 34px; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.38), rgba(167, 128, 255, 0.1) 64%, transparent 82%); filter: blur(0.4px); opacity: 0.9; animation: pr-glow 6.8s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__halo { position: absolute; inset: 18%; border-radius: 26px; background: linear-gradient(150deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.04)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 20px 34px rgba(28, 12, 74, 0.45); opacity: 0.82; }",
+        "#pleaserotate-graphic .pr-icon__halo::after { content: ''; position: absolute; inset: 16%; border-radius: inherit; border: 1px solid rgba(255, 255, 255, 0.22); opacity: 0.6; mix-blend-mode: screen; }",
+        "#pleaserotate-graphic .pr-icon__phone { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 24px; background: linear-gradient(160deg, rgba(32, 18, 92, 0.96), rgba(118, 76, 234, 0.88)); box-shadow: 0 18px 30px rgba(14, 6, 58, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.16); }",
+        "#pleaserotate-graphic .pr-icon__phone-screen { width: 78%; height: 74%; border-radius: 18px; background: linear-gradient(160deg, rgba(148, 116, 255, 0.92), rgba(226, 190, 255, 0.7)); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.3); }",
+        "#pleaserotate-graphic .pr-icon__phone-notch { position: absolute; top: 12%; left: 50%; width: 36%; height: 7%; border-radius: 3px; background: rgba(255, 255, 255, 0.4); transform: translateX(-50%); box-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }",
+        "#pleaserotate-graphic .pr-icon__phone--portrait { width: 44%; height: 72%; left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(-2deg); animation: pr-portrait 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__phone--landscape { width: 70%; height: 46%; left: 60%; top: 44%; transform: translate(-50%, -50%) rotate(-90deg); opacity: 0.7; background: linear-gradient(160deg, rgba(24, 12, 74, 0.7), rgba(112, 76, 230, 0.54)); animation: pr-landscape 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__phone--landscape .pr-icon__phone-screen { background: linear-gradient(140deg, rgba(198, 182, 255, 0.24), rgba(255, 255, 255, 0.08)); }",
+        "#pleaserotate-graphic .pr-icon__arrow { position: absolute; inset: 12%; transform-origin: 50% 50%; filter: drop-shadow(0 10px 16px rgba(33, 12, 94, 0.35)); animation: pr-arrow-loop 7s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__arrow path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }",
+        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__arc { stroke-dasharray: 220; stroke-dashoffset: 220; animation: pr-arrow-dash 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__arrow .pr-arrow__head { stroke-dasharray: 32; stroke-dashoffset: 32; animation: pr-arrow-head 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__pivot { position: absolute; left: 32%; top: 72%; width: 16%; height: 16%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9), rgba(176, 132, 255, 0.3)); box-shadow: 0 0 18px rgba(190, 148, 255, 0.6); transform: translate(-50%, -50%); animation: pr-pivot 6.4s ease-in-out infinite; }",
+        "#pleaserotate-graphic .pr-icon__pivot::after { content: ''; position: absolute; inset: 28%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.6); }",
         "#pleaserotate-message { position: relative; z-index: 1; margin: 0; font-size: clamp(20px, 5vw, 28px); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }",
         "#pleaserotate-message strong { display: block; color: #ffffff; font-size: clamp(20px, 5vw, 28px); }",
         "#pleaserotate-message small { display: block; margin-top: clamp(8px, 2vw, 12px); font-size: clamp(13px, 3.2vw, 15px); font-weight: 500; letter-spacing: 0.06em; color: rgba(255, 244, 255, 0.78); }",
-        "@media (prefers-reduced-motion: reduce) { #pleaserotate-backdrop, #pleaserotate-graphic .pr-icon__glow, #pleaserotate-graphic .pr-icon__ring, #pleaserotate-graphic .pr-icon__device, #pleaserotate-graphic .pr-icon__device--landscape, #pleaserotate-graphic .pr-icon__arrow, #pleaserotate-graphic .pr-icon__hint, #pleaserotate-graphic .pr-icon__spark { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }"
+        "@media (prefers-reduced-motion: reduce) { #pleaserotate-backdrop, #pleaserotate-graphic .pr-icon__glow, #pleaserotate-graphic .pr-icon__phone, #pleaserotate-graphic .pr-icon__arrow, #pleaserotate-graphic .pr-icon__pivot { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }"
     ];
-
     var cssKeyframeRules = [
-        "pr-device { 0%,100% { transform: translate(-50%, -50%) rotate(12deg); } 50% { transform: translate(-50%, -54%) rotate(2deg); } }",
-        "pr-device-ghost { 0%,100% { opacity: 0.62; transform: translate(-50%, -50%) rotate(-78deg) scale(0.96); } 50% { opacity: 0.88; transform: translate(-50%, -54%) rotate(-92deg) scale(1); } }",
-        "pr-ring { 0% { transform: rotate(-26deg); } 100% { transform: rotate(334deg); } }",
-        "pr-hint { 0%,100% { opacity: 0.52; transform: translateX(-50%) rotate(-6deg) scale(0.96); } 50% { opacity: 0.82; transform: translateX(-50%) rotate(-2deg) scale(1.02); } }",
-        "pr-glow { 0%,100% { opacity: 0.72; } 45% { opacity: 1; } }",
-        "pr-arrow { 0%,100% { transform: rotate(-12deg); } 45% { transform: rotate(10deg); } }",
-        "pr-arrow-stroke { 0% { stroke-dashoffset: 210; } 28% { stroke-dashoffset: 38; } 70% { stroke-dashoffset: -16; } 100% { stroke-dashoffset: -16; } }",
-        "pr-spark { 0%,100% { opacity: 0.52; transform: scale(0.92); } 45% { opacity: 0.9; transform: scale(1.06); } }"
+        "pr-portrait { 0%,100% { transform: translate(-50%, -50%) rotate(-2deg); } 50% { transform: translate(-50%, -54%) rotate(6deg); } }",
+        "pr-landscape { 0%,100% { transform: translate(-50%, -50%) rotate(-90deg); opacity: 0.68; } 50% { transform: translate(-48%, -52%) rotate(-108deg); opacity: 0.85; } }",
+        "pr-arrow-loop { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } }",
+        "pr-arrow-dash { 0% { stroke-dashoffset: 220; } 46% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; } }",
+        "pr-arrow-head { 0% { stroke-dashoffset: 32; opacity: 0; } 40% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 1; } }",
+        "pr-glow { 0%,100% { opacity: 0.7; } 45% { opacity: 1; } }",
+        "pr-pivot { 0%,100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; } 45% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; } }"
     ];
-
     /* private functions */
    
     function overrideOptions(updates){
@@ -237,40 +232,38 @@ var isGamePlay = false;
     function createPhoneSVG(){
         var wrapper = document.createElement('div');
         var glow = document.createElement('span');
-        var orbit = document.createElement('span');
-        var ring = document.createElement('span');
+        var halo = document.createElement('span');
         var portrait = document.createElement('div');
         var portraitScreen = document.createElement('div');
         var portraitNotch = document.createElement('span');
         var landscape = document.createElement('div');
         var landscapeScreen = document.createElement('div');
+        var landscapeNotch = document.createElement('span');
         var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        var hint = document.createElement('span');
-        var spark = document.createElement('span');
+        var pivot = document.createElement('span');
 
         wrapper.setAttribute('id', 'pleaserotate-graphic');
         wrapper.className = 'pr-icon';
 
         glow.className = 'pr-icon__glow';
-        orbit.className = 'pr-icon__orbit';
-        ring.className = 'pr-icon__ring';
-        portrait.className = 'pr-icon__device pr-icon__device--portrait';
-        portraitScreen.className = 'pr-icon__device-screen';
-        portraitNotch.className = 'pr-icon__device-notch';
-        landscape.className = 'pr-icon__device pr-icon__device--landscape';
+        halo.className = 'pr-icon__halo';
+        portrait.className = 'pr-icon__phone pr-icon__phone--portrait';
+        portraitScreen.className = 'pr-icon__phone-screen';
+        portraitNotch.className = 'pr-icon__phone-notch';
+        landscape.className = 'pr-icon__phone pr-icon__phone--landscape';
         landscape.setAttribute('aria-hidden', 'true');
-        landscapeScreen.className = 'pr-icon__device-screen';
+        landscapeScreen.className = 'pr-icon__phone-screen';
+        landscapeNotch.className = 'pr-icon__phone-notch';
         arrow.setAttribute('class', 'pr-icon__arrow');
-        arrow.setAttribute('viewBox', '0 0 90 90');
+        arrow.setAttribute('viewBox', '0 0 120 120');
         arrow.setAttribute('role', 'presentation');
-        hint.className = 'pr-icon__hint';
-        hint.setAttribute('aria-hidden', 'true');
-        spark.className = 'pr-icon__spark';
-        spark.setAttribute('aria-hidden', 'true');
+        pivot.className = 'pr-icon__pivot';
+        pivot.setAttribute('aria-hidden', 'true');
 
         portrait.appendChild(portraitScreen);
         portrait.appendChild(portraitNotch);
         landscape.appendChild(landscapeScreen);
+        landscape.appendChild(landscapeNotch);
 
         var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         var gradientId = 'pr-arrow-gradient-' + Math.floor(Math.random() * 1000000);
@@ -283,15 +276,15 @@ var isGamePlay = false;
 
         var stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         stop1.setAttribute('offset', '0%');
-        stop1.setAttribute('stop-color', '#F9EDFF');
+        stop1.setAttribute('stop-color', '#FDF5FF');
 
         var stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop2.setAttribute('offset', '52%');
-        stop2.setAttribute('stop-color', '#D6B9FF');
+        stop2.setAttribute('offset', '45%');
+        stop2.setAttribute('stop-color', '#D9BBFF');
 
         var stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         stop3.setAttribute('offset', '100%');
-        stop3.setAttribute('stop-color', '#926CFF');
+        stop3.setAttribute('stop-color', '#8D6CFF');
 
         gradient.appendChild(stop1);
         gradient.appendChild(stop2);
@@ -299,35 +292,33 @@ var isGamePlay = false;
 
         defs.appendChild(gradient);
 
-        var arrowStroke = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        arrowStroke.setAttribute('class', 'pr-arrow__trail');
-        arrowStroke.setAttribute('d', 'M28 22c6.6-12.6 19.3-21 33.8-21 19.2 0 34.2 15.4 34.2 34.2 0 15.8-10.6 29.8-25.8 33.6');
-        arrowStroke.setAttribute('stroke', 'url(#' + gradientId + ')');
+        var arrowArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        arrowArc.setAttribute('class', 'pr-arrow__arc');
+        arrowArc.setAttribute('d', 'M32 90C32 55 58 30 94 30h10');
+        arrowArc.setAttribute('stroke', 'url(#' + gradientId + ')');
 
         var arrowHead = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         arrowHead.setAttribute('class', 'pr-arrow__head');
-        arrowHead.setAttribute('d', 'M24 26l4.8-13.8 12 9.6');
+        arrowHead.setAttribute('d', 'M96 20l18 10-18 10');
         arrowHead.setAttribute('stroke', 'url(#' + gradientId + ')');
 
         arrow.appendChild(defs);
-        arrow.appendChild(arrowStroke);
+        arrow.appendChild(arrowArc);
         arrow.appendChild(arrowHead);
 
-        arrowStroke.setAttribute('stroke-width', '5');
-        arrowHead.setAttribute('stroke-width', '5');
-        arrowStroke.setAttribute('stroke-linecap', 'round');
+        arrowArc.setAttribute('stroke-width', '6');
+        arrowHead.setAttribute('stroke-width', '6');
+        arrowArc.setAttribute('stroke-linecap', 'round');
         arrowHead.setAttribute('stroke-linecap', 'round');
-        arrowStroke.setAttribute('stroke-linejoin', 'round');
+        arrowArc.setAttribute('stroke-linejoin', 'round');
         arrowHead.setAttribute('stroke-linejoin', 'round');
 
         wrapper.appendChild(glow);
-        wrapper.appendChild(orbit);
-        wrapper.appendChild(ring);
+        wrapper.appendChild(halo);
         wrapper.appendChild(landscape);
         wrapper.appendChild(portrait);
+        wrapper.appendChild(pivot);
         wrapper.appendChild(arrow);
-        wrapper.appendChild(spark);
-        wrapper.appendChild(hint);
 
         return wrapper;
     }
