@@ -39,7 +39,27 @@ function htmlRedirect(nav, url, tqcnt, aqcnt, cqcnt, gscore, gtime, rtime, crtim
                         console.log("test")
                         //if (Data == 1) {
                             bitmap.visible = false;
-                            resultLoading.visible = true;
+                            var overlayShown = false;
+                            if (typeof SAUIX_showResultsLoadingOverlay === "function") {
+                                var stageRef = typeof stage !== "undefined" ? stage : null;
+                                var langKey = typeof assetsPathLang === "string" ? assetsPathLang : "";
+                                var copy = typeof SAUIX_getConnectivityCopy === "function"
+                                    ? SAUIX_getConnectivityCopy("resultsLoading", langKey)
+                                    : null;
+
+                                var overlay = SAUIX_showResultsLoadingOverlay({
+                                    stage: stageRef,
+                                    language: langKey,
+                                    message: copy ? copy.title : null,
+                                    detail: copy ? copy.detail : null,
+                                });
+
+                                overlayShown = !!overlay;
+                            }
+
+                            if (!overlayShown && typeof resultLoading !== "undefined" && resultLoading) {
+                                resultLoading.visible = true;
+                            }
                             console.log("tewt works")
                             questionTxtR.visible = true;
                             attemptTxtR.visible = true;

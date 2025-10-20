@@ -54,6 +54,10 @@ var feedbackContainer,
 var confettiLayer;
 var confettiColors = ["#f9d342", "#ff6f61", "#50c878", "#4fc3f7", "#af7ac5", "#ffd1dc"]; // soft vibrant palette
 
+function getOverlayLanguageKey() {
+    return typeof assetsPathLang === "string" ? assetsPathLang : "";
+}
+
 function applyColorAlpha(color, alpha) {
     if (typeof alpha !== "number") {
         alpha = 1;
@@ -845,7 +849,28 @@ function handleComplete1(e) {
     // stage.addChild(container3)
     container1 = new createjs.Container();
     stage.addChild(container1)
-    container1.parent.addChild(resultLoading)
+
+    var usedEnhancedResultsOverlay = false;
+    if (typeof SAUIX_showResultsLoadingOverlay === "function") {
+        var langKey = getOverlayLanguageKey();
+        var copy = typeof SAUIX_getConnectivityCopy === "function"
+            ? SAUIX_getConnectivityCopy("resultsLoading", langKey)
+            : null;
+
+        var overlay = SAUIX_showResultsLoadingOverlay({
+            stage: stage,
+            language: langKey,
+            message: copy ? copy.title : null,
+            detail: copy ? copy.detail : null,
+        });
+
+        usedEnhancedResultsOverlay = !!overlay;
+    }
+
+    if (!usedEnhancedResultsOverlay && container1.parent && typeof resultLoading !== "undefined" && resultLoading) {
+        container1.parent.addChild(resultLoading);
+        resultLoading.visible = true;
+    }
 
 
 console.log("before computeresult");
@@ -1710,6 +1735,10 @@ function showScoreFn() {
 
     if (typeof bitmap !== "undefined" && bitmap) {
         bitmap.visible = false;
+    }
+
+    if (typeof SAUIX_hideResultsLoadingOverlay === "function") {
+        SAUIX_hideResultsLoadingOverlay();
     }
 
     if (typeof resultLoading !== "undefined" && resultLoading) {
