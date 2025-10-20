@@ -2918,8 +2918,6 @@ function createManifest() {
 
         { id: "correctImg", src: assetsPathLang + "wow.png" },
         { id: "wrongImg", src: assetsPathLang + "oops.png" },
-        { id: "gameOverImg", src: assetsPathLang + "gameover.png" },
-        { id: "timeOverImg", src: assetsPathLang + "timeover.png" },
         { id: "questionOverImg", src: assetsPathLang + "questionover.png" },
         //////////////////====AUDIO=====//////////////////////// //4
 
@@ -2933,7 +2931,6 @@ function createManifest() {
 
         /////////////////////===RESULT===///////////////////// 10
 
-        { id: "resultLoading", src: assetsPathLang + "ResultLoading.jpg" },
         { id: "domainPath", src: redirectJsonPath + "redirecturl_org.json" },
         ///////////////////====OTHERS====///////////////////// 12
 
@@ -3452,19 +3449,6 @@ function doneLoading(event) {
                 showIntroTitleBadge();
                 continue;
             }
-
-
-
-            if (id == "resultLoading") {
-                resultLoading = new createjs.Bitmap(preload.getResult('resultLoading'));
-                container.parent.addChild(resultLoading);
-                resultLoading.visible = false;
-                continue;
-
-            }
-
-
-
             if (id == "scoreImgMc") {
                 var spriteSheet3 = new createjs.SpriteSheet({
                     framerate: 30,
@@ -3560,20 +3544,6 @@ function doneLoading(event) {
                 wrongImg.x = 569;
                 wrongImg.y = 200;
                 wrongImg.visible = false;
-
-                continue;
-            }
-            if (id == "gameOverImg") {
-                gameOverImg = new createjs.Bitmap(preload.getResult('gameOverImg'));
-                container.parent.addChild(gameOverImg);
-                gameOverImg.visible = false;
-
-                continue;
-            }
-            if (id == "timeOverImg") {
-                timeOverImg = new createjs.Bitmap(preload.getResult('timeOverImg'));
-                container.parent.addChild(timeOverImg);
-                timeOverImg.visible = false;
 
                 continue;
             }
@@ -7192,8 +7162,12 @@ function panelVisibleFn() {
 
 function internetErrorFn() {
     pauseTimer()
-    timeOverImg.visible = false;
-    gameOverImg.visible = false;
+    if (typeof SAUIX_hideTimeOverOverlay === "function") {
+        SAUIX_hideTimeOverOverlay({ immediate: true });
+    }
+    if (typeof SAUIX_hideGameFinishedOverlay === "function") {
+        SAUIX_hideGameFinishedOverlay({ immediate: true });
+    }
     questionOverImg.visible = false;
     if (typeof hideGameplayTimeUpBanner === "function") {
         hideGameplayTimeUpBanner(true);

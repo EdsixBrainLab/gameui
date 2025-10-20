@@ -757,9 +757,30 @@ function sentscore() {
             bgSnd.stop();
             gameOverSnd.play();
             gameOverSnd.volume = 1;
-            gameOverImg.visible = true;
-            container.parent.addChild(gameOverImg)
-            stage.update()
+            var shownGameFinishedOverlay = false;
+            if (typeof SAUIX_showGameFinishedOverlay === "function") {
+                var langKeyFinished = getOverlayLanguageKey();
+                var finishedCopy = typeof SAUIX_getConnectivityCopy === "function"
+                    ? SAUIX_getConnectivityCopy("gameFinished", langKeyFinished)
+                    : null;
+
+                var finishedOverlay = SAUIX_showGameFinishedOverlay({
+                    stage: stage,
+                    language: langKeyFinished,
+                    message: finishedCopy ? finishedCopy.title : null,
+                    detail: finishedCopy ? finishedCopy.detail : null,
+                });
+
+                shownGameFinishedOverlay = !!finishedOverlay;
+            }
+
+            if (!shownGameFinishedOverlay && stage && stage.update) {
+                try {
+                    stage.update();
+                } catch (gameFinishedUpdateError) {
+                    console.log("Error: game finished overlay fallback", gameFinishedUpdateError);
+                }
+            }
             gameOverSnd.addEventListener("complete", handleComplete1);
 
         }
@@ -815,9 +836,30 @@ function handleComplete(e) {
             bgSnd.stop();
             gameOverSnd.play();
             gameOverSnd.volume = 1;
-            gameOverImg.visible = true;
-            container.parent.addChild(gameOverImg)
-            stage.update()
+            var overlayDisplayed = false;
+            if (typeof SAUIX_showGameFinishedOverlay === "function") {
+                var langKey = getOverlayLanguageKey();
+                var overlayCopy = typeof SAUIX_getConnectivityCopy === "function"
+                    ? SAUIX_getConnectivityCopy("gameFinished", langKey)
+                    : null;
+
+                var overlay = SAUIX_showGameFinishedOverlay({
+                    stage: stage,
+                    language: langKey,
+                    message: overlayCopy ? overlayCopy.title : null,
+                    detail: overlayCopy ? overlayCopy.detail : null,
+                });
+
+                overlayDisplayed = !!overlay;
+            }
+
+            if (!overlayDisplayed && stage && stage.update) {
+                try {
+                    stage.update();
+                } catch (gameFinishedUpdateErr) {
+                    console.log("Error: game finished overlay fallback", gameFinishedUpdateErr);
+                }
+            }
             gameOverSnd.addEventListener("complete", handleComplete1);
         }//
 
@@ -832,9 +874,13 @@ function handleComplete(e) {
 }
 
 function handleComplete1(e) {
-	console.log("handleComplete1");
-    timeOverImg.visible = false;
-    gameOverImg.visible = false;
+        console.log("handleComplete1");
+    if (typeof SAUIX_hideTimeOverOverlay === "function") {
+        SAUIX_hideTimeOverOverlay({ immediate: true });
+    }
+    if (typeof SAUIX_hideGameFinishedOverlay === "function") {
+        SAUIX_hideGameFinishedOverlay({ immediate: true });
+    }
     clearInterval(interval);
     gameResponseTimerStop();
     correctSnd.stop();
@@ -866,12 +912,6 @@ function handleComplete1(e) {
 
         usedEnhancedResultsOverlay = !!overlay;
     }
-
-    if (!usedEnhancedResultsOverlay && container1.parent && typeof resultLoading !== "undefined" && resultLoading) {
-        container1.parent.addChild(resultLoading);
-        resultLoading.visible = true;
-    }
-
 
 console.log("before computeresult");
     computeresult();
@@ -956,9 +996,6 @@ console.log("computeresult");
     else {
         if (resultsOverlay) {
             resultsOverlay.visible = false;
-        }
-        if (bitmap) {
-            bitmap.visible = true;
         }
         if (closeBtnFinal) {
             closeBtnFinal.visible = true;
@@ -1733,16 +1770,9 @@ function updateResultsSummary(values) {
 
 function showScoreFn() {
 
-    if (typeof bitmap !== "undefined" && bitmap) {
-        bitmap.visible = false;
-    }
 
     if (typeof SAUIX_hideResultsLoadingOverlay === "function") {
         SAUIX_hideResultsLoadingOverlay();
-    }
-
-    if (typeof resultLoading !== "undefined" && resultLoading) {
-        resultLoading.visible = false;
     }
 
     ensureResultsSummaryOverlay(container1);

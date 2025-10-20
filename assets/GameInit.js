@@ -14,7 +14,7 @@ if (window == window.top) {
 
 var isMobile, resizeCnt;
 
-var bitmap, s1;
+var s1;
 
 var isOpera, isFirefox, isSafari, isIE, isEdge, isChrome, isBlink = false;
 
@@ -359,7 +359,6 @@ function checkBrowserSupport() {
         // this.parent.document.onkeydown = keydown;
 
         init();
-        createLoadingScreen()
 
     }
 
@@ -541,42 +540,6 @@ function removeFullScreen() {
         document.webkitExitFullscreen();
 
     }
-
-}
-
-
-
-//-----------------------------------------------------------------------------------------//
-
-
-
-function createLoadingScreen() {
-
-
-
-    var image = new Image();
-
-    image.src = assetsPathLang+"Loading.png?vr=1";
-
-    image.onload = handleImageLoad;
-
-    console.log("get values1")
-
-}
-
-
-
-function handleImageLoad(event) {
-
-    console.log("get values2")
-
-    var image = event.target;
-
-    bitmap = new createjs.Bitmap(image);
-
-    bitmap.visible = false;
-
-    stage.update();
 
 }
 
