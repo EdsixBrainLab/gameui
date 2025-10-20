@@ -63,6 +63,14 @@ function getCycleRaceQuestionLayoutMetrics() {
                 if (typeof cycleRaceQuestionBubble.y === "number") {
                         bubbleY = cycleRaceQuestionBubble.y;
                 }
+                if (typeof cycleRaceQuestionBubble.__visualCenterOffset === "number") {
+                        centerX += cycleRaceQuestionBubble.__visualCenterOffset;
+                } else if (
+                        cycleRaceQuestionBubble.__options &&
+                        typeof cycleRaceQuestionBubble.__options.visualCenterOffset === "number"
+                ) {
+                        centerX += cycleRaceQuestionBubble.__options.visualCenterOffset;
+                }
                 if (cycleRaceQuestionBubble.__options) {
                         if (cycleRaceQuestionBubble.__options.width != null) {
                                 bubbleWidth = cycleRaceQuestionBubble.__options.width;
@@ -203,6 +211,220 @@ function centerCycleRaceOptionBitmap(bitmap) {
         bitmap.x = 0;
         bitmap.y = 0;
         bitmap.__cycleRaceCentered = true;
+}
+
+function getCycleRaceSpriteDimensions(sprite) {
+
+        if (!sprite) {
+                return null;
+        }
+
+        if (sprite.__naturalWidth && sprite.__naturalHeight) {
+                return {
+                        width: sprite.__naturalWidth,
+                        height: sprite.__naturalHeight
+                };
+        }
+
+        var bounds = null;
+
+        if (typeof sprite.getBounds === "function") {
+                bounds = sprite.getBounds();
+        }
+
+        if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrameBounds === "function") {
+                bounds = sprite.spriteSheet.getFrameBounds(sprite.currentFrame || 0);
+        }
+
+        if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrame === "function") {
+                        var frame = sprite.spriteSheet.getFrame(sprite.currentFrame || 0);
+                        if (frame && frame.rect) {
+                                bounds = {
+                                        width: frame.rect.width,
+                                        height: frame.rect.height
+                                };
+                        }
+        }
+
+        if (!bounds && sprite.image) {
+                bounds = {
+                        width: sprite.image.width || 0,
+                        height: sprite.image.height || 0
+                };
+        }
+
+        if (!bounds) {
+                return null;
+        }
+
+        return {
+                width: bounds.width || 0,
+                height: bounds.height || 0
+        };
+}
+
+function configureCycleRaceQuestionSprite(sprite, options) {
+
+        if (!sprite) {
+                return { width: 0, height: 0 };
+        }
+
+        options = options || {};
+
+        var dims = getCycleRaceSpriteDimensions(sprite);
+        if (!dims || !dims.width || !dims.height) {
+                return { width: 0, height: 0 };
+        }
+
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var availableWidth =
+                options.maxWidth != null ? options.maxWidth : (bubbleOptions.width || 760) - 200;
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var availableHeight = options.maxHeight != null ? options.maxHeight : bodyHeight - 80;
+        var baseScale =
+                options.baseScale != null
+                        ? options.baseScale
+                        : sprite.__baseScale != null
+                        ? sprite.__baseScale
+                        : sprite.scaleX || 1;
+
+        var scaleX = availableWidth > 0 ? availableWidth / dims.width : baseScale;
+        var scaleY = availableHeight > 0 ? availableHeight / dims.height : baseScale;
+        var targetScale = Math.min(baseScale, scaleX, scaleY);
+        if (options.minScale != null) {
+                targetScale = Math.max(options.minScale, targetScale);
+        }
+
+        sprite.scaleX = sprite.scaleY = targetScale;
+        sprite.regX = dims.width / 2;
+        sprite.regY = dims.height / 2;
+        sprite.x = 0;
+        sprite.y = 0;
+        sprite.__layoutWidth = dims.width * targetScale;
+        sprite.__layoutHeight = dims.height * targetScale;
+
+        return {
+                width: sprite.__layoutWidth,
+                height: sprite.__layoutHeight
+        };
+}
+
+function layoutCycleRaceTextQuestionContent() {
+
+        if (!cycleRaceQuestionBubble) {
+                return;
+        }
+
+        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var innerTop = -bodyHeight / 2 + 36;
+        var innerBottom = bodyHeight / 2 - 32;
+        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var spacing = Math.min(54, Math.max(32, bodyHeight * 0.12));
+
+        if (question1 && question1.visible) {
+                var q1Metrics = configureCycleRaceQuestionSprite(question1, {
+                        maxWidth: availableWidth,
+                        maxHeight: Math.max(bodyHeight * 0.56, 140),
+                        baseScale: question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
+                });
+                question1.x = 0;
+                question1.y = innerTop + (q1Metrics.height || 0) / 2;
+        }
+
+        if (questionText1 && questionText1.visible) {
+                var qTextMetrics = configureCycleRaceQuestionSprite(questionText1, {
+                        maxWidth: availableWidth - 16,
+                        maxHeight: Math.max(bodyHeight * 0.32, 100),
+                        baseScale: questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
+                });
+                questionText1.x = 0;
+                var anchorY;
+                if (question1 && question1.visible) {
+                        anchorY = question1.y + (question1.__layoutHeight || 0) / 2;
+                } else {
+                        anchorY = innerTop + 8;
+                }
+                var desiredCenter = anchorY + spacing + (qTextMetrics.height || 0) / 2;
+                var maxCenter = innerBottom - (qTextMetrics.height || 0) / 2;
+                questionText1.y = Math.min(maxCenter, desiredCenter);
+        }
+}
+
+function layoutCycleRaceImageQuestionContent() {
+
+        if (!cycleRaceQuestionBubble || !question2 || !question2.visible) {
+                return;
+        }
+
+        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var innerTop = -bodyHeight / 2 + 36;
+        var innerBottom = bodyHeight / 2 - 32;
+        var availableWidth = (bubbleOptions.width || 760) - 220;
+
+        var q2Metrics = configureCycleRaceQuestionSprite(question2, {
+                maxWidth: availableWidth,
+                maxHeight: Math.max(bodyHeight * 0.68, 140),
+                baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
+        });
+        question2.x = 0;
+        var centerY = (innerTop + innerBottom) / 2;
+        if (q2Metrics && q2Metrics.height && q2Metrics.height > innerBottom - innerTop) {
+                centerY = innerTop + (innerBottom - innerTop) / 2;
+        }
+        question2.y = centerY;
+}
+
+function cycleRaceInvokeChoice(choiceDisplay) {
+
+        if (!choiceDisplay) {
+                return;
+        }
+
+        answerSelected({
+                preventDefault: function () {},
+                currentTarget: choiceDisplay
+        });
+}
+
+function cycleRaceAttachWrapperListeners(wrapper, choiceDisplay) {
+
+        if (!wrapper || !choiceDisplay) {
+                return;
+        }
+
+        wrapper.__linkedChoice = choiceDisplay;
+        wrapper.mouseEnabled = true;
+        wrapper.cursor = "pointer";
+
+        if (wrapper.__cycleRaceClickHandler) {
+                wrapper.removeEventListener("click", wrapper.__cycleRaceClickHandler);
+        }
+
+        wrapper.__cycleRaceClickHandler = function () {
+                if (!wrapper.__linkedChoice || !wrapper.__linkedChoice.mouseEnabled) {
+                        return;
+                }
+                cycleRaceInvokeChoice(wrapper.__linkedChoice);
+        };
+
+        wrapper.addEventListener("click", wrapper.__cycleRaceClickHandler);
+}
+
+function cycleRaceDetachWrapperListeners(wrapper) {
+
+        if (!wrapper) {
+                return;
+        }
+
+        if (wrapper.__cycleRaceClickHandler) {
+                wrapper.removeEventListener("click", wrapper.__cycleRaceClickHandler);
+        }
+
+        wrapper.mouseEnabled = false;
+        wrapper.cursor = "default";
+        wrapper.__linkedChoice = null;
 }
 
 var chPosArr = [1, 0, 2, 3, 1, 0, 2, 3, 1, 0] // Only 4 Choice 
@@ -503,11 +725,14 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
                 question1.regY = 239 / 2;
                 question1.x = 0;
                 question1.y = 0;
+                question1.__naturalWidth = 241;
+                question1.__naturalHeight = 239;
+                question1.__baseScale = 1.02;
 
 
-	}
-	if (id == "question2") {
-		var spriteSheet10 = new createjs.SpriteSheet({
+        }
+        if (id == "question2") {
+                var spriteSheet10 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("question2")],
 			"frames": { "regX": 82, "height": 63, "count": 300, "regY": 0, "width": 574 },
@@ -528,7 +753,13 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
                 questionText1 = question2.clone();
                 questionText1.regX = question2.regX;
                 questionText1.regY = question2.regY;
-	}
+                question2.__naturalWidth = 574;
+                question2.__naturalHeight = 63;
+                question2.__baseScale = 1;
+                questionText1.__naturalWidth = 574;
+                questionText1.__naturalHeight = 63;
+                questionText1.__baseScale = 0.96;
+        }
 	//
 
 	if (id == "choice1") {
@@ -891,19 +1122,25 @@ function createQuestions() {
         }
 
         if (chPosArr1[cnt] == 0) {
+                if (question2) {
+                        question2.visible = false;
+                }
                 question1.visible = true;
-                question1.scaleX = question1.scaleY = 1.02
+                question1.scaleX = question1.scaleY = question1.__baseScale != null ? question1.__baseScale : 1;
                 question1.gotoAndStop(chPosArr2[type1Cnt] - 1)
-                question1.x = -220;
-                question1.y = 6;
+                question1.x = 0;
+                question1.y = 0;
 
                 if (questionText1) {
                         questionText1.visible = true;
                         questionText1.gotoAndStop(9);
-                        questionText1.scaleX = questionText1.scaleY = 0.94;
-                        questionText1.x = 200;
-                        questionText1.y = -12;
+                        questionText1.scaleX = questionText1.scaleY =
+                                questionText1.__baseScale != null ? questionText1.__baseScale : 1;
+                        questionText1.x = 0;
+                        questionText1.y = 0;
                 }
+
+                layoutCycleRaceTextQuestionContent();
 
                 rand = between(0, TOTAL_CYCLE - 1)
                 val = rand.indexOf(chVal)
@@ -916,9 +1153,6 @@ function createQuestions() {
                         if (choiceArr[i].__wrapper) {
                                 if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
                                         SAUI_resetCycleRaceOptionBubble(choiceArr[i].__wrapper);
-                                }
-                                if (choiceArr[i].__wrapper.__badgeLabel) {
-                                        choiceArr[i].__wrapper.__badgeLabel.text = String.fromCharCode(65 + i);
                                 }
                         } else {
                                 choiceArr[i].alpha = 1;
@@ -933,12 +1167,16 @@ function createQuestions() {
 
         } else {
                 question2.visible = true;
-                question2.scaleX = question2.scaleY = 1;
+                question2.scaleX = question2.scaleY = question2.__baseScale != null ? question2.__baseScale : 1;
                 question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
                 question2.x = 0;
-                question2.y = -8;
+                question2.y = 0;
+                layoutCycleRaceImageQuestionContent();
                 if (questionText1) {
                         questionText1.visible = false;
+                }
+                if (question1) {
+                        question1.visible = false;
                 }
                 rand = between(0, 7)
                 val = rand.indexOf(pArr[count + 1] - 1)
@@ -951,9 +1189,6 @@ function createQuestions() {
                         if (choiceArr1[i].__wrapper) {
                                 if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
                                         SAUI_resetCycleRaceOptionBubble(choiceArr1[i].__wrapper);
-                                }
-                                if (choiceArr1[i].__wrapper.__badgeLabel) {
-                                        choiceArr1[i].__wrapper.__badgeLabel.text = String.fromCharCode(65 + i);
                                 }
                         } else {
                                 choiceArr1[i].alpha = 1;
@@ -1049,6 +1284,7 @@ function AddListenerFn() {
                         }
                         if (choiceArr[i].__wrapper) {
                                 choiceArr[i].__wrapper.cursor = "pointer";
+                                cycleRaceAttachWrapperListeners(choiceArr[i].__wrapper, choiceArr[i]);
                                 if (typeof SAUI_startCycleRaceOptionIdle === "function") {
                                         SAUI_startCycleRaceOptionIdle(choiceArr[i].__wrapper);
                                 }
@@ -1066,6 +1302,7 @@ function AddListenerFn() {
                         }
                         if (choiceArr1[i].__wrapper) {
                                 choiceArr1[i].__wrapper.cursor = "pointer";
+                                cycleRaceAttachWrapperListeners(choiceArr1[i].__wrapper, choiceArr1[i]);
                                 if (typeof SAUI_startCycleRaceOptionIdle === "function") {
                                         SAUI_startCycleRaceOptionIdle(choiceArr1[i].__wrapper);
                                 }
@@ -1090,6 +1327,7 @@ function disablechoices() {
                         choiceArr[i].__wrapper.alpha = 0;
                         choiceArr[i].__wrapper.mouseEnabled = false;
                         choiceArr[i].__wrapper.cursor = "default";
+                        cycleRaceDetachWrapperListeners(choiceArr[i].__wrapper);
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(choiceArr[i].__wrapper);
                         }
@@ -1106,6 +1344,7 @@ function disablechoices() {
                         choiceArr1[i].__wrapper.alpha = 0;
                         choiceArr1[i].__wrapper.mouseEnabled = false;
                         choiceArr1[i].__wrapper.cursor = "default";
+                        cycleRaceDetachWrapperListeners(choiceArr1[i].__wrapper);
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(choiceArr1[i].__wrapper);
                         }
@@ -1170,7 +1409,9 @@ function ensureCycleRaceQuestionSurface() {
                                 tailHeight: 60,
                                 tailWidth: 150,
                                 cornerRadius: 52,
-                                title: "Question"
+                                title: null,
+                                visualCenterOffset: 16,
+                                contentOffsetY: -12
                         });
                         cycleRaceQuestionBubble.x = 640;
                         cycleRaceQuestionBubble.y = 248;
@@ -1259,6 +1500,7 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                 }
 
                 if (textWrapper) {
+                        cycleRaceDetachWrapperListeners(textWrapper);
                         textWrapper.visible = false;
                         textWrapper.alpha = 0;
                         textWrapper.mouseEnabled = false;
@@ -1272,9 +1514,6 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                                 textWrapper.__content.addChild(choiceArr[i1]);
                         } else if (choiceArr[i1] && choiceArr[i1].parent !== textWrapper) {
                                 textWrapper.addChild(choiceArr[i1]);
-                        }
-                        if (textWrapper.__badgeLabel) {
-                                textWrapper.__badgeLabel.text = "";
                         }
                 } else if (choiceArr[i1] && !choiceArr[i1].parent) {
                         container.parent.addChild(choiceArr[i1]);
@@ -1303,6 +1542,7 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                 }
 
                 if (imageWrapper) {
+                        cycleRaceDetachWrapperListeners(imageWrapper);
                         imageWrapper.visible = false;
                         imageWrapper.alpha = 0;
                         imageWrapper.mouseEnabled = false;
@@ -1316,9 +1556,6 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                                 imageWrapper.__content.addChild(choiceArr1[i1]);
                         } else if (choiceArr1[i1] && choiceArr1[i1].parent !== imageWrapper) {
                                 imageWrapper.addChild(choiceArr1[i1]);
-                        }
-                        if (imageWrapper.__badgeLabel) {
-                                imageWrapper.__badgeLabel.text = "";
                         }
                 } else if (choiceArr1[i1] && !choiceArr1[i1].parent) {
                         container.parent.addChild(choiceArr1[i1]);
@@ -1358,23 +1595,19 @@ function cycleRaceResetQuestionDisplay() {
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(cycleRaceTextChoiceWrappers[i2]);
                         }
+                        cycleRaceDetachWrapperListeners(cycleRaceTextChoiceWrappers[i2]);
                         cycleRaceTextChoiceWrappers[i2].visible = false;
                         cycleRaceTextChoiceWrappers[i2].alpha = 0;
                         cycleRaceTextChoiceWrappers[i2].mouseEnabled = false;
-                        if (cycleRaceTextChoiceWrappers[i2].__badgeLabel) {
-                                cycleRaceTextChoiceWrappers[i2].__badgeLabel.text = "";
-                        }
                 }
                 if (cycleRaceImageChoiceWrappers[i2]) {
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(cycleRaceImageChoiceWrappers[i2]);
                         }
+                        cycleRaceDetachWrapperListeners(cycleRaceImageChoiceWrappers[i2]);
                         cycleRaceImageChoiceWrappers[i2].visible = false;
                         cycleRaceImageChoiceWrappers[i2].alpha = 0;
                         cycleRaceImageChoiceWrappers[i2].mouseEnabled = false;
-                        if (cycleRaceImageChoiceWrappers[i2].__badgeLabel) {
-                                cycleRaceImageChoiceWrappers[i2].__badgeLabel.text = "";
-                        }
                 }
                 if (choiceArr[i2]) {
                         choiceArr[i2].visible = false;
