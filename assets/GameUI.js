@@ -1758,12 +1758,16 @@ var connectivityOverlay,
   connectivityIconOffline,
   connectivityIconOfflineSlash,
   connectivityIconSuccess,
-  connectivityIconInfo;
+  connectivityIconInfo,
+  connectivityOverlayClose,
+  connectivityOverlayCloseGlow,
+  connectivityOverlayCloseHighlight,
+  connectivityOverlayCloseIcon;
 
 var SAUIX_CONNECTIVITY_COPY = {
   default: {
     offlineTitle: "You're offline right now.",
-    offlineDetail: "We'll reconnect automatically once you're back online.",
+    offlineDetail: "Check your internet connection and tap Close once you're back online.",
     completeAllTitle: "You have completed all the puzzles.",
     completeAllDetail: "Tap Close at the top to see the results.",
     completeOneTitle: "You have completed this puzzle...",
@@ -2044,7 +2048,7 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityOverlayTitle.textAlign = "center";
   connectivityOverlayTitle.textBaseline = "middle";
   connectivityOverlayTitle.lineWidth = 480;
-  connectivityOverlayTitle.lineHeight = 56;
+  connectivityOverlayTitle.lineHeight = 52;
   connectivityOverlayTitle.x = 0;
   connectivityOverlayTitle.y = 72;
   connectivityOverlayTitle.shadow = new createjs.Shadow(
@@ -2063,7 +2067,7 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityOverlayDetail.textAlign = "center";
   connectivityOverlayDetail.textBaseline = "middle";
   connectivityOverlayDetail.lineWidth = 520;
-  connectivityOverlayDetail.lineHeight = 40;
+  connectivityOverlayDetail.lineHeight = 34;
   connectivityOverlayDetail.x = 0;
   connectivityOverlayDetail.y = 134;
   connectivityOverlayDetail.shadow = new createjs.Shadow(
@@ -2074,7 +2078,122 @@ function ensureConnectivityOverlay(stageRef) {
   );
   connectivityOverlayCard.addChild(connectivityOverlayDetail);
 
+  connectivityOverlayClose = new createjs.Container();
+  connectivityOverlayClose.visible = false;
+  connectivityOverlayClose.alpha = 0;
+  connectivityOverlayClose.mouseChildren = false;
+  connectivityOverlayClose.mouseEnabled = true;
+  connectivityOverlayClose.cursor = "pointer";
+  connectivityOverlayClose.__baseScale = 1;
+  connectivityOverlayCard.addChild(connectivityOverlayClose);
+
+  connectivityOverlayCloseGlow = new createjs.Shape();
+  connectivityOverlayCloseGlow.graphics
+    .beginRadialGradientFill(
+      ["rgba(255,255,255,0.35)", "rgba(255,255,255,0)", "rgba(255,255,255,0)"],
+      [0, 0.6, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      40
+    )
+    .drawCircle(0, 0, 40);
+  connectivityOverlayCloseGlow.alpha = 0.25;
+  connectivityOverlayClose.addChild(connectivityOverlayCloseGlow);
+
+  var connectivityOverlayCloseBase = new createjs.Shape();
+  connectivityOverlayCloseBase.graphics
+    .beginLinearGradientFill(["#FF8A94", "#FFB15F"], [0, 1], -32, -32, 32, 32)
+    .drawRoundRect(-28, -28, 56, 56, 18);
+  connectivityOverlayClose.addChild(connectivityOverlayCloseBase);
+
+  connectivityOverlayCloseHighlight = new createjs.Shape();
+  connectivityOverlayCloseHighlight.graphics
+    .setStrokeStyle(2)
+    .beginStroke("rgba(255,255,255,0.88)")
+    .drawRoundRect(-26, -26, 52, 52, 16);
+  connectivityOverlayCloseHighlight.alpha = 0.85;
+  connectivityOverlayClose.addChild(connectivityOverlayCloseHighlight);
+
+  connectivityOverlayCloseIcon = new createjs.Shape();
+  connectivityOverlayCloseIcon.graphics
+    .setStrokeStyle(4, "round", "round")
+    .beginStroke("#FFFFFF")
+    .moveTo(-11, -11)
+    .lineTo(11, 11)
+    .moveTo(-11, 11)
+    .lineTo(11, -11);
+  connectivityOverlayCloseIcon.alpha = 0.92;
+  connectivityOverlayClose.addChild(connectivityOverlayCloseIcon);
+
+  var connectivityOverlayCloseHit = new createjs.Shape();
+  connectivityOverlayCloseHit.graphics.beginFill("#000").drawCircle(0, 0, 32);
+  connectivityOverlayClose.hitArea = connectivityOverlayCloseHit;
+
+  connectivityOverlayClose.on("mouseover", function () {
+    if (!connectivityOverlayClose.mouseEnabled) {
+      return;
+    }
+
+    createjs.Tween.get(connectivityOverlayCloseHighlight, { override: true })
+      .to({ alpha: 1 }, 160, createjs.Ease.quadOut);
+    createjs.Tween.get(connectivityOverlayCloseGlow, { override: true })
+      .to({ alpha: 0.45, scaleX: 1.05, scaleY: 1.05 }, 180, createjs.Ease.quadOut);
+  });
+
+  connectivityOverlayClose.on("mouseout", function () {
+    createjs.Tween.get(connectivityOverlayCloseHighlight, { override: true })
+      .to({ alpha: 0.85 }, 200, createjs.Ease.quadOut);
+    createjs.Tween.get(connectivityOverlayCloseGlow, { override: true })
+      .to({ alpha: 0.25, scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadOut);
+  });
+
+  connectivityOverlayClose.on("mousedown", function () {
+    if (!connectivityOverlayClose.mouseEnabled) {
+      return;
+    }
+
+    createjs.Tween.get(connectivityOverlayClose, { override: true })
+      .to({ scaleX: 0.94, scaleY: 0.94 }, 120, createjs.Ease.quadOut);
+  });
+
+  connectivityOverlayClose.on("pressup", function () {
+    createjs.Tween.get(connectivityOverlayClose, { override: true })
+      .to({ scaleX: 1, scaleY: 1 }, 160, createjs.Ease.quadOut);
+  });
+
+  connectivityOverlayClose.on("click", function () {
+    if (!connectivityOverlayClose.mouseEnabled) {
+      return;
+    }
+
+    handleConnectivityOverlayClose();
+  });
+
   return connectivityOverlay;
+}
+
+function handleConnectivityOverlayClose() {
+  if (!connectivityOverlay) {
+    return;
+  }
+
+  if (!connectivityOverlay.__active) {
+    return;
+  }
+
+  var onClose = connectivityOverlay.__onClose;
+  SAUIX_hideConnectivityOverlay();
+
+  if (typeof onClose === "function") {
+    try {
+      onClose();
+    } catch (overlayCloseError) {
+      console.log("Error: connectivity overlay close callback", overlayCloseError);
+    }
+  }
 }
 
 function layoutConnectivityOverlay(stageRef) {
@@ -2224,30 +2343,118 @@ function layoutConnectivityOverlay(stageRef) {
     connectivityOverlayAccent.graphics
       .clear()
       .beginRadialGradientFill(
-        [accentColor, "rgba(255,255,255,0.65)", "rgba(124,88,255,0)"] ,
-        [0, 0.36, 1],
+        [accentColor, "rgba(255,255,255,0.45)", "rgba(124,88,255,0)"],
+        [0, 0.5, 1],
         0,
         0,
         0,
         0,
         0,
-        180
+        168
       )
-      .drawEllipse(-190, -164, 380, 228);
-  }
-
-  if (connectivityOverlayTitle) {
-    connectivityOverlayTitle.lineWidth = baseWidth - 120;
-  }
-
-  if (connectivityOverlayDetail) {
-    connectivityOverlayDetail.lineWidth = baseWidth - 120;
+      .drawCircle(0, 0, 168);
+    connectivityOverlayAccent.alpha = 0.68;
+    connectivityOverlayAccent.x = 0;
+    connectivityOverlayAccent.y = -baseHeight / 2 + 128;
   }
 
   if (connectivityIconWrapper) {
     connectivityIconWrapper.x = 0;
-    connectivityIconWrapper.y = -baseHeight / 2 + 120;
+    connectivityIconWrapper.y = -baseHeight / 2 + 118;
     connectivityIconWrapper.__baseY = connectivityIconWrapper.y;
+  }
+
+  var contentWidth = baseWidth - 140;
+  var hasDetail = false;
+  var titleHeight = 0;
+  var detailHeight = 0;
+
+  if (connectivityOverlayTitle) {
+    connectivityOverlayTitle.lineWidth = contentWidth;
+    titleHeight = connectivityOverlayTitle.getMeasuredHeight() || connectivityOverlayTitle.getMeasuredLineHeight() || 0;
+  }
+
+  if (connectivityOverlayDetail) {
+    connectivityOverlayDetail.lineWidth = contentWidth;
+    hasDetail =
+      connectivityOverlayDetail.visible &&
+      typeof connectivityOverlayDetail.text === "string" &&
+      connectivityOverlayDetail.text.length > 0;
+
+    if (hasDetail) {
+      detailHeight =
+        connectivityOverlayDetail.getMeasuredHeight() ||
+        connectivityOverlayDetail.getMeasuredLineHeight() ||
+        0;
+    } else {
+      connectivityOverlayDetail.visible = false;
+      detailHeight = 0;
+    }
+  }
+
+  var titleSpacing = 22;
+  var safeTop = -baseHeight / 2 + 128;
+  var safeBottom = baseHeight / 2 - 30;
+  var layoutStartY = safeTop;
+  var contentTopEdge = null;
+  var contentBottomEdge = null;
+
+  if (connectivityOverlayTitle) {
+    var resolvedTitleHeight = titleHeight > 0 ? titleHeight : 48;
+    var titleCenter = layoutStartY + resolvedTitleHeight / 2;
+    connectivityOverlayTitle.y = titleCenter;
+    contentTopEdge = titleCenter - resolvedTitleHeight / 2;
+    contentBottomEdge = titleCenter + resolvedTitleHeight / 2;
+    layoutStartY += resolvedTitleHeight;
+  }
+
+  if (hasDetail && connectivityOverlayDetail) {
+    layoutStartY += titleSpacing;
+    var resolvedDetailHeight = detailHeight > 0 ? detailHeight : 36;
+    var detailCenter = layoutStartY + resolvedDetailHeight / 2;
+    connectivityOverlayDetail.y = detailCenter;
+    connectivityOverlayDetail.visible = true;
+    if (contentTopEdge === null) {
+      contentTopEdge = detailCenter - resolvedDetailHeight / 2;
+    }
+    contentBottomEdge = detailCenter + resolvedDetailHeight / 2;
+  }
+
+  if (
+    typeof contentTopEdge === "number" &&
+    typeof contentBottomEdge === "number"
+  ) {
+    var requiredShift = 0;
+
+    if (contentBottomEdge > safeBottom) {
+      requiredShift = contentBottomEdge - safeBottom;
+    }
+
+    if (requiredShift > 0) {
+      var maxAllowedShift = contentTopEdge - safeTop;
+      if (typeof maxAllowedShift === "number") {
+        if (maxAllowedShift < 0) {
+          maxAllowedShift = 0;
+        }
+        if (requiredShift > maxAllowedShift) {
+          requiredShift = maxAllowedShift;
+        }
+      }
+    }
+
+    if (requiredShift > 0) {
+      if (connectivityOverlayTitle) {
+        connectivityOverlayTitle.y -= requiredShift;
+      }
+      if (hasDetail && connectivityOverlayDetail) {
+        connectivityOverlayDetail.y -= requiredShift;
+      }
+    }
+  }
+
+  if (connectivityOverlayClose) {
+    connectivityOverlayClose.x = baseWidth / 2 - 52;
+    connectivityOverlayClose.y = -baseHeight / 2 + 52;
   }
 
   if (connectivityOverlay && !connectivityOverlay.__suppressIconSync) {
@@ -2351,6 +2558,23 @@ function animateConnectivityOverlay() {
       .wait(1600)
       .set({ x: -320 });
   }
+
+  if (connectivityOverlayClose && connectivityOverlayClose.visible) {
+    createjs.Tween.removeTweens(connectivityOverlayClose);
+    connectivityOverlayClose.alpha = 0;
+    createjs.Tween.get(connectivityOverlayClose, { override: true })
+      .wait(160)
+      .to({ alpha: 1 }, 220, createjs.Ease.quadOut);
+
+    if (connectivityOverlayCloseGlow) {
+      connectivityOverlayCloseGlow.alpha = 0.25;
+      createjs.Tween.removeTweens(connectivityOverlayCloseGlow);
+      createjs.Tween.get(connectivityOverlayCloseGlow, { override: true })
+        .wait(260)
+        .to({ alpha: 0.4 }, 220, createjs.Ease.quadOut)
+        .to({ alpha: 0.25 }, 260, createjs.Ease.quadOut);
+    }
+  }
 }
 
 function SAUIX_showConnectivityOverlay(options) {
@@ -2376,8 +2600,6 @@ function SAUIX_showConnectivityOverlay(options) {
 
   stageRef.setChildIndex(overlay, stageRef.numChildren - 1);
 
-  layoutConnectivityOverlay(stageRef);
-
   if (typeof options.message === "string") {
     connectivityOverlayTitle.text = options.message;
   }
@@ -2385,13 +2607,34 @@ function SAUIX_showConnectivityOverlay(options) {
   if (typeof options.detail === "string" && options.detail.length > 0) {
     connectivityOverlayDetail.text = options.detail;
     connectivityOverlayDetail.visible = true;
-    connectivityOverlayTitle.y = 72;
   } else {
     connectivityOverlayDetail.visible = false;
-    connectivityOverlayTitle.y = 84;
+    connectivityOverlayDetail.text = "";
   }
 
   setConnectivityIcon(options.iconType);
+
+  var showCloseButton = options.hideClose !== true;
+  if (connectivityOverlayClose) {
+    connectivityOverlayClose.visible = showCloseButton;
+    connectivityOverlayClose.mouseEnabled = showCloseButton;
+    connectivityOverlayClose.scaleX = connectivityOverlayClose.scaleY = 1;
+    connectivityOverlayClose.alpha = 0;
+
+    if (connectivityOverlayCloseHighlight) {
+      connectivityOverlayCloseHighlight.alpha = 0.85;
+    }
+
+    if (connectivityOverlayCloseGlow) {
+      connectivityOverlayCloseGlow.alpha = 0.25;
+      connectivityOverlayCloseGlow.scaleX = connectivityOverlayCloseGlow.scaleY = 1;
+    }
+  }
+
+  overlay.__onClose =
+    typeof options.onClose === "function" ? options.onClose : null;
+
+  layoutConnectivityOverlay(stageRef);
 
   overlay.visible = true;
   animateConnectivityOverlay();
@@ -2437,11 +2680,34 @@ function SAUIX_hideConnectivityOverlay(options) {
     connectivityOverlayShine.alpha = 0;
   }
 
+  if (connectivityOverlayClose) {
+    createjs.Tween.removeTweens(connectivityOverlayClose);
+    connectivityOverlayClose.mouseEnabled = false;
+  }
+
+  if (connectivityOverlayCloseGlow) {
+    createjs.Tween.removeTweens(connectivityOverlayCloseGlow);
+  }
+
   if (immediate) {
     connectivityOverlay.visible = false;
     connectivityOverlay.alpha = 0;
     connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
     connectivityOverlay.__active = false;
+    connectivityOverlay.__onClose = null;
+
+    if (connectivityOverlayClose) {
+      createjs.Tween.removeTweens(connectivityOverlayClose);
+      connectivityOverlayClose.visible = false;
+      connectivityOverlayClose.alpha = 0;
+      connectivityOverlayClose.mouseEnabled = false;
+    }
+
+    if (connectivityOverlay.__stage && connectivityOverlay.__stage.update) {
+      try {
+        connectivityOverlay.__stage.update();
+      } catch (hideUpdateErrorImmediate) {}
+    }
     return;
   }
 
@@ -2451,6 +2717,19 @@ function SAUIX_hideConnectivityOverlay(options) {
       connectivityOverlay.visible = false;
       connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
       connectivityOverlay.__active = false;
+      connectivityOverlay.__onClose = null;
+
+      if (connectivityOverlayClose) {
+        connectivityOverlayClose.visible = false;
+        connectivityOverlayClose.alpha = 0;
+        connectivityOverlayClose.mouseEnabled = false;
+      }
+
+      if (connectivityOverlay.__stage && connectivityOverlay.__stage.update) {
+        try {
+          connectivityOverlay.__stage.update();
+        } catch (hideUpdateError) {}
+      }
     });
 }
 
