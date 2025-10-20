@@ -7337,6 +7337,17 @@ function internetErrorFn() {
         });
         setFinishedTxt.visible = false;
     }
+
+    var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
+    if (shouldUseOverlay) {
+        SAUIX_showConnectivityOverlay({
+            stage: stage,
+            message: overlayCopy.title,
+            detail: overlayCopy.detail,
+            iconType: overlayCopy.iconType,
+        });
+        setFinishedTxt.visible = false;
+    }
     intChkVar = -1
 
 }
