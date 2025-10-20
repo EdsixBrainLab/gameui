@@ -7,6 +7,7 @@ var gamename = "gname=" + getJSName;
 var titleName;
 // var TitleBtn, TitleBtn1, TitleBtn2, TitleBtn3, TitleBtn4;
 var TitleContaier;
+var Title;
 var extradot = "";
 
 //var introStartCnt = -1;
@@ -2902,6 +2903,253 @@ function createLoader() {
 
 
 
+
+
+function buildTitleBadgeForGame(gameName) {
+    var sourceName = typeof gameName === "string" && gameName ? gameName : (typeof GameNameWithLvl !== "undefined" ? GameNameWithLvl : "");
+    var formattedTitle = sourceName
+        .replace(/-/g, " ")
+        .replace(/(?!^)([A-Z])/g, " $1")
+        .toUpperCase()
+        .split("LEVEL")[0]
+        .trim();
+
+    var fontFamily = "'Baloo 2'";
+    var fontWeight = "800";
+    var badgePadding = 200;
+    var minBadgeWidth = 360;
+    var maxBadgeWidth = 640;
+    var minBadgeHeight = 52;
+    var badgeVerticalPadding = 28;
+    var fontSizes = [44, 40, 36, 32, 28];
+    var titleLabel;
+
+    for (var sizeIndex = 0; sizeIndex < fontSizes.length; sizeIndex++) {
+        var fontSize = fontSizes[sizeIndex];
+        titleLabel = new createjs.Text(
+            formattedTitle,
+            fontWeight + " " + fontSize + "px " + fontFamily,
+            "#F9F7FF"
+        );
+        titleLabel.textAlign = "left";
+        titleLabel.textBaseline = "middle";
+        titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
+
+        if (
+            titleLabel.getMeasuredWidth() + badgePadding <= maxBadgeWidth ||
+            sizeIndex === fontSizes.length - 1
+        ) {
+            break;
+        }
+    }
+
+    var measuredTitleWidth = titleLabel.getMeasuredWidth();
+    var badgeWidth = Math.max(
+        minBadgeWidth,
+        Math.min(maxBadgeWidth, measuredTitleWidth + badgePadding)
+    );
+
+    titleLabel.lineWidth = badgeWidth - 180;
+    var textHeight = titleLabel.getMeasuredHeight();
+    var badgeHeight = Math.max(
+        minBadgeHeight,
+        Math.round(textHeight + badgeVerticalPadding)
+    );
+    var badgeCornerRadius = Math.min(40, Math.round(badgeHeight * 0.45));
+    var highlightCornerRadius = Math.max(16, badgeCornerRadius - 8);
+
+    var titleContainer = new createjs.Container();
+    titleContainer.mouseEnabled = false;
+    titleContainer.mouseChildren = false;
+
+    var badgeShadow = new createjs.Shape();
+    badgeShadow.graphics
+        .beginFill("rgba(6,12,28,0.55)")
+        .drawRoundRect(
+            -badgeWidth / 2,
+            -badgeHeight / 2 + 10,
+            badgeWidth,
+            badgeHeight,
+            Math.min(badgeCornerRadius + 4, 44)
+        );
+    badgeShadow.alpha = 0.34;
+    titleContainer.addChild(badgeShadow);
+
+    var badgeGlow = new createjs.Shape();
+    badgeGlow.graphics
+        .beginRadialGradientFill(
+            ["rgba(255,255,255,0.65)", "rgba(176,118,255,0.55)", "rgba(176,118,255,0)"],
+            [0, 0.45, 1],
+            0,
+            0,
+            badgeWidth * 0.35,
+            0,
+            0,
+            badgeWidth
+        )
+        .drawRoundRect(
+            -badgeWidth / 2,
+            -badgeHeight / 2,
+            badgeWidth,
+            badgeHeight,
+            Math.min(badgeCornerRadius + 2, 42)
+        );
+    badgeGlow.alpha = 0.65;
+    badgeGlow.compositeOperation = "lighter";
+    titleContainer.addChild(badgeGlow);
+
+    var badgeBackground = new createjs.Shape();
+    badgeBackground.graphics
+        .beginLinearGradientFill(["#4528B6", "#7044E2", "#FF6FB5"], [0, 0.55, 1], -badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, badgeHeight / 2)
+        .drawRoundRect(
+            -badgeWidth / 2,
+            -badgeHeight / 2,
+            badgeWidth,
+            badgeHeight,
+            Math.min(badgeCornerRadius + 2, 42)
+        );
+    titleContainer.addChild(badgeBackground);
+
+    var badgeOutline = new createjs.Shape();
+    badgeOutline.graphics
+        .setStrokeStyle(2)
+        .beginStroke("rgba(255,255,255,0.45)")
+        .drawRoundRect(
+            -badgeWidth / 2 + 1,
+            -badgeHeight / 2 + 1,
+            badgeWidth - 2,
+            badgeHeight - 2,
+            Math.max(badgeCornerRadius - 2, 20)
+        );
+    badgeOutline.alpha = 0.6;
+    titleContainer.addChild(badgeOutline);
+
+    var badgeHighlight = new createjs.Shape();
+    badgeHighlight.graphics
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"],
+            [0, 1],
+            -badgeWidth / 2 + 8,
+            -badgeHeight / 2 + 6,
+            badgeWidth / 2,
+            0
+        )
+        .drawRoundRect(
+            -badgeWidth / 2 + 6,
+            -badgeHeight / 2 + 6,
+            badgeWidth - 12,
+            badgeHeight / 2,
+            highlightCornerRadius
+        );
+    badgeHighlight.alpha = 0.5;
+    titleContainer.addChild(badgeHighlight);
+
+    var iconOrb = new createjs.Shape();
+    iconOrb.graphics
+        .beginRadialGradientFill(
+            ["rgba(255,255,255,0.9)", "rgba(255,190,128,0.85)", "rgba(255,190,128,0)"],
+            [0, 0.55, 1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            32
+        )
+        .drawCircle(0, 0, 26);
+    iconOrb.x = -badgeWidth / 2 + 54;
+    iconOrb.y = 0;
+    iconOrb.alpha = 0.9;
+    iconOrb.compositeOperation = "lighter";
+    titleContainer.addChild(iconOrb);
+
+    var iconGlyph = new createjs.Shape();
+    iconGlyph.graphics
+        .setStrokeStyle(3)
+        .beginStroke("rgba(72,23,143,0.85)")
+        .beginFill("rgba(255,255,255,0.92)")
+        .moveTo(0, -10)
+        .lineTo(10, 0)
+        .lineTo(0, 10)
+        .lineTo(-10, 0)
+        .closePath();
+    iconGlyph.x = iconOrb.x;
+    iconGlyph.y = iconOrb.y;
+    iconGlyph.alpha = 0.9;
+    titleContainer.addChild(iconGlyph);
+
+    titleLabel.lineWidth = badgeWidth - 180;
+    titleLabel.x = iconOrb.x + 40;
+    titleLabel.y = 2;
+    titleContainer.addChild(titleLabel);
+
+    var shimmer = new createjs.Shape();
+    shimmer.graphics
+        .beginLinearGradientFill(
+            ["rgba(255,255,255,0)", "rgba(255,255,255,0.65)", "rgba(255,255,255,0)"],
+            [0, 0.5, 1],
+            -badgeWidth,
+            -badgeHeight,
+            badgeWidth,
+            badgeHeight
+        )
+        .drawRoundRect(
+            -badgeWidth,
+            -badgeHeight,
+            badgeWidth * 2,
+            badgeHeight * 2,
+            Math.min(badgeCornerRadius + 6, 48)
+        );
+    shimmer.alpha = 0.65;
+    shimmer.compositeOperation = "lighter";
+    shimmer.x = -badgeWidth;
+    shimmer.y = 0;
+    titleContainer.addChild(shimmer);
+    titleContainer.__shimmer = shimmer;
+
+    titleContainer.x = getCanvasCenterX();
+    titleContainer.y = badgeHeight / 2;
+    titleContainer.__layoutHalfWidth = badgeWidth / 2;
+    titleContainer.__layoutHalfHeight = badgeHeight / 2;
+    titleContainer.__label = titleLabel;
+
+    titleContainer.clone = function () {
+        var clone = buildTitleBadgeForGame(gameName);
+        clone.x = titleContainer.x;
+        clone.y = titleContainer.y;
+        clone.visible = titleContainer.visible;
+        clone.__layoutTargetY = titleContainer.__layoutTargetY;
+        clone.__introBadgeActive = titleContainer.__introBadgeActive;
+        return clone;
+    };
+
+    return titleContainer;
+}
+
+
+function ensureIntroTitleBadge() {
+    if (typeof Title !== "undefined" && Title) {
+        return Title;
+    }
+
+    var fallbackTitle = buildTitleBadgeForGame(GameNameWithLvl);
+    fallbackTitle.visible = false;
+    fallbackTitle.__introBadgeActive = false;
+    fallbackTitle.__isFallbackTitle = true;
+
+    if (container && container.parent && !fallbackTitle.parent) {
+        container.parent.addChild(fallbackTitle);
+    }
+
+    TitleContaier = fallbackTitle;
+    Title = fallbackTitle;
+
+    if (typeof refreshResponsiveLayout === "function") {
+        refreshResponsiveLayout(true);
+    }
+
+    return fallbackTitle;
+}
 function createManifest() {
 
     var VarTitle = GameNameWithLvl + "-Title.png";
@@ -3259,192 +3507,30 @@ function doneLoading(event) {
             //////////////////////////////////////////////////////////////////////////////////////////////////////
 
             if (id == "Title") {
-                var formattedTitle = GameNameWithLvl.replace(/-/g, " ")
-                    .replace(/(?!^)([A-Z])/g, " $1")
-                    .toUpperCase()
-                    .split("LEVEL")[0]
-                    .trim();
-
-                var fontFamily = "'Baloo 2'";
-                var fontWeight = "800";
-                var badgePadding = 200;
-                var minBadgeWidth = 360;
-                var maxBadgeWidth = 640;
-                var minBadgeHeight = 52;
-                var badgeVerticalPadding = 28;
-                var fontSizes = [44, 40, 36, 32, 28];
-                var titleLabel;
-
-                for (var sizeIndex = 0; sizeIndex < fontSizes.length; sizeIndex++) {
-                    var fontSize = fontSizes[sizeIndex];
-                    titleLabel = new createjs.Text(
-                        formattedTitle,
-                        fontWeight + " " + fontSize + "px " + fontFamily,
-                        "#F9F7FF"
-                    );
-                    titleLabel.textAlign = "left";
-                    titleLabel.textBaseline = "middle";
-                    titleLabel.shadow = new createjs.Shadow("rgba(10,18,44,0.55)", 0, 10, 26);
-
-                    if (
-                        titleLabel.getMeasuredWidth() + badgePadding <= maxBadgeWidth ||
-                        sizeIndex === fontSizes.length - 1
-                    ) {
-                        break;
-                    }
-                }
-
-                var measuredTitleWidth = titleLabel.getMeasuredWidth();
-                var badgeWidth = Math.max(
-                    minBadgeWidth,
-                    Math.min(maxBadgeWidth, measuredTitleWidth + badgePadding)
-                );
-
-                titleLabel.lineWidth = badgeWidth - 180;
-                var textHeight = titleLabel.getMeasuredHeight();
-                var badgeHeight = Math.max(
-                    minBadgeHeight,
-                    Math.round(textHeight + badgeVerticalPadding)
-                );
-                var badgeCornerRadius = Math.min(40, Math.round(badgeHeight * 0.45));
-                var highlightCornerRadius = Math.max(16, badgeCornerRadius - 8);
-
-                TitleContaier = new createjs.Container();
-                TitleContaier.mouseEnabled = false;
-                TitleContaier.mouseChildren = false;
-
-                var badgeShadow = new createjs.Shape();
-                badgeShadow.graphics
-                    .beginFill("rgba(6,12,28,0.55)")
-                    .drawRoundRect(
-                        -badgeWidth / 2,
-                        -badgeHeight / 2 + 10,
-                        badgeWidth,
-                        badgeHeight,
-                        Math.min(badgeCornerRadius + 4, 44)
-                    );
-                badgeShadow.alpha = 0.34;
-                TitleContaier.addChild(badgeShadow);
-
-                var badgeGlow = new createjs.Shape();
-                badgeGlow.graphics
-                    .beginRadialGradientFill(
-                        ["rgba(255,255,255,0.65)", "rgba(176,118,255,0.55)", "rgba(176,118,255,0)"],
-                        [0, 0.45, 1],
-                        0,
-                        0,
-                        badgeWidth * 0.35,
-                        0,
-                        0,
-                        badgeWidth
-                    )
-                    .drawRoundRect(
-                        -badgeWidth / 2,
-                        -badgeHeight / 2,
-                        badgeWidth,
-                        badgeHeight,
-                        Math.min(badgeCornerRadius + 2, 42)
-                    );
-                badgeGlow.alpha = 0.65;
-                badgeGlow.compositeOperation = "lighter";
-                TitleContaier.addChild(badgeGlow);
-
-                var badgeBackground = new createjs.Shape();
-                badgeBackground.graphics
-                    .beginLinearGradientFill([
-                        "#4528B6",
-                        "#7044E2",
-                        "#FF6FB5"
-                    ], [0, 0.55, 1], -badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, badgeHeight / 2)
-                    .drawRoundRect(
-                        -badgeWidth / 2,
-                        -badgeHeight / 2,
-                        badgeWidth,
-                        badgeHeight,
-                        Math.min(badgeCornerRadius + 2, 42)
-                    );
-                TitleContaier.addChild(badgeBackground);
-
-                var badgeOutline = new createjs.Shape();
-                badgeOutline.graphics
-                    .setStrokeStyle(2)
-                    .beginStroke("rgba(255,255,255,0.45)")
-                    .drawRoundRect(
-                        -badgeWidth / 2 + 1,
-                        -badgeHeight / 2 + 1,
-                        badgeWidth - 2,
-                        badgeHeight - 2,
-                        Math.max(badgeCornerRadius - 2, 20)
-                    );
-                badgeOutline.alpha = 0.6;
-                TitleContaier.addChild(badgeOutline);
-
-                var badgeHighlight = new createjs.Shape();
-                badgeHighlight.graphics
-                    .beginLinearGradientFill([
-                        "rgba(255,255,255,0.55)",
-                        "rgba(255,255,255,0)"
-                    ], [0, 1], -badgeWidth / 2 + 8, -badgeHeight / 2 + 6, badgeWidth / 2, 0)
-                    .drawRoundRect(
-                        -badgeWidth / 2 + 6,
-                        -badgeHeight / 2 + 6,
-                        badgeWidth - 12,
-                        badgeHeight / 2,
-                        highlightCornerRadius
-                    );
-                badgeHighlight.alpha = 0.5;
-                TitleContaier.addChild(badgeHighlight);
-
-                var iconOrb = new createjs.Shape();
-                iconOrb.graphics
-                    .beginRadialGradientFill(
-                        ["rgba(255,255,255,0.9)", "rgba(255,190,128,0.85)", "rgba(255,190,128,0)"],
-                        [0, 0.55, 1],
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        32
-                    )
-                    .drawCircle(0, 0, 26);
-                iconOrb.x = -badgeWidth / 2 + 54;
-                iconOrb.y = 0;
-                iconOrb.alpha = 0.9;
-                iconOrb.compositeOperation = "lighter";
-                TitleContaier.addChild(iconOrb);
-
-                var iconGlyph = new createjs.Shape();
-                iconGlyph.graphics
-                    .setStrokeStyle(3)
-                    .beginStroke("rgba(72,23,143,0.85)")
-                    .beginFill("rgba(255,255,255,0.92)")
-                    .moveTo(0, -10)
-                    .lineTo(10, 0)
-                    .lineTo(0, 10)
-                    .lineTo(-10, 0)
-                    .closePath();
-                iconGlyph.x = iconOrb.x;
-                iconGlyph.y = iconOrb.y;
-                iconGlyph.alpha = 0.9;
-                TitleContaier.addChild(iconGlyph);
-
-                titleLabel.lineWidth = badgeWidth - 180;
-                titleLabel.x = iconOrb.x + 40;
-                titleLabel.y = 2;
-                TitleContaier.addChild(titleLabel);
-
-                TitleContaier.x = getCanvasCenterX();
-                TitleContaier.y = badgeHeight / 2;
-                TitleContaier.__layoutHalfWidth = badgeWidth / 2;
-                TitleContaier.__layoutHalfHeight = badgeHeight / 2;
-                TitleContaier.__label = titleLabel;
-
+                var previousTitle = typeof Title !== "undefined" ? Title : null;
+                TitleContaier = buildTitleBadgeForGame(GameNameWithLvl);
+                TitleContaier.__isFallbackTitle = false;
                 Title = TitleContaier;
-                container.parent.addChild(TitleContaier);
+
+                var parentContainer = container && container.parent ? container.parent : null;
+                if (previousTitle && previousTitle.parent) {
+                    parentContainer = previousTitle.parent;
+                    var insertionIndex = parentContainer.getChildIndex(previousTitle);
+                    parentContainer.removeChild(previousTitle);
+                    if (typeof previousTitle.__dispose === "function") {
+                        try {
+                            previousTitle.__dispose();
+                        } catch (err) {
+                        }
+                    }
+                    parentContainer.addChildAt(TitleContaier, Math.max(0, insertionIndex));
+                } else if (parentContainer) {
+                    parentContainer.addChild(TitleContaier);
+                }
 
                 Title.visible = false;
                 Title.__introBadgeActive = false;
+
                 refreshResponsiveLayout(true);
                 showIntroTitleBadge();
                 continue;
@@ -6922,6 +7008,8 @@ function gameHowToPlayAnimation() {
 //===========================================================================================//
 
 function createGameIntroAnimationPlay() {
+    ensureIntroTitleBadge();
+
     //////////////////////////////////////Dynamicintro///////////////////////
 
     howToPlayImageMc.visible = true;
