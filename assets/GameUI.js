@@ -1759,6 +1759,9 @@ var connectivityOverlay,
   connectivityIconOfflineSlash,
   connectivityIconSuccess,
   connectivityIconInfo,
+  connectivityIconProgress,
+  connectivityIconProgressSpinner,
+  connectivityIconProgressGlow,
   connectivityOverlayClose,
   connectivityOverlayCloseGlow,
   connectivityOverlayCloseHighlight,
@@ -1774,6 +1777,8 @@ var SAUIX_CONNECTIVITY_COPY = {
     completeOneDetail: "Tap Close at the top to continue.",
     genericTitle: "Hold on a moment...",
     genericDetail: "We're preparing the next activity for you.",
+    resultsLoadingTitle: "Loading your results...",
+    resultsLoadingDetail: "Hang tight while we polish your scorecard.",
   },
   "assets/GujaratiAssets/": {
     offlineTitle: "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...",
@@ -1811,6 +1816,10 @@ function SAUIX_getConnectivityCopy(kind, lang) {
     keyTitle = "completeOneTitle";
     keyDetail = "completeOneDetail";
     iconType = "success";
+  } else if (kind === "resultsLoading") {
+    keyTitle = "resultsLoadingTitle";
+    keyDetail = "resultsLoadingDetail";
+    iconType = "progress";
   }
 
   var title = pack[keyTitle];
@@ -2039,6 +2048,80 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityIconInfo.addChild(infoGlyph);
 
   connectivityIconWrapper.addChild(connectivityIconInfo);
+
+  connectivityIconProgress = new createjs.Container();
+  connectivityIconProgress.visible = false;
+
+  var progressPlate = new createjs.Shape();
+  progressPlate.graphics
+    .beginRadialGradientFill(
+      ["#5640DF", "#190C4B"],
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      64
+    )
+    .drawCircle(0, 0, 64);
+  progressPlate.shadow = new createjs.Shadow("rgba(10,12,38,0.45)", 0, 14, 28);
+  connectivityIconProgress.addChild(progressPlate);
+
+  connectivityIconProgressGlow = new createjs.Shape();
+  connectivityIconProgressGlow.graphics
+    .beginRadialGradientFill(
+      ["rgba(126,211,255,0.65)", "rgba(132,126,255,0.15)", "rgba(132,126,255,0)"] ,
+      [0, 0.6, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      70
+    )
+    .drawCircle(0, 0, 70);
+  connectivityIconProgressGlow.alpha = 0.6;
+  connectivityIconProgressGlow.compositeOperation = "lighter";
+  connectivityIconProgressGlow.scaleX = connectivityIconProgressGlow.scaleY = 1;
+  connectivityIconProgress.addChild(connectivityIconProgressGlow);
+
+  connectivityIconProgressSpinner = new createjs.Container();
+  connectivityIconProgressSpinner.name = "spinner";
+  connectivityIconProgress.addChild(connectivityIconProgressSpinner);
+
+  var progressSpinnerArc = new createjs.Shape();
+  progressSpinnerArc.graphics
+    .setStrokeStyle(9, "round")
+    .beginStroke("rgba(255,255,255,0.92)")
+    .arc(0, 0, 46, -Math.PI / 2, Math.PI * 1.4, false);
+  progressSpinnerArc.shadow = new createjs.Shadow("rgba(14,24,48,0.35)", 0, 6, 14);
+  connectivityIconProgressSpinner.addChild(progressSpinnerArc);
+
+  var progressTail = new createjs.Shape();
+  progressTail.graphics
+    .beginRadialGradientFill(
+      ["rgba(255,255,255,0.95)", "rgba(255,255,255,0.25)", "rgba(255,255,255,0)"],
+      [0, 0.5, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      34
+    )
+    .drawCircle(46, -8, 16);
+  progressTail.compositeOperation = "lighter";
+  connectivityIconProgressSpinner.addChild(progressTail);
+
+  var progressCore = new createjs.Shape();
+  progressCore.graphics
+    .beginLinearGradientFill(["#FFFFFF", "#D2E8FF"], [0, 1], -16, -16, 16, 16)
+    .drawCircle(0, 0, 18);
+  progressCore.shadow = new createjs.Shadow("rgba(12,16,36,0.28)", 0, 4, 10);
+  connectivityIconProgress.addChild(progressCore);
+
+  connectivityIconWrapper.addChild(connectivityIconProgress);
 
   connectivityOverlayTitle = new createjs.Text(
     "",
@@ -2485,13 +2568,30 @@ function setConnectivityIcon(type) {
     connectivityIconInfo.visible = iconType === "info";
   }
 
+  if (connectivityIconProgress) {
+    var showProgress = iconType === "progress";
+    connectivityIconProgress.visible = showProgress;
+    if (!showProgress && connectivityIconProgressSpinner) {
+      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
+      connectivityIconProgressSpinner.rotation = 0;
+    }
+    if (!showProgress && connectivityIconProgressGlow) {
+      connectivityIconProgressGlow.alpha = 0.6;
+    }
+  }
+}
+
   if (connectivityOverlayAccent) {
     var accent = "rgba(255,148,220,0.9)";
     if (iconType === "success") {
       accent = "rgba(92,239,200,0.9)";
     } else if (iconType === "info") {
       accent = "rgba(144,166,255,0.9)";
+    } else if (iconType === "progress") {
+      accent = "rgba(130,188,255,0.9)";
     }
+  }
+}
 
     connectivityOverlayAccent.__accentColor = accent;
     connectivityOverlayAccent.graphics.clear();
@@ -2543,6 +2643,35 @@ function animateConnectivityOverlay() {
     createjs.Tween.get(connectivityIconWrapper, { loop: true })
       .to({ y: baseY - 8 }, 1200, createjs.Ease.sineInOut)
       .to({ y: baseY }, 1200, createjs.Ease.sineInOut);
+  }
+
+  var currentKind = connectivityOverlay.__iconType || "";
+  if (currentKind === "progress") {
+    if (connectivityIconProgressSpinner) {
+      connectivityIconProgressSpinner.rotation = 0;
+      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
+      createjs.Tween.get(connectivityIconProgressSpinner, { loop: true })
+        .to({ rotation: 360 }, 2200, createjs.Ease.linear);
+    }
+
+    if (connectivityIconProgressGlow) {
+      createjs.Tween.removeTweens(connectivityIconProgressGlow);
+      connectivityIconProgressGlow.alpha = 0.45;
+      createjs.Tween.get(connectivityIconProgressGlow, { loop: true })
+        .to({ alpha: 0.8, scaleX: 1.08, scaleY: 1.08 }, 1200, createjs.Ease.sineInOut)
+        .to({ alpha: 0.45, scaleX: 1, scaleY: 1 }, 1200, createjs.Ease.sineInOut);
+    }
+  } else {
+    if (connectivityIconProgressSpinner) {
+      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
+      connectivityIconProgressSpinner.rotation = 0;
+    }
+
+    if (connectivityIconProgressGlow) {
+      createjs.Tween.removeTweens(connectivityIconProgressGlow);
+      connectivityIconProgressGlow.alpha = 0.6;
+      connectivityIconProgressGlow.scaleX = connectivityIconProgressGlow.scaleY = 1;
+    }
   }
 
   if (connectivityOverlayShine) {
@@ -2631,6 +2760,7 @@ function SAUIX_showConnectivityOverlay(options) {
 
   overlay.__onClose =
     typeof options.onClose === "function" ? options.onClose : null;
+  overlay.__kind = typeof options.kind === "string" ? options.kind : null;
 
   layoutConnectivityOverlay(stageRef);
 
@@ -2693,6 +2823,7 @@ function SAUIX_hideConnectivityOverlay(options) {
     connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
     connectivityOverlay.__active = false;
     connectivityOverlay.__onClose = null;
+    connectivityOverlay.__kind = null;
 
     if (connectivityOverlayClose) {
       createjs.Tween.removeTweens(connectivityOverlayClose);
@@ -2716,6 +2847,7 @@ function SAUIX_hideConnectivityOverlay(options) {
       connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
       connectivityOverlay.__active = false;
       connectivityOverlay.__onClose = null;
+      connectivityOverlay.__kind = null;
 
       if (connectivityOverlayClose) {
         connectivityOverlayClose.visible = false;
@@ -2737,6 +2869,67 @@ function SAUIX_refreshConnectivityOverlayLayout(stageRef) {
   }
 
   layoutConnectivityOverlay(stageRef || connectivityOverlay.__stage || null);
+}
+
+function SAUIX_showResultsLoadingOverlay(options) {
+  options = options || {};
+  var stageRef = options.stage;
+
+  if (!stageRef && typeof stage !== "undefined") {
+    stageRef = stage;
+  }
+
+  var lang =
+    typeof options.language === "string"
+      ? options.language
+      : typeof assetsPathLang === "string"
+      ? assetsPathLang
+      : "";
+
+  var copy =
+    typeof SAUIX_getConnectivityCopy === "function"
+      ? SAUIX_getConnectivityCopy("resultsLoading", lang)
+      : null;
+
+  var message =
+    typeof options.message === "string"
+      ? options.message
+      : copy
+      ? copy.title
+      : "Loading your results...";
+
+  var detail;
+  if (options.detail === null) {
+    detail = "";
+  } else if (typeof options.detail === "string") {
+    detail = options.detail;
+  } else if (copy && typeof copy.detail === "string") {
+    detail = copy.detail;
+  }
+
+  var showOptions = {
+    stage: stageRef,
+    message: message,
+    detail: detail,
+    iconType: "progress",
+    hideClose: options.hideClose === false ? false : true,
+    onClose: typeof options.onClose === "function" ? options.onClose : null,
+    kind: "resultsLoading",
+  };
+
+  return SAUIX_showConnectivityOverlay(showOptions);
+}
+
+function SAUIX_hideResultsLoadingOverlay(options) {
+  options = options || {};
+
+  if (
+    connectivityOverlay &&
+    connectivityOverlay.visible &&
+    connectivityOverlay.__kind === "resultsLoading"
+  ) {
+    SAUIX_hideConnectivityOverlay({ immediate: !!options.immediate });
+  }
 }
 
 
