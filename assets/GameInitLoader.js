@@ -4217,7 +4217,7 @@ function buildHudLayout() {
         scoreCardContainer.valueHolder.addChild(gameScoreTxt);
         gameScoreTxt.textAlign = "left";
         gameScoreTxt.x = 0;
-        gameScoreTxt.y = -2;
+        gameScoreTxt.y = 0;
     }
 
     if (timerCardContainer.valueHolder) {
@@ -4231,7 +4231,7 @@ function buildHudLayout() {
         hudQuestionCardContainer.valueHolder.addChild(gameQCntTxt);
         gameQCntTxt.textAlign = "left";
         gameQCntTxt.x = 0;
-        gameQCntTxt.y = -2;
+        gameQCntTxt.y = 0;
     }
 
     var progressTheme = hudTheme.questionProgress || {};
