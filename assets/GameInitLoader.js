@@ -1902,6 +1902,28 @@ function applyTextStyle(target, style) {
     }
 }
 
+function alignHudValueText(target) {
+    if (!target) {
+        return;
+    }
+
+    var metrics = typeof target.getMetrics === "function" ? target.getMetrics() : null;
+    if (metrics && typeof metrics.height === "number") {
+        var baseline = typeof metrics.baseline === "number" ? metrics.baseline : metrics.height * 0.8;
+        target.textBaseline = "alphabetic";
+        target.y = baseline - metrics.height / 2;
+        target.__valueTextBaseline = target.textBaseline;
+        target.__valueTextOffset = target.y;
+        return;
+    }
+
+    target.textBaseline = "middle";
+    var fallbackLineHeight = typeof target.getMeasuredLineHeight === "function" ? target.getMeasuredLineHeight() : 0;
+    target.y = fallbackLineHeight ? fallbackLineHeight * 0.08 : 0;
+    target.__valueTextBaseline = target.textBaseline;
+    target.__valueTextOffset = target.y;
+}
+
 function updateHudIconWrapper(wrapper, paletteConfig, theme) {
     if (!wrapper) {
         return;
@@ -2770,6 +2792,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameScoreTxt, valueStyle);
         gameScoreTxt.__baseColor = gameScoreTxt.color;
         gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+        alignHudValueText(gameScoreTxt);
     }
 
     if (gameQCntTxt) {
@@ -2780,6 +2803,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameQCntTxt, questionStyle);
         gameQCntTxt.__baseColor = gameQCntTxt.color;
         gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+        alignHudValueText(gameQCntTxt);
     }
 
     if (gameTimerTxt) {
@@ -2790,6 +2814,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameTimerTxt, timerStyle);
         gameTimerTxt.__baseColor = gameTimerTxt.color;
         gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+        alignHudValueText(gameTimerTxt);
     }
 }
 
@@ -3808,6 +3833,7 @@ function watchRestart() {
     applyTextStyle(gameScoreTxt, valueTextStyle);
     gameScoreTxt.__baseColor = gameScoreTxt.color;
     gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+    alignHudValueText(gameScoreTxt);
 
     gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 32px 'Digital'", (timerTextStyle && timerTextStyle.color) || "#F6FBFF");
     gameTimerTxt.textAlign = "left";
@@ -3815,6 +3841,7 @@ function watchRestart() {
     applyTextStyle(gameTimerTxt, timerTextStyle);
     gameTimerTxt.__baseColor = gameTimerTxt.color;
     gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+    alignHudValueText(gameTimerTxt);
 
     gameQCntTxt = new createjs.Text("", "700 28px 'Baloo 2'", (valueTextStyle && valueTextStyle.color) || "#FFFFFF");
     gameQCntTxt.textAlign = "left";
@@ -3822,6 +3849,7 @@ function watchRestart() {
     applyTextStyle(gameQCntTxt, valueTextStyle);
     gameQCntTxt.__baseColor = gameQCntTxt.color;
     gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+    alignHudValueText(gameQCntTxt);
 
     gameScoreTxt.scaleX = gameScoreTxt.scaleY = 1;
     gameTimerTxt.scaleX = gameTimerTxt.scaleY = 1;
@@ -4218,6 +4246,7 @@ function buildHudLayout() {
         gameScoreTxt.textAlign = "left";
         gameScoreTxt.x = 0;
         gameScoreTxt.y = 0;
+        alignHudValueText(gameScoreTxt);
     }
 
     if (timerCardContainer.valueHolder) {
@@ -4225,6 +4254,7 @@ function buildHudLayout() {
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
         gameTimerTxt.y = 0;
+        alignHudValueText(gameTimerTxt);
     }
 
     if (hudQuestionCardContainer.valueHolder) {
@@ -4232,6 +4262,7 @@ function buildHudLayout() {
         gameQCntTxt.textAlign = "left";
         gameQCntTxt.x = 0;
         gameQCntTxt.y = 0;
+        alignHudValueText(gameQCntTxt);
     }
 
     var progressTheme = hudTheme.questionProgress || {};
@@ -4383,7 +4414,8 @@ function refreshHudValues() {
 
     var currentScore = typeof score !== "undefined" ? score : 0;
     gameScoreTxt.text = String(currentScore);
-animateScoreCelebration();
+    alignHudValueText(gameScoreTxt);
+    animateScoreCelebration();
     /*if (lastDisplayedScore !== null && currentScore > lastDisplayedScore && (!scoreCardContainer || !scoreCardContainer.__scoreCelebrating)) {
         animateScoreCelebration();
     }*/
@@ -4391,6 +4423,7 @@ animateScoreCelebration();
 
     var timerValue = typeof formatTimerValue === "function" ? formatTimerValue(time) : String(parseInt(time, 10) || 0);
     gameTimerTxt.text = timerValue;
+    alignHudValueText(gameTimerTxt);
 
     var numericTime = typeof time !== "undefined" ? parseInt(time, 10) || 0 : 0;
    animateTimerTick();
@@ -4408,7 +4441,8 @@ animateScoreCelebration();
     }
 
     gameQCntTxt.text = currentQuestion + "/" + total;
-animateQuestionAdvance();
+    alignHudValueText(gameQCntTxt);
+    animateQuestionAdvance();
    /* if (lastDisplayedQuestion !== null && currentQuestion > lastDisplayedQuestion) {
         animateQuestionAdvance();
     }*/
