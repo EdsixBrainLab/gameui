@@ -15,7 +15,7 @@ if (canvas) {
   offlineContainer.addChild(fallbackBackdrop);
 
   var fallbackHeadline = new createjs.Text(
-    "Please check your internet connectivity!",
+    "You're offline right now.",
     "700 42px 'Baloo 2'",
     "#F7F3FF"
   );
@@ -106,7 +106,7 @@ if (canvas) {
       fallbackHeadline.text =
         copy && copy.title
           ? copy.title
-          : "Please check your internet connectivity!";
+          : "You're offline right now.";
       offlineContainer.visible = true;
     }
 

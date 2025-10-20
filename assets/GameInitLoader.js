@@ -7256,9 +7256,9 @@ function internetErrorFn() {
             } else if (assetsPathLang == "assets/ArabicAssets/") {
                 setFinishedTxt.text = "...لا يوجد اتصال بالإنترنت. حاول مرة اخرى";
             } else if (assetsPathLang == "assets/TamilAssets/") {
-                setFinishedTxt.text = "No Internet Connection. Please try again...";
+                setFinishedTxt.text = "You're offline right now.";
             } else {
-                setFinishedTxt.text = "No Internet Connection. Please try again...";
+                setFinishedTxt.text = "You're offline right now.";
 
             }
         }

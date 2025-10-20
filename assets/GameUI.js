@@ -1762,8 +1762,8 @@ var connectivityOverlay,
 
 var SAUIX_CONNECTIVITY_COPY = {
   default: {
-    offlineTitle: "No Internet Connection. Please try again...",
-    offlineDetail: "We'll retry automatically in a moment.",
+    offlineTitle: "You're offline right now.",
+    offlineDetail: "We'll reconnect automatically once you're back online.",
     completeAllTitle: "You have completed all the puzzles.",
     completeAllDetail: "Tap Close at the top to see the results.",
     completeOneTitle: "You have completed this puzzle...",
@@ -1784,7 +1784,7 @@ var SAUIX_CONNECTIVITY_COPY = {
     completeOneTitle: "لقد أكملت هذا اللغز...",
   },
   "assets/TamilAssets/": {
-    offlineTitle: "No Internet Connection. Please try again...",
+    offlineTitle: "You're offline right now.",
   },
 };
 
@@ -1877,8 +1877,9 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityOverlayCard.addChild(connectivityOverlayAccent);
 
   connectivityIconWrapper = new createjs.Container();
-  connectivityIconWrapper.x = -176;
-  connectivityIconWrapper.y = 0;
+  connectivityIconWrapper.x = 0;
+  connectivityIconWrapper.y = -88;
+  connectivityIconWrapper.__baseY = -88;
   connectivityIconWrapper.mouseEnabled = false;
   connectivityIconWrapper.mouseChildren = false;
   connectivityOverlayCard.addChild(connectivityIconWrapper);
@@ -2040,12 +2041,12 @@ function ensureConnectivityOverlay(stageRef) {
     "800 46px 'Baloo 2'",
     "#FEF9FF"
   );
-  connectivityOverlayTitle.textAlign = "left";
+  connectivityOverlayTitle.textAlign = "center";
   connectivityOverlayTitle.textBaseline = "middle";
-  connectivityOverlayTitle.lineWidth = 420;
+  connectivityOverlayTitle.lineWidth = 480;
   connectivityOverlayTitle.lineHeight = 56;
-  connectivityOverlayTitle.x = 40;
-  connectivityOverlayTitle.y = -24;
+  connectivityOverlayTitle.x = 0;
+  connectivityOverlayTitle.y = 72;
   connectivityOverlayTitle.shadow = new createjs.Shadow(
     "rgba(10,12,32,0.55)",
     0,
@@ -2057,14 +2058,14 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityOverlayDetail = new createjs.Text(
     "",
     "400 26px 'Baloo 2'",
-    "rgba(235,240,255,0.85)"
+    "rgba(240,236,255,0.92)"
   );
-  connectivityOverlayDetail.textAlign = "left";
+  connectivityOverlayDetail.textAlign = "center";
   connectivityOverlayDetail.textBaseline = "middle";
-  connectivityOverlayDetail.lineWidth = 420;
-  connectivityOverlayDetail.lineHeight = 36;
-  connectivityOverlayDetail.x = 40;
-  connectivityOverlayDetail.y = 48;
+  connectivityOverlayDetail.lineWidth = 520;
+  connectivityOverlayDetail.lineHeight = 40;
+  connectivityOverlayDetail.x = 0;
+  connectivityOverlayDetail.y = 134;
   connectivityOverlayDetail.shadow = new createjs.Shadow(
     "rgba(6,10,28,0.4)",
     0,
@@ -2125,8 +2126,8 @@ function layoutConnectivityOverlay(stageRef) {
   }
 
   var baseWidth = 620;
-  var baseHeight = 240;
-  var radius = 48;
+  var baseHeight = 320;
+  var radius = 54;
 
   var scaleX = width / 1280;
   var scaleY = height / 720;
@@ -2141,7 +2142,7 @@ function layoutConnectivityOverlay(stageRef) {
     connectivityOverlayPanel.graphics
       .clear()
       .beginLinearGradientFill(
-        ["#28175A", "#5A2EDC", "#8E46FF"],
+        ["#26144F", "#4D2BCF", "#8A44FF"],
         [0, 0.5, 1],
         0,
         -baseHeight / 2,
@@ -2161,8 +2162,8 @@ function layoutConnectivityOverlay(stageRef) {
     connectivityOverlayGlass.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0.36)", "rgba(255,255,255,0.12)", "rgba(255,255,255,0)"] ,
-        [0, 0.48, 1],
+        ["rgba(255,255,255,0.38)", "rgba(255,255,255,0.16)", "rgba(255,255,255,0)"] ,
+        [0, 0.52, 1],
         0,
         -baseHeight / 2,
         0,
@@ -2173,7 +2174,7 @@ function layoutConnectivityOverlay(stageRef) {
         -baseHeight / 2 + 18,
         baseWidth - 36,
         baseHeight - 36,
-        radius - 16
+        radius - 18
       );
   }
 
@@ -2182,7 +2183,7 @@ function layoutConnectivityOverlay(stageRef) {
       .clear()
       .setStrokeStyle(3)
       .beginLinearGradientStroke(
-        ["rgba(196,188,255,0.7)", "rgba(136,104,255,0.58)"],
+        ["rgba(212,202,255,0.78)", "rgba(152,120,255,0.62)"],
         [0, 1],
         0,
         -baseHeight / 2 + 6,
@@ -2190,11 +2191,11 @@ function layoutConnectivityOverlay(stageRef) {
         baseHeight / 2 - 6
       )
       .drawRoundRect(
-        -baseWidth / 2 + 8,
-        -baseHeight / 2 + 8,
-        baseWidth - 16,
-        baseHeight - 16,
-        radius - 12
+        -baseWidth / 2 + 10,
+        -baseHeight / 2 + 10,
+        baseWidth - 20,
+        baseHeight - 20,
+        radius - 16
       );
   }
 
@@ -2202,33 +2203,57 @@ function layoutConnectivityOverlay(stageRef) {
     connectivityOverlayShine.graphics
       .clear()
       .beginLinearGradientFill(
-        ["rgba(255,255,255,0)", "rgba(255,255,255,0.8)", "rgba(255,255,255,0)"],
-        [0, 0.5, 1],
-        -160,
+        ["rgba(255,255,255,0)", "rgba(255,255,255,0.5)", "rgba(255,255,255,0)"],
+        [0, 0.45, 1],
+        -baseWidth / 2,
         0,
-        160,
+        baseWidth / 2,
         0
       )
-      .drawRoundRect(-160, -baseHeight / 2 + 20, 320, baseHeight - 40, radius - 20);
-    connectivityOverlayShine.x = -baseWidth / 2;
+      .drawRoundRect(
+        -baseWidth / 2 + 26,
+        -baseHeight / 2 + 26,
+        baseWidth - 52,
+        baseHeight - 52,
+        radius - 24
+      );
   }
 
   if (connectivityOverlayAccent) {
+    var accentColor = connectivityOverlayAccent.__accentColor || "rgba(255,148,220,0.9)";
     connectivityOverlayAccent.graphics
       .clear()
-      .beginLinearGradientFill(
-        ["rgba(255,162,226,0.85)", "rgba(104,214,255,0.65)", "rgba(162,132,255,0.9)"],
-        [0, 0.5, 1],
-        -140,
+      .beginRadialGradientFill(
+        [accentColor, "rgba(255,255,255,0.65)", "rgba(124,88,255,0)"] ,
+        [0, 0.36, 1],
         0,
-        140,
-        0
+        0,
+        0,
+        0,
+        0,
+        180
       )
-      .drawRoundRect(-140, -baseHeight / 2 + 30, 280, 10, 5);
+      .drawEllipse(-190, -164, 380, 228);
   }
 
-  if (connectivityOverlay) {
+  if (connectivityOverlayTitle) {
+    connectivityOverlayTitle.lineWidth = baseWidth - 120;
+  }
+
+  if (connectivityOverlayDetail) {
+    connectivityOverlayDetail.lineWidth = baseWidth - 120;
+  }
+
+  if (connectivityIconWrapper) {
+    connectivityIconWrapper.x = 0;
+    connectivityIconWrapper.y = -baseHeight / 2 + 120;
+    connectivityIconWrapper.__baseY = connectivityIconWrapper.y;
+  }
+
+  if (connectivityOverlay && !connectivityOverlay.__suppressIconSync) {
+    connectivityOverlay.__suppressIconSync = true;
     setConnectivityIcon(connectivityOverlay.__iconType || "offline");
+    connectivityOverlay.__suppressIconSync = false;
   }
 }
 
@@ -2256,24 +2281,22 @@ function setConnectivityIcon(type) {
   }
 
   if (connectivityOverlayAccent) {
-    var accent = "#FF8CB7";
+    var accent = "rgba(255,148,220,0.9)";
     if (iconType === "success") {
-      accent = "#5CEFC8";
+      accent = "rgba(92,239,200,0.9)";
     } else if (iconType === "info") {
-      accent = "#90A6FF";
+      accent = "rgba(144,166,255,0.9)";
     }
 
-    connectivityOverlayAccent.graphics
-      .clear()
-      .beginLinearGradientFill(
-        [accent, "rgba(255,255,255,0.6)", accent],
-        [0, 0.5, 1],
-        -140,
-        0,
-        140,
-        0
-      )
-      .drawRoundRect(-140, -90, 280, 10, 5);
+    connectivityOverlayAccent.__accentColor = accent;
+    connectivityOverlayAccent.graphics.clear();
+    if (connectivityOverlay) {
+      connectivityOverlay.__suppressIconSync = true;
+    }
+    layoutConnectivityOverlay(connectivityOverlay.__stage || null);
+    if (connectivityOverlay) {
+      connectivityOverlay.__suppressIconSync = false;
+    }
   }
 }
 
@@ -2307,10 +2330,14 @@ function animateConnectivityOverlay() {
 
   if (connectivityIconWrapper) {
     createjs.Tween.removeTweens(connectivityIconWrapper);
-    connectivityIconWrapper.y = 0;
+    var baseY =
+      typeof connectivityIconWrapper.__baseY === "number"
+        ? connectivityIconWrapper.__baseY
+        : connectivityIconWrapper.y || 0;
+    connectivityIconWrapper.y = baseY;
     createjs.Tween.get(connectivityIconWrapper, { loop: true })
-      .to({ y: -6 }, 1200, createjs.Ease.sineInOut)
-      .to({ y: 0 }, 1200, createjs.Ease.sineInOut);
+      .to({ y: baseY - 8 }, 1200, createjs.Ease.sineInOut)
+      .to({ y: baseY }, 1200, createjs.Ease.sineInOut);
   }
 
   if (connectivityOverlayShine) {
@@ -2358,8 +2385,10 @@ function SAUIX_showConnectivityOverlay(options) {
   if (typeof options.detail === "string" && options.detail.length > 0) {
     connectivityOverlayDetail.text = options.detail;
     connectivityOverlayDetail.visible = true;
+    connectivityOverlayTitle.y = 72;
   } else {
     connectivityOverlayDetail.visible = false;
+    connectivityOverlayTitle.y = 84;
   }
 
   setConnectivityIcon(options.iconType);
