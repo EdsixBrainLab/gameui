@@ -2579,6 +2579,7 @@ function setConnectivityIcon(type) {
       connectivityIconProgressGlow.alpha = 0.6;
     }
   }
+}
 
   if (connectivityOverlayAccent) {
     var accent = "rgba(255,148,220,0.9)";
@@ -2589,6 +2590,8 @@ function setConnectivityIcon(type) {
     } else if (iconType === "progress") {
       accent = "rgba(130,188,255,0.9)";
     }
+  }
+}
 
     connectivityOverlayAccent.__accentColor = accent;
     connectivityOverlayAccent.graphics.clear();
