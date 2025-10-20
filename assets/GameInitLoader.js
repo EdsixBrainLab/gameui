@@ -1902,6 +1902,76 @@ function applyTextStyle(target, style) {
     }
 }
 
+function alignHudValueText(target) {
+    if (!target) {
+        return;
+    }
+
+    var metrics = typeof target.getMetrics === "function" ? target.getMetrics() : null;
+    if (metrics) {
+        var ascentCandidates = [
+            metrics.actualBoundingBoxAscent,
+            metrics.fontBoundingBoxAscent,
+            metrics.emHeightAscent,
+            metrics.baseline
+        ];
+        var descentCandidates = [
+            metrics.actualBoundingBoxDescent,
+            metrics.fontBoundingBoxDescent,
+            metrics.emHeightDescent
+        ];
+
+        var ascent = findFirstNumber(ascentCandidates);
+        var descent = findFirstNumber(descentCandidates);
+        var total = null;
+
+        if (typeof ascent === "number" && typeof descent === "number") {
+            total = ascent + descent;
+        }
+
+        if (total === null || !total) {
+            if (typeof metrics.height === "number" && typeof ascent === "number") {
+                total = metrics.height;
+                if (typeof descent !== "number") {
+                    descent = total - ascent;
+                }
+            } else if (typeof metrics.height === "number") {
+                total = metrics.height;
+                ascent = total * 0.8;
+                descent = total - ascent;
+            }
+        }
+
+        if (typeof ascent === "number" && typeof total === "number" && total) {
+            target.textBaseline = "alphabetic";
+            target.y = ascent - total / 2;
+            target.__valueTextBaseline = target.textBaseline;
+            target.__valueTextOffset = target.y;
+            return;
+        }
+    }
+
+    target.textBaseline = "middle";
+    var fallbackLineHeight = typeof target.getMeasuredLineHeight === "function" ? target.getMeasuredLineHeight() : 0;
+    target.y = fallbackLineHeight ? fallbackLineHeight * 0.08 : 0;
+    target.__valueTextBaseline = target.textBaseline;
+    target.__valueTextOffset = target.y;
+}
+
+function findFirstNumber(candidates) {
+    if (!candidates || !candidates.length) {
+        return null;
+    }
+
+    for (var i = 0; i < candidates.length; i++) {
+        if (typeof candidates[i] === "number" && !isNaN(candidates[i])) {
+            return candidates[i];
+        }
+    }
+
+    return null;
+}
+
 function updateHudIconWrapper(wrapper, paletteConfig, theme) {
     if (!wrapper) {
         return;
@@ -2022,6 +2092,129 @@ function applyAlphaToColor(color, alpha) {
     }
 
     return color;
+}
+
+function getHudCardTheme(type) {
+    var theme = getHudThemeConfig();
+    if (!theme || !theme.cards) {
+        return null;
+    }
+
+    if (theme.cards[type]) {
+        return theme.cards[type];
+    }
+
+    if (theme.cards.score) {
+        return theme.cards.score;
+    }
+
+    var cardKeys = Object.keys(theme.cards);
+    return cardKeys.length ? theme.cards[cardKeys[0]] : null;
+}
+
+function resolveCardPrimaryColor(type, fallbackColor) {
+    var cardTheme = getHudCardTheme(type);
+    if (!cardTheme) {
+        return fallbackColor;
+    }
+
+    var candidates = [];
+    var ambient = cardTheme.ambient || {};
+    var iconStyle = cardTheme.iconStyle || {};
+
+    if (ambient.spark) {
+        candidates.push(ambient.spark);
+    }
+    if (ambient.halo) {
+        candidates.push(ambient.halo);
+    }
+
+    if (iconStyle.strokeColor) {
+        candidates.push(iconStyle.strokeColor);
+    }
+    if (iconStyle.fill) {
+        candidates.push(iconStyle.fill);
+    }
+    if (iconStyle.gradient && iconStyle.gradient.length) {
+        candidates = candidates.concat(iconStyle.gradient);
+    }
+
+    var accent = cardTheme.accent;
+    if (Array.isArray(accent)) {
+        candidates = candidates.concat(accent);
+    } else if (typeof accent === "string") {
+        candidates.push(accent);
+    }
+
+    var background = cardTheme.background;
+    if (Array.isArray(background)) {
+        candidates = candidates.concat(background);
+    } else if (typeof background === "string") {
+        candidates.push(background);
+    }
+
+    for (var i = 0; i < candidates.length; i++) {
+        if (typeof candidates[i] === "string" && candidates[i]) {
+            return candidates[i];
+        }
+    }
+
+    return fallbackColor;
+}
+
+function resolveCardEffectPalette(type, fallbackPalette) {
+    var cardTheme = getHudCardTheme(type);
+    var palette = [];
+
+    function pushUniqueColor(color) {
+        if (typeof color === "string" && color && palette.indexOf(color) === -1) {
+            palette.push(color);
+        }
+    }
+
+    if (cardTheme) {
+        var accent = cardTheme.accent;
+        if (Array.isArray(accent)) {
+            accent.forEach(pushUniqueColor);
+        } else {
+            pushUniqueColor(accent);
+        }
+
+        var background = cardTheme.background;
+        if (Array.isArray(background)) {
+            background.forEach(pushUniqueColor);
+        } else {
+            pushUniqueColor(background);
+        }
+
+        var iconStyle = cardTheme.iconStyle || {};
+        if (iconStyle.fill) {
+            pushUniqueColor(iconStyle.fill);
+        }
+        if (iconStyle.strokeColor) {
+            pushUniqueColor(iconStyle.strokeColor);
+        }
+        if (iconStyle.gradient && iconStyle.gradient.length) {
+            iconStyle.gradient.forEach(pushUniqueColor);
+        }
+
+        var ambient = cardTheme.ambient || {};
+        pushUniqueColor(ambient.spark);
+        pushUniqueColor(ambient.halo);
+        pushUniqueColor(ambient.ring);
+    }
+
+    if (!palette.length && Array.isArray(fallbackPalette)) {
+        return fallbackPalette.slice();
+    }
+
+    if (Array.isArray(fallbackPalette)) {
+        for (var i = 0; i < fallbackPalette.length; i++) {
+            pushUniqueColor(fallbackPalette[i]);
+        }
+    }
+
+    return palette.length ? palette : (Array.isArray(fallbackPalette) ? fallbackPalette.slice() : []);
 }
 
 function ensureHudIconAmbientDecor(card) {
@@ -2647,6 +2840,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameScoreTxt, valueStyle);
         gameScoreTxt.__baseColor = gameScoreTxt.color;
         gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+        alignHudValueText(gameScoreTxt);
     }
 
     if (gameQCntTxt) {
@@ -2657,6 +2851,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameQCntTxt, questionStyle);
         gameQCntTxt.__baseColor = gameQCntTxt.color;
         gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+        alignHudValueText(gameQCntTxt);
     }
 
     if (gameTimerTxt) {
@@ -2667,6 +2862,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameTimerTxt, timerStyle);
         gameTimerTxt.__baseColor = gameTimerTxt.color;
         gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+        alignHudValueText(gameTimerTxt);
     }
 }
 
@@ -3685,6 +3881,7 @@ function watchRestart() {
     applyTextStyle(gameScoreTxt, valueTextStyle);
     gameScoreTxt.__baseColor = gameScoreTxt.color;
     gameScoreTxt.__baseShadow = gameScoreTxt.shadow;
+    alignHudValueText(gameScoreTxt);
 
     gameTimerTxt = new createjs.Text(formatTimerValue(time), "bold 32px 'Digital'", (timerTextStyle && timerTextStyle.color) || "#F6FBFF");
     gameTimerTxt.textAlign = "left";
@@ -3692,6 +3889,7 @@ function watchRestart() {
     applyTextStyle(gameTimerTxt, timerTextStyle);
     gameTimerTxt.__baseColor = gameTimerTxt.color;
     gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
+    alignHudValueText(gameTimerTxt);
 
     gameQCntTxt = new createjs.Text("", "700 28px 'Baloo 2'", (valueTextStyle && valueTextStyle.color) || "#FFFFFF");
     gameQCntTxt.textAlign = "left";
@@ -3699,6 +3897,7 @@ function watchRestart() {
     applyTextStyle(gameQCntTxt, valueTextStyle);
     gameQCntTxt.__baseColor = gameQCntTxt.color;
     gameQCntTxt.__baseShadow = gameQCntTxt.shadow;
+    alignHudValueText(gameQCntTxt);
 
     gameScoreTxt.scaleX = gameScoreTxt.scaleY = 1;
     gameTimerTxt.scaleX = gameTimerTxt.scaleY = 1;
@@ -4094,7 +4293,8 @@ function buildHudLayout() {
         scoreCardContainer.valueHolder.addChild(gameScoreTxt);
         gameScoreTxt.textAlign = "left";
         gameScoreTxt.x = 0;
-        gameScoreTxt.y = -2;
+        gameScoreTxt.y = 0;
+        alignHudValueText(gameScoreTxt);
     }
 
     if (timerCardContainer.valueHolder) {
@@ -4102,13 +4302,15 @@ function buildHudLayout() {
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
         gameTimerTxt.y = 0;
+        alignHudValueText(gameTimerTxt);
     }
 
     if (hudQuestionCardContainer.valueHolder) {
         hudQuestionCardContainer.valueHolder.addChild(gameQCntTxt);
         gameQCntTxt.textAlign = "left";
         gameQCntTxt.x = 0;
-        gameQCntTxt.y = -2;
+        gameQCntTxt.y = 0;
+        alignHudValueText(gameQCntTxt);
     }
 
     var progressTheme = hudTheme.questionProgress || {};
@@ -4260,7 +4462,8 @@ function refreshHudValues() {
 
     var currentScore = typeof score !== "undefined" ? score : 0;
     gameScoreTxt.text = String(currentScore);
-animateScoreCelebration();
+    alignHudValueText(gameScoreTxt);
+    animateScoreCelebration();
     /*if (lastDisplayedScore !== null && currentScore > lastDisplayedScore && (!scoreCardContainer || !scoreCardContainer.__scoreCelebrating)) {
         animateScoreCelebration();
     }*/
@@ -4268,6 +4471,7 @@ animateScoreCelebration();
 
     var timerValue = typeof formatTimerValue === "function" ? formatTimerValue(time) : String(parseInt(time, 10) || 0);
     gameTimerTxt.text = timerValue;
+    alignHudValueText(gameTimerTxt);
 
     var numericTime = typeof time !== "undefined" ? parseInt(time, 10) || 0 : 0;
    animateTimerTick();
@@ -4285,7 +4489,8 @@ animateScoreCelebration();
     }
 
     gameQCntTxt.text = currentQuestion + "/" + total;
-animateQuestionAdvance();
+    alignHudValueText(gameQCntTxt);
+    animateQuestionAdvance();
    /* if (lastDisplayedQuestion !== null && currentQuestion > lastDisplayedQuestion) {
         animateQuestionAdvance();
     }*/
@@ -4552,7 +4757,7 @@ function spawnScoreCardSparkles() {
     var layer = scoreCardContainer.effectLayer;
     var baseX = scoreCardContainer.icon.x;
     var baseY = scoreCardContainer.icon.y;
-    var colors = ["#FDE68A", "#FCD34D", "#FACC15", "#F97316"];
+    var colors = resolveCardEffectPalette("score", ["#FDE68A", "#FCD34D", "#FACC15", "#F97316"]);
 
     for (var i = 0; i < 6; i++) {
         var sparkle = new createjs.Shape();
@@ -4592,10 +4797,12 @@ function spawnTimerPulse() {
     var baseX = timerCardContainer.icon.x;
     var baseY = timerCardContainer.icon.y;
     var layer = timerCardContainer.effectLayer;
+    var timerColor = resolveCardPrimaryColor("timer", "#82C8FF");
+    var timerStroke = applyAlphaToColor(timerColor, 0.85);
 
     for (var i = 0; i < 2; i++) {
         var pulse = new createjs.Shape();
-        pulse.graphics.setStrokeStyle(2).beginStroke("rgba(130,200,255,0.85)").drawCircle(0, 0, 14);
+        pulse.graphics.setStrokeStyle(2).beginStroke(timerStroke).drawCircle(0, 0, 14);
         pulse.alpha = 0.7;
         pulse.scaleX = pulse.scaleY = 0.45;
         pulse.x = baseX;
@@ -4620,10 +4827,13 @@ function spawnQuestionAdvancePulse() {
         return;
     }
 
+    var questionColor = resolveCardPrimaryColor("question", "#6EE7B7");
+    var questionStroke = applyAlphaToColor(questionColor, 0.85);
+
     var ripple = new createjs.Shape();
     ripple.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(110,231,183,0.85)")
+        .beginStroke(questionStroke)
         .drawRoundRect(-12, -12, 24, 24, 6);
     ripple.alpha = 0.75;
     ripple.scaleX = ripple.scaleY = 0.8;

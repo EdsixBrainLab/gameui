@@ -40,6 +40,393 @@ var qno = []
 var choiceArr = []
 var choiceArr1 = []
 
+var cycleRaceQuestionBubble,
+  cycleRaceTextChoiceWrappers = [],
+  cycleRaceImageChoiceWrappers = [],
+  cycleRaceTextChoicePositions = [],
+  cycleRaceImageChoicePositions = [],
+  cycleRaceHoverInHandler = null,
+  cycleRaceHoverOutHandler = null;
+
+function getCycleRaceQuestionLayoutMetrics() {
+
+        var centerX = 640;
+        var bubbleWidth = 780;
+        var bubbleY = 248;
+        var tailHeight = 60;
+        var bodyHeight = 240;
+
+        if (cycleRaceQuestionBubble) {
+                if (typeof cycleRaceQuestionBubble.x === "number") {
+                        centerX = cycleRaceQuestionBubble.x;
+                }
+                if (typeof cycleRaceQuestionBubble.y === "number") {
+                        bubbleY = cycleRaceQuestionBubble.y;
+                }
+                if (typeof cycleRaceQuestionBubble.__visualCenterOffset === "number") {
+                        centerX += cycleRaceQuestionBubble.__visualCenterOffset;
+                } else if (
+                        cycleRaceQuestionBubble.__options &&
+                        typeof cycleRaceQuestionBubble.__options.visualCenterOffset === "number"
+                ) {
+                        centerX += cycleRaceQuestionBubble.__options.visualCenterOffset;
+                }
+                if (cycleRaceQuestionBubble.__options) {
+                        if (cycleRaceQuestionBubble.__options.width != null) {
+                                bubbleWidth = cycleRaceQuestionBubble.__options.width;
+                        }
+                        if (cycleRaceQuestionBubble.__options.tailHeight != null) {
+                                tailHeight = cycleRaceQuestionBubble.__options.tailHeight;
+                        }
+                        if (cycleRaceQuestionBubble.__options.height != null) {
+                                bodyHeight = Math.max(
+                                        cycleRaceQuestionBubble.__options.height - tailHeight,
+                                        180
+                                );
+                        }
+                }
+        }
+
+        var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+
+        return {
+                centerX: centerX,
+                width: bubbleWidth,
+                bottom: bubbleBottom
+        };
+}
+
+function computeCycleRaceTextChoiceLayout() {
+
+        var fallbackX = [480, 800, 480, 800];
+        var fallbackY = [512, 512, 648, 648];
+
+        if (typeof SAUI_computeCenteredRow !== "function") {
+                return {
+                        xPositions: fallbackX,
+                        yPositions: fallbackY
+                };
+        }
+
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        var wrapperWidth = 324;
+        var horizontalPadding = 96;
+        var availableSpan = Math.max(metrics.width - horizontalPadding * 2, wrapperWidth * 2 + 140);
+        var rowSpacing = 144;
+        var startY = Math.max(metrics.bottom + 84, fallbackY[0]);
+
+        var textRowLayout = SAUI_computeCenteredRow(2, {
+                centerX: metrics.centerX,
+                baseSpacing: wrapperWidth + 148,
+                tileSpan: wrapperWidth,
+                maxSpan: availableSpan
+        });
+
+        var positions =
+                textRowLayout && textRowLayout.positions && textRowLayout.positions.length >= 2
+                        ? textRowLayout.positions
+                        : [metrics.centerX - wrapperWidth * 0.5, metrics.centerX + wrapperWidth * 0.5];
+
+        return {
+                xPositions: [positions[0], positions[1], positions[0], positions[1]],
+                yPositions: [startY, startY, startY + rowSpacing, startY + rowSpacing]
+        };
+}
+
+function computeCycleRaceImageChoiceLayout() {
+
+        var fallbackX = [360, 520, 760, 920];
+        var fallbackY = [556, 556, 556, 556];
+
+        if (typeof SAUI_computeCenteredRow !== "function") {
+                return {
+                        xPositions: fallbackX,
+                        yPositions: fallbackY
+                };
+        }
+
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        var circleDiameter = 224;
+        var horizontalPadding = 72;
+        var availableSpan = Math.max(metrics.width - horizontalPadding * 2, circleDiameter * 4 + 240);
+        var rowY = Math.max(metrics.bottom + 108, fallbackY[0]);
+
+        var imageRowLayout = SAUI_computeCenteredRow(4, {
+                centerX: metrics.centerX,
+                baseSpacing: circleDiameter + 86,
+                tileSpan: circleDiameter,
+                maxSpan: availableSpan
+        });
+
+        var positions =
+                imageRowLayout && imageRowLayout.positions && imageRowLayout.positions.length >= 4
+                        ? imageRowLayout.positions
+                        : [
+                                metrics.centerX - circleDiameter * 1.5,
+                                metrics.centerX - circleDiameter * 0.5,
+                                metrics.centerX + circleDiameter * 0.5,
+                                metrics.centerX + circleDiameter * 1.5
+                        ];
+
+        return {
+                xPositions: positions,
+                yPositions: [rowY, rowY, rowY, rowY]
+        };
+}
+
+function centerCycleRaceOptionBitmap(bitmap) {
+
+        if (!bitmap || bitmap.__cycleRaceCentered) {
+                return;
+        }
+
+        var bounds = null;
+
+        if (typeof getBitmapNaturalBounds === "function") {
+                bounds = getBitmapNaturalBounds(bitmap);
+        }
+
+        if (!bounds && typeof bitmap.getBounds === "function") {
+                bounds = bitmap.getBounds();
+        }
+
+        if (!bounds && bitmap.image) {
+                bounds = {
+                        x: 0,
+                        y: 0,
+                        width: bitmap.image.width || 0,
+                        height: bitmap.image.height || 0
+                };
+        }
+
+        if (!bounds || !bounds.width || !bounds.height) {
+                return;
+        }
+
+        var originX = (bounds.x || 0) + bounds.width / 2;
+        var originY = (bounds.y || 0) + bounds.height / 2;
+
+        bitmap.regX = originX;
+        bitmap.regY = originY;
+        bitmap.x = 0;
+        bitmap.y = 0;
+        bitmap.__cycleRaceCentered = true;
+}
+
+function getCycleRaceSpriteDimensions(sprite) {
+
+        if (!sprite) {
+                return null;
+        }
+
+        if (sprite.__naturalWidth && sprite.__naturalHeight) {
+                return {
+                        width: sprite.__naturalWidth,
+                        height: sprite.__naturalHeight
+                };
+        }
+
+        var bounds = null;
+
+        if (typeof sprite.getBounds === "function") {
+                bounds = sprite.getBounds();
+        }
+
+        if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrameBounds === "function") {
+                bounds = sprite.spriteSheet.getFrameBounds(sprite.currentFrame || 0);
+        }
+
+        if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrame === "function") {
+                        var frame = sprite.spriteSheet.getFrame(sprite.currentFrame || 0);
+                        if (frame && frame.rect) {
+                                bounds = {
+                                        width: frame.rect.width,
+                                        height: frame.rect.height
+                                };
+                        }
+        }
+
+        if (!bounds && sprite.image) {
+                bounds = {
+                        width: sprite.image.width || 0,
+                        height: sprite.image.height || 0
+                };
+        }
+
+        if (!bounds) {
+                return null;
+        }
+
+        return {
+                width: bounds.width || 0,
+                height: bounds.height || 0
+        };
+}
+
+function configureCycleRaceQuestionSprite(sprite, options) {
+
+        if (!sprite) {
+                return { width: 0, height: 0 };
+        }
+
+        options = options || {};
+
+        var dims = getCycleRaceSpriteDimensions(sprite);
+        if (!dims || !dims.width || !dims.height) {
+                return { width: 0, height: 0 };
+        }
+
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var availableWidth =
+                options.maxWidth != null ? options.maxWidth : (bubbleOptions.width || 760) - 200;
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var availableHeight = options.maxHeight != null ? options.maxHeight : bodyHeight - 80;
+        var baseScale =
+                options.baseScale != null
+                        ? options.baseScale
+                        : sprite.__baseScale != null
+                        ? sprite.__baseScale
+                        : sprite.scaleX || 1;
+
+        var scaleX = availableWidth > 0 ? availableWidth / dims.width : baseScale;
+        var scaleY = availableHeight > 0 ? availableHeight / dims.height : baseScale;
+        var targetScale = Math.min(baseScale, scaleX, scaleY);
+        if (options.minScale != null) {
+                targetScale = Math.max(options.minScale, targetScale);
+        }
+
+        sprite.scaleX = sprite.scaleY = targetScale;
+        sprite.regX = dims.width / 2;
+        sprite.regY = dims.height / 2;
+        sprite.x = 0;
+        sprite.y = 0;
+        sprite.__layoutWidth = dims.width * targetScale;
+        sprite.__layoutHeight = dims.height * targetScale;
+
+        return {
+                width: sprite.__layoutWidth,
+                height: sprite.__layoutHeight
+        };
+}
+
+function layoutCycleRaceTextQuestionContent() {
+
+        if (!cycleRaceQuestionBubble) {
+                return;
+        }
+
+        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var innerTop = -bodyHeight / 2 + 36;
+        var innerBottom = bodyHeight / 2 - 32;
+        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var spacing = Math.min(54, Math.max(32, bodyHeight * 0.12));
+
+        if (question1 && question1.visible) {
+                var q1Metrics = configureCycleRaceQuestionSprite(question1, {
+                        maxWidth: availableWidth,
+                        maxHeight: Math.max(bodyHeight * 0.56, 140),
+                        baseScale: question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
+                });
+                question1.x = 0;
+                question1.y = innerTop + (q1Metrics.height || 0) / 2;
+        }
+
+        if (questionText1 && questionText1.visible) {
+                var qTextMetrics = configureCycleRaceQuestionSprite(questionText1, {
+                        maxWidth: availableWidth - 16,
+                        maxHeight: Math.max(bodyHeight * 0.32, 100),
+                        baseScale: questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
+                });
+                questionText1.x = 0;
+                var anchorY;
+                if (question1 && question1.visible) {
+                        anchorY = question1.y + (question1.__layoutHeight || 0) / 2;
+                } else {
+                        anchorY = innerTop + 8;
+                }
+                var desiredCenter = anchorY + spacing + (qTextMetrics.height || 0) / 2;
+                var maxCenter = innerBottom - (qTextMetrics.height || 0) / 2;
+                questionText1.y = Math.min(maxCenter, desiredCenter);
+        }
+}
+
+function layoutCycleRaceImageQuestionContent() {
+
+        if (!cycleRaceQuestionBubble || !question2 || !question2.visible) {
+                return;
+        }
+
+        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var innerTop = -bodyHeight / 2 + 36;
+        var innerBottom = bodyHeight / 2 - 32;
+        var availableWidth = (bubbleOptions.width || 760) - 220;
+
+        var q2Metrics = configureCycleRaceQuestionSprite(question2, {
+                maxWidth: availableWidth,
+                maxHeight: Math.max(bodyHeight * 0.68, 140),
+                baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
+        });
+        question2.x = 0;
+        var centerY = (innerTop + innerBottom) / 2;
+        if (q2Metrics && q2Metrics.height && q2Metrics.height > innerBottom - innerTop) {
+                centerY = innerTop + (innerBottom - innerTop) / 2;
+        }
+        question2.y = centerY;
+}
+
+function cycleRaceInvokeChoice(choiceDisplay) {
+
+        if (!choiceDisplay) {
+                return;
+        }
+
+        answerSelected({
+                preventDefault: function () {},
+                currentTarget: choiceDisplay
+        });
+}
+
+function cycleRaceAttachWrapperListeners(wrapper, choiceDisplay) {
+
+        if (!wrapper || !choiceDisplay) {
+                return;
+        }
+
+        wrapper.__linkedChoice = choiceDisplay;
+        wrapper.mouseEnabled = true;
+        wrapper.cursor = "pointer";
+
+        if (wrapper.__cycleRaceClickHandler) {
+                wrapper.removeEventListener("click", wrapper.__cycleRaceClickHandler);
+        }
+
+        wrapper.__cycleRaceClickHandler = function () {
+                if (!wrapper.__linkedChoice || !wrapper.__linkedChoice.mouseEnabled) {
+                        return;
+                }
+                cycleRaceInvokeChoice(wrapper.__linkedChoice);
+        };
+
+        wrapper.addEventListener("click", wrapper.__cycleRaceClickHandler);
+}
+
+function cycleRaceDetachWrapperListeners(wrapper) {
+
+        if (!wrapper) {
+                return;
+        }
+
+        if (wrapper.__cycleRaceClickHandler) {
+                wrapper.removeEventListener("click", wrapper.__cycleRaceClickHandler);
+        }
+
+        wrapper.mouseEnabled = false;
+        wrapper.cursor = "default";
+        wrapper.__linkedChoice = null;
+}
+
 var chPosArr = [1, 0, 2, 3, 1, 0, 2, 3, 1, 0] // Only 4 Choice 
 
 var chPosArr1 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]// Only 10 questions Alternatively 
@@ -330,15 +717,22 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		question1 = new createjs.Sprite(spriteSheet9, "run");
-		container.parent.addChild(question1);
+                question1 = new createjs.Sprite(spriteSheet9, "run");
+                container.parent.addChild(question1);
 
-		question1.visible = false
+                question1.visible = false
+                question1.regX = 241 / 2;
+                question1.regY = 239 / 2;
+                question1.x = 0;
+                question1.y = 0;
+                question1.__naturalWidth = 241;
+                question1.__naturalHeight = 239;
+                question1.__baseScale = 1.02;
 
 
-	}
-	if (id == "question2") {
-		var spriteSheet10 = new createjs.SpriteSheet({
+        }
+        if (id == "question2") {
+                var spriteSheet10 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("question2")],
 			"frames": { "regX": 82, "height": 63, "count": 300, "regY": 0, "width": 574 },
@@ -348,12 +742,24 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		question2 = new createjs.Sprite(spriteSheet10, "run");
-		container.parent.addChild(question2);
+                question2 = new createjs.Sprite(spriteSheet10, "run");
+                container.parent.addChild(question2);
 
-		question2.visible = false;
-		questionText1 = question2.clone();
-	}
+                question2.visible = false;
+                question2.regX = 574 / 2;
+                question2.regY = 63 / 2;
+                question2.x = 0;
+                question2.y = 0;
+                questionText1 = question2.clone();
+                questionText1.regX = question2.regX;
+                questionText1.regY = question2.regY;
+                question2.__naturalWidth = 574;
+                question2.__naturalHeight = 63;
+                question2.__baseScale = 1;
+                questionText1.__naturalWidth = 574;
+                questionText1.__naturalHeight = 63;
+                questionText1.__baseScale = 0.96;
+        }
 	//
 
 	if (id == "choice1") {
@@ -367,13 +773,17 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		choice1 = new createjs.Sprite(spriteSheet11);
-		container.parent.addChild(choice1);
+                choice1 = new createjs.Sprite(spriteSheet11);
+                container.parent.addChild(choice1);
 
-		choice1.visible = false
-	}
-	if (id == "choice2") {
-		var spriteSheet11 = new createjs.SpriteSheet({
+                choice1.visible = false
+                choice1.regX = 266 / 2;
+                choice1.regY = 78 / 2;
+                choice1.x = 0;
+                choice1.y = 0;
+        }
+        if (id == "choice2") {
+                var spriteSheet11 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("choice2")],
 			"frames": { "regX": 82, "height": 239, "count": 0, "regY": 0, "width": 241 },
@@ -383,10 +793,14 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		choice2 = new createjs.Sprite(spriteSheet11);
-		container.parent.addChild(choice2);
-		choice2.visible = false
-	}
+                choice2 = new createjs.Sprite(spriteSheet11);
+                container.parent.addChild(choice2);
+                choice2.visible = false
+                choice2.regX = 241 / 2;
+                choice2.regY = 239 / 2;
+                choice2.x = 0;
+                choice2.y = 0;
+        }
 
 
 	if (id == "chHolder") {
@@ -448,30 +862,48 @@ function CreateGameElements() {
 		this["cycle" + i].y = posY[i];
 
 	}
-	container.parent.addChild(question1, question2)
-	container.parent.addChild(choice1, choice2)
+        var textChoiceLayout = computeCycleRaceTextChoiceLayout();
+        var choiceXArr =
+                textChoiceLayout && textChoiceLayout.xPositions && textChoiceLayout.xPositions.length >= choiceCnt
+                        ? textChoiceLayout.xPositions.slice(0)
+                        : [480, 800, 480, 800];
+        var choiceYArr =
+                textChoiceLayout && textChoiceLayout.yPositions && textChoiceLayout.yPositions.length >= choiceCnt
+                        ? textChoiceLayout.yPositions.slice(0)
+                        : [512, 512, 648, 648];
 
-	var choiceXArr = [420, 790, 420, 790]
-	var choiceYArr = [390, 390, 520, 520]
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr[i] = choice1.clone()
+                choiceArr[i].visible = false;
+                choiceArr[i].x = 0;
+                choiceArr[i].y = 0;
+        }
 
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr[i] = choice1.clone()
-		choiceArr[i].visible = false;
-		choiceArr[i].x = choiceXArr[i]
-		choiceArr[i].y = choiceYArr[i]
-		container.parent.addChild(choiceArr[i])
-	}
+        var imageChoiceLayout = computeCycleRaceImageChoiceLayout();
+        var choiceX1Arr =
+                imageChoiceLayout && imageChoiceLayout.xPositions && imageChoiceLayout.xPositions.length >= choiceCnt
+                        ? imageChoiceLayout.xPositions.slice(0)
+                        : [360, 520, 760, 920];
+        var choiceY1Arr =
+                imageChoiceLayout && imageChoiceLayout.yPositions && imageChoiceLayout.yPositions.length >= choiceCnt
+                        ? imageChoiceLayout.yPositions.slice(0)
+                        : [556, 556, 556, 556];
 
-	var choiceX1Arr =  [240, 440, 640, 840]
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr1[i] = choice2.clone()
+                choiceArr1[i].visible = false;
+                choiceArr1[i].scaleX = choiceArr1[i].scaleY = .78;
+                choiceArr1[i].x = 0;
+                choiceArr1[i].y = 0;
+        }
 
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr1[i] = choice2.clone()
-		container.parent.addChild(choiceArr1[i])
-		choiceArr1[i].visible = false;
-		choiceArr1[i].x = choiceX1Arr[i]
-		choiceArr1[i].scaleX = choiceArr1[i].scaleY = .8;
-		choiceArr1[i].y = 510;
-	}
+        ensureCycleRaceQuestionSurface();
+        initializeCycleRaceChoiceWrappers(
+                choiceXArr,
+                choiceYArr,
+                choiceX1Arr,
+                choiceY1Arr
+        );
 
 	// container.parent.addChild(TitleBtn);
 	// TitleBtn.visible=true;
@@ -670,174 +1102,542 @@ function roadMove(event) {
 
 //=============================================================================================//
 function createQuestions() {
-	clearInterval(quesIntervel)
+        clearInterval(quesIntervel)
 
-	QusTxtString.visible = false;
+        QusTxtString.visible = false;
 
-	container.parent.addChild(chHolderMc);
-	container.parent.addChild(question1, question2)
+        cycleRaceResetQuestionDisplay();
 
-	chHolderMc.visible = true;
-	question1.x = 150; question1.y = 315;
-	question2.x = 360; question2.y = 320;
+        for (i = 0; i < TOTAL_CYCLE; i++) {
+                cycle_array[i].visible = false
+        }
 
-	for (i = 0; i < TOTAL_CYCLE; i++) {
-		cycle_array[i].visible = false
-	}
+        if (cycleRaceQuestionBubble) {
+                if (typeof SAUI_showCycleRaceSpeechBubble === "function") {
+                        SAUI_showCycleRaceSpeechBubble(cycleRaceQuestionBubble, 40);
+                } else {
+                        cycleRaceQuestionBubble.visible = true;
+                        cycleRaceQuestionBubble.alpha = 1;
+                }
+        }
 
+        if (chPosArr1[cnt] == 0) {
+                if (question2) {
+                        question2.visible = false;
+                }
+                question1.visible = true;
+                question1.scaleX = question1.scaleY = question1.__baseScale != null ? question1.__baseScale : 1;
+                question1.gotoAndStop(chPosArr2[type1Cnt] - 1)
+                question1.x = 0;
+                question1.y = 0;
 
-	if (chPosArr1[cnt] == 0) {
-		question1.visible = true;
-		question1.scaleX = question1.scaleY = 1.1
-		question1.gotoAndStop(chPosArr2[type1Cnt] - 1)
+                if (questionText1) {
+                        questionText1.visible = true;
+                        questionText1.gotoAndStop(9);
+                        questionText1.scaleX = questionText1.scaleY =
+                                questionText1.__baseScale != null ? questionText1.__baseScale : 1;
+                        questionText1.x = 0;
+                        questionText1.y = 0;
+                }
 
-		container.parent.addChild(questionText1);
-		questionText1.gotoAndStop(9);
-		questionText1.x = 440; questionText1.y = 300;
-		questionText1.visible = true;
+                layoutCycleRaceTextQuestionContent();
 
-		rand = between(0, TOTAL_CYCLE - 1)
-		val = rand.indexOf(chVal)
-		rand.splice(val, 1)
+                rand = between(0, TOTAL_CYCLE - 1)
+                val = rand.indexOf(chVal)
+                rand.splice(val, 1)
 
-		chHolderMc.x = chHolderMc.x + 30;
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = true;
+                        choiceArr[i].gotoAndStop(rand[i])
+                        choiceArr[i].name = rand[i]
+                        if (choiceArr[i].__wrapper) {
+                                if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
+                                        SAUI_resetCycleRaceOptionBubble(choiceArr[i].__wrapper);
+                                }
+                        } else {
+                                choiceArr[i].alpha = 1;
+                                choiceArr[i].x = cycleRaceTextChoicePositions[i].x;
+                                choiceArr[i].y = cycleRaceTextChoicePositions[i].y;
+                        }
+                }
+                choiceArr[chPosArr[cnt]].gotoAndStop(chVal)
+                choiceArr[chPosArr[cnt]].name = chVal
 
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = true;
-			container.parent.addChild(choiceArr[i])
-			choiceArr[i].gotoAndStop(rand[i])
-			choiceArr[i].name = rand[i]
-		}
-		choiceArr[chPosArr[cnt]].gotoAndStop(chVal)
-		choiceArr[chPosArr[cnt]].name = chVal
+                ans = chVal;
 
+        } else {
+                question2.visible = true;
+                question2.scaleX = question2.scaleY = question2.__baseScale != null ? question2.__baseScale : 1;
+                question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
+                question2.x = 0;
+                question2.y = 0;
+                layoutCycleRaceImageQuestionContent();
+                if (questionText1) {
+                        questionText1.visible = false;
+                }
+                if (question1) {
+                        question1.visible = false;
+                }
+                rand = between(0, 7)
+                val = rand.indexOf(pArr[count + 1] - 1)
+                rand.splice(val, 1)
 
-		ans = chVal;
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].gotoAndStop(rand[i])
+                        choiceArr1[i].name = rand[i]
+                        if (choiceArr1[i].__wrapper) {
+                                if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
+                                        SAUI_resetCycleRaceOptionBubble(choiceArr1[i].__wrapper);
+                                }
+                        } else {
+                                choiceArr1[i].alpha = 1;
+                                choiceArr1[i].x = cycleRaceImageChoicePositions[i].x;
+                                choiceArr1[i].y = cycleRaceImageChoicePositions[i].y;
+                        }
+                }
 
+                choiceArr1[chPosArr[cnt]].gotoAndStop(pArr[count + 1] - 1)
+                choiceArr1[chPosArr[cnt]].name = pArr[count + 1] - 1
+                ans = pArr[count + 1] - 1
 
+        }
 
-	} else {
-		question2.visible = true;
-		question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
-		//chHolderMc.x = 0;
-		rand = between(0, 7)
-		val = rand.indexOf(pArr[count + 1] - 1)
-		rand.splice(val, 1)
-		console.log("pArr===" + pArr)
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = true;
-			container.parent.addChild(choiceArr1[i])
-			choiceArr1[i].gotoAndStop(rand[i])
-			choiceArr1[i].name = rand[i]
-		}
-
-		choiceArr1[chPosArr[cnt]].gotoAndStop(pArr[count + 1] - 1)
-		choiceArr1[chPosArr[cnt]].name = pArr[count + 1] - 1
-		ans = pArr[count + 1] - 1
-
-	}
-
-
-
-	enablechoices();
-	createjs.Ticker.addEventListener("tick", tick);
-	stage.update();
-
-
+        enablechoices();
+        createjs.Ticker.addEventListener("tick", tick);
+        stage.update();
 
 }
 
-//====================================================================================================================================//
+//==============================================================================================================================
+======//
 function enablechoices() {
 
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = false;
-		}
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = false;
-		}
-	}
-	createTween()
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = false;
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.visible = false;
+                                choiceArr[i].__wrapper.alpha = 0;
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = false;
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.visible = false;
+                                choiceArr1[i].__wrapper.alpha = 0;
+                        }
+                }
+        }
+        createTween()
 }
 function createTween() {
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = true;
-			choiceArr[i].alpha = 0;
-		}
-		createjs.Tween.get(choiceArr[0]).wait(100).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[1]).wait(200).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[2]).wait(300).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[3]).wait(400).to({ alpha: 0 }, 500).to({ alpha: 1 })
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = true;
-			choiceArr1[i].alpha = 0;
-		}
-		createjs.Tween.get(choiceArr1[0]).wait(200).to({ x: choiceArr1[0].x, y: 410, alpha: 0 }, 500).to({ x: choiceArr1[0].x, y: 430, alpha: 0.5 }, 500).to({ x: choiceArr1[0].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[1]).wait(300).to({ x: choiceArr1[1].x, y: 430, alpha: 0 }, 500).to({ x: choiceArr1[1].x, y: 410, alpha: 0.5 }, 500).to({ x: choiceArr1[1].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[2]).wait(600).to({ x: choiceArr1[2].x, y: 410, alpha: 0 }, 500).to({ x: choiceArr1[2].x, y: 430, alpha: 0.5 }, 500).to({ x: choiceArr1[2].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[3]).wait(800).to({ x: choiceArr1[3].x, y: 430, alpha: 0 }, 500).to({ x: choiceArr1[3].x, y: 410, alpha: 0.5 }, 500).to({ x: choiceArr1[3].x, y: 410, alpha: 1 })
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = true;
+                        choiceArr[i].alpha = 1;
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.visible = true;
+                                if (typeof SAUI_showCycleRaceOptionBubble === "function") {
+                                        SAUI_showCycleRaceOptionBubble(choiceArr[i].__wrapper, 120 + i * 90);
+                                } else {
+                                        choiceArr[i].__wrapper.alpha = 1;
+                                }
+                        } else {
+                                choiceArr[i].alpha = 0;
+                                createjs.Tween.get(choiceArr[i]).wait(120 * (i + 1)).to({ alpha: 1 }, 360);
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].alpha = 1;
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.visible = true;
+                                if (typeof SAUI_showCycleRaceOptionBubble === "function") {
+                                        SAUI_showCycleRaceOptionBubble(choiceArr1[i].__wrapper, 160 + i * 110);
+                                } else {
+                                        choiceArr1[i].__wrapper.alpha = 1;
+                                }
+                        } else {
+                                choiceArr1[i].alpha = 0;
+                                createjs.Tween.get(choiceArr1[i]).wait(160 * (i + 1)).to({ alpha: 1 }, 360);
+                        }
+                }
 
-	}
+        }
 
-
-	repTimeClearInterval = setTimeout(AddListenerFn, 1400)
+        repTimeClearInterval = setTimeout(AddListenerFn, 1400)
 }
 function AddListenerFn() {
-	clearTimeout(repTimeClearInterval)
-	console.log("eventlisterneer")
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].cursor = "pointer";
-			choiceArr[i].visible = true;
-			choiceArr[i].addEventListener("click", answerSelected)
-			choiceArr[i].cursor = "pointer";
-			choiceArr[i].mouseEnabled = true
-		}
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].cursor = "pointer";
-			choiceArr1[i].visible = true;
-			choiceArr1[i].addEventListener("click", answerSelected)
-			choiceArr1[i].cursor = "pointer";
-			choiceArr1[i].mouseEnabled = true
-		}
-	}
-	rst = 0;
-	gameResponseTimerStart();
-	restartTimer()
+        clearTimeout(repTimeClearInterval)
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].cursor = "pointer";
+                        choiceArr[i].visible = true;
+                        choiceArr[i].addEventListener("click", answerSelected)
+                        choiceArr[i].mouseEnabled = true
+                        if (cycleRaceHoverInHandler) {
+                                choiceArr[i].addEventListener("mouseover", cycleRaceHoverInHandler);
+                                choiceArr[i].addEventListener("mouseout", cycleRaceHoverOutHandler);
+                        }
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.cursor = "pointer";
+                                cycleRaceAttachWrapperListeners(choiceArr[i].__wrapper, choiceArr[i]);
+                                if (typeof SAUI_startCycleRaceOptionIdle === "function") {
+                                        SAUI_startCycleRaceOptionIdle(choiceArr[i].__wrapper);
+                                }
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].cursor = "pointer";
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].addEventListener("click", answerSelected)
+                        choiceArr1[i].mouseEnabled = true
+                        if (cycleRaceHoverInHandler) {
+                                choiceArr1[i].addEventListener("mouseover", cycleRaceHoverInHandler);
+                                choiceArr1[i].addEventListener("mouseout", cycleRaceHoverOutHandler);
+                        }
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.cursor = "pointer";
+                                cycleRaceAttachWrapperListeners(choiceArr1[i].__wrapper, choiceArr1[i]);
+                                if (typeof SAUI_startCycleRaceOptionIdle === "function") {
+                                        SAUI_startCycleRaceOptionIdle(choiceArr1[i].__wrapper);
+                                }
+                        }
+                }
+        }
+        rst = 0;
+        gameResponseTimerStart();
+        restartTimer()
 }
 function disablechoices() {
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr[i].visible = false
-		choiceArr[i].removeEventListener("click", answerSelected);
-		choiceArr[i].cursor = "default";
-		choiceArr1[i].visible = false
-		choiceArr1[i].removeEventListener("click", answerSelected);
-		choiceArr1[i].cursor = "default";
-	}
-	questionText1.visible = false;
-	chHolderMc.visible = false;
-	question1.visible = false;
-	question2.visible = false;
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr[i].visible = false
+                choiceArr[i].removeEventListener("click", answerSelected);
+                if (cycleRaceHoverInHandler) {
+                        choiceArr[i].removeEventListener("mouseover", cycleRaceHoverInHandler);
+                        choiceArr[i].removeEventListener("mouseout", cycleRaceHoverOutHandler);
+                }
+                choiceArr[i].cursor = "default";
+                if (choiceArr[i].__wrapper) {
+                        choiceArr[i].__wrapper.visible = false;
+                        choiceArr[i].__wrapper.alpha = 0;
+                        choiceArr[i].__wrapper.mouseEnabled = false;
+                        choiceArr[i].__wrapper.cursor = "default";
+                        cycleRaceDetachWrapperListeners(choiceArr[i].__wrapper);
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(choiceArr[i].__wrapper);
+                        }
+                }
+                choiceArr1[i].visible = false
+                choiceArr1[i].removeEventListener("click", answerSelected);
+                if (cycleRaceHoverInHandler) {
+                        choiceArr1[i].removeEventListener("mouseover", cycleRaceHoverInHandler);
+                        choiceArr1[i].removeEventListener("mouseout", cycleRaceHoverOutHandler);
+                }
+                choiceArr1[i].cursor = "default";
+                if (choiceArr1[i].__wrapper) {
+                        choiceArr1[i].__wrapper.visible = false;
+                        choiceArr1[i].__wrapper.alpha = 0;
+                        choiceArr1[i].__wrapper.mouseEnabled = false;
+                        choiceArr1[i].__wrapper.cursor = "default";
+                        cycleRaceDetachWrapperListeners(choiceArr1[i].__wrapper);
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(choiceArr1[i].__wrapper);
+                        }
+                }
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+        if (cycleRaceQuestionBubble && typeof SAUI_hideCycleRaceSpeechBubble === "function") {
+                SAUI_hideCycleRaceSpeechBubble(cycleRaceQuestionBubble);
+        }
+        if (chHolderMc) {
+                chHolderMc.visible = false;
+        }
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
 }
-//===================================================================MOUSE ROLL OVER/ROLL OUT==============================================================//
+//===================================================================MOUSE ROLL OVER/ROLL OUT===================================
+===========================//
 
 function answerSelected(e) {
-	e.preventDefault();
-	uans = e.currentTarget.name;
-	console.log("answer" + uans);
-	console.log(ans + " =correct= " + uans)
-	gameResponseTimerStop();
-	if (ans == uans) {
-		 
-		getValidation("correct");
-		disablechoices();
-	} else {
-		getValidation("wrong");
-		disablechoices();
-	}
+        e.preventDefault();
+        uans = e.currentTarget.name;
+        console.log("answer" + uans);
+        console.log(ans + " =correct= " + uans)
+        gameResponseTimerStop();
+        var wrapper = e.currentTarget.__wrapper;
+        if (wrapper) {
+                if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                        SAUI_stopCycleRaceOptionIdle(wrapper);
+                }
+                if (typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                        SAUI_setCycleRaceOptionHoverState(wrapper, false);
+                }
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(wrapper, ans == uans);
+                }
+        }
+        if (ans != uans) {
+                cycleRaceMarkCorrectWrapper();
+        }
+        if (ans == uans) {
+
+                getValidation("correct");
+                disablechoices();
+        } else {
+                getValidation("wrong");
+                disablechoices();
+        }
+}
+function ensureCycleRaceQuestionSurface() {
+
+        if (typeof SAUI_createCycleRaceSpeechBubble === "function") {
+                if (!cycleRaceQuestionBubble) {
+                        cycleRaceQuestionBubble = SAUI_createCycleRaceSpeechBubble({
+                                width: 780,
+                                height: 300,
+                                tailHeight: 60,
+                                tailWidth: 150,
+                                cornerRadius: 52,
+                                title: null,
+                                visualCenterOffset: 16,
+                                contentOffsetY: -12
+                        });
+                        cycleRaceQuestionBubble.x = 640;
+                        cycleRaceQuestionBubble.y = 248;
+                }
+
+                if (!cycleRaceQuestionBubble.parent) {
+                        container.parent.addChild(cycleRaceQuestionBubble);
+                }
+
+                if (cycleRaceQuestionBubble.__content) {
+                        if (question1 && question1.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(question1);
+                        }
+                        if (question2 && question2.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(question2);
+                        }
+                        if (questionText1 && questionText1.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(questionText1);
+                        }
+                }
+        } else {
+                if (question1 && !question1.parent) {
+                        container.parent.addChild(question1);
+                }
+                if (question2 && !question2.parent) {
+                        container.parent.addChild(question2);
+                }
+                if (questionText1 && !questionText1.parent) {
+                        container.parent.addChild(questionText1);
+                }
+        }
+
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+}
+
+function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, choiceY1Arr) {
+
+        cycleRaceTextChoicePositions = [];
+        cycleRaceImageChoicePositions = [];
+
+        for (var idx = 0; idx < choiceCnt; idx++) {
+                cycleRaceTextChoicePositions[idx] = {
+                        x: choiceXArr[idx],
+                        y: choiceYArr[idx]
+                };
+                cycleRaceImageChoicePositions[idx] = {
+                        x: choiceX1Arr[idx],
+                        y: choiceY1Arr[idx]
+                };
+        }
+
+        if (!cycleRaceHoverInHandler) {
+                cycleRaceHoverInHandler = function (e) {
+                        if (!e || !e.currentTarget) {
+                                return;
+                        }
+                        var wrapper = e.currentTarget.__wrapper;
+                        if (wrapper && typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                                SAUI_setCycleRaceOptionHoverState(wrapper, true);
+                        }
+                };
+                cycleRaceHoverOutHandler = function (e) {
+                        if (!e || !e.currentTarget) {
+                                return;
+                        }
+                        var wrapper = e.currentTarget.__wrapper;
+                        if (wrapper && typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                                SAUI_setCycleRaceOptionHoverState(wrapper, false);
+                        }
+                };
+        }
+
+        for (var i1 = 0; i1 < choiceCnt; i1++) {
+                var textWrapper = cycleRaceTextChoiceWrappers[i1];
+                if (!textWrapper && typeof SAUI_createCycleRaceOptionBubble === "function") {
+                        textWrapper = SAUI_createCycleRaceOptionBubble({ variant: "text" });
+                        cycleRaceTextChoiceWrappers[i1] = textWrapper;
+                }
+
+                if (textWrapper) {
+                        cycleRaceDetachWrapperListeners(textWrapper);
+                        textWrapper.visible = false;
+                        textWrapper.alpha = 0;
+                        textWrapper.mouseEnabled = false;
+                        textWrapper.cursor = "default";
+                        textWrapper.x = cycleRaceTextChoicePositions[i1].x;
+                        textWrapper.y = cycleRaceTextChoicePositions[i1].y;
+                        if (!textWrapper.parent) {
+                                container.parent.addChild(textWrapper);
+                        }
+                        if (textWrapper.__content && choiceArr[i1] && choiceArr[i1].parent !== textWrapper.__content) {
+                                textWrapper.__content.addChild(choiceArr[i1]);
+                        } else if (choiceArr[i1] && choiceArr[i1].parent !== textWrapper) {
+                                textWrapper.addChild(choiceArr[i1]);
+                        }
+                } else if (choiceArr[i1] && !choiceArr[i1].parent) {
+                        container.parent.addChild(choiceArr[i1]);
+                }
+
+                if (choiceArr[i1]) {
+                        choiceArr[i1].visible = false;
+                        choiceArr[i1].alpha = 1;
+                        centerCycleRaceOptionBitmap(choiceArr[i1]);
+                        choiceArr[i1].mouseChildren = false;
+                        choiceArr[i1].cursor = "pointer";
+                        choiceArr[i1].__wrapper = textWrapper;
+                        if (textWrapper && textWrapper.__hitArea) {
+                                choiceArr[i1].hitArea = textWrapper.__hitArea;
+                        } else if (!textWrapper) {
+                                centerCycleRaceOptionBitmap(choiceArr[i1]);
+                                choiceArr[i1].x = cycleRaceTextChoicePositions[i1].x;
+                                choiceArr[i1].y = cycleRaceTextChoicePositions[i1].y;
+                        }
+                }
+
+                var imageWrapper = cycleRaceImageChoiceWrappers[i1];
+                if (!imageWrapper && typeof SAUI_createCycleRaceOptionBubble === "function") {
+                        imageWrapper = SAUI_createCycleRaceOptionBubble({ variant: "image" });
+                        cycleRaceImageChoiceWrappers[i1] = imageWrapper;
+                }
+
+                if (imageWrapper) {
+                        cycleRaceDetachWrapperListeners(imageWrapper);
+                        imageWrapper.visible = false;
+                        imageWrapper.alpha = 0;
+                        imageWrapper.mouseEnabled = false;
+                        imageWrapper.cursor = "default";
+                        imageWrapper.x = cycleRaceImageChoicePositions[i1].x;
+                        imageWrapper.y = cycleRaceImageChoicePositions[i1].y;
+                        if (!imageWrapper.parent) {
+                                container.parent.addChild(imageWrapper);
+                        }
+                        if (imageWrapper.__content && choiceArr1[i1] && choiceArr1[i1].parent !== imageWrapper.__content) {
+                                imageWrapper.__content.addChild(choiceArr1[i1]);
+                        } else if (choiceArr1[i1] && choiceArr1[i1].parent !== imageWrapper) {
+                                imageWrapper.addChild(choiceArr1[i1]);
+                        }
+                } else if (choiceArr1[i1] && !choiceArr1[i1].parent) {
+                        container.parent.addChild(choiceArr1[i1]);
+                }
+
+                if (choiceArr1[i1]) {
+                        choiceArr1[i1].visible = false;
+                        choiceArr1[i1].alpha = 1;
+                        centerCycleRaceOptionBitmap(choiceArr1[i1]);
+                        choiceArr1[i1].mouseChildren = false;
+                        choiceArr1[i1].cursor = "pointer";
+                        choiceArr1[i1].__wrapper = imageWrapper;
+                        if (imageWrapper && imageWrapper.__hitArea) {
+                                choiceArr1[i1].hitArea = imageWrapper.__hitArea;
+                        } else if (!imageWrapper) {
+                                centerCycleRaceOptionBitmap(choiceArr1[i1]);
+                                choiceArr1[i1].x = cycleRaceImageChoicePositions[i1].x;
+                                choiceArr1[i1].y = cycleRaceImageChoicePositions[i1].y;
+                        }
+                }
+        }
+}
+
+function cycleRaceResetQuestionDisplay() {
+
+        if (cycleRaceQuestionBubble) {
+                if (typeof SAUI_hideCycleRaceSpeechBubble === "function") {
+                        SAUI_hideCycleRaceSpeechBubble(cycleRaceQuestionBubble);
+                } else {
+                        cycleRaceQuestionBubble.visible = false;
+                        cycleRaceQuestionBubble.alpha = 0;
+                }
+        }
+
+        for (var i2 = 0; i2 < choiceCnt; i2++) {
+                if (cycleRaceTextChoiceWrappers[i2]) {
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(cycleRaceTextChoiceWrappers[i2]);
+                        }
+                        cycleRaceDetachWrapperListeners(cycleRaceTextChoiceWrappers[i2]);
+                        cycleRaceTextChoiceWrappers[i2].visible = false;
+                        cycleRaceTextChoiceWrappers[i2].alpha = 0;
+                        cycleRaceTextChoiceWrappers[i2].mouseEnabled = false;
+                }
+                if (cycleRaceImageChoiceWrappers[i2]) {
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(cycleRaceImageChoiceWrappers[i2]);
+                        }
+                        cycleRaceDetachWrapperListeners(cycleRaceImageChoiceWrappers[i2]);
+                        cycleRaceImageChoiceWrappers[i2].visible = false;
+                        cycleRaceImageChoiceWrappers[i2].alpha = 0;
+                        cycleRaceImageChoiceWrappers[i2].mouseEnabled = false;
+                }
+                if (choiceArr[i2]) {
+                        choiceArr[i2].visible = false;
+                        choiceArr[i2].alpha = 1;
+                }
+                if (choiceArr1[i2]) {
+                        choiceArr1[i2].visible = false;
+                        choiceArr1[i2].alpha = 1;
+                }
+        }
+
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+}
+
+function cycleRaceMarkCorrectWrapper() {
+        if (chPosArr1[cnt] == 0 && choiceArr[chPosArr[cnt]] && choiceArr[chPosArr[cnt]].__wrapper) {
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(choiceArr[chPosArr[cnt]].__wrapper, true);
+                }
+        } else if (choiceArr1[chPosArr[cnt]] && choiceArr1[chPosArr[cnt]].__wrapper) {
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(choiceArr1[chPosArr[cnt]].__wrapper, true);
+                }
+        }
 }
