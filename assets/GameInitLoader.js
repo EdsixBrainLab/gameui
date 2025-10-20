@@ -1640,7 +1640,6 @@ function layoutHudElements(canvasWidth, canvasHeight) {
 
     cursor += questionWidth / 2 + baseGap + controlWidth / 2;
     positions.push(cursor);
-console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
         scoreCardContainer.x = positions[0]-210;
         scoreCardContainer.baseX = positions[0]-210;
@@ -1696,8 +1695,6 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 7);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
-
-console.log("Title.y::"+Title.y)
 console.log("topMargin::"+topMargin)
 console.log("titleHalfHeight::"+titleHalfHeight)
 console.log("minimumTop::"+minimumTop)
@@ -4015,7 +4012,7 @@ function createHudCard(label, type) {
 
     var valueHolder = new createjs.Container();
     valueHolder.x = icon.x + 42;
-    valueHolder.y = 5;
+    valueHolder.y = 0;
     card.addChild(valueHolder);
 
     card.background = background;
@@ -4104,7 +4101,7 @@ function buildHudLayout() {
         timerCardContainer.valueHolder.addChild(gameTimerTxt);
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
-        gameTimerTxt.y = -5;
+        gameTimerTxt.y = 0;
     }
 
     if (hudQuestionCardContainer.valueHolder) {
@@ -6906,17 +6903,28 @@ function startProceedButtonHighlightSweep(button) {
 
 
 //==========================================================================//
+var __isCreatingHowToPlay = false;
+
 function createHowToPlay() {
-    if (typeof handCursor !== "undefined" && handCursor) {
-        handCursor.visible = false;
-    }
-    hideLoaderProceedButton();
-
-    if (HowToPlayScreenImg) {
-        HowToPlayScreenImg.visible = false;
+    if (__isCreatingHowToPlay) {
+        return;
     }
 
-    createGameIntroAnimationPlay(true)
+    __isCreatingHowToPlay = true;
+    try {
+        if (typeof handCursor !== "undefined" && handCursor) {
+            handCursor.visible = false;
+        }
+        hideLoaderProceedButton();
+
+        if (HowToPlayScreenImg) {
+            HowToPlayScreenImg.visible = false;
+        }
+
+        createGameIntroAnimationPlay(true);
+    } finally {
+        __isCreatingHowToPlay = false;
+    }
 }
 //==========================================================================//
 function createHowToPlayHandler(evt) {
@@ -7206,80 +7214,200 @@ function internetErrorFn() {
     }
 
     container4 = new createjs.Container();
-    stage.addChild(container4)
-    container4.parent.addChild(GameFinishedImg);
-    GameFinishedImg.visible = true;
+    stage.addChild(container4);
 
-    container4.parent.addChild(closeBtnFinal);
-    closeBtnFinal.visible = true;
-    closeBtnFinal.addEventListener("click", closeGameFn);
-    closeBtnFinal.cursor = "pointer";
+    if (GameFinishedImg) {
+        GameFinishedImg.visible = false;
+        if (GameFinishedImg.parent) {
+            GameFinishedImg.parent.removeChild(GameFinishedImg);
+        }
+    }
 
-    var setFinishedTxt = new createjs.Text("", "60px 'Baloo 2'", "white");
+    var stageWidth = stage && stage.canvas ? stage.canvas.width : 1280;
+    var stageHeight = stage && stage.canvas ? stage.canvas.height : 720;
+
+    if (typeof getLogicalCanvasWidth === "function") {
+        try {
+            stageWidth = getLogicalCanvasWidth();
+        } catch (getLogicalWidthErr) {}
+    }
+
+    if (typeof getLogicalCanvasHeight === "function") {
+        try {
+            stageHeight = getLogicalCanvasHeight();
+        } catch (getLogicalHeightErr) {}
+    }
+
+    if (container4.__offlineBackground) {
+        container4.removeChild(container4.__offlineBackground);
+        container4.__offlineBackground = null;
+    }
+
+    var offlineBackdropContainer = new createjs.Container();
+    offlineBackdropContainer.mouseEnabled = false;
+    offlineBackdropContainer.mouseChildren = false;
+    offlineBackdropContainer.x = stageWidth / 2;
+    offlineBackdropContainer.y = stageHeight / 2;
+
+    var offlineBackdrop = new createjs.Shape();
+    offlineBackdrop.graphics
+        .beginLinearGradientFill(["#150C35", "#23175F", "#3A2F92"], [0, 0.55, 1], 0, -stageHeight / 2, 0, stageHeight / 2)
+        .drawRect(-stageWidth / 2, -stageHeight / 2, stageWidth, stageHeight);
+
+    var offlineBackdropSheen = new createjs.Shape();
+    offlineBackdropSheen.graphics
+        .beginRadialGradientFill(
+            ["rgba(255,255,255,0.32)", "rgba(255,255,255,0.0)"],
+            [0, 1],
+            0,
+            -stageHeight * 0.05,
+            Math.max(stageWidth, stageHeight) * 0.1,
+            0,
+            -stageHeight * 0.05,
+            Math.max(stageWidth, stageHeight) * 0.85
+        )
+        .drawRect(-stageWidth / 2, -stageHeight / 2, stageWidth, stageHeight);
+    offlineBackdropSheen.alpha = 0.65;
+    offlineBackdropSheen.compositeOperation = "lighter";
+
+    var offlineBackdropEdge = new createjs.Shape();
+    offlineBackdropEdge.graphics
+        .setStrokeStyle(4)
+        .beginLinearGradientStroke(["rgba(255,255,255,0.22)", "rgba(255,255,255,0)", "rgba(255,255,255,0.18)"], [0, 0.48, 1], 0, -stageHeight / 2, 0, stageHeight / 2)
+        .drawRoundRect(-stageWidth / 2 + 8, -stageHeight / 2 + 8, stageWidth - 16, stageHeight - 16, 28);
+    offlineBackdropEdge.alpha = 0.6;
+
+    offlineBackdropContainer.addChild(offlineBackdrop);
+    offlineBackdropContainer.addChild(offlineBackdropEdge);
+    offlineBackdropContainer.addChild(offlineBackdropSheen);
+    container4.addChild(offlineBackdropContainer);
+    container4.__offlineBackground = offlineBackdropContainer;
+
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = false;
+        closeBtnFinal.mouseEnabled = false;
+        closeBtnFinal.removeAllEventListeners && closeBtnFinal.removeAllEventListeners("click");
+        if (closeBtnFinal.parent) {
+            closeBtnFinal.parent.removeChild(closeBtnFinal);
+        }
+    }
+
+    if (container4.__offlineMessage && container4.__offlineMessage.parent) {
+        container4.__offlineMessage.parent.removeChild(container4.__offlineMessage);
+    }
+
+    var setFinishedTxt = new createjs.Text("", "600 46px 'Baloo 2'", "#F5ECFF");
     setFinishedTxt.textAlign = "center";
     setFinishedTxt.textBaseline = "middle";
-    setFinishedTxt.lineWidth = 1000
-    setFinishedTxt.lineHeight = 63
-    setFinishedTxt.x = 640;
-    setFinishedTxt.y = 367;
+    setFinishedTxt.lineWidth = Math.max(320, Math.min(720, stageWidth * 0.68));
+    setFinishedTxt.lineHeight = 62;
+    setFinishedTxt.x = stageWidth / 2;
+    setFinishedTxt.y = stageHeight / 2;
     setFinishedTxt.visible = true;
     container4.parent.addChild(setFinishedTxt);
+    container4.__offlineMessage = setFinishedTxt;
 
-    if (intChkVar == 0) {
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "...لا يوجد اتصال بالإنترنت. حاول مرة اخرى";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "No Internet Connection. Please try again...";
-        } else {
-            setFinishedTxt.text = "No Internet Connection. Please try again...";
+    var langKey = typeof assetsPathLang === "string" ? assetsPathLang : "";
+    var copyType = "offline";
 
-        }
-    }
     if (intChkVar == 1) {
-        // setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "                          તમે દરેક કોયડા ઉકેલી લીધા છે.                           પરિણામ જાણવા ઉપર દર્શાવેલ close પર ક્લિક કરો...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "                           ...لقد أكملت جميع الألغاز                           انقر على إغلاق في الأعلى لرؤية النتائج";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        } else {
-            setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        }
-        if (container1.parent) {
-            container1.parent.removeAllChildren();
-        }
-
+        copyType = "completeAll";
     } else if (intChkVar == 2) {
-        // setFinishedTxt.text = "You have completed this puzzle...";
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "તમે આ કોયડો ઉકેલી લીધો છે...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "...لقد أكملت هذا اللغز";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "You have completed this puzzle...";
-        } else {
-            setFinishedTxt.text = "You have completed this puzzle...";
-        }
+        copyType = "completeOne";
+    }
 
+    var overlayCopy = null;
+    if (typeof SAUIX_getConnectivityCopy === "function") {
+        overlayCopy = SAUIX_getConnectivityCopy(copyType, langKey);
+    }
+
+    if (overlayCopy && overlayCopy.title) {
+        setFinishedTxt.text = overlayCopy.title;
+    } else {
+        if (intChkVar == 0) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "...لا يوجد اتصال بالإنترنت. حاول مرة اخرى";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "You're offline right now.";
+            } else {
+                setFinishedTxt.text = "You're offline right now.";
+
+            }
+        }
+        if (intChkVar == 1) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "તમે દરેક કોયડા ઉકેલી લીધા છે. પરિણામ જાણવા ઉપર દર્શાવેલ close પર ક્લિક કરો...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "لقد أكملت جميع الألغاز. انقر على إغلاق في الأعلى لرؤية النتائج...";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "You have completed all the puzzles. Click close at top to see the results...";
+            } else {
+                setFinishedTxt.text = "You have completed all the puzzles. Click close at top to see the results...";
+            }
+        } else if (intChkVar == 2) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "તમે આ કોયડો ઉકેલી લીધો છે...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "لقد أكملت هذا اللغز...";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "You have completed this puzzle...";
+            } else {
+                setFinishedTxt.text = "You have completed this puzzle...";
+            }
+        }
+    }
+
+    if (intChkVar == 1 || intChkVar == 2) {
         if (container1.parent) {
             container1.parent.removeAllChildren();
         }
     }
 
+    var measuredHeight = 0;
+    try {
+        measuredHeight = setFinishedTxt.getMeasuredHeight();
+    } catch (setFinishedMeasureErr) {
+        measuredHeight = 0;
+    }
 
+    if (!measuredHeight || !isFinite(measuredHeight)) {
+        measuredHeight = setFinishedTxt.lineHeight || 62;
+    }
 
+    if (setFinishedTxt.text.length > 70) {
+        setFinishedTxt.font = "600 40px 'Baloo 2'";
+        setFinishedTxt.lineHeight = 58;
+        try {
+            measuredHeight = setFinishedTxt.getMeasuredHeight();
+        } catch (setFinishedReMeasureErr) {
+            measuredHeight = setFinishedTxt.lineHeight || 58;
+        }
+        if (!measuredHeight || !isFinite(measuredHeight)) {
+            measuredHeight = setFinishedTxt.lineHeight || 58;
+        }
+    }
 
-    if (setFinishedTxt.text.length <= 35) {
-        setFinishedTxt.y = 407;
-    } else if (setFinishedTxt.text.length <= 70) {
-        setFinishedTxt.font = "bold 40px 'Baloo 2'"
-        setFinishedTxt.y = 407;
-    } else {
-        setFinishedTxt.font = "bold 40px 'Baloo 2'"
-        setFinishedTxt.y = 377;
+    setFinishedTxt.y = stageHeight / 2;
+
+    var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
+    if (shouldUseOverlay) {
+        SAUIX_showConnectivityOverlay({
+            stage: stage,
+            message: overlayCopy.title,
+            detail: overlayCopy.detail,
+            iconType: overlayCopy.iconType,
+            onClose: typeof closeGameFn === "function" ? closeGameFn : null,
+        });
+        setFinishedTxt.visible = false;
+    } else if (closeBtnFinal) {
+        container4.parent.addChild(closeBtnFinal);
+        closeBtnFinal.visible = true;
+        closeBtnFinal.mouseEnabled = true;
+        closeBtnFinal.cursor = "pointer";
+        closeBtnFinal.removeAllEventListeners("click");
+        closeBtnFinal.addEventListener("click", closeGameFn);
     }
     intChkVar = -1
 
