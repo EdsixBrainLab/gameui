@@ -7223,20 +7223,89 @@ function internetErrorFn() {
         }
     }
 
-    container4.parent.addChild(closeBtnFinal);
-    closeBtnFinal.visible = true;
-    closeBtnFinal.addEventListener("click", closeGameFn);
-    closeBtnFinal.cursor = "pointer";
+    var stageWidth = stage && stage.canvas ? stage.canvas.width : 1280;
+    var stageHeight = stage && stage.canvas ? stage.canvas.height : 720;
+
+    if (typeof getLogicalCanvasWidth === "function") {
+        try {
+            stageWidth = getLogicalCanvasWidth();
+        } catch (getLogicalWidthErr) {}
+    }
+
+    if (typeof getLogicalCanvasHeight === "function") {
+        try {
+            stageHeight = getLogicalCanvasHeight();
+        } catch (getLogicalHeightErr) {}
+    }
+
+    if (container4.__offlineBackground) {
+        container4.removeChild(container4.__offlineBackground);
+        container4.__offlineBackground = null;
+    }
+
+    var offlineBackdropContainer = new createjs.Container();
+    offlineBackdropContainer.mouseEnabled = false;
+    offlineBackdropContainer.mouseChildren = false;
+    offlineBackdropContainer.x = stageWidth / 2;
+    offlineBackdropContainer.y = stageHeight / 2;
+
+    var offlineBackdrop = new createjs.Shape();
+    offlineBackdrop.graphics
+        .beginLinearGradientFill(["#150C35", "#23175F", "#3A2F92"], [0, 0.55, 1], 0, -stageHeight / 2, 0, stageHeight / 2)
+        .drawRect(-stageWidth / 2, -stageHeight / 2, stageWidth, stageHeight);
+
+    var offlineBackdropSheen = new createjs.Shape();
+    offlineBackdropSheen.graphics
+        .beginRadialGradientFill(
+            ["rgba(255,255,255,0.32)", "rgba(255,255,255,0.0)"],
+            [0, 1],
+            0,
+            -stageHeight * 0.05,
+            Math.max(stageWidth, stageHeight) * 0.1,
+            0,
+            -stageHeight * 0.05,
+            Math.max(stageWidth, stageHeight) * 0.85
+        )
+        .drawRect(-stageWidth / 2, -stageHeight / 2, stageWidth, stageHeight);
+    offlineBackdropSheen.alpha = 0.65;
+    offlineBackdropSheen.compositeOperation = "lighter";
+
+    var offlineBackdropEdge = new createjs.Shape();
+    offlineBackdropEdge.graphics
+        .setStrokeStyle(4)
+        .beginLinearGradientStroke(["rgba(255,255,255,0.22)", "rgba(255,255,255,0)", "rgba(255,255,255,0.18)"], [0, 0.48, 1], 0, -stageHeight / 2, 0, stageHeight / 2)
+        .drawRoundRect(-stageWidth / 2 + 8, -stageHeight / 2 + 8, stageWidth - 16, stageHeight - 16, 28);
+    offlineBackdropEdge.alpha = 0.6;
+
+    offlineBackdropContainer.addChild(offlineBackdrop);
+    offlineBackdropContainer.addChild(offlineBackdropEdge);
+    offlineBackdropContainer.addChild(offlineBackdropSheen);
+    container4.addChild(offlineBackdropContainer);
+    container4.__offlineBackground = offlineBackdropContainer;
+
+    if (closeBtnFinal) {
+        closeBtnFinal.visible = false;
+        closeBtnFinal.mouseEnabled = false;
+        closeBtnFinal.removeAllEventListeners && closeBtnFinal.removeAllEventListeners("click");
+        if (closeBtnFinal.parent) {
+            closeBtnFinal.parent.removeChild(closeBtnFinal);
+        }
+    }
+
+    if (container4.__offlineMessage && container4.__offlineMessage.parent) {
+        container4.__offlineMessage.parent.removeChild(container4.__offlineMessage);
+    }
 
     var setFinishedTxt = new createjs.Text("", "600 46px 'Baloo 2'", "#F5ECFF");
     setFinishedTxt.textAlign = "center";
     setFinishedTxt.textBaseline = "middle";
-    setFinishedTxt.lineWidth = 560;
+    setFinishedTxt.lineWidth = Math.max(320, Math.min(720, stageWidth * 0.68));
     setFinishedTxt.lineHeight = 62;
-    setFinishedTxt.x = 640;
-    setFinishedTxt.y = 372;
+    setFinishedTxt.x = stageWidth / 2;
+    setFinishedTxt.y = stageHeight / 2;
     setFinishedTxt.visible = true;
     container4.parent.addChild(setFinishedTxt);
+    container4.__offlineMessage = setFinishedTxt;
 
     var langKey = typeof assetsPathLang === "string" ? assetsPathLang : "";
     var copyType = "offline";
@@ -7320,12 +7389,7 @@ function internetErrorFn() {
         }
     }
 
-    var blockHeight = Math.max(measuredHeight, setFinishedTxt.lineHeight || 62);
-    var targetCenterY = 372;
-    if (blockHeight > 0) {
-        targetCenterY = 360 + blockHeight / 2;
-    }
-    setFinishedTxt.y = targetCenterY;
+    setFinishedTxt.y = stageHeight / 2;
 
     var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
     if (shouldUseOverlay) {
@@ -7334,19 +7398,16 @@ function internetErrorFn() {
             message: overlayCopy.title,
             detail: overlayCopy.detail,
             iconType: overlayCopy.iconType,
+            onClose: typeof closeGameFn === "function" ? closeGameFn : null,
         });
         setFinishedTxt.visible = false;
-    }
-
-    var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
-    if (shouldUseOverlay) {
-        SAUIX_showConnectivityOverlay({
-            stage: stage,
-            message: overlayCopy.title,
-            detail: overlayCopy.detail,
-            iconType: overlayCopy.iconType,
-        });
-        setFinishedTxt.visible = false;
+    } else if (closeBtnFinal) {
+        container4.parent.addChild(closeBtnFinal);
+        closeBtnFinal.visible = true;
+        closeBtnFinal.mouseEnabled = true;
+        closeBtnFinal.cursor = "pointer";
+        closeBtnFinal.removeAllEventListeners("click");
+        closeBtnFinal.addEventListener("click", closeGameFn);
     }
     intChkVar = -1
 
