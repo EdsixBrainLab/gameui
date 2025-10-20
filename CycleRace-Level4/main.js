@@ -40,6 +40,14 @@ var qno = []
 var choiceArr = []
 var choiceArr1 = []
 
+var cycleRaceQuestionBubble,
+  cycleRaceTextChoiceWrappers = [],
+  cycleRaceImageChoiceWrappers = [],
+  cycleRaceTextChoicePositions = [],
+  cycleRaceImageChoicePositions = [],
+  cycleRaceHoverInHandler = null,
+  cycleRaceHoverOutHandler = null;
+
 var chPosArr = [1, 0, 2, 3, 1, 0, 2, 3, 1, 0] // Only 4 Choice 
 
 var chPosArr1 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]// Only 10 questions Alternatively 
@@ -330,10 +338,14 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		question1 = new createjs.Sprite(spriteSheet9, "run");
-		container.parent.addChild(question1);
+                question1 = new createjs.Sprite(spriteSheet9, "run");
+                container.parent.addChild(question1);
 
-		question1.visible = false
+                question1.visible = false
+                question1.regX = 241 / 2;
+                question1.regY = 239 / 2;
+                question1.x = 0;
+                question1.y = 0;
 
 
 	}
@@ -348,11 +360,17 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		question2 = new createjs.Sprite(spriteSheet10, "run");
-		container.parent.addChild(question2);
+                question2 = new createjs.Sprite(spriteSheet10, "run");
+                container.parent.addChild(question2);
 
-		question2.visible = false;
-		questionText1 = question2.clone();
+                question2.visible = false;
+                question2.regX = 574 / 2;
+                question2.regY = 63 / 2;
+                question2.x = 0;
+                question2.y = 0;
+                questionText1 = question2.clone();
+                questionText1.regX = question2.regX;
+                questionText1.regY = question2.regY;
 	}
 	//
 
@@ -367,13 +385,17 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		choice1 = new createjs.Sprite(spriteSheet11);
-		container.parent.addChild(choice1);
+                choice1 = new createjs.Sprite(spriteSheet11);
+                container.parent.addChild(choice1);
 
-		choice1.visible = false
-	}
-	if (id == "choice2") {
-		var spriteSheet11 = new createjs.SpriteSheet({
+                choice1.visible = false
+                choice1.regX = 266 / 2;
+                choice1.regY = 78 / 2;
+                choice1.x = 0;
+                choice1.y = 0;
+        }
+        if (id == "choice2") {
+                var spriteSheet11 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("choice2")],
 			"frames": { "regX": 82, "height": 239, "count": 0, "regY": 0, "width": 241 },
@@ -383,10 +405,14 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 			}
 		});
-		choice2 = new createjs.Sprite(spriteSheet11);
-		container.parent.addChild(choice2);
-		choice2.visible = false
-	}
+                choice2 = new createjs.Sprite(spriteSheet11);
+                container.parent.addChild(choice2);
+                choice2.visible = false
+                choice2.regX = 241 / 2;
+                choice2.regY = 239 / 2;
+                choice2.x = 0;
+                choice2.y = 0;
+        }
 
 
 	if (id == "chHolder") {
@@ -448,30 +474,65 @@ function CreateGameElements() {
 		this["cycle" + i].y = posY[i];
 
 	}
-	container.parent.addChild(question1, question2)
-	container.parent.addChild(choice1, choice2)
+        var choiceXArr = [480, 800, 480, 800]
+        var choiceYArr = [468, 468, 598, 598]
+        if (typeof SAUI_computeCenteredRow === "function") {
+                var textRowLayout = SAUI_computeCenteredRow(2, {
+                        centerX: 640,
+                        baseSpacing: 340,
+                        tileSpan: 340,
+                        maxSpan: 680
+                });
+                var textRowPositions = textRowLayout && textRowLayout.positions;
+                if (textRowPositions && textRowPositions.length >= 2) {
+                        choiceXArr = [
+                                textRowPositions[0],
+                                textRowPositions[1],
+                                textRowPositions[0],
+                                textRowPositions[1]
+                        ];
+                }
+                choiceYArr = [468, 468, 598, 598];
+        }
 
-	var choiceXArr = [420, 790, 420, 790]
-	var choiceYArr = [390, 390, 520, 520]
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr[i] = choice1.clone()
+                choiceArr[i].visible = false;
+                choiceArr[i].x = 0;
+                choiceArr[i].y = 0;
+        }
 
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr[i] = choice1.clone()
-		choiceArr[i].visible = false;
-		choiceArr[i].x = choiceXArr[i]
-		choiceArr[i].y = choiceYArr[i]
-		container.parent.addChild(choiceArr[i])
-	}
+        var choiceX1Arr =  [320, 520, 760, 960]
+        var choiceY1Arr = [540, 540, 540, 540]
+        if (typeof SAUI_computeCenteredRow === "function") {
+                var imageRowLayout = SAUI_computeCenteredRow(4, {
+                        centerX: 640,
+                        baseSpacing: 220,
+                        tileSpan: 220,
+                        maxSpan: 880
+                });
+                var imageRowPositions = imageRowLayout && imageRowLayout.positions;
+                if (imageRowPositions && imageRowPositions.length >= 4) {
+                        choiceX1Arr = imageRowPositions;
+                }
+                choiceY1Arr = [540, 540, 540, 540];
+        }
 
-	var choiceX1Arr =  [240, 440, 640, 840]
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr1[i] = choice2.clone()
+                choiceArr1[i].visible = false;
+                choiceArr1[i].scaleX = choiceArr1[i].scaleY = .78;
+                choiceArr1[i].x = 0;
+                choiceArr1[i].y = 0;
+        }
 
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr1[i] = choice2.clone()
-		container.parent.addChild(choiceArr1[i])
-		choiceArr1[i].visible = false;
-		choiceArr1[i].x = choiceX1Arr[i]
-		choiceArr1[i].scaleX = choiceArr1[i].scaleY = .8;
-		choiceArr1[i].y = 510;
-	}
+        ensureCycleRaceQuestionSurface();
+        initializeCycleRaceChoiceWrappers(
+                choiceXArr,
+                choiceYArr,
+                choiceX1Arr,
+                choiceY1Arr
+        );
 
 	// container.parent.addChild(TitleBtn);
 	// TitleBtn.visible=true;
@@ -670,174 +731,540 @@ function roadMove(event) {
 
 //=============================================================================================//
 function createQuestions() {
-	clearInterval(quesIntervel)
+        clearInterval(quesIntervel)
 
-	QusTxtString.visible = false;
+        QusTxtString.visible = false;
 
-	container.parent.addChild(chHolderMc);
-	container.parent.addChild(question1, question2)
+        cycleRaceResetQuestionDisplay();
 
-	chHolderMc.visible = true;
-	question1.x = 150; question1.y = 315;
-	question2.x = 360; question2.y = 320;
+        for (i = 0; i < TOTAL_CYCLE; i++) {
+                cycle_array[i].visible = false
+        }
 
-	for (i = 0; i < TOTAL_CYCLE; i++) {
-		cycle_array[i].visible = false
-	}
+        if (cycleRaceQuestionBubble) {
+                if (typeof SAUI_showCycleRaceSpeechBubble === "function") {
+                        SAUI_showCycleRaceSpeechBubble(cycleRaceQuestionBubble, 40);
+                } else {
+                        cycleRaceQuestionBubble.visible = true;
+                        cycleRaceQuestionBubble.alpha = 1;
+                }
+        }
 
+        if (chPosArr1[cnt] == 0) {
+                question1.visible = true;
+                question1.scaleX = question1.scaleY = 1.02
+                question1.gotoAndStop(chPosArr2[type1Cnt] - 1)
+                question1.x = -220;
+                question1.y = 6;
 
-	if (chPosArr1[cnt] == 0) {
-		question1.visible = true;
-		question1.scaleX = question1.scaleY = 1.1
-		question1.gotoAndStop(chPosArr2[type1Cnt] - 1)
+                if (questionText1) {
+                        questionText1.visible = true;
+                        questionText1.gotoAndStop(9);
+                        questionText1.scaleX = questionText1.scaleY = 0.94;
+                        questionText1.x = 200;
+                        questionText1.y = -12;
+                }
 
-		container.parent.addChild(questionText1);
-		questionText1.gotoAndStop(9);
-		questionText1.x = 440; questionText1.y = 300;
-		questionText1.visible = true;
+                rand = between(0, TOTAL_CYCLE - 1)
+                val = rand.indexOf(chVal)
+                rand.splice(val, 1)
 
-		rand = between(0, TOTAL_CYCLE - 1)
-		val = rand.indexOf(chVal)
-		rand.splice(val, 1)
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = true;
+                        choiceArr[i].gotoAndStop(rand[i])
+                        choiceArr[i].name = rand[i]
+                        if (choiceArr[i].__wrapper) {
+                                if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
+                                        SAUI_resetCycleRaceOptionBubble(choiceArr[i].__wrapper);
+                                }
+                                if (choiceArr[i].__wrapper.__badgeLabel) {
+                                        choiceArr[i].__wrapper.__badgeLabel.text = String.fromCharCode(65 + i);
+                                }
+                        } else {
+                                choiceArr[i].alpha = 1;
+                                choiceArr[i].x = cycleRaceTextChoicePositions[i].x;
+                                choiceArr[i].y = cycleRaceTextChoicePositions[i].y;
+                        }
+                }
+                choiceArr[chPosArr[cnt]].gotoAndStop(chVal)
+                choiceArr[chPosArr[cnt]].name = chVal
 
-		chHolderMc.x = chHolderMc.x + 30;
+                ans = chVal;
 
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = true;
-			container.parent.addChild(choiceArr[i])
-			choiceArr[i].gotoAndStop(rand[i])
-			choiceArr[i].name = rand[i]
-		}
-		choiceArr[chPosArr[cnt]].gotoAndStop(chVal)
-		choiceArr[chPosArr[cnt]].name = chVal
+        } else {
+                question2.visible = true;
+                question2.scaleX = question2.scaleY = 1;
+                question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
+                question2.x = 0;
+                question2.y = -8;
+                if (questionText1) {
+                        questionText1.visible = false;
+                }
+                rand = between(0, 7)
+                val = rand.indexOf(pArr[count + 1] - 1)
+                rand.splice(val, 1)
 
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].gotoAndStop(rand[i])
+                        choiceArr1[i].name = rand[i]
+                        if (choiceArr1[i].__wrapper) {
+                                if (typeof SAUI_resetCycleRaceOptionBubble === "function") {
+                                        SAUI_resetCycleRaceOptionBubble(choiceArr1[i].__wrapper);
+                                }
+                                if (choiceArr1[i].__wrapper.__badgeLabel) {
+                                        choiceArr1[i].__wrapper.__badgeLabel.text = String.fromCharCode(65 + i);
+                                }
+                        } else {
+                                choiceArr1[i].alpha = 1;
+                                choiceArr1[i].x = cycleRaceImageChoicePositions[i].x;
+                                choiceArr1[i].y = cycleRaceImageChoicePositions[i].y;
+                        }
+                }
 
-		ans = chVal;
+                choiceArr1[chPosArr[cnt]].gotoAndStop(pArr[count + 1] - 1)
+                choiceArr1[chPosArr[cnt]].name = pArr[count + 1] - 1
+                ans = pArr[count + 1] - 1
 
+        }
 
-
-	} else {
-		question2.visible = true;
-		question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
-		//chHolderMc.x = 0;
-		rand = between(0, 7)
-		val = rand.indexOf(pArr[count + 1] - 1)
-		rand.splice(val, 1)
-		console.log("pArr===" + pArr)
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = true;
-			container.parent.addChild(choiceArr1[i])
-			choiceArr1[i].gotoAndStop(rand[i])
-			choiceArr1[i].name = rand[i]
-		}
-
-		choiceArr1[chPosArr[cnt]].gotoAndStop(pArr[count + 1] - 1)
-		choiceArr1[chPosArr[cnt]].name = pArr[count + 1] - 1
-		ans = pArr[count + 1] - 1
-
-	}
-
-
-
-	enablechoices();
-	createjs.Ticker.addEventListener("tick", tick);
-	stage.update();
-
-
+        enablechoices();
+        createjs.Ticker.addEventListener("tick", tick);
+        stage.update();
 
 }
 
-//====================================================================================================================================//
+//==============================================================================================================================
+======//
 function enablechoices() {
 
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = false;
-		}
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = false;
-		}
-	}
-	createTween()
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = false;
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.visible = false;
+                                choiceArr[i].__wrapper.alpha = 0;
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = false;
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.visible = false;
+                                choiceArr1[i].__wrapper.alpha = 0;
+                        }
+                }
+        }
+        createTween()
 }
 function createTween() {
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].visible = true;
-			choiceArr[i].alpha = 0;
-		}
-		createjs.Tween.get(choiceArr[0]).wait(100).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[1]).wait(200).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[2]).wait(300).to({ alpha: 0 }, 500).to({ alpha: 1 })
-		createjs.Tween.get(choiceArr[3]).wait(400).to({ alpha: 0 }, 500).to({ alpha: 1 })
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].visible = true;
-			choiceArr1[i].alpha = 0;
-		}
-		createjs.Tween.get(choiceArr1[0]).wait(200).to({ x: choiceArr1[0].x, y: 410, alpha: 0 }, 500).to({ x: choiceArr1[0].x, y: 430, alpha: 0.5 }, 500).to({ x: choiceArr1[0].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[1]).wait(300).to({ x: choiceArr1[1].x, y: 430, alpha: 0 }, 500).to({ x: choiceArr1[1].x, y: 410, alpha: 0.5 }, 500).to({ x: choiceArr1[1].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[2]).wait(600).to({ x: choiceArr1[2].x, y: 410, alpha: 0 }, 500).to({ x: choiceArr1[2].x, y: 430, alpha: 0.5 }, 500).to({ x: choiceArr1[2].x, y: 410, alpha: 1 })
-		createjs.Tween.get(choiceArr1[3]).wait(800).to({ x: choiceArr1[3].x, y: 430, alpha: 0 }, 500).to({ x: choiceArr1[3].x, y: 410, alpha: 0.5 }, 500).to({ x: choiceArr1[3].x, y: 410, alpha: 1 })
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].visible = true;
+                        choiceArr[i].alpha = 1;
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.visible = true;
+                                if (typeof SAUI_showCycleRaceOptionBubble === "function") {
+                                        SAUI_showCycleRaceOptionBubble(choiceArr[i].__wrapper, 120 + i * 90);
+                                } else {
+                                        choiceArr[i].__wrapper.alpha = 1;
+                                }
+                        } else {
+                                choiceArr[i].alpha = 0;
+                                createjs.Tween.get(choiceArr[i]).wait(120 * (i + 1)).to({ alpha: 1 }, 360);
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].alpha = 1;
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.visible = true;
+                                if (typeof SAUI_showCycleRaceOptionBubble === "function") {
+                                        SAUI_showCycleRaceOptionBubble(choiceArr1[i].__wrapper, 160 + i * 110);
+                                } else {
+                                        choiceArr1[i].__wrapper.alpha = 1;
+                                }
+                        } else {
+                                choiceArr1[i].alpha = 0;
+                                createjs.Tween.get(choiceArr1[i]).wait(160 * (i + 1)).to({ alpha: 1 }, 360);
+                        }
+                }
 
-	}
+        }
 
-
-	repTimeClearInterval = setTimeout(AddListenerFn, 1400)
+        repTimeClearInterval = setTimeout(AddListenerFn, 1400)
 }
 function AddListenerFn() {
-	clearTimeout(repTimeClearInterval)
-	console.log("eventlisterneer")
-	if (chPosArr1[cnt] == 0) {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr[i].cursor = "pointer";
-			choiceArr[i].visible = true;
-			choiceArr[i].addEventListener("click", answerSelected)
-			choiceArr[i].cursor = "pointer";
-			choiceArr[i].mouseEnabled = true
-		}
-	} else {
-		for (i = 0; i < choiceCnt; i++) {
-			choiceArr1[i].cursor = "pointer";
-			choiceArr1[i].visible = true;
-			choiceArr1[i].addEventListener("click", answerSelected)
-			choiceArr1[i].cursor = "pointer";
-			choiceArr1[i].mouseEnabled = true
-		}
-	}
-	rst = 0;
-	gameResponseTimerStart();
-	restartTimer()
+        clearTimeout(repTimeClearInterval)
+        if (chPosArr1[cnt] == 0) {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr[i].cursor = "pointer";
+                        choiceArr[i].visible = true;
+                        choiceArr[i].addEventListener("click", answerSelected)
+                        choiceArr[i].mouseEnabled = true
+                        if (cycleRaceHoverInHandler) {
+                                choiceArr[i].addEventListener("mouseover", cycleRaceHoverInHandler);
+                                choiceArr[i].addEventListener("mouseout", cycleRaceHoverOutHandler);
+                        }
+                        if (choiceArr[i].__wrapper) {
+                                choiceArr[i].__wrapper.cursor = "pointer";
+                                if (typeof SAUI_startCycleRaceOptionIdle === "function") {
+                                        SAUI_startCycleRaceOptionIdle(choiceArr[i].__wrapper);
+                                }
+                        }
+                }
+        } else {
+                for (i = 0; i < choiceCnt; i++) {
+                        choiceArr1[i].cursor = "pointer";
+                        choiceArr1[i].visible = true;
+                        choiceArr1[i].addEventListener("click", answerSelected)
+                        choiceArr1[i].mouseEnabled = true
+                        if (cycleRaceHoverInHandler) {
+                                choiceArr1[i].addEventListener("mouseover", cycleRaceHoverInHandler);
+                                choiceArr1[i].addEventListener("mouseout", cycleRaceHoverOutHandler);
+                        }
+                        if (choiceArr1[i].__wrapper) {
+                                choiceArr1[i].__wrapper.cursor = "pointer";
+                                if (typeof SAUI_startCycleRaceOptionIdle === "function") {
+                                        SAUI_startCycleRaceOptionIdle(choiceArr1[i].__wrapper);
+                                }
+                        }
+                }
+        }
+        rst = 0;
+        gameResponseTimerStart();
+        restartTimer()
 }
 function disablechoices() {
-	for (i = 0; i < choiceCnt; i++) {
-		choiceArr[i].visible = false
-		choiceArr[i].removeEventListener("click", answerSelected);
-		choiceArr[i].cursor = "default";
-		choiceArr1[i].visible = false
-		choiceArr1[i].removeEventListener("click", answerSelected);
-		choiceArr1[i].cursor = "default";
-	}
-	questionText1.visible = false;
-	chHolderMc.visible = false;
-	question1.visible = false;
-	question2.visible = false;
+        for (i = 0; i < choiceCnt; i++) {
+                choiceArr[i].visible = false
+                choiceArr[i].removeEventListener("click", answerSelected);
+                if (cycleRaceHoverInHandler) {
+                        choiceArr[i].removeEventListener("mouseover", cycleRaceHoverInHandler);
+                        choiceArr[i].removeEventListener("mouseout", cycleRaceHoverOutHandler);
+                }
+                choiceArr[i].cursor = "default";
+                if (choiceArr[i].__wrapper) {
+                        choiceArr[i].__wrapper.visible = false;
+                        choiceArr[i].__wrapper.alpha = 0;
+                        choiceArr[i].__wrapper.mouseEnabled = false;
+                        choiceArr[i].__wrapper.cursor = "default";
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(choiceArr[i].__wrapper);
+                        }
+                }
+                choiceArr1[i].visible = false
+                choiceArr1[i].removeEventListener("click", answerSelected);
+                if (cycleRaceHoverInHandler) {
+                        choiceArr1[i].removeEventListener("mouseover", cycleRaceHoverInHandler);
+                        choiceArr1[i].removeEventListener("mouseout", cycleRaceHoverOutHandler);
+                }
+                choiceArr1[i].cursor = "default";
+                if (choiceArr1[i].__wrapper) {
+                        choiceArr1[i].__wrapper.visible = false;
+                        choiceArr1[i].__wrapper.alpha = 0;
+                        choiceArr1[i].__wrapper.mouseEnabled = false;
+                        choiceArr1[i].__wrapper.cursor = "default";
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(choiceArr1[i].__wrapper);
+                        }
+                }
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+        if (cycleRaceQuestionBubble && typeof SAUI_hideCycleRaceSpeechBubble === "function") {
+                SAUI_hideCycleRaceSpeechBubble(cycleRaceQuestionBubble);
+        }
+        if (chHolderMc) {
+                chHolderMc.visible = false;
+        }
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
 }
-//===================================================================MOUSE ROLL OVER/ROLL OUT==============================================================//
+//===================================================================MOUSE ROLL OVER/ROLL OUT===================================
+===========================//
 
 function answerSelected(e) {
-	e.preventDefault();
-	uans = e.currentTarget.name;
-	console.log("answer" + uans);
-	console.log(ans + " =correct= " + uans)
-	gameResponseTimerStop();
-	if (ans == uans) {
-		 
-		getValidation("correct");
-		disablechoices();
-	} else {
-		getValidation("wrong");
-		disablechoices();
-	}
+        e.preventDefault();
+        uans = e.currentTarget.name;
+        console.log("answer" + uans);
+        console.log(ans + " =correct= " + uans)
+        gameResponseTimerStop();
+        var wrapper = e.currentTarget.__wrapper;
+        if (wrapper) {
+                if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                        SAUI_stopCycleRaceOptionIdle(wrapper);
+                }
+                if (typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                        SAUI_setCycleRaceOptionHoverState(wrapper, false);
+                }
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(wrapper, ans == uans);
+                }
+        }
+        if (ans != uans) {
+                cycleRaceMarkCorrectWrapper();
+        }
+        if (ans == uans) {
+
+                getValidation("correct");
+                disablechoices();
+        } else {
+                getValidation("wrong");
+                disablechoices();
+        }
+}
+function ensureCycleRaceQuestionSurface() {
+
+        if (typeof SAUI_createCycleRaceSpeechBubble === "function") {
+                if (!cycleRaceQuestionBubble) {
+                        cycleRaceQuestionBubble = SAUI_createCycleRaceSpeechBubble({
+                                width: 780,
+                                height: 300,
+                                tailHeight: 60,
+                                tailWidth: 150,
+                                cornerRadius: 52,
+                                title: "Question"
+                        });
+                        cycleRaceQuestionBubble.x = 640;
+                        cycleRaceQuestionBubble.y = 248;
+                }
+
+                if (!cycleRaceQuestionBubble.parent) {
+                        container.parent.addChild(cycleRaceQuestionBubble);
+                }
+
+                if (cycleRaceQuestionBubble.__content) {
+                        if (question1 && question1.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(question1);
+                        }
+                        if (question2 && question2.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(question2);
+                        }
+                        if (questionText1 && questionText1.parent !== cycleRaceQuestionBubble.__content) {
+                                cycleRaceQuestionBubble.__content.addChild(questionText1);
+                        }
+                }
+        } else {
+                if (question1 && !question1.parent) {
+                        container.parent.addChild(question1);
+                }
+                if (question2 && !question2.parent) {
+                        container.parent.addChild(question2);
+                }
+                if (questionText1 && !questionText1.parent) {
+                        container.parent.addChild(questionText1);
+                }
+        }
+
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+}
+
+function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, choiceY1Arr) {
+
+        cycleRaceTextChoicePositions = [];
+        cycleRaceImageChoicePositions = [];
+
+        for (var idx = 0; idx < choiceCnt; idx++) {
+                cycleRaceTextChoicePositions[idx] = {
+                        x: choiceXArr[idx],
+                        y: choiceYArr[idx]
+                };
+                cycleRaceImageChoicePositions[idx] = {
+                        x: choiceX1Arr[idx],
+                        y: choiceY1Arr[idx]
+                };
+        }
+
+        if (!cycleRaceHoverInHandler) {
+                cycleRaceHoverInHandler = function (e) {
+                        if (!e || !e.currentTarget) {
+                                return;
+                        }
+                        var wrapper = e.currentTarget.__wrapper;
+                        if (wrapper && typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                                SAUI_setCycleRaceOptionHoverState(wrapper, true);
+                        }
+                };
+                cycleRaceHoverOutHandler = function (e) {
+                        if (!e || !e.currentTarget) {
+                                return;
+                        }
+                        var wrapper = e.currentTarget.__wrapper;
+                        if (wrapper && typeof SAUI_setCycleRaceOptionHoverState === "function") {
+                                SAUI_setCycleRaceOptionHoverState(wrapper, false);
+                        }
+                };
+        }
+
+        for (var i1 = 0; i1 < choiceCnt; i1++) {
+                var textWrapper = cycleRaceTextChoiceWrappers[i1];
+                if (!textWrapper && typeof SAUI_createCycleRaceOptionBubble === "function") {
+                        textWrapper = SAUI_createCycleRaceOptionBubble({ variant: "text" });
+                        cycleRaceTextChoiceWrappers[i1] = textWrapper;
+                }
+
+                if (textWrapper) {
+                        textWrapper.visible = false;
+                        textWrapper.alpha = 0;
+                        textWrapper.mouseEnabled = false;
+                        textWrapper.cursor = "default";
+                        textWrapper.x = cycleRaceTextChoicePositions[i1].x;
+                        textWrapper.y = cycleRaceTextChoicePositions[i1].y;
+                        if (!textWrapper.parent) {
+                                container.parent.addChild(textWrapper);
+                        }
+                        if (textWrapper.__content && choiceArr[i1] && choiceArr[i1].parent !== textWrapper.__content) {
+                                textWrapper.__content.addChild(choiceArr[i1]);
+                        } else if (choiceArr[i1] && choiceArr[i1].parent !== textWrapper) {
+                                textWrapper.addChild(choiceArr[i1]);
+                        }
+                        if (textWrapper.__badgeLabel) {
+                                textWrapper.__badgeLabel.text = "";
+                        }
+                } else if (choiceArr[i1] && !choiceArr[i1].parent) {
+                        container.parent.addChild(choiceArr[i1]);
+                }
+
+                if (choiceArr[i1]) {
+                        choiceArr[i1].visible = false;
+                        choiceArr[i1].alpha = 1;
+                        choiceArr[i1].x = 0;
+                        choiceArr[i1].y = 0;
+                        choiceArr[i1].mouseChildren = false;
+                        choiceArr[i1].cursor = "pointer";
+                        choiceArr[i1].__wrapper = textWrapper;
+                        if (textWrapper && textWrapper.__hitArea) {
+                                choiceArr[i1].hitArea = textWrapper.__hitArea;
+                        } else if (!textWrapper) {
+                                choiceArr[i1].x = cycleRaceTextChoicePositions[i1].x;
+                                choiceArr[i1].y = cycleRaceTextChoicePositions[i1].y;
+                        }
+                }
+
+                var imageWrapper = cycleRaceImageChoiceWrappers[i1];
+                if (!imageWrapper && typeof SAUI_createCycleRaceOptionBubble === "function") {
+                        imageWrapper = SAUI_createCycleRaceOptionBubble({ variant: "image" });
+                        cycleRaceImageChoiceWrappers[i1] = imageWrapper;
+                }
+
+                if (imageWrapper) {
+                        imageWrapper.visible = false;
+                        imageWrapper.alpha = 0;
+                        imageWrapper.mouseEnabled = false;
+                        imageWrapper.cursor = "default";
+                        imageWrapper.x = cycleRaceImageChoicePositions[i1].x;
+                        imageWrapper.y = cycleRaceImageChoicePositions[i1].y;
+                        if (!imageWrapper.parent) {
+                                container.parent.addChild(imageWrapper);
+                        }
+                        if (imageWrapper.__content && choiceArr1[i1] && choiceArr1[i1].parent !== imageWrapper.__content) {
+                                imageWrapper.__content.addChild(choiceArr1[i1]);
+                        } else if (choiceArr1[i1] && choiceArr1[i1].parent !== imageWrapper) {
+                                imageWrapper.addChild(choiceArr1[i1]);
+                        }
+                        if (imageWrapper.__badgeLabel) {
+                                imageWrapper.__badgeLabel.text = "";
+                        }
+                } else if (choiceArr1[i1] && !choiceArr1[i1].parent) {
+                        container.parent.addChild(choiceArr1[i1]);
+                }
+
+                if (choiceArr1[i1]) {
+                        choiceArr1[i1].visible = false;
+                        choiceArr1[i1].alpha = 1;
+                        choiceArr1[i1].x = 0;
+                        choiceArr1[i1].y = 0;
+                        choiceArr1[i1].mouseChildren = false;
+                        choiceArr1[i1].cursor = "pointer";
+                        choiceArr1[i1].__wrapper = imageWrapper;
+                        if (imageWrapper && imageWrapper.__hitArea) {
+                                choiceArr1[i1].hitArea = imageWrapper.__hitArea;
+                        } else if (!imageWrapper) {
+                                choiceArr1[i1].x = cycleRaceImageChoicePositions[i1].x;
+                                choiceArr1[i1].y = cycleRaceImageChoicePositions[i1].y;
+                        }
+                }
+        }
+}
+
+function cycleRaceResetQuestionDisplay() {
+
+        if (cycleRaceQuestionBubble) {
+                if (typeof SAUI_hideCycleRaceSpeechBubble === "function") {
+                        SAUI_hideCycleRaceSpeechBubble(cycleRaceQuestionBubble);
+                } else {
+                        cycleRaceQuestionBubble.visible = false;
+                        cycleRaceQuestionBubble.alpha = 0;
+                }
+        }
+
+        for (var i2 = 0; i2 < choiceCnt; i2++) {
+                if (cycleRaceTextChoiceWrappers[i2]) {
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(cycleRaceTextChoiceWrappers[i2]);
+                        }
+                        cycleRaceTextChoiceWrappers[i2].visible = false;
+                        cycleRaceTextChoiceWrappers[i2].alpha = 0;
+                        cycleRaceTextChoiceWrappers[i2].mouseEnabled = false;
+                        if (cycleRaceTextChoiceWrappers[i2].__badgeLabel) {
+                                cycleRaceTextChoiceWrappers[i2].__badgeLabel.text = "";
+                        }
+                }
+                if (cycleRaceImageChoiceWrappers[i2]) {
+                        if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                                SAUI_stopCycleRaceOptionIdle(cycleRaceImageChoiceWrappers[i2]);
+                        }
+                        cycleRaceImageChoiceWrappers[i2].visible = false;
+                        cycleRaceImageChoiceWrappers[i2].alpha = 0;
+                        cycleRaceImageChoiceWrappers[i2].mouseEnabled = false;
+                        if (cycleRaceImageChoiceWrappers[i2].__badgeLabel) {
+                                cycleRaceImageChoiceWrappers[i2].__badgeLabel.text = "";
+                        }
+                }
+                if (choiceArr[i2]) {
+                        choiceArr[i2].visible = false;
+                        choiceArr[i2].alpha = 1;
+                }
+                if (choiceArr1[i2]) {
+                        choiceArr1[i2].visible = false;
+                        choiceArr1[i2].alpha = 1;
+                }
+        }
+
+        if (question1) {
+                question1.visible = false;
+        }
+        if (question2) {
+                question2.visible = false;
+        }
+        if (questionText1) {
+                questionText1.visible = false;
+        }
+}
+
+function cycleRaceMarkCorrectWrapper() {
+        if (chPosArr1[cnt] == 0 && choiceArr[chPosArr[cnt]] && choiceArr[chPosArr[cnt]].__wrapper) {
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(choiceArr[chPosArr[cnt]].__wrapper, true);
+                }
+        } else if (choiceArr1[chPosArr[cnt]] && choiceArr1[chPosArr[cnt]].__wrapper) {
+                if (typeof SAUI_markCycleRaceOptionResult === "function") {
+                        SAUI_markCycleRaceOptionResult(choiceArr1[chPosArr[cnt]].__wrapper, true);
+                }
+        }
 }
