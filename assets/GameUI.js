@@ -659,18 +659,6 @@ incontainer.parent.addChild(questionCardContainer_htp);
 
 }
 
-if (typeof window !== "undefined") {
-  if (typeof window.call_UI_ambientOverlay !== "function") {
-    window.call_UI_ambientOverlay = call_UI_ambientOverlay;
-  }
-  if (typeof window.call_UI_gameQuestion !== "function") {
-    window.call_UI_gameQuestion = call_UI_gameQuestion;
-  }
-  if (typeof window.call_UI_introQuestionCardContainer !== "function") {
-    window.call_UI_introQuestionCardContainer = call_UI_introQuestionCardContainer;
-  }
-}
-
 
 
 function drawChoiceTileBackground(targetShape, colors) {
@@ -1771,9 +1759,6 @@ var connectivityOverlay,
   connectivityIconOfflineSlash,
   connectivityIconSuccess,
   connectivityIconInfo,
-  connectivityIconProgress,
-  connectivityIconProgressSpinner,
-  connectivityIconProgressGlow,
   connectivityOverlayClose,
   connectivityOverlayCloseGlow,
   connectivityOverlayCloseHighlight,
@@ -1789,8 +1774,6 @@ var SAUIX_CONNECTIVITY_COPY = {
     completeOneDetail: "Tap Close at the top to continue.",
     genericTitle: "Hold on a moment...",
     genericDetail: "We're preparing the next activity for you.",
-    resultsLoadingTitle: "Loading your results...",
-    resultsLoadingDetail: "Hang tight while we polish your scorecard.",
   },
   "assets/GujaratiAssets/": {
     offlineTitle: "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...",
@@ -1828,10 +1811,6 @@ function SAUIX_getConnectivityCopy(kind, lang) {
     keyTitle = "completeOneTitle";
     keyDetail = "completeOneDetail";
     iconType = "success";
-  } else if (kind === "resultsLoading") {
-    keyTitle = "resultsLoadingTitle";
-    keyDetail = "resultsLoadingDetail";
-    iconType = "progress";
   }
 
   var title = pack[keyTitle];
@@ -1851,7 +1830,7 @@ function SAUIX_getConnectivityCopy(kind, lang) {
     title: title,
     detail: detail,
     iconType: iconType,
-    language: lang
+    language: lang,
   };
 }
 
@@ -2060,80 +2039,6 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityIconInfo.addChild(infoGlyph);
 
   connectivityIconWrapper.addChild(connectivityIconInfo);
-
-  connectivityIconProgress = new createjs.Container();
-  connectivityIconProgress.visible = false;
-
-  var progressPlate = new createjs.Shape();
-  progressPlate.graphics
-    .beginRadialGradientFill(
-      ["#5640DF", "#190C4B"],
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      64
-    )
-    .drawCircle(0, 0, 64);
-  progressPlate.shadow = new createjs.Shadow("rgba(10,12,38,0.45)", 0, 14, 28);
-  connectivityIconProgress.addChild(progressPlate);
-
-  connectivityIconProgressGlow = new createjs.Shape();
-  connectivityIconProgressGlow.graphics
-    .beginRadialGradientFill(
-      ["rgba(126,211,255,0.65)", "rgba(132,126,255,0.15)", "rgba(132,126,255,0)"] ,
-      [0, 0.6, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      70
-    )
-    .drawCircle(0, 0, 70);
-  connectivityIconProgressGlow.alpha = 0.6;
-  connectivityIconProgressGlow.compositeOperation = "lighter";
-  connectivityIconProgressGlow.scaleX = connectivityIconProgressGlow.scaleY = 1;
-  connectivityIconProgress.addChild(connectivityIconProgressGlow);
-
-  connectivityIconProgressSpinner = new createjs.Container();
-  connectivityIconProgressSpinner.name = "spinner";
-  connectivityIconProgress.addChild(connectivityIconProgressSpinner);
-
-  var progressSpinnerArc = new createjs.Shape();
-  progressSpinnerArc.graphics
-    .setStrokeStyle(9, "round")
-    .beginStroke("rgba(255,255,255,0.92)")
-    .arc(0, 0, 46, -Math.PI / 2, Math.PI * 1.4, false);
-  progressSpinnerArc.shadow = new createjs.Shadow("rgba(14,24,48,0.35)", 0, 6, 14);
-  connectivityIconProgressSpinner.addChild(progressSpinnerArc);
-
-  var progressTail = new createjs.Shape();
-  progressTail.graphics
-    .beginRadialGradientFill(
-      ["rgba(255,255,255,0.95)", "rgba(255,255,255,0.25)", "rgba(255,255,255,0)"],
-      [0, 0.5, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      34
-    )
-    .drawCircle(46, -8, 16);
-  progressTail.compositeOperation = "lighter";
-  connectivityIconProgressSpinner.addChild(progressTail);
-
-  var progressCore = new createjs.Shape();
-  progressCore.graphics
-    .beginLinearGradientFill(["#FFFFFF", "#D2E8FF"], [0, 1], -16, -16, 16, 16)
-    .drawCircle(0, 0, 18);
-  progressCore.shadow = new createjs.Shadow("rgba(12,16,36,0.28)", 0, 4, 10);
-  connectivityIconProgress.addChild(progressCore);
-
-  connectivityIconWrapper.addChild(connectivityIconProgress);
 
   connectivityOverlayTitle = new createjs.Text(
     "",
@@ -2580,26 +2485,12 @@ function setConnectivityIcon(type) {
     connectivityIconInfo.visible = iconType === "info";
   }
 
-  if (connectivityIconProgress) {
-    var showProgress = iconType === "progress";
-    connectivityIconProgress.visible = showProgress;
-    if (!showProgress && connectivityIconProgressSpinner) {
-      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
-      connectivityIconProgressSpinner.rotation = 0;
-    }
-    if (!showProgress && connectivityIconProgressGlow) {
-      connectivityIconProgressGlow.alpha = 0.6;
-    }
-  }
-
   if (connectivityOverlayAccent) {
     var accent = "rgba(255,148,220,0.9)";
     if (iconType === "success") {
       accent = "rgba(92,239,200,0.9)";
     } else if (iconType === "info") {
       accent = "rgba(144,166,255,0.9)";
-    } else if (iconType === "progress") {
-      accent = "rgba(130,188,255,0.9)";
     }
 
     connectivityOverlayAccent.__accentColor = accent;
@@ -2653,36 +2544,6 @@ function animateConnectivityOverlay() {
       .to({ y: baseY - 8 }, 1200, createjs.Ease.sineInOut)
       .to({ y: baseY }, 1200, createjs.Ease.sineInOut);
   }
-
-  var currentKind = connectivityOverlay.__iconType || "";
-  if (currentKind === "progress") {
-    if (connectivityIconProgressSpinner) {
-      connectivityIconProgressSpinner.rotation = 0;
-      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
-      createjs.Tween.get(connectivityIconProgressSpinner, { loop: true })
-        .to({ rotation: 360 }, 2200, createjs.Ease.linear);
-    }
-
-    if (connectivityIconProgressGlow) {
-      createjs.Tween.removeTweens(connectivityIconProgressGlow);
-      connectivityIconProgressGlow.alpha = 0.45;
-      createjs.Tween.get(connectivityIconProgressGlow, { loop: true })
-        .to({ alpha: 0.8, scaleX: 1.08, scaleY: 1.08 }, 1200, createjs.Ease.sineInOut)
-        .to({ alpha: 0.45, scaleX: 1, scaleY: 1 }, 1200, createjs.Ease.sineInOut);
-    }
-  } else {
-    if (connectivityIconProgressSpinner) {
-      createjs.Tween.removeTweens(connectivityIconProgressSpinner);
-      connectivityIconProgressSpinner.rotation = 0;
-    }
-
-    if (connectivityIconProgressGlow) {
-      createjs.Tween.removeTweens(connectivityIconProgressGlow);
-      connectivityIconProgressGlow.alpha = 0.6;
-      connectivityIconProgressGlow.scaleX = connectivityIconProgressGlow.scaleY = 1;
-    }
-  }
-}
 
   if (connectivityOverlayShine) {
     createjs.Tween.removeTweens(connectivityOverlayShine);
@@ -2770,7 +2631,6 @@ function SAUIX_showConnectivityOverlay(options) {
 
   overlay.__onClose =
     typeof options.onClose === "function" ? options.onClose : null;
-  overlay.__kind = typeof options.kind === "string" ? options.kind : null;
 
   layoutConnectivityOverlay(stageRef);
 
@@ -2833,7 +2693,6 @@ function SAUIX_hideConnectivityOverlay(options) {
     connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
     connectivityOverlay.__active = false;
     connectivityOverlay.__onClose = null;
-    connectivityOverlay.__kind = null;
 
     if (connectivityOverlayClose) {
       createjs.Tween.removeTweens(connectivityOverlayClose);
@@ -2857,7 +2716,6 @@ function SAUIX_hideConnectivityOverlay(options) {
       connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
       connectivityOverlay.__active = false;
       connectivityOverlay.__onClose = null;
-      connectivityOverlay.__kind = null;
 
       if (connectivityOverlayClose) {
         connectivityOverlayClose.visible = false;
@@ -2879,67 +2737,6 @@ function SAUIX_refreshConnectivityOverlayLayout(stageRef) {
   }
 
   layoutConnectivityOverlay(stageRef || connectivityOverlay.__stage || null);
-}
-
-function SAUIX_showResultsLoadingOverlay(options) {
-  options = options || {};
-  var stageRef = options.stage;
-
-  if (!stageRef && typeof stage !== "undefined") {
-    stageRef = stage;
-  }
-
-  var lang =
-    typeof options.language === "string"
-      ? options.language
-      : typeof assetsPathLang === "string"
-      ? assetsPathLang
-      : "";
-
-  var copy =
-    typeof SAUIX_getConnectivityCopy === "function"
-      ? SAUIX_getConnectivityCopy("resultsLoading", lang)
-      : null;
-
-  var message =
-    typeof options.message === "string"
-      ? options.message
-      : copy
-      ? copy.title
-      : "Loading your results...";
-
-  var detail;
-  if (options.detail === null) {
-    detail = "";
-  } else if (typeof options.detail === "string") {
-    detail = options.detail;
-  } else if (copy && typeof copy.detail === "string") {
-    detail = copy.detail;
-  }
-
-  var showOptions = {
-    stage: stageRef,
-    message: message,
-    detail: detail,
-    iconType: "progress",
-    hideClose: options.hideClose === false ? false : true,
-    onClose: typeof options.onClose === "function" ? options.onClose : null,
-    kind: "resultsLoading",
-  };
-
-  return SAUIX_showConnectivityOverlay(showOptions);
-}
-
-function SAUIX_hideResultsLoadingOverlay(options) {
-  options = options || {};
-
-  if (
-    connectivityOverlay &&
-    connectivityOverlay.visible &&
-    connectivityOverlay.__kind === "resultsLoading"
-  ) {
-    SAUIX_hideConnectivityOverlay({ immediate: !!options.immediate });
-  }
 }
 
 
@@ -4695,56 +4492,39 @@ function ChoiceFX_addGlow(ch, on){
 }
 
 function ChoiceFX_pressRipple(parent, x, y){
-  var ripple = new createjs.Shape();
-  ripple.alpha = 0.25;
-  ripple.graphics.setStrokeStyle(6).beginStroke("#2EC4B6").drawCircle(0,0,1);
-  ripple.x = x;
-  ripple.y = y;
-  if (parent) {
-    parent.addChild(ripple);
-  }
-  createjs.Tween.get(ripple)
+  const r = new createjs.Shape();
+  r.alpha = 0.25;
+  r.graphics.setStrokeStyle(6).beginStroke("#2EC4B6").drawCircle(0,0,1);
+  r.x = x; r.y = y;
+  parent.addChild(r);
+  createjs.Tween.get(r)
     .to({ scaleX: 28, scaleY: 28, alpha: 0 }, 420, createjs.Ease.quadOut)
-    .call(function () {
-      if (ripple.parent) {
-        ripple.parent.removeChild(ripple);
-      }
-    });
+    .call(()=> parent.removeChild(r));
 }
 
 function ChoiceFX_randomConfetti(){
-  var colors = ["#FF9F1C","#2EC4B6","#E71D36","#FDFFFC","#7F5AF0"];
+  const colors = ["#FF9F1C","#2EC4B6","#E71D36","#FDFFFC","#7F5AF0"];
   return colors[(Math.random()*colors.length)|0];
 }
 
 function ChoiceFX_confettiBurst(container, x, y){
-  for (var i=0; i<16; i++){
-    var piece = new createjs.Shape();
-    var size = 6 + Math.random()*6;
-    piece.graphics.beginFill(ChoiceFX_randomConfetti()).drawRect(-size/2, -size/2, size, size);
-    piece.x = x;
-    piece.y = y;
-    piece.rotation = Math.random()*360;
-    if (container) {
-      container.addChild(piece);
-    }
-    (function(localPiece){
-      var dx = (-80 + Math.random()*160);
-      var dy = (-140 + Math.random()*100);
-      var travel = 500 + Math.random()*400;
-      createjs.Tween.get(localPiece)
-        .to({ x: x+dx, y: y+dy, alpha: 0, rotation: localPiece.rotation+360 }, travel, createjs.Ease.quadOut)
-        .call(function () {
-          if (localPiece.parent) {
-            localPiece.parent.removeChild(localPiece);
-          }
-        });
-    })(piece);
+  for (let i=0; i<16; i++){
+    const p = new createjs.Shape();
+    const sz = 6 + Math.random()*6;
+    p.graphics.beginFill(ChoiceFX_randomConfetti()).drawRect(-sz/2, -sz/2, sz, sz);
+    p.x = x; p.y = y; p.rotation = Math.random()*360;
+    container.addChild(p);
+    const dx = (-80 + Math.random()*160);
+    const dy = (-140 + Math.random()*100);
+    const tt = 500 + Math.random()*400;
+    createjs.Tween.get(p)
+      .to({ x: x+dx, y: y+dy, alpha: 0, rotation: p.rotation+360 }, tt, createjs.Ease.quadOut)
+      .call(()=> container.removeChild(p));
   }
 }
 
 function ChoiceFX_wrongShake(target){
-  var baseX = target.x;
+  const baseX = target.x;
   createjs.Tween.get(target)
     .to({ x: baseX - 10 }, 60)
     .to({ x: baseX + 10 }, 60)
@@ -4754,7 +4534,7 @@ function ChoiceFX_wrongShake(target){
 }
 
 function ChoiceFX_redFlash(obj){
-  var old = obj.alpha;
+  const old = obj.alpha;
   createjs.Tween.get(obj)
     .to({ alpha: 0.3 }, 70)
     .to({ alpha: old }, 120);
@@ -4765,7 +4545,7 @@ function ChoiceFX_drawFocusRing(target, on){
 
   if (on){
     if (!target._ring){
-      var ring = new createjs.Shape();
+      const ring = new createjs.Shape();
       ring.mouseEnabled = false;
       ring.mouseChildren = false;
       ring.graphics.setStrokeStyle(4)
@@ -4780,9 +4560,9 @@ function ChoiceFX_drawFocusRing(target, on){
       ring.regY = target.regY || 0;
 
       // Insert just below the target in the parent's display list
-      var parent = target.parent;
+      const parent = target.parent;
       if (parent){
-        var idx = parent.getChildIndex(target);
+        const idx = parent.getChildIndex(target);
         if (typeof parent.addChildAt === "function"){
           parent.addChildAt(ring, Math.max(0, idx));
         } else {
@@ -4796,56 +4576,46 @@ function ChoiceFX_drawFocusRing(target, on){
       target._ring.y = target.y;
     }
   } else if (target._ring){
-    var existingRing = target._ring;
-    if (existingRing.parent) {
-      existingRing.parent.removeChild(existingRing);
-    }
+    const r = target._ring;
+    if (r.parent) r.parent.removeChild(r);
     target._ring = null;
   }
 }
 
 function ChoiceFX_addGlowPulse(obj){
-  var offShadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
+  const offShadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
   obj.shadow = new createjs.Shadow("rgba(255,200,0,0.8)", 0, 0, 20);
-  createjs.Tween.get(obj)
-    .wait(100)
-    .call(function () {
-      obj.shadow = offShadow;
-    });
+  createjs.Tween.get(obj).wait(100).call(()=> obj.shadow = offShadow);
 }
 
 /* Entrance animation for a passed array of choices */
 function ChoiceFX_entrance(choiceArr, baseDelay){
   var startDelay = typeof baseDelay === "number" ? baseDelay : 1600;
-  for (var i = 0; i < choiceArr.length; i++) {
-    var ch = choiceArr[i];
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
     if(!ch) continue;
     if (typeof ch.scaleX === "undefined") continue;
     if (!ch.shadow) ch.shadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
     ch.scaleX = ch.scaleY = 0.55;
     ch.alpha = 0;
-    var baseY = ch.y || 620;
+    const baseY = ch.y || 620;
    // ch.y = baseY + 20;
 
-    (function (localChoice, localBaseY, localIndex) {
-      createjs.Tween.get(localChoice)
-        .wait(startDelay + localIndex * 120)
-        .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: localBaseY, rotation: 15 }, 320, createjs.Ease.quadOut)
-        .to({ rotation: 0 }, 240, createjs.Ease.quadOut)
-        .call(function () {
-          ChoiceFX_startIdleBob(localChoice);
-        });
-    })(ch, baseY, i);
+    createjs.Tween.get(ch)
+      .wait(startDelay + i*120)
+      .to({ alpha: 1, scaleX: 0.72, scaleY: 0.72, y: baseY, rotation: 15 }, 320, createjs.Ease.quadOut)
+      .to({ rotation: 0 }, 240, createjs.Ease.quadOut)
+      .call(()=> ChoiceFX_startIdleBob(ch));
   }
 }
 
 /* Hover/HitArea wiring */
 function ChoiceFX_bindHover(choiceArr){
-  for (var i = 0; i < choiceArr.length; i++) {
-    var ch = choiceArr[i];
+  for (let i = 0; i < choiceArr.length; i++) {
+    const ch = choiceArr[i];
     if(!ch) continue;
 
-    var hit = new createjs.Shape();
+    const hit = new createjs.Shape();
     hit.graphics.beginFill("#000").drawRoundRect(-70, -70, 140, 140, 20);
     ch.hitArea = hit;
 
@@ -4853,19 +4623,19 @@ function ChoiceFX_bindHover(choiceArr){
     ch.mouseEnabled = true;
 
     ch.addEventListener("mouseover", function(e){
-      var t = e.currentTarget;
+      const t = e.currentTarget;
       createjs.Tween.get(t, { override:true })
         .to({ scaleX: 0.78, scaleY: 0.78 }, 160, createjs.Ease.quadOut);
       ChoiceFX_addGlow(t, true);
       //ChoiceFX_drawFocusRing(t, true);
     });
     ch.addEventListener("mouseout", function(e){
-      var t = e.currentTarget;
+      const t = e.currentTarget;
       createjs.Tween.get(t, { override:true })
         .to({ scaleX: 0.72, scaleY: 0.72}, 160, createjs.Ease.quadIn);
       ChoiceFX_addGlow(t, false);
      //ChoiceFX_drawFocusRing(t, false);
-         //t.y = t.y +4;
+	 //t.y = t.y +4;
 	 ChoiceFX_startIdleBob(t);
     });
   }
@@ -4873,7 +4643,7 @@ function ChoiceFX_bindHover(choiceArr){
 
 /* Reveal pop animation helper */
 function ChoiceFX_revealPop(displayObj, style){
-  var qObj = displayObj;
+  const qObj = displayObj;
   if(!qObj) return;
   switch(style){
     case "spin":
@@ -4883,9 +4653,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, rotation: 0, scaleX: 1.3, scaleY: 1.3 }, 280, createjs.Ease.backOut)
         .to({ scaleX: 1, scaleY: 1 }, 120)
-        .call(function () {
-          ChoiceFX_addGlowPulse(qObj);
-        });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
       break;
     case "soft":
       qObj.alpha = 0.2;
@@ -4893,9 +4661,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, scaleX: 1.1, scaleY: 1.1 }, 200, createjs.Ease.sineOut)
         .to({ scaleX: 1, scaleY: 1 }, 180, createjs.Ease.sineInOut)
-        .call(function () {
-          ChoiceFX_addGlowPulse(qObj);
-        });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
       break;
     default: // "pop"
       qObj.scaleX = qObj.scaleY = 0;
@@ -4903,9 +4669,7 @@ function ChoiceFX_revealPop(displayObj, style){
       createjs.Tween.get(qObj)
         .to({ alpha: 1, scaleX: 1.4, scaleY: 1.4 }, 200, createjs.Ease.backOut)
         .to({ scaleX: 1, scaleY: 1 }, 150, createjs.Ease.quadOut)
-        .call(function () {
-          ChoiceFX_addGlowPulse(qObj);
-        });
+        .call(() => ChoiceFX_addGlowPulse(qObj));
   }
 }
 /* ===== End ChoiceFX Helpers ===== */
@@ -4916,49 +4680,28 @@ function ChoiceFX_revealPop(displayObj, style){
  * Keeps your original Text (QusTxtString) untouched; mirrors visibility/alpha.
  */
 function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
-  var cfg = {
-    padX: 24,
-    padY: 12,
+  const cfg = Object.assign({
+    padX: 24, padY: 12,
     fill: "rgba(0,0,0,0.55)",
-    stroke: "rgba(255,255,255,0.12)",
-    strokeW: 2,
-    maxRadius: 20,
-    addShadow: true,
-    autoTick: true
-  };
+    stroke: "rgba(255,255,255,0.12)", strokeW: 2,
+    maxRadius: 20, addShadow: true, autoTick: true
+  }, opts || {});
 
-  if (opts) {
-    for (var optKey in opts) {
-      if (Object.prototype.hasOwnProperty.call(opts, optKey)) {
-        cfg[optKey] = opts[optKey];
-      }
-    }
-  }
-
-  var bg = new createjs.Shape();
-  var idx = parent.getChildIndex(textObj);
+  const bg = new createjs.Shape();
+  const idx = parent.getChildIndex(textObj);
   parent.addChildAt(bg, Math.max(0, idx)); // directly under the text
 
   function measure() {
-    var b = textObj.getBounds();
-    if (!b) {
-      textObj.cache(0,0,1,1);
-      textObj.uncache();
-      b = textObj.getBounds();
-    }
+    let b = textObj.getBounds();
+    if (!b) { textObj.cache(0,0,1,1); textObj.uncache(); b = textObj.getBounds(); }
     return b;
   }
 
   function draw() {
-    var b = measure();
-    if (!b) {
-      return;
-    }
-    var w = b.width + cfg.padX * 2;
-    var h = b.height + cfg.padY * 2;
-    var r = Math.min(cfg.maxRadius, h/2);
-    var left = textObj.x - w/2;
-    var top = textObj.y - h/2;
+    const b = measure(); if (!b) return;
+    const w = b.width + cfg.padX * 2, h = b.height + cfg.padY * 2;
+    const r = Math.min(cfg.maxRadius, h/2);
+    const left = textObj.x - w/2, top = textObj.y - h/2;
 
     bg.graphics.clear()
       .setStrokeStyle(cfg.strokeW)
@@ -4974,16 +4717,10 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
 
   draw();
 
-  var tickH = null;
+  let tickH = null;
   if (cfg.autoTick) {
-    tickH = createjs.Ticker.on("tick", function () {
-      if (!bg.parent || !textObj.parent) {
-        if (tickH) {
-          createjs.Ticker.off("tick", tickH);
-        }
-        tickH = null;
-        return;
-      }
+    tickH = createjs.Ticker.on("tick", () => {
+      if (!bg.parent || !textObj.parent) { if (tickH) createjs.Ticker.off("tick", tickH); tickH = null; return; }
       bg.visible = textObj.visible;
       bg.alpha = textObj.alpha;
       draw();
@@ -4991,15 +4728,8 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
   }
 
   return {
-    bg: bg,
+    bg,
     refresh: draw,
-    destroy: function () {
-      if (tickH) {
-        createjs.Ticker.off("tick", tickH);
-      }
-      if (bg.parent) {
-        bg.parent.removeChild(bg);
-      }
-    }
+    destroy: () => { if (tickH) createjs.Ticker.off("tick", tickH); if (bg.parent) bg.parent.removeChild(bg); }
   };
 }
