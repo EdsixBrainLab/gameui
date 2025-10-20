@@ -2682,6 +2682,7 @@ function animateConnectivityOverlay() {
       connectivityIconProgressGlow.scaleX = connectivityIconProgressGlow.scaleY = 1;
     }
   }
+}
 
   if (connectivityOverlayShine) {
     createjs.Tween.removeTweens(connectivityOverlayShine);
