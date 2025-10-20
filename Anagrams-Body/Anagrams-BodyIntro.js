@@ -308,7 +308,7 @@ function commongameintro() {
     container.parent.addChild(introTitle);
     introTitle.visible = true;
 
-    call_UI_introQuestionCardContainer(container, "sink");
+    call_UI_introQuestionCardContainer(container, "SINK");
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
