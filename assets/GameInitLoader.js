@@ -7233,52 +7233,63 @@ function internetErrorFn() {
     setFinishedTxt.visible = true;
     container4.parent.addChild(setFinishedTxt);
 
-    if (intChkVar == 0) {
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "...لا يوجد اتصال بالإنترنت. حاول مرة اخرى";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "No Internet Connection. Please try again...";
-        } else {
-            setFinishedTxt.text = "No Internet Connection. Please try again...";
+    var langKey = typeof assetsPathLang === "string" ? assetsPathLang : "";
+    var copyType = "offline";
 
-        }
-    }
     if (intChkVar == 1) {
-        // setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "                          તમે દરેક કોયડા ઉકેલી લીધા છે.                           પરિણામ જાણવા ઉપર દર્શાવેલ close પર ક્લિક કરો...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "                           ...لقد أكملت جميع الألغاز                           انقر على إغلاق في الأعلى لرؤية النتائج";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        } else {
-            setFinishedTxt.text = "                          You have completed all the puzzles.                           Click close at top to see the results...";
-        }
-        if (container1.parent) {
-            container1.parent.removeAllChildren();
-        }
-
+        copyType = "completeAll";
     } else if (intChkVar == 2) {
-        // setFinishedTxt.text = "You have completed this puzzle...";
-        if (assetsPathLang == "assets/GujaratiAssets/") {
-            setFinishedTxt.text = "તમે આ કોયડો ઉકેલી લીધો છે...";
-        } else if (assetsPathLang == "assets/ArabicAssets/") {
-            setFinishedTxt.text = "...لقد أكملت هذا اللغز";
-        } else if (assetsPathLang == "assets/TamilAssets/") {
-            setFinishedTxt.text = "You have completed this puzzle...";
-        } else {
-            setFinishedTxt.text = "You have completed this puzzle...";
-        }
+        copyType = "completeOne";
+    }
 
+    var overlayCopy = null;
+    if (typeof SAUIX_getConnectivityCopy === "function") {
+        overlayCopy = SAUIX_getConnectivityCopy(copyType, langKey);
+    }
+
+    if (overlayCopy && overlayCopy.title) {
+        setFinishedTxt.text = overlayCopy.title;
+    } else {
+        if (intChkVar == 0) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "...لا يوجد اتصال بالإنترنت. حاول مرة اخرى";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "No Internet Connection. Please try again...";
+            } else {
+                setFinishedTxt.text = "No Internet Connection. Please try again...";
+
+            }
+        }
+        if (intChkVar == 1) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "તમે દરેક કોયડા ઉકેલી લીધા છે. પરિણામ જાણવા ઉપર દર્શાવેલ close પર ક્લિક કરો...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "لقد أكملت جميع الألغاز. انقر على إغلاق في الأعلى لرؤية النتائج...";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "You have completed all the puzzles. Click close at top to see the results...";
+            } else {
+                setFinishedTxt.text = "You have completed all the puzzles. Click close at top to see the results...";
+            }
+        } else if (intChkVar == 2) {
+            if (assetsPathLang == "assets/GujaratiAssets/") {
+                setFinishedTxt.text = "તમે આ કોયડો ઉકેલી લીધો છે...";
+            } else if (assetsPathLang == "assets/ArabicAssets/") {
+                setFinishedTxt.text = "لقد أكملت هذا اللغز...";
+            } else if (assetsPathLang == "assets/TamilAssets/") {
+                setFinishedTxt.text = "You have completed this puzzle...";
+            } else {
+                setFinishedTxt.text = "You have completed this puzzle...";
+            }
+        }
+    }
+
+    if (intChkVar == 1 || intChkVar == 2) {
         if (container1.parent) {
             container1.parent.removeAllChildren();
         }
     }
-
-
-
 
     if (setFinishedTxt.text.length <= 35) {
         setFinishedTxt.y = 407;
@@ -7288,6 +7299,17 @@ function internetErrorFn() {
     } else {
         setFinishedTxt.font = "bold 40px 'Baloo 2'"
         setFinishedTxt.y = 377;
+    }
+
+    var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
+    if (shouldUseOverlay) {
+        SAUIX_showConnectivityOverlay({
+            stage: stage,
+            message: overlayCopy.title,
+            detail: overlayCopy.detail,
+            iconType: overlayCopy.iconType,
+        });
+        setFinishedTxt.visible = false;
     }
     intChkVar = -1
 

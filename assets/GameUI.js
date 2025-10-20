@@ -1743,6 +1743,696 @@ function hideGameplayTimeUpBanner(force) {
     });
 }
 
+var connectivityOverlay,
+  connectivityOverlayBackdrop,
+  connectivityOverlayCard,
+  connectivityOverlayPanel,
+  connectivityOverlayGlass,
+  connectivityOverlayOutline,
+  connectivityOverlayShine,
+  connectivityOverlayAccent,
+  connectivityOverlayTitle,
+  connectivityOverlayDetail,
+  connectivityIconWrapper,
+  connectivityIconPulse,
+  connectivityIconOffline,
+  connectivityIconOfflineSlash,
+  connectivityIconSuccess,
+  connectivityIconInfo;
+
+var SAUIX_CONNECTIVITY_COPY = {
+  default: {
+    offlineTitle: "No Internet Connection. Please try again...",
+    offlineDetail: "We'll retry automatically in a moment.",
+    completeAllTitle: "You have completed all the puzzles.",
+    completeAllDetail: "Tap Close at the top to see the results.",
+    completeOneTitle: "You have completed this puzzle...",
+    completeOneDetail: "Tap Close at the top to continue.",
+    genericTitle: "Hold on a moment...",
+    genericDetail: "We're preparing the next activity for you.",
+  },
+  "assets/GujaratiAssets/": {
+    offlineTitle: "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...",
+    completeAllTitle:
+      "તમે દરેક કોયડા ઉકેલી લીધા છે. પરિણામ જાણવા ઉપર દર્શાવેલ close પર ક્લિક કરો...",
+    completeOneTitle: "તમે આ કોયડો ઉકેલી લીધો છે...",
+  },
+  "assets/ArabicAssets/": {
+    offlineTitle: "لا يوجد اتصال بالإنترنت. حاول مرة اخرى...",
+    completeAllTitle:
+      "لقد أكملت جميع الألغاز. انقر على إغلاق في الأعلى لرؤية النتائج...",
+    completeOneTitle: "لقد أكملت هذا اللغز...",
+  },
+  "assets/TamilAssets/": {
+    offlineTitle: "No Internet Connection. Please try again...",
+  },
+};
+
+function SAUIX_getConnectivityCopy(kind, lang) {
+  var pack = SAUIX_CONNECTIVITY_COPY[lang] || SAUIX_CONNECTIVITY_COPY.default;
+  var fallback = SAUIX_CONNECTIVITY_COPY.default;
+  var keyTitle = "genericTitle";
+  var keyDetail = "genericDetail";
+  var iconType = "info";
+
+  if (kind === "offline") {
+    keyTitle = "offlineTitle";
+    keyDetail = "offlineDetail";
+    iconType = "offline";
+  } else if (kind === "completeAll") {
+    keyTitle = "completeAllTitle";
+    keyDetail = "completeAllDetail";
+    iconType = "success";
+  } else if (kind === "completeOne") {
+    keyTitle = "completeOneTitle";
+    keyDetail = "completeOneDetail";
+    iconType = "success";
+  }
+
+  var title = pack[keyTitle];
+  if (!title || title === "") {
+    title = fallback[keyTitle] || fallback.genericTitle;
+  }
+
+  var detail = pack[keyDetail];
+  if (typeof detail !== "string") {
+    detail = fallback[keyDetail] || "";
+  }
+
+  title = typeof title === "string" ? title.trim() : "";
+  detail = typeof detail === "string" ? detail.trim() : "";
+
+  return {
+    title: title,
+    detail: detail,
+    iconType: iconType,
+    language: lang,
+  };
+}
+
+function ensureConnectivityOverlay(stageRef) {
+  if (connectivityOverlay) {
+    return connectivityOverlay;
+  }
+
+  connectivityOverlay = new createjs.Container();
+  connectivityOverlay.mouseEnabled = false;
+  connectivityOverlay.mouseChildren = false;
+  connectivityOverlay.visible = false;
+  connectivityOverlay.alpha = 0;
+  connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
+
+  connectivityOverlayBackdrop = new createjs.Shape();
+  connectivityOverlayBackdrop.alpha = 0.75;
+  connectivityOverlay.addChild(connectivityOverlayBackdrop);
+
+  connectivityOverlayCard = new createjs.Container();
+  connectivityOverlayCard.mouseEnabled = false;
+  connectivityOverlayCard.mouseChildren = false;
+  connectivityOverlay.addChild(connectivityOverlayCard);
+
+  connectivityOverlayPanel = new createjs.Shape();
+  connectivityOverlayPanel.shadow = new createjs.Shadow(
+    "rgba(12,8,40,0.55)",
+    0,
+    22,
+    48
+  );
+  connectivityOverlayCard.addChild(connectivityOverlayPanel);
+
+  connectivityOverlayGlass = new createjs.Shape();
+  connectivityOverlayGlass.alpha = 0.88;
+  connectivityOverlayCard.addChild(connectivityOverlayGlass);
+
+  connectivityOverlayOutline = new createjs.Shape();
+  connectivityOverlayOutline.alpha = 0.7;
+  connectivityOverlayCard.addChild(connectivityOverlayOutline);
+
+  connectivityOverlayShine = new createjs.Shape();
+  connectivityOverlayShine.alpha = 0;
+  connectivityOverlayShine.compositeOperation = "lighter";
+  connectivityOverlayCard.addChild(connectivityOverlayShine);
+
+  connectivityOverlayAccent = new createjs.Shape();
+  connectivityOverlayCard.addChild(connectivityOverlayAccent);
+
+  connectivityIconWrapper = new createjs.Container();
+  connectivityIconWrapper.x = -176;
+  connectivityIconWrapper.y = 0;
+  connectivityIconWrapper.mouseEnabled = false;
+  connectivityIconWrapper.mouseChildren = false;
+  connectivityOverlayCard.addChild(connectivityIconWrapper);
+
+  var iconBackdrop = new createjs.Shape();
+  iconBackdrop.graphics
+    .beginRadialGradientFill(
+      ["rgba(148,124,255,0.65)", "rgba(62,38,150,0)", "rgba(62,38,150,0)"],
+      [0, 0.6, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      104
+    )
+    .drawCircle(0, 4, 96);
+  iconBackdrop.alpha = 0.65;
+  iconBackdrop.compositeOperation = "lighter";
+  connectivityIconWrapper.addChild(iconBackdrop);
+
+  connectivityIconPulse = new createjs.Shape();
+  connectivityIconPulse.graphics
+    .setStrokeStyle(8)
+    .beginStroke("rgba(255,255,255,0.28)")
+    .drawCircle(0, 4, 66);
+  connectivityIconPulse.alpha = 0.4;
+  connectivityIconPulse.scaleX = connectivityIconPulse.scaleY = 0.9;
+  connectivityIconWrapper.addChild(connectivityIconPulse);
+
+  connectivityIconOffline = new createjs.Container();
+  var wifiPlate = new createjs.Shape();
+  wifiPlate.graphics
+    .beginRadialGradientFill(
+      ["#6E4BFF", "#32108E"],
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      60
+    )
+    .drawCircle(0, 0, 58);
+  wifiPlate.shadow = new createjs.Shadow("rgba(14,10,44,0.65)", 0, 12, 26);
+  connectivityIconOffline.addChild(wifiPlate);
+
+  var wifiArcOuter = new createjs.Shape();
+  wifiArcOuter.graphics
+    .setStrokeStyle(7, "round")
+    .beginStroke("rgba(248,242,255,0.92)")
+    .arc(0, 10, 28, Math.PI * 1.05, Math.PI * 1.95, false);
+  connectivityIconOffline.addChild(wifiArcOuter);
+
+  var wifiArcMiddle = new createjs.Shape();
+  wifiArcMiddle.graphics
+    .setStrokeStyle(7, "round")
+    .beginStroke("rgba(255,255,255,0.86)")
+    .arc(0, 12, 18, Math.PI * 1.08, Math.PI * 1.92, false);
+  connectivityIconOffline.addChild(wifiArcMiddle);
+
+  var wifiArcInner = new createjs.Shape();
+  wifiArcInner.graphics
+    .setStrokeStyle(7, "round")
+    .beginStroke("rgba(255,255,255,0.78)")
+    .arc(0, 14, 9, Math.PI * 1.1, Math.PI * 1.9, false);
+  connectivityIconOffline.addChild(wifiArcInner);
+
+  var wifiDot = new createjs.Shape();
+  wifiDot.graphics.beginFill("#FFFFFF").drawCircle(0, 22, 7);
+  connectivityIconOffline.addChild(wifiDot);
+
+  connectivityIconOfflineSlash = new createjs.Shape();
+  connectivityIconOfflineSlash.graphics
+    .setStrokeStyle(9, "round")
+    .beginStroke("#FF8CB7")
+    .moveTo(-30, -32)
+    .lineTo(32, 26);
+  connectivityIconOfflineSlash.shadow = new createjs.Shadow(
+    "rgba(120,18,70,0.45)",
+    0,
+    6,
+    16
+  );
+  connectivityIconOffline.addChild(connectivityIconOfflineSlash);
+
+  connectivityIconWrapper.addChild(connectivityIconOffline);
+
+  connectivityIconSuccess = new createjs.Container();
+  var successPlate = new createjs.Shape();
+  successPlate.graphics
+    .beginRadialGradientFill(
+      ["#4CE9C3", "#0A7C68"],
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      58
+    )
+    .drawCircle(0, 0, 58);
+  successPlate.shadow = new createjs.Shadow("rgba(6,40,32,0.55)", 0, 12, 24);
+  connectivityIconSuccess.addChild(successPlate);
+
+  var successRing = new createjs.Shape();
+  successRing.graphics
+    .setStrokeStyle(5)
+    .beginLinearGradientStroke(
+      ["rgba(255,255,255,0.76)", "rgba(220,255,244,0.32)"],
+      [0, 1],
+      -30,
+      -30,
+      30,
+      30
+    )
+    .drawCircle(0, 0, 50);
+  connectivityIconSuccess.addChild(successRing);
+
+  var successCheck = new createjs.Shape();
+  successCheck.graphics
+    .setStrokeStyle(10, "round")
+    .beginStroke("#F3FFFA")
+    .moveTo(-24, 6)
+    .lineTo(-4, 26)
+    .lineTo(30, -18);
+  connectivityIconSuccess.addChild(successCheck);
+
+  connectivityIconWrapper.addChild(connectivityIconSuccess);
+
+  connectivityIconInfo = new createjs.Container();
+  var infoPlate = new createjs.Shape();
+  infoPlate.graphics
+    .beginRadialGradientFill(
+      ["#7A6BFF", "#241856"],
+      [0, 1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      58
+    )
+    .drawCircle(0, 0, 58);
+  infoPlate.shadow = new createjs.Shadow("rgba(8,14,40,0.52)", 0, 12, 24);
+  connectivityIconInfo.addChild(infoPlate);
+
+  var infoGlyph = new createjs.Shape();
+  infoGlyph.graphics
+    .beginFill("#F4F7FF")
+    .drawRoundRect(-4, -18, 8, 32, 4)
+    .drawCircle(0, -32, 6);
+  connectivityIconInfo.addChild(infoGlyph);
+
+  connectivityIconWrapper.addChild(connectivityIconInfo);
+
+  connectivityOverlayTitle = new createjs.Text(
+    "",
+    "800 46px 'Baloo 2'",
+    "#FEF9FF"
+  );
+  connectivityOverlayTitle.textAlign = "left";
+  connectivityOverlayTitle.textBaseline = "middle";
+  connectivityOverlayTitle.lineWidth = 420;
+  connectivityOverlayTitle.lineHeight = 56;
+  connectivityOverlayTitle.x = 40;
+  connectivityOverlayTitle.y = -24;
+  connectivityOverlayTitle.shadow = new createjs.Shadow(
+    "rgba(10,12,32,0.55)",
+    0,
+    10,
+    24
+  );
+  connectivityOverlayCard.addChild(connectivityOverlayTitle);
+
+  connectivityOverlayDetail = new createjs.Text(
+    "",
+    "400 26px 'Baloo 2'",
+    "rgba(235,240,255,0.85)"
+  );
+  connectivityOverlayDetail.textAlign = "left";
+  connectivityOverlayDetail.textBaseline = "middle";
+  connectivityOverlayDetail.lineWidth = 420;
+  connectivityOverlayDetail.lineHeight = 36;
+  connectivityOverlayDetail.x = 40;
+  connectivityOverlayDetail.y = 48;
+  connectivityOverlayDetail.shadow = new createjs.Shadow(
+    "rgba(6,10,28,0.4)",
+    0,
+    6,
+    18
+  );
+  connectivityOverlayCard.addChild(connectivityOverlayDetail);
+
+  return connectivityOverlay;
+}
+
+function layoutConnectivityOverlay(stageRef) {
+  if (!connectivityOverlay) {
+    return;
+  }
+
+  var stageForLayout = stageRef;
+
+  if (!stageForLayout) {
+    if (typeof stage !== "undefined" && stage && stage.canvas) {
+      stageForLayout = stage;
+    } else {
+      stageForLayout = connectivityOverlay.__stage || null;
+    }
+  }
+
+  if (!stageForLayout || !stageForLayout.canvas) {
+    return;
+  }
+
+  var width = stageForLayout.canvas.width || 1280;
+  var height = stageForLayout.canvas.height || 720;
+
+  if (typeof getLogicalCanvasWidth === "function") {
+    try {
+      width = getLogicalCanvasWidth();
+    } catch (err) {}
+  }
+
+  if (typeof getLogicalCanvasHeight === "function") {
+    try {
+      height = getLogicalCanvasHeight();
+    } catch (err) {}
+  }
+
+  var centerX = width / 2;
+  var centerY = height / 2;
+
+  connectivityOverlay.x = centerX;
+  connectivityOverlay.y = centerY;
+  connectivityOverlay.__stage = stageForLayout;
+
+  if (connectivityOverlayBackdrop) {
+    connectivityOverlayBackdrop.graphics
+      .clear()
+      .beginFill("rgba(8,6,24,0.68)")
+      .drawRect(-centerX, -centerY, width, height);
+  }
+
+  var baseWidth = 620;
+  var baseHeight = 240;
+  var radius = 48;
+
+  var scaleX = width / 1280;
+  var scaleY = height / 720;
+  var scale = Math.max(Math.min(Math.min(scaleX, scaleY) * 1.08, 1.25), 0.76);
+
+  if (connectivityOverlayCard) {
+    connectivityOverlayCard.scaleX = connectivityOverlayCard.scaleY = scale;
+    connectivityOverlayCard.y = 0;
+  }
+
+  if (connectivityOverlayPanel) {
+    connectivityOverlayPanel.graphics
+      .clear()
+      .beginLinearGradientFill(
+        ["#28175A", "#5A2EDC", "#8E46FF"],
+        [0, 0.5, 1],
+        0,
+        -baseHeight / 2,
+        0,
+        baseHeight / 2
+      )
+      .drawRoundRect(
+        -baseWidth / 2,
+        -baseHeight / 2,
+        baseWidth,
+        baseHeight,
+        radius
+      );
+  }
+
+  if (connectivityOverlayGlass) {
+    connectivityOverlayGlass.graphics
+      .clear()
+      .beginLinearGradientFill(
+        ["rgba(255,255,255,0.36)", "rgba(255,255,255,0.12)", "rgba(255,255,255,0)"] ,
+        [0, 0.48, 1],
+        0,
+        -baseHeight / 2,
+        0,
+        baseHeight / 2
+      )
+      .drawRoundRect(
+        -baseWidth / 2 + 18,
+        -baseHeight / 2 + 18,
+        baseWidth - 36,
+        baseHeight - 36,
+        radius - 16
+      );
+  }
+
+  if (connectivityOverlayOutline) {
+    connectivityOverlayOutline.graphics
+      .clear()
+      .setStrokeStyle(3)
+      .beginLinearGradientStroke(
+        ["rgba(196,188,255,0.7)", "rgba(136,104,255,0.58)"],
+        [0, 1],
+        0,
+        -baseHeight / 2 + 6,
+        0,
+        baseHeight / 2 - 6
+      )
+      .drawRoundRect(
+        -baseWidth / 2 + 8,
+        -baseHeight / 2 + 8,
+        baseWidth - 16,
+        baseHeight - 16,
+        radius - 12
+      );
+  }
+
+  if (connectivityOverlayShine) {
+    connectivityOverlayShine.graphics
+      .clear()
+      .beginLinearGradientFill(
+        ["rgba(255,255,255,0)", "rgba(255,255,255,0.8)", "rgba(255,255,255,0)"],
+        [0, 0.5, 1],
+        -160,
+        0,
+        160,
+        0
+      )
+      .drawRoundRect(-160, -baseHeight / 2 + 20, 320, baseHeight - 40, radius - 20);
+    connectivityOverlayShine.x = -baseWidth / 2;
+  }
+
+  if (connectivityOverlayAccent) {
+    connectivityOverlayAccent.graphics
+      .clear()
+      .beginLinearGradientFill(
+        ["rgba(255,162,226,0.85)", "rgba(104,214,255,0.65)", "rgba(162,132,255,0.9)"],
+        [0, 0.5, 1],
+        -140,
+        0,
+        140,
+        0
+      )
+      .drawRoundRect(-140, -baseHeight / 2 + 30, 280, 10, 5);
+  }
+
+  if (connectivityOverlay) {
+    setConnectivityIcon(connectivityOverlay.__iconType || "offline");
+  }
+}
+
+function setConnectivityIcon(type) {
+  if (!connectivityIconWrapper) {
+    return;
+  }
+
+  var iconType = type || "offline";
+
+  if (connectivityOverlay) {
+    connectivityOverlay.__iconType = iconType;
+  }
+
+  if (connectivityIconOffline) {
+    connectivityIconOffline.visible = iconType === "offline";
+  }
+
+  if (connectivityIconSuccess) {
+    connectivityIconSuccess.visible = iconType === "success";
+  }
+
+  if (connectivityIconInfo) {
+    connectivityIconInfo.visible = iconType === "info";
+  }
+
+  if (connectivityOverlayAccent) {
+    var accent = "#FF8CB7";
+    if (iconType === "success") {
+      accent = "#5CEFC8";
+    } else if (iconType === "info") {
+      accent = "#90A6FF";
+    }
+
+    connectivityOverlayAccent.graphics
+      .clear()
+      .beginLinearGradientFill(
+        [accent, "rgba(255,255,255,0.6)", accent],
+        [0, 0.5, 1],
+        -140,
+        0,
+        140,
+        0
+      )
+      .drawRoundRect(-140, -90, 280, 10, 5);
+  }
+}
+
+function animateConnectivityOverlay() {
+  if (!connectivityOverlay) {
+    return;
+  }
+
+  createjs.Tween.removeTweens(connectivityOverlay);
+  createjs.Tween.get(connectivityOverlay, { override: true })
+    .set({ alpha: 0, scaleX: 0.92, scaleY: 0.92 })
+    .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 420, createjs.Ease.quadOut);
+
+  if (connectivityOverlayCard) {
+    createjs.Tween.removeTweens(connectivityOverlayCard);
+    connectivityOverlayCard.y = 0;
+    createjs.Tween.get(connectivityOverlayCard, { loop: true })
+      .to({ y: -6 }, 1400, createjs.Ease.sineInOut)
+      .to({ y: 0 }, 1400, createjs.Ease.sineInOut);
+  }
+
+  if (connectivityIconPulse) {
+    createjs.Tween.removeTweens(connectivityIconPulse);
+    connectivityIconPulse.alpha = 0.45;
+    connectivityIconPulse.scaleX = connectivityIconPulse.scaleY = 0.9;
+    createjs.Tween.get(connectivityIconPulse, { loop: true })
+      .to({ alpha: 0, scaleX: 1.4, scaleY: 1.4 }, 1600, createjs.Ease.quadOut)
+      .set({ alpha: 0.45, scaleX: 0.9, scaleY: 0.9 })
+      .wait(400);
+  }
+
+  if (connectivityIconWrapper) {
+    createjs.Tween.removeTweens(connectivityIconWrapper);
+    connectivityIconWrapper.y = 0;
+    createjs.Tween.get(connectivityIconWrapper, { loop: true })
+      .to({ y: -6 }, 1200, createjs.Ease.sineInOut)
+      .to({ y: 0 }, 1200, createjs.Ease.sineInOut);
+  }
+
+  if (connectivityOverlayShine) {
+    createjs.Tween.removeTweens(connectivityOverlayShine);
+    connectivityOverlayShine.alpha = 0;
+    connectivityOverlayShine.x = -320;
+    createjs.Tween.get(connectivityOverlayShine, { loop: true })
+      .wait(260)
+      .to({ alpha: 0.7, x: 320 }, 960, createjs.Ease.quadOut)
+      .to({ alpha: 0 }, 520, createjs.Ease.quadIn)
+      .wait(1600)
+      .set({ x: -320 });
+  }
+}
+
+function SAUIX_showConnectivityOverlay(options) {
+  options = options || {};
+  var stageRef = options.stage;
+
+  if (!stageRef && typeof stage !== "undefined") {
+    stageRef = stage;
+  }
+
+  if (!stageRef) {
+    return null;
+  }
+
+  var overlay = ensureConnectivityOverlay(stageRef);
+  if (!overlay) {
+    return null;
+  }
+
+  if (overlay.parent !== stageRef) {
+    stageRef.addChild(overlay);
+  }
+
+  stageRef.setChildIndex(overlay, stageRef.numChildren - 1);
+
+  layoutConnectivityOverlay(stageRef);
+
+  if (typeof options.message === "string") {
+    connectivityOverlayTitle.text = options.message;
+  }
+
+  if (typeof options.detail === "string" && options.detail.length > 0) {
+    connectivityOverlayDetail.text = options.detail;
+    connectivityOverlayDetail.visible = true;
+  } else {
+    connectivityOverlayDetail.visible = false;
+  }
+
+  setConnectivityIcon(options.iconType);
+
+  overlay.visible = true;
+  animateConnectivityOverlay();
+
+  if (stageRef.update) {
+    try {
+      stageRef.update();
+    } catch (err) {}
+  }
+
+  overlay.__active = true;
+  overlay.__stage = stageRef;
+
+  return overlay;
+}
+
+function SAUIX_hideConnectivityOverlay(options) {
+  options = options || {};
+
+  if (!connectivityOverlay) {
+    return;
+  }
+
+  var immediate = !!options.immediate;
+  createjs.Tween.removeTweens(connectivityOverlay);
+
+  if (connectivityOverlayCard) {
+    createjs.Tween.removeTweens(connectivityOverlayCard);
+    connectivityOverlayCard.y = 0;
+  }
+
+  if (connectivityIconPulse) {
+    createjs.Tween.removeTweens(connectivityIconPulse);
+  }
+
+  if (connectivityIconWrapper) {
+    createjs.Tween.removeTweens(connectivityIconWrapper);
+    connectivityIconWrapper.y = 0;
+  }
+
+  if (connectivityOverlayShine) {
+    createjs.Tween.removeTweens(connectivityOverlayShine);
+    connectivityOverlayShine.alpha = 0;
+  }
+
+  if (immediate) {
+    connectivityOverlay.visible = false;
+    connectivityOverlay.alpha = 0;
+    connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
+    connectivityOverlay.__active = false;
+    return;
+  }
+
+  createjs.Tween.get(connectivityOverlay, { override: true })
+    .to({ alpha: 0, scaleX: 0.97, scaleY: 0.97 }, 220, createjs.Ease.quadIn)
+    .call(function () {
+      connectivityOverlay.visible = false;
+      connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
+      connectivityOverlay.__active = false;
+    });
+}
+
+function SAUIX_refreshConnectivityOverlayLayout(stageRef) {
+  if (!connectivityOverlay || !connectivityOverlay.visible) {
+    return;
+  }
+
+  layoutConnectivityOverlay(stageRef || connectivityOverlay.__stage || null);
+}
+
 
 
 function renderQuestionCardBackground() {
