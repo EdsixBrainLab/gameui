@@ -41,20 +41,7 @@ var cycleRaceTextOptionPalette = {
   wrongFill: ["rgba(255,178,178,0.98)", "rgba(214,92,110,0.96)"],
   wrongStroke: ["rgba(255,214,214,0.94)", "rgba(182,68,88,0.9)"],
   highlight: ["rgba(255,255,255,0.56)", "rgba(255,255,255,0.05)"],
-  badge: {
-    base: ["rgba(36,58,104,0.96)", "rgba(22,37,74,0.96)"],
-    correct: ["rgba(56,170,132,0.96)", "rgba(28,110,92,0.96)"],
-    wrong: ["rgba(220,96,122,0.96)", "rgba(166,38,72,0.96)"],
-    pole: "#F4F7FF",
-    poleShadow: "rgba(18,38,84,0.28)",
-    flagEdge: "#0f244d",
-    flagHighlight: "rgba(255,255,255,0.55)",
-    flag: {
-      base: ["#FFE082", "#FF9F3C"],
-      correct: ["#8EF2CE", "#35B889"],
-      wrong: ["#FF98AF", "#D65074"]
-    }
-  }
+  sheen: ["rgba(255,255,255,0.8)", "rgba(255,255,255,0)"]
 };
 
 var cycleRaceImageOptionPalette = {
@@ -67,20 +54,7 @@ var cycleRaceImageOptionPalette = {
   wrongFill: ["rgba(255,170,170,0.98)", "rgba(214,82,106,0.96)"],
   wrongStroke: ["rgba(255,212,212,0.94)", "rgba(184,62,86,0.9)"],
   highlight: ["rgba(255,255,255,0.5)", "rgba(255,255,255,0.08)"],
-  badge: {
-    base: ["rgba(36,58,104,0.96)", "rgba(22,37,74,0.96)"],
-    correct: ["rgba(56,170,132,0.96)", "rgba(28,110,92,0.96)"],
-    wrong: ["rgba(220,96,122,0.96)", "rgba(166,38,72,0.96)"],
-    pole: "#F4F7FF",
-    poleShadow: "rgba(18,38,84,0.28)",
-    flagEdge: "#0f244d",
-    flagHighlight: "rgba(255,255,255,0.55)",
-    flag: {
-      base: ["#FFE082", "#FF9F3C"],
-      correct: ["#8EF2CE", "#35B889"],
-      wrong: ["#FF98AF", "#D65074"]
-    }
-  }
+  sheen: ["rgba(255,255,255,0.82)", "rgba(255,255,255,0)"]
 };
 
 function computeCenteredRowLayout(count, options) {
@@ -5155,36 +5129,24 @@ function SAUI_createCycleRaceOptionBubble(options) {
     radius: options.radius
   };
   wrapper.__palette = variant === "image" ? cycleRaceImageOptionPalette : cycleRaceTextOptionPalette;
-  wrapper.__badgePalette = wrapper.__palette.badge;
 
   var shadow = new createjs.Shape();
   var pulse = new createjs.Shape();
   var background = new createjs.Shape();
   var highlight = new createjs.Shape();
+  var sheen = new createjs.Shape();
   var content = new createjs.Container();
-  var badgeBg = new createjs.Shape();
-  var badgeContainer = new createjs.Container();
-  badgeContainer.mouseEnabled = false;
-  var badgePole = new createjs.Shape();
-  var badgeFlag = new createjs.Shape();
-  var badgeHighlight = new createjs.Shape();
-  badgeContainer.addChild(badgePole, badgeFlag, badgeHighlight);
   var hitArea = new createjs.Shape();
 
-  wrapper.addChild(shadow, pulse, background, highlight, content, badgeBg, badgeContainer);
+  wrapper.addChild(shadow, pulse, background, highlight, sheen, content);
 
   wrapper.__shadow = shadow;
   wrapper.__pulse = pulse;
   wrapper.__background = background;
   wrapper.__highlight = highlight;
+  wrapper.__sheen = sheen;
   wrapper.__content = content;
-  wrapper.__badgeBg = badgeBg;
-  wrapper.__badgeContainer = badgeContainer;
-  wrapper.__badgePole = badgePole;
-  wrapper.__badgeFlag = badgeFlag;
-  wrapper.__badgeHighlight = badgeHighlight;
   wrapper.__hitArea = hitArea;
-  wrapper.__badgeRadius = variant === "image" ? 26 : 24;
   wrapper.__pulse.__baseScale = variant === "image" ? 1.1 : 1.08;
   wrapper.__pulse.alpha = 0;
   wrapper.__wrapper = wrapper;
@@ -5199,9 +5161,10 @@ function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
     return;
   }
 
-  wrapper.__options = wrapper.__options || {};
   overrideOptions = overrideOptions || {};
+
   var variant = wrapper.__variant || "text";
+  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
 
   var width =
     overrideOptions.width != null ? overrideOptions.width : wrapper.__options.width;
@@ -5214,17 +5177,11 @@ function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
   var radius =
     overrideOptions.radius != null ? overrideOptions.radius : wrapper.__options.radius;
 
-  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
-
   var shadow = wrapper.__shadow;
   var pulse = wrapper.__pulse;
   var background = wrapper.__background;
   var highlight = wrapper.__highlight;
-  var badgeBg = wrapper.__badgeBg;
-  var badgeContainer = wrapper.__badgeContainer;
-  var badgePole = wrapper.__badgePole;
-  var badgeFlag = wrapper.__badgeFlag;
-  var badgeHighlight = wrapper.__badgeHighlight;
+  var sheen = wrapper.__sheen;
   var content = wrapper.__content;
   var hitArea = wrapper.__hitArea;
 
@@ -5277,16 +5234,28 @@ function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
       content.y = 0;
     }
 
-    if (badgeBg) {
-      badgeBg.x = 0;
-      badgeBg.y = -circleRadius - wrapper.__badgeRadius + 10;
-    }
-    if (badgeContainer) {
-      badgeContainer.x = badgeBg ? badgeBg.x : 0;
-      badgeContainer.y = badgeBg ? badgeBg.y : -circleRadius - wrapper.__badgeRadius + 10;
-      badgeContainer.regX = 0;
-      badgeContainer.regY = 0;
-      badgeContainer.rotation = 0;
+    if (sheen) {
+      sheen.graphics
+        .clear()
+        .beginLinearGradientFill(
+          palette.sheen || ["rgba(255,255,255,0.85)", "rgba(255,255,255,0)"] ,
+          [0, 1],
+          -circleRadius,
+          0,
+          circleRadius,
+          0
+        )
+        .moveTo(-circleRadius * 0.6, -circleRadius)
+        .lineTo(circleRadius * 0.1, -circleRadius)
+        .lineTo(circleRadius * 0.8, circleRadius)
+        .lineTo(-circleRadius * 0.4, circleRadius)
+        .closePath();
+      sheen.alpha = 0;
+      sheen.x = -circleRadius;
+      sheen.y = 0;
+      wrapper.__sheenSpan = circleRadius * 2;
+      wrapper.__sheenBaseX = sheen.x;
+      wrapper.__sheenBaseY = sheen.y;
     }
   } else {
     var rectWidth = width != null ? width : 324;
@@ -5341,38 +5310,35 @@ function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
       content.y = 0;
     }
 
-    if (badgeBg) {
-      badgeBg.x = -rectWidth / 2 + wrapper.__badgeRadius + 14;
-      badgeBg.y = -rectHeight / 2 - wrapper.__badgeRadius + 6;
+    if (sheen) {
+      var sheenWidth = rectWidth * 0.78;
+      var sheenHeight = rectHeight * 0.36;
+      sheen.graphics
+        .clear()
+        .beginLinearGradientFill(
+          palette.sheen || ["rgba(255,255,255,0.8)", "rgba(255,255,255,0)"] ,
+          [0, 1],
+          -sheenWidth / 2,
+          0,
+          sheenWidth / 2,
+          0
+        )
+        .moveTo(-sheenWidth / 2, -sheenHeight / 2)
+        .lineTo(-sheenWidth / 2 + sheenHeight * 0.6, -sheenHeight / 2)
+        .lineTo(sheenWidth / 2, sheenHeight / 2)
+        .lineTo(sheenWidth / 2 - sheenHeight * 0.6, sheenHeight / 2)
+        .closePath();
+      sheen.alpha = 0;
+      sheen.y = -rectHeight * 0.02;
+      sheen.x = -rectWidth * 0.5;
+      wrapper.__sheenSpan = rectWidth;
+      wrapper.__sheenBaseX = sheen.x;
+      wrapper.__sheenBaseY = sheen.y;
     }
-    if (badgeContainer) {
-      badgeContainer.x = badgeBg ? badgeBg.x : -rectWidth / 2 + wrapper.__badgeRadius + 14;
-      badgeContainer.y = badgeBg ? badgeBg.y : -rectHeight / 2 - wrapper.__badgeRadius + 6;
-      badgeContainer.regX = -wrapper.__badgeRadius * 0.32;
-      badgeContainer.regY = wrapper.__badgeRadius * 0.52;
-      badgeContainer.rotation = 0;
-    }
-  }
-
-  if (badgePole) {
-    badgePole.x = 0;
-    badgePole.y = 0;
-  }
-
-  if (badgeFlag) {
-    badgeFlag.x = wrapper.__badgeRadius * 0.18;
-    badgeFlag.y = -wrapper.__badgeRadius * 0.2;
-  }
-
-  if (badgeHighlight) {
-    badgeHighlight.x = badgeFlag.x;
-    badgeHighlight.y = badgeFlag.y;
   }
 
   paintCycleRaceOptionBackground(wrapper, wrapper.__palette.fill, wrapper.__palette.stroke);
-  paintCycleRaceOptionBadge(wrapper, "base");
 }
-
 function paintCycleRaceOptionBackground(wrapper, fillColors, strokeColors) {
   if (!wrapper) {
     return;
@@ -5454,125 +5420,15 @@ function paintCycleRaceOptionBackground(wrapper, fillColors, strokeColors) {
   }
 }
 
-function paintCycleRaceOptionBadge(wrapper, state) {
-  if (!wrapper) {
-    return;
-  }
-
-  var badgeBg = wrapper.__badgeBg;
-  if (!badgeBg) {
-    return;
-  }
-
-  var palette = wrapper.__badgePalette || cycleRaceTextOptionPalette.badge;
-  var gradientColors =
-    state === "correct"
-      ? palette.correct
-      : state === "wrong"
-      ? palette.wrong
-      : palette.base;
-  var radius = wrapper.__badgeRadius || 24;
-  badgeBg.graphics
-    .clear()
-    .beginLinearGradientFill(gradientColors, [0, 1], -radius, 0, radius, 0)
-    .drawCircle(0, 0, radius);
-  badgeBg.alpha = 0.94;
-
-  var flagPalette = palette.flag || {};
-  var flagColors =
-    state === "correct"
-      ? flagPalette.correct || flagPalette.base
-      : state === "wrong"
-      ? flagPalette.wrong || flagPalette.base
-      : flagPalette.base;
-  if (!flagColors) {
-    flagColors = [palette.pole || "#F4F7FF", palette.pole || "#F4F7FF"];
-  }
-
-  var poleColor = palette.pole || "#F4F7FF";
-  var poleShadow = palette.poleShadow || "rgba(18,38,84,0.28)";
-  var flagEdge = palette.flagEdge || "#0f244d";
-  var flagHighlight = palette.flagHighlight || "rgba(255,255,255,0.45)";
-
-  var pole = wrapper.__badgePole;
-  var flag = wrapper.__badgeFlag;
-  var highlight = wrapper.__badgeHighlight;
-  var badgeContainer = wrapper.__badgeContainer;
-
-  var flagWidth = radius * 1.32;
-  var flagHeight = radius * 0.92;
-  var poleWidth = Math.max(4, radius * 0.22);
-  var poleHeight = radius * 1.8;
-
-  if (pole) {
-    pole.graphics
-      .clear()
-      .beginLinearGradientFill(
-        [poleShadow, poleColor],
-        [0, 1],
-        0,
-        -poleHeight * 0.5,
-        0,
-        poleHeight * 0.5
-      )
-      .drawRoundRect(-poleWidth / 2, -poleHeight * 0.6, poleWidth, poleHeight * 1.1, poleWidth * 0.38)
-      .beginFill(poleColor)
-      .drawRoundRect(-poleWidth * 0.8, poleHeight * 0.48, poleWidth * 1.6, poleWidth * 0.6, poleWidth * 0.3);
-    pole.alpha = 0.92;
-  }
-
-  if (flag) {
-    flag.graphics
-      .clear()
-      .setStrokeStyle(Math.max(1.4, radius * 0.08), "round", "round")
-      .beginStroke(flagEdge)
-      .beginLinearGradientFill(
-        flagColors,
-        [0, 1],
-        0,
-        -flagHeight / 2,
-        flagWidth,
-        flagHeight / 2
-      )
-      .moveTo(0, -flagHeight / 2)
-      .lineTo(flagWidth * 0.72, -flagHeight * 0.38)
-      .lineTo(0, -flagHeight * 0.18)
-      .closePath();
-    flag.alpha = 0.98;
-  }
-
-  if (highlight) {
-    highlight.graphics
-      .clear()
-      .beginLinearGradientFill(
-        [flagHighlight, "rgba(255,255,255,0)"] ,
-        [0, 1],
-        -flagWidth * 0.1,
-        -flagHeight * 0.56,
-        flagWidth * 0.38,
-        -flagHeight * 0.18
-      )
-      .moveTo(0, -flagHeight * 0.44)
-      .lineTo(flagWidth * 0.48, -flagHeight * 0.34)
-      .lineTo(0, -flagHeight * 0.26)
-      .closePath();
-    highlight.alpha = 0.72;
-  }
-
-  if (badgeContainer) {
-    badgeContainer.alpha = 1;
-  }
-}
-
 function SAUI_resetCycleRaceOptionBubble(wrapper) {
   if (!wrapper) {
     return;
   }
 
   paintCycleRaceOptionBackground(wrapper, wrapper.__palette.fill, wrapper.__palette.stroke);
-  paintCycleRaceOptionBadge(wrapper, "base");
 
   if (wrapper.__highlight) {
+    createjs.Tween.removeTweens(wrapper.__highlight);
     wrapper.__highlight.alpha = 0.86;
   }
 
@@ -5582,14 +5438,16 @@ function SAUI_resetCycleRaceOptionBubble(wrapper) {
     wrapper.__pulse.scaleX = wrapper.__pulse.scaleY = 1;
   }
 
-  if (wrapper.__badgeContainer) {
-    createjs.Tween.removeTweens(wrapper.__badgeContainer);
-    wrapper.__badgeContainer.rotation = 0;
-  }
-
-  if (wrapper.__badgeFlag) {
-    createjs.Tween.removeTweens(wrapper.__badgeFlag);
-    wrapper.__badgeFlag.skewY = 0;
+  if (wrapper.__sheen) {
+    var sheen = wrapper.__sheen;
+    createjs.Tween.removeTweens(sheen);
+    sheen.alpha = 0;
+    if (wrapper.__sheenBaseX != null) {
+      sheen.x = wrapper.__sheenBaseX;
+    }
+    if (wrapper.__sheenBaseY != null) {
+      sheen.y = wrapper.__sheenBaseY;
+    }
   }
 
   wrapper.scaleX = wrapper.scaleY = 1;
@@ -5624,26 +5482,20 @@ function SAUI_showCycleRaceOptionBubble(wrapper, delay) {
       .to({ alpha: 0, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadIn);
   }
 
-  if (wrapper.__badgeContainer) {
-    var badgeContainer = wrapper.__badgeContainer;
-    createjs.Tween.removeTweens(badgeContainer);
-    badgeContainer.rotation = -2.8;
-    createjs.Tween.get(badgeContainer, { override: false })
-      .wait((delay || 0) + 90)
-      .to({ rotation: 3.4 }, 220, createjs.Ease.quartOut)
-      .to({ rotation: -1.6 }, 200, createjs.Ease.quadInOut)
-      .to({ rotation: 0 }, 160, createjs.Ease.quadOut);
-  }
-
-  if (wrapper.__badgeFlag) {
-    var badgeFlag = wrapper.__badgeFlag;
-    createjs.Tween.removeTweens(badgeFlag);
-    badgeFlag.skewY = -8;
-    createjs.Tween.get(badgeFlag, { override: false })
-      .wait((delay || 0) + 90)
-      .to({ skewY: 6 }, 220, createjs.Ease.sineOut)
-      .to({ skewY: -3 }, 200, createjs.Ease.sineInOut)
-      .to({ skewY: 0 }, 200, createjs.Ease.sineOut);
+  if (wrapper.__sheen) {
+    var sheen = wrapper.__sheen;
+    var baseX = wrapper.__sheenBaseX != null ? wrapper.__sheenBaseX : sheen.x || 0;
+    var baseY = wrapper.__sheenBaseY != null ? wrapper.__sheenBaseY : sheen.y || 0;
+    var span = wrapper.__sheenSpan != null ? wrapper.__sheenSpan : wrapper.__width || 0;
+    createjs.Tween.removeTweens(sheen);
+    sheen.alpha = 0;
+    sheen.x = baseX - span * 0.45;
+    sheen.y = baseY;
+    createjs.Tween.get(sheen, { override: true })
+      .wait((delay || 0) + 160)
+      .to({ alpha: 0.85 }, 120, createjs.Ease.quadOut)
+      .to({ x: baseX + span * 0.45 }, 360, createjs.Ease.sineOut)
+      .to({ alpha: 0 }, 220, createjs.Ease.quadIn);
   }
 }
 
@@ -5683,21 +5535,30 @@ function SAUI_startCycleRaceOptionIdle(wrapper) {
       .to({ alpha: 0.22, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
   }
 
-  if (wrapper.__badgeContainer) {
-    var badgeContainer = wrapper.__badgeContainer;
-    createjs.Tween.removeTweens(badgeContainer);
-    createjs.Tween.get(badgeContainer, { override: false, loop: true })
-      .to({ rotation: 3.2 }, 720, createjs.Ease.sineInOut)
-      .to({ rotation: -3.2 }, 720, createjs.Ease.sineInOut);
+  if (wrapper.__highlight) {
+    var highlight = wrapper.__highlight;
+    createjs.Tween.removeTweens(highlight);
+    highlight.alpha = 0.88;
+    createjs.Tween.get(highlight, { override: false, loop: true })
+      .to({ alpha: 0.96 }, 720, createjs.Ease.sineInOut)
+      .to({ alpha: 0.78 }, 720, createjs.Ease.sineInOut);
   }
 
-  if (wrapper.__badgeFlag) {
-    var badgeFlag = wrapper.__badgeFlag;
-    createjs.Tween.removeTweens(badgeFlag);
-    badgeFlag.skewY = 0;
-    createjs.Tween.get(badgeFlag, { override: false, loop: true })
-      .to({ skewY: 7 }, 360, createjs.Ease.sineInOut)
-      .to({ skewY: -7 }, 360, createjs.Ease.sineInOut);
+  if (wrapper.__sheen) {
+    var sheen = wrapper.__sheen;
+    var baseX = wrapper.__sheenBaseX != null ? wrapper.__sheenBaseX : sheen.x || 0;
+    var baseY = wrapper.__sheenBaseY != null ? wrapper.__sheenBaseY : sheen.y || 0;
+    var span = wrapper.__sheenSpan != null ? wrapper.__sheenSpan : wrapper.__width || 0;
+    createjs.Tween.removeTweens(sheen);
+    sheen.alpha = 0;
+    sheen.y = baseY;
+    sheen.x = baseX - span * 0.55;
+    createjs.Tween.get(sheen, { override: false, loop: true })
+      .to({ alpha: 0.78 }, 200, createjs.Ease.quadOut)
+      .to({ x: baseX + span * 0.55 }, 700, createjs.Ease.sineInOut)
+      .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
+      .wait(260)
+      .to({ x: baseX - span * 0.55 }, 0);
   }
 }
 
@@ -5712,14 +5573,21 @@ function SAUI_stopCycleRaceOptionIdle(wrapper) {
     wrapper.__pulse.scaleX = wrapper.__pulse.scaleY = 1;
   }
 
-  if (wrapper.__badgeContainer) {
-    createjs.Tween.removeTweens(wrapper.__badgeContainer);
-    wrapper.__badgeContainer.rotation = 0;
+  if (wrapper.__highlight) {
+    createjs.Tween.removeTweens(wrapper.__highlight);
+    wrapper.__highlight.alpha = 0.86;
   }
 
-  if (wrapper.__badgeFlag) {
-    createjs.Tween.removeTweens(wrapper.__badgeFlag);
-    wrapper.__badgeFlag.skewY = 0;
+  if (wrapper.__sheen) {
+    var sheen = wrapper.__sheen;
+    createjs.Tween.removeTweens(sheen);
+    sheen.alpha = 0;
+    if (wrapper.__sheenBaseX != null) {
+      sheen.x = wrapper.__sheenBaseX;
+    }
+    if (wrapper.__sheenBaseY != null) {
+      sheen.y = wrapper.__sheenBaseY;
+    }
   }
 }
 
@@ -5734,7 +5602,6 @@ function SAUI_markCycleRaceOptionResult(wrapper, isCorrect) {
     isCorrect ? palette.correctFill : palette.wrongFill,
     isCorrect ? palette.correctStroke : palette.wrongStroke
   );
-  paintCycleRaceOptionBadge(wrapper, isCorrect ? "correct" : "wrong");
 
   if (wrapper.__highlight) {
     createjs.Tween.get(wrapper.__highlight, { override: true })
@@ -5746,18 +5613,10 @@ function SAUI_markCycleRaceOptionResult(wrapper, isCorrect) {
     wrapper.__pulse.alpha = 0;
   }
 
-  if (wrapper.__badgeContainer) {
-    createjs.Tween.removeTweens(wrapper.__badgeContainer);
-    wrapper.__badgeContainer.rotation = isCorrect ? 6 : -6;
-    createjs.Tween.get(wrapper.__badgeContainer, { override: false })
-      .to({ rotation: 0 }, 320, createjs.Ease.quadOut);
-  }
-
-  if (wrapper.__badgeFlag) {
-    createjs.Tween.removeTweens(wrapper.__badgeFlag);
-    wrapper.__badgeFlag.skewY = isCorrect ? 10 : -10;
-    createjs.Tween.get(wrapper.__badgeFlag, { override: false })
-      .to({ skewY: 0 }, 300, createjs.Ease.quadOut);
+  if (wrapper.__sheen) {
+    var sheen = wrapper.__sheen;
+    createjs.Tween.removeTweens(sheen);
+    sheen.alpha = 0;
   }
 
   createjs.Tween.get(wrapper, { override: false })

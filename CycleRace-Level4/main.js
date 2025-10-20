@@ -349,6 +349,8 @@ function layoutCycleRaceTextQuestionContent() {
                 var maxCenter = innerBottom - (qTextMetrics.height || 0) / 2;
                 questionText1.y = Math.min(maxCenter, desiredCenter);
         }
+
+        alignCycleRaceQuestionContent();
 }
 
 function layoutCycleRaceImageQuestionContent() {
@@ -374,6 +376,111 @@ function layoutCycleRaceImageQuestionContent() {
                 centerY = innerTop + (innerBottom - innerTop) / 2;
         }
         question2.y = centerY;
+
+        alignCycleRaceQuestionContent();
+}
+
+function alignCycleRaceQuestionContent() {
+
+        if (!cycleRaceQuestionBubble || !cycleRaceQuestionBubble.__content) {
+                return;
+        }
+
+        var contentNodes = [];
+        var nodeMetrics = [];
+
+        if (question1 && question1.visible && question1.parent === cycleRaceQuestionBubble.__content) {
+                contentNodes.push(question1);
+        }
+        if (questionText1 && questionText1.visible && questionText1.parent === cycleRaceQuestionBubble.__content) {
+                contentNodes.push(questionText1);
+        }
+        if (question2 && question2.visible && question2.parent === cycleRaceQuestionBubble.__content) {
+                contentNodes.push(question2);
+        }
+
+        if (!contentNodes.length) {
+                return;
+        }
+
+        var minX = Infinity;
+        var maxX = -Infinity;
+        var minY = Infinity;
+        var maxY = -Infinity;
+
+        for (var i = 0; i < contentNodes.length; i++) {
+                var node = contentNodes[i];
+                var width = typeof node.__layoutWidth === "number" ? node.__layoutWidth : 0;
+                var height = typeof node.__layoutHeight === "number" ? node.__layoutHeight : 0;
+
+                if ((!width || !height) && typeof node.getBounds === "function") {
+                        var rawBounds = node.getBounds();
+                        if (rawBounds) {
+                                if (!width) {
+                                        width = Math.abs((rawBounds.width || 0) * (node.scaleX || 1));
+                                }
+                                if (!height) {
+                                        height = Math.abs((rawBounds.height || 0) * (node.scaleY || 1));
+                                }
+                        }
+                }
+
+                nodeMetrics.push({
+                        node: node,
+                        width: width,
+                        height: height
+                });
+
+                var left = node.x - width / 2;
+                var right = node.x + width / 2;
+                var top = node.y - height / 2;
+                var bottom = node.y + height / 2;
+
+                if (left < minX) {
+                        minX = left;
+                }
+                if (right > maxX) {
+                        maxX = right;
+                }
+                if (top < minY) {
+                        minY = top;
+                }
+                if (bottom > maxY) {
+                        maxY = bottom;
+                }
+        }
+
+        if (!isFinite(minX) || !isFinite(maxX) || !isFinite(minY) || !isFinite(maxY)) {
+                return;
+        }
+
+        var centerX = (minX + maxX) / 2;
+        var centerY = (minY + maxY) / 2;
+
+        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var innerTop = -bodyHeight / 2 + 36;
+        var innerBottom = bodyHeight / 2 - 36;
+        var targetCenterY = (innerTop + innerBottom) / 2;
+
+        var deltaX = centerX;
+        var deltaY = centerY - targetCenterY;
+
+        for (var j = 0; j < nodeMetrics.length; j++) {
+                var entry = nodeMetrics[j];
+                var targetX = entry.node.x - deltaX;
+                var targetY = entry.node.y - deltaY;
+                var halfHeight = (entry.height || 0) / 2;
+
+                if (targetY - halfHeight < innerTop) {
+                        targetY = innerTop + halfHeight;
+                } else if (targetY + halfHeight > innerBottom) {
+                        targetY = innerBottom - halfHeight;
+                }
+
+                entry.node.x = targetX;
+                entry.node.y = targetY;
+        }
 }
 
 function cycleRaceInvokeChoice(choiceDisplay) {
@@ -1507,6 +1614,8 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                         textWrapper.cursor = "default";
                         textWrapper.x = cycleRaceTextChoicePositions[i1].x;
                         textWrapper.y = cycleRaceTextChoicePositions[i1].y;
+                        textWrapper.__homeX = textWrapper.x;
+                        textWrapper.__homeY = textWrapper.y;
                         if (!textWrapper.parent) {
                                 container.parent.addChild(textWrapper);
                         }
@@ -1549,6 +1658,8 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                         imageWrapper.cursor = "default";
                         imageWrapper.x = cycleRaceImageChoicePositions[i1].x;
                         imageWrapper.y = cycleRaceImageChoicePositions[i1].y;
+                        imageWrapper.__homeX = imageWrapper.x;
+                        imageWrapper.__homeY = imageWrapper.y;
                         if (!imageWrapper.parent) {
                                 container.parent.addChild(imageWrapper);
                         }
