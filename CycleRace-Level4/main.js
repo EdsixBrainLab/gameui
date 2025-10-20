@@ -474,8 +474,26 @@ function CreateGameElements() {
 		this["cycle" + i].y = posY[i];
 
 	}
-        var choiceXArr = [420, 820, 420, 820]
-        var choiceYArr = [450, 450, 570, 570]
+        var choiceXArr = [480, 800, 480, 800]
+        var choiceYArr = [468, 468, 598, 598]
+        if (typeof SAUI_computeCenteredRow === "function") {
+                var textRowLayout = SAUI_computeCenteredRow(2, {
+                        centerX: 640,
+                        baseSpacing: 340,
+                        tileSpan: 340,
+                        maxSpan: 680
+                });
+                var textRowPositions = textRowLayout && textRowLayout.positions;
+                if (textRowPositions && textRowPositions.length >= 2) {
+                        choiceXArr = [
+                                textRowPositions[0],
+                                textRowPositions[1],
+                                textRowPositions[0],
+                                textRowPositions[1]
+                        ];
+                }
+                choiceYArr = [468, 468, 598, 598];
+        }
 
         for (i = 0; i < choiceCnt; i++) {
                 choiceArr[i] = choice1.clone()
@@ -484,8 +502,21 @@ function CreateGameElements() {
                 choiceArr[i].y = 0;
         }
 
-        var choiceX1Arr =  [360, 560, 760, 960]
-        var choiceY1Arr = [520, 520, 520, 520]
+        var choiceX1Arr =  [320, 520, 760, 960]
+        var choiceY1Arr = [540, 540, 540, 540]
+        if (typeof SAUI_computeCenteredRow === "function") {
+                var imageRowLayout = SAUI_computeCenteredRow(4, {
+                        centerX: 640,
+                        baseSpacing: 220,
+                        tileSpan: 220,
+                        maxSpan: 880
+                });
+                var imageRowPositions = imageRowLayout && imageRowLayout.positions;
+                if (imageRowPositions && imageRowPositions.length >= 4) {
+                        choiceX1Arr = imageRowPositions;
+                }
+                choiceY1Arr = [540, 540, 540, 540];
+        }
 
         for (i = 0; i < choiceCnt; i++) {
                 choiceArr1[i] = choice2.clone()
@@ -915,6 +946,9 @@ function disablechoices() {
                 }
                 choiceArr[i].cursor = "default";
                 if (choiceArr[i].__wrapper) {
+                        choiceArr[i].__wrapper.visible = false;
+                        choiceArr[i].__wrapper.alpha = 0;
+                        choiceArr[i].__wrapper.mouseEnabled = false;
                         choiceArr[i].__wrapper.cursor = "default";
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(choiceArr[i].__wrapper);
@@ -928,6 +962,9 @@ function disablechoices() {
                 }
                 choiceArr1[i].cursor = "default";
                 if (choiceArr1[i].__wrapper) {
+                        choiceArr1[i].__wrapper.visible = false;
+                        choiceArr1[i].__wrapper.alpha = 0;
+                        choiceArr1[i].__wrapper.mouseEnabled = false;
                         choiceArr1[i].__wrapper.cursor = "default";
                         if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
                                 SAUI_stopCycleRaceOptionIdle(choiceArr1[i].__wrapper);
@@ -1183,6 +1220,7 @@ function cycleRaceResetQuestionDisplay() {
                         }
                         cycleRaceTextChoiceWrappers[i2].visible = false;
                         cycleRaceTextChoiceWrappers[i2].alpha = 0;
+                        cycleRaceTextChoiceWrappers[i2].mouseEnabled = false;
                         if (cycleRaceTextChoiceWrappers[i2].__badgeLabel) {
                                 cycleRaceTextChoiceWrappers[i2].__badgeLabel.text = "";
                         }
@@ -1193,6 +1231,7 @@ function cycleRaceResetQuestionDisplay() {
                         }
                         cycleRaceImageChoiceWrappers[i2].visible = false;
                         cycleRaceImageChoiceWrappers[i2].alpha = 0;
+                        cycleRaceImageChoiceWrappers[i2].mouseEnabled = false;
                         if (cycleRaceImageChoiceWrappers[i2].__badgeLabel) {
                                 cycleRaceImageChoiceWrappers[i2].__badgeLabel.text = "";
                         }
