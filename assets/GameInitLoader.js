@@ -2024,6 +2024,129 @@ function applyAlphaToColor(color, alpha) {
     return color;
 }
 
+function getHudCardTheme(type) {
+    var theme = getHudThemeConfig();
+    if (!theme || !theme.cards) {
+        return null;
+    }
+
+    if (theme.cards[type]) {
+        return theme.cards[type];
+    }
+
+    if (theme.cards.score) {
+        return theme.cards.score;
+    }
+
+    var cardKeys = Object.keys(theme.cards);
+    return cardKeys.length ? theme.cards[cardKeys[0]] : null;
+}
+
+function resolveCardPrimaryColor(type, fallbackColor) {
+    var cardTheme = getHudCardTheme(type);
+    if (!cardTheme) {
+        return fallbackColor;
+    }
+
+    var candidates = [];
+    var ambient = cardTheme.ambient || {};
+    var iconStyle = cardTheme.iconStyle || {};
+
+    if (ambient.spark) {
+        candidates.push(ambient.spark);
+    }
+    if (ambient.halo) {
+        candidates.push(ambient.halo);
+    }
+
+    if (iconStyle.strokeColor) {
+        candidates.push(iconStyle.strokeColor);
+    }
+    if (iconStyle.fill) {
+        candidates.push(iconStyle.fill);
+    }
+    if (iconStyle.gradient && iconStyle.gradient.length) {
+        candidates = candidates.concat(iconStyle.gradient);
+    }
+
+    var accent = cardTheme.accent;
+    if (Array.isArray(accent)) {
+        candidates = candidates.concat(accent);
+    } else if (typeof accent === "string") {
+        candidates.push(accent);
+    }
+
+    var background = cardTheme.background;
+    if (Array.isArray(background)) {
+        candidates = candidates.concat(background);
+    } else if (typeof background === "string") {
+        candidates.push(background);
+    }
+
+    for (var i = 0; i < candidates.length; i++) {
+        if (typeof candidates[i] === "string" && candidates[i]) {
+            return candidates[i];
+        }
+    }
+
+    return fallbackColor;
+}
+
+function resolveCardEffectPalette(type, fallbackPalette) {
+    var cardTheme = getHudCardTheme(type);
+    var palette = [];
+
+    function pushUniqueColor(color) {
+        if (typeof color === "string" && color && palette.indexOf(color) === -1) {
+            palette.push(color);
+        }
+    }
+
+    if (cardTheme) {
+        var accent = cardTheme.accent;
+        if (Array.isArray(accent)) {
+            accent.forEach(pushUniqueColor);
+        } else {
+            pushUniqueColor(accent);
+        }
+
+        var background = cardTheme.background;
+        if (Array.isArray(background)) {
+            background.forEach(pushUniqueColor);
+        } else {
+            pushUniqueColor(background);
+        }
+
+        var iconStyle = cardTheme.iconStyle || {};
+        if (iconStyle.fill) {
+            pushUniqueColor(iconStyle.fill);
+        }
+        if (iconStyle.strokeColor) {
+            pushUniqueColor(iconStyle.strokeColor);
+        }
+        if (iconStyle.gradient && iconStyle.gradient.length) {
+            iconStyle.gradient.forEach(pushUniqueColor);
+        }
+
+        var ambient = cardTheme.ambient || {};
+        pushUniqueColor(ambient.spark);
+        pushUniqueColor(ambient.halo);
+        pushUniqueColor(ambient.ring);
+    }
+
+    if (!palette.length && Array.isArray(fallbackPalette)) {
+        return fallbackPalette.slice();
+    }
+
+    if (Array.isArray(fallbackPalette)) {
+        for (var i = 0; i < fallbackPalette.length; i++) {
+            pushUniqueColor(fallbackPalette[i]);
+        }
+    }
+
+    return palette.length ? palette : (Array.isArray(fallbackPalette) ? fallbackPalette.slice() : []);
+}
+
 function ensureHudIconAmbientDecor(card) {
     if (!card || !card.effectLayer) {
         return null;
@@ -4552,7 +4675,7 @@ function spawnScoreCardSparkles() {
     var layer = scoreCardContainer.effectLayer;
     var baseX = scoreCardContainer.icon.x;
     var baseY = scoreCardContainer.icon.y;
-    var colors = ["#FDE68A", "#FCD34D", "#FACC15", "#F97316"];
+    var colors = resolveCardEffectPalette("score", ["#FDE68A", "#FCD34D", "#FACC15", "#F97316"]);
 
     for (var i = 0; i < 6; i++) {
         var sparkle = new createjs.Shape();
@@ -4592,10 +4715,12 @@ function spawnTimerPulse() {
     var baseX = timerCardContainer.icon.x;
     var baseY = timerCardContainer.icon.y;
     var layer = timerCardContainer.effectLayer;
+    var timerColor = resolveCardPrimaryColor("timer", "#82C8FF");
+    var timerStroke = applyAlphaToColor(timerColor, 0.85);
 
     for (var i = 0; i < 2; i++) {
         var pulse = new createjs.Shape();
-        pulse.graphics.setStrokeStyle(2).beginStroke("rgba(130,200,255,0.85)").drawCircle(0, 0, 14);
+        pulse.graphics.setStrokeStyle(2).beginStroke(timerStroke).drawCircle(0, 0, 14);
         pulse.alpha = 0.7;
         pulse.scaleX = pulse.scaleY = 0.45;
         pulse.x = baseX;
@@ -4620,10 +4745,13 @@ function spawnQuestionAdvancePulse() {
         return;
     }
 
+    var questionColor = resolveCardPrimaryColor("question", "#6EE7B7");
+    var questionStroke = applyAlphaToColor(questionColor, 0.85);
+
     var ripple = new createjs.Shape();
     ripple.graphics
         .setStrokeStyle(2)
-        .beginStroke("rgba(110,231,183,0.85)")
+        .beginStroke(questionStroke)
         .drawRoundRect(-12, -12, 24, 24, 6);
     ripple.alpha = 0.75;
     ripple.scaleX = ripple.scaleY = 0.8;
