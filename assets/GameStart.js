@@ -241,6 +241,10 @@ if (questionOverImg) {
                 bgSnd.stop();
             }
 
+            if (timeOverImg) {
+                timeOverImg.visible = false;
+            }
+
             correctSnd.stop();
             wrongSnd.stop();
             gameOverSnd.stop();
@@ -289,6 +293,7 @@ function removeTimeOverImg(options) {
     if (!deferOverlayHide && typeof hideGameplayTimeUpBanner === "function") {
         hideGameplayTimeUpBanner(true);
     }
+    timeOverImg.visible = false;
     time = 18;
     currTime = time;
     createjs.Tween.removeTweens(gameTimerTxt);

@@ -580,7 +580,7 @@ function call_UI_gameQuestion(incontainer,in_questiontext)
 {
          QusTxtString = new createjs.Text(
       in_questiontext,
-      "700 34px 'Baloo 2'",
+      "700 28px 'Baloo 2'",
       "#EAF2FF"
     );
     QusTxtString.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
@@ -646,7 +646,7 @@ function call_UI_introQuestionCardContainer(incontainer,in_question)
 	
 	renderQuestionCardBackground_htp();
 	
-    in_introQues1 = new createjs.Text(in_question, "800 66px 'Baloo 2'", "#F4FAFF");
+    in_introQues1 = new createjs.Text(in_question, "800 80px 'Baloo 2'", "#F4FAFF");
     in_introQues1.x = 0;
     in_introQues1.y = 0;
     in_introQues1.textAlign = "center";
@@ -1544,149 +1544,7 @@ function ensureTimeUpOverlay() {
   return timeUpOverlay;
 }
 
-var timeUpOverlayConnectivityActive = false,
-  timeUpOverlayConnectivityHoldTimer = null,
-  timeUpOverlayConnectivitySafetyTimer = null;
-
 function showGameplayTimeUpBanner(onComplete) {
-  if (typeof SAUIX_showTimeOverOverlay === "function") {
-    var stageRef = typeof stage !== "undefined" ? stage : null;
-    var langKey = typeof getOverlayLanguageKey === "function"
-      ? getOverlayLanguageKey()
-      : typeof assetsPathLang === "string"
-      ? assetsPathLang
-      : "";
-    var copy = typeof SAUIX_getConnectivityCopy === "function"
-      ? SAUIX_getConnectivityCopy("timeOver", langKey)
-      : null;
-
-    var overlayPanel = SAUIX_showTimeOverOverlay({
-      stage: stageRef,
-      language: langKey,
-      message:
-        copy && copy.title
-          ? copy.title
-          : "Time's up!",
-      detail:
-        copy && typeof copy.detail === "string"
-          ? copy.detail
-          : "",
-      hideClose: true,
-    });
-
-    if (overlayPanel) {
-      if (timeUpOverlayConnectivityHoldTimer) {
-        clearTimeout(timeUpOverlayConnectivityHoldTimer);
-      }
-      if (timeUpOverlayConnectivitySafetyTimer) {
-        clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-      }
-      timeUpOverlayConnectivityHoldTimer = null;
-      timeUpOverlayConnectivitySafetyTimer = null;
-      timeUpOverlayConnectivityActive = true;
-
-      var holdDuration = 3000;
-      var safetyDuration = 4200;
-      var completeFired = false;
-      var doneCalled = false;
-
-      function clearConnectivityTimers() {
-        if (timeUpOverlayConnectivityHoldTimer) {
-          clearTimeout(timeUpOverlayConnectivityHoldTimer);
-          timeUpOverlayConnectivityHoldTimer = null;
-        }
-        if (timeUpOverlayConnectivitySafetyTimer) {
-          clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-          timeUpOverlayConnectivitySafetyTimer = null;
-        }
-      }
-
-      function requestHide(immediate) {
-        if (!timeUpOverlayConnectivityActive) {
-          clearConnectivityTimers();
-          return;
-        }
-        clearConnectivityTimers();
-        if (typeof SAUIX_hideTimeOverOverlay === "function") {
-          SAUIX_hideTimeOverOverlay({ immediate: !!immediate });
-        }
-        timeUpOverlayConnectivityActive = false;
-      }
-
-      function done() {
-        if (doneCalled) {
-          return;
-        }
-        doneCalled = true;
-        requestHide();
-      }
-
-      function triggerComplete() {
-        if (completeFired) {
-          return;
-        }
-        completeFired = true;
-
-        if (typeof onComplete === "function") {
-          try {
-            if (onComplete.length >= 1) {
-              timeUpOverlayConnectivitySafetyTimer = setTimeout(done, safetyDuration);
-              var asyncResult = onComplete(function () {
-                if (timeUpOverlayConnectivitySafetyTimer) {
-                  clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-                  timeUpOverlayConnectivitySafetyTimer = null;
-                }
-                done();
-              });
-              if (asyncResult && typeof asyncResult.then === "function") {
-                asyncResult
-                  .then(function () {
-                    if (timeUpOverlayConnectivitySafetyTimer) {
-                      clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-                      timeUpOverlayConnectivitySafetyTimer = null;
-                    }
-                    done();
-                  })
-                  .catch(function (asyncErr) {
-                    console.log("Error: time up completion handler", asyncErr);
-                    if (timeUpOverlayConnectivitySafetyTimer) {
-                      clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-                      timeUpOverlayConnectivitySafetyTimer = null;
-                    }
-                    done();
-                  });
-                return;
-              }
-              if (asyncResult === false) {
-                return;
-              }
-            } else {
-              var result = onComplete();
-              if (result && typeof result.then === "function") {
-                result
-                  .then(function () {
-                    done();
-                  })
-                  .catch(function (asyncErr) {
-                    console.log("Error: time up completion handler", asyncErr);
-                    done();
-                  });
-                return;
-              }
-            }
-          } catch (overlayCompleteError) {
-            console.log("Error: time up completion handler", overlayCompleteError);
-          }
-        }
-
-        done();
-      }
-
-      timeUpOverlayConnectivityHoldTimer = setTimeout(triggerComplete, holdDuration);
-      return overlayPanel;
-    }
-  }
-
   var overlay = ensureTimeUpOverlay();
   if (!overlay) {
     if (typeof onComplete === "function") {
@@ -1843,26 +1701,6 @@ function showGameplayTimeUpBanner(onComplete) {
 }
 
 function hideGameplayTimeUpBanner(force) {
-  if (
-    timeUpOverlayConnectivityActive ||
-    timeUpOverlayConnectivityHoldTimer ||
-    timeUpOverlayConnectivitySafetyTimer
-  ) {
-    if (timeUpOverlayConnectivityHoldTimer) {
-      clearTimeout(timeUpOverlayConnectivityHoldTimer);
-      timeUpOverlayConnectivityHoldTimer = null;
-    }
-    if (timeUpOverlayConnectivitySafetyTimer) {
-      clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-      timeUpOverlayConnectivitySafetyTimer = null;
-    }
-    if (typeof SAUIX_hideTimeOverOverlay === "function") {
-      SAUIX_hideTimeOverOverlay({ immediate: !!force });
-    }
-    timeUpOverlayConnectivityActive = false;
-    return;
-  }
-
   if (!timeUpOverlay) {
     return;
   }
@@ -1921,12 +1759,6 @@ var connectivityOverlay,
   connectivityIconOfflineSlash,
   connectivityIconSuccess,
   connectivityIconInfo,
-  connectivityIconProgress,
-  connectivityIconProgressSpinner,
-  connectivityIconWarning,
-  connectivityIconCelebrate,
-  connectivityIconCelebrateStar,
-  connectivityIconCelebrateSparkles,
   connectivityOverlayClose,
   connectivityOverlayCloseGlow,
   connectivityOverlayCloseHighlight,
@@ -1942,12 +1774,6 @@ var SAUIX_CONNECTIVITY_COPY = {
     completeOneDetail: "Tap Close at the top to continue.",
     genericTitle: "Hold on a moment...",
     genericDetail: "We're preparing the next activity for you.",
-    resultsLoadingTitle: "Loading your results...",
-    resultsLoadingDetail: "Hang tight while we prepare your performance summary.",
-    gameFinishedTitle: "Great work!",
-    gameFinishedDetail: "Sit tight while we wrap up this session.",
-    timeOverTitle: "Time's up!",
-    timeOverDetail: "Let's review how you performed.",
   },
   "assets/GujaratiAssets/": {
     offlineTitle: "ઈન્ટરનેટ કનેક્શન નથી. ફરી પ્રયત્ન કરો...",
@@ -1985,18 +1811,6 @@ function SAUIX_getConnectivityCopy(kind, lang) {
     keyTitle = "completeOneTitle";
     keyDetail = "completeOneDetail";
     iconType = "success";
-  } else if (kind === "resultsLoading") {
-    keyTitle = "resultsLoadingTitle";
-    keyDetail = "resultsLoadingDetail";
-    iconType = "progress";
-  } else if (kind === "gameFinished") {
-    keyTitle = "gameFinishedTitle";
-    keyDetail = "gameFinishedDetail";
-    iconType = "celebrate";
-  } else if (kind === "timeOver") {
-    keyTitle = "timeOverTitle";
-    keyDetail = "timeOverDetail";
-    iconType = "warning";
   }
 
   var title = pack[keyTitle];
@@ -2225,165 +2039,6 @@ function ensureConnectivityOverlay(stageRef) {
   connectivityIconInfo.addChild(infoGlyph);
 
   connectivityIconWrapper.addChild(connectivityIconInfo);
-
-  connectivityIconProgress = new createjs.Container();
-  var progressPlate = new createjs.Shape();
-  progressPlate.graphics
-    .beginRadialGradientFill([
-      "#83B3FF",
-      "#163171"
-    ], [0, 1], 0, 0, 0, 0, 0, 58)
-    .drawCircle(0, 0, 58);
-  progressPlate.shadow = new createjs.Shadow("rgba(10,16,42,0.6)", 0, 12, 26);
-  connectivityIconProgress.addChild(progressPlate);
-
-  var progressInnerRing = new createjs.Shape();
-  progressInnerRing.graphics
-    .setStrokeStyle(8, "round")
-    .beginStroke("rgba(255,255,255,0.32)")
-    .drawCircle(0, 0, 42);
-  progressInnerRing.alpha = 0.65;
-  connectivityIconProgress.addChild(progressInnerRing);
-
-  connectivityIconProgressSpinner = new createjs.Shape();
-  connectivityIconProgressSpinner.graphics
-    .setStrokeStyle(9, "round")
-    .beginStroke("rgba(244,249,255,0.95)")
-    .arc(0, 0, 30, -Math.PI * 0.35, Math.PI * 1.25, false);
-  connectivityIconProgressSpinner.rotation = 0;
-  connectivityIconProgress.addChild(connectivityIconProgressSpinner);
-
-  var progressTrail = new createjs.Shape();
-  progressTrail.graphics
-    .setStrokeStyle(9, "round")
-    .beginStroke("rgba(244,249,255,0.35)")
-    .arc(0, 0, 30, Math.PI * 1.05, Math.PI * 1.55, false);
-  connectivityIconProgress.addChild(progressTrail);
-
-  var progressHub = new createjs.Shape();
-  progressHub.graphics
-    .beginRadialGradientFill([
-      "#F2F6FF",
-      "#B7CCFF"
-    ], [0, 1], 0, 0, 0, 0, 0, 12)
-    .drawCircle(0, 0, 12);
-  connectivityIconProgress.addChild(progressHub);
-
-  connectivityIconProgress.visible = false;
-  connectivityIconWrapper.addChild(connectivityIconProgress);
-
-  connectivityIconWarning = new createjs.Container();
-  var warningPlate = new createjs.Shape();
-  warningPlate.graphics
-    .beginRadialGradientFill([
-      "#FFD993",
-      "#B25A00"
-    ], [0, 1], 0, 0, 0, 0, 0, 58)
-    .drawCircle(0, 0, 58);
-  warningPlate.shadow = new createjs.Shadow("rgba(58,24,0,0.48)", 0, 12, 26);
-  connectivityIconWarning.addChild(warningPlate);
-
-  var warningTriangle = new createjs.Shape();
-  warningTriangle.graphics
-    .beginLinearGradientFill([
-      "#FFEEC2",
-      "#F4A543"
-    ], [0, 1], 0, -46, 0, 36)
-    .moveTo(0, -44)
-    .lineTo(36, 32)
-    .lineTo(-36, 32)
-    .closePath();
-  warningTriangle.shadow = new createjs.Shadow("rgba(90,48,0,0.38)", 0, 10, 18);
-  connectivityIconWarning.addChild(warningTriangle);
-
-  var warningMark = new createjs.Shape();
-  warningMark.graphics
-    .beginFill("#4B2200")
-    .drawRoundRect(-6, -18, 12, 30, 4)
-    .drawCircle(0, 20, 6);
-  warningMark.alpha = 0.92;
-  connectivityIconWarning.addChild(warningMark);
-
-  var warningGlow = new createjs.Shape();
-  warningGlow.graphics
-    .beginRadialGradientFill(
-      ["rgba(255,255,255,0.38)", "rgba(255,255,255,0)"],
-      [0, 1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      94
-    )
-    .drawCircle(0, -8, 86);
-  warningGlow.alpha = 0.55;
-  warningGlow.compositeOperation = "lighter";
-  connectivityIconWarning.addChild(warningGlow);
-
-  connectivityIconWarning.visible = false;
-  connectivityIconWrapper.addChild(connectivityIconWarning);
-
-  connectivityIconCelebrate = new createjs.Container();
-  var celebratePlate = new createjs.Shape();
-  celebratePlate.graphics
-    .beginRadialGradientFill([
-      "#FFBCEE",
-      "#6E1D9C"
-    ], [0, 1], 0, 0, 0, 0, 0, 58)
-    .drawCircle(0, 0, 58);
-  celebratePlate.shadow = new createjs.Shadow("rgba(56,8,74,0.55)", 0, 12, 24);
-  connectivityIconCelebrate.addChild(celebratePlate);
-
-  connectivityIconCelebrateStar = new createjs.Shape();
-  connectivityIconCelebrateStar.graphics
-    .beginLinearGradientFill([
-      "#FFF7FF",
-      "#FFD7F6"
-    ], [0, 1], -10, -16, 12, 24)
-    .moveTo(0, -36)
-    .lineTo(12, -6)
-    .lineTo(42, -6)
-    .lineTo(18, 12)
-    .lineTo(28, 40)
-    .lineTo(0, 22)
-    .lineTo(-28, 40)
-    .lineTo(-18, 12)
-    .lineTo(-42, -6)
-    .lineTo(-12, -6)
-    .closePath();
-  connectivityIconCelebrateStar.shadow = new createjs.Shadow(
-    "rgba(68,16,82,0.4)",
-    0,
-    10,
-    16
-  );
-  connectivityIconCelebrate.addChild(connectivityIconCelebrateStar);
-
-  connectivityIconCelebrateSparkles = [];
-  for (var celebrateSparkleIndex = 0; celebrateSparkleIndex < 3; celebrateSparkleIndex++) {
-    var sparkle = new createjs.Shape();
-    sparkle.graphics
-      .beginRadialGradientFill(
-        ["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"],
-        [0, 1],
-        0,
-        0,
-        0,
-        0,
-        0,
-        18
-      )
-      .drawCircle(0, 0, 16);
-    sparkle.alpha = 0;
-    sparkle.x = -26 + celebrateSparkleIndex * 26;
-    sparkle.y = -46 + celebrateSparkleIndex * 26;
-    connectivityIconCelebrate.addChild(sparkle);
-    connectivityIconCelebrateSparkles.push(sparkle);
-  }
-
-  connectivityIconCelebrate.visible = false;
-  connectivityIconWrapper.addChild(connectivityIconCelebrate);
 
   connectivityOverlayTitle = new createjs.Text(
     "",
@@ -2830,45 +2485,12 @@ function setConnectivityIcon(type) {
     connectivityIconInfo.visible = iconType === "info";
   }
 
-  if (connectivityIconProgress) {
-    connectivityIconProgress.visible = iconType === "progress";
-  }
-
-  if (connectivityIconWarning) {
-    connectivityIconWarning.visible = iconType === "warning";
-    if (iconType !== "warning") {
-      connectivityIconWarning.rotation = 0;
-    }
-  }
-
-  if (connectivityIconCelebrate) {
-    connectivityIconCelebrate.visible = iconType === "celebrate";
-  }
-
-  if (
-    connectivityIconCelebrateSparkles &&
-    iconType !== "celebrate"
-  ) {
-    for (var s = 0; s < connectivityIconCelebrateSparkles.length; s++) {
-      var sparkle = connectivityIconCelebrateSparkles[s];
-      if (sparkle) {
-        sparkle.alpha = 0;
-      }
-    }
-  }
-
   if (connectivityOverlayAccent) {
     var accent = "rgba(255,148,220,0.9)";
     if (iconType === "success") {
       accent = "rgba(92,239,200,0.9)";
     } else if (iconType === "info") {
       accent = "rgba(144,166,255,0.9)";
-    } else if (iconType === "progress") {
-      accent = "rgba(132,196,255,0.9)";
-    } else if (iconType === "warning") {
-      accent = "rgba(255,204,138,0.92)";
-    } else if (iconType === "celebrate") {
-      accent = "rgba(255,188,240,0.92)";
     }
 
     connectivityOverlayAccent.__accentColor = accent;
@@ -2951,66 +2573,6 @@ function animateConnectivityOverlay() {
         .to({ alpha: 0.25 }, 260, createjs.Ease.quadOut);
     }
   }
-
-  if (connectivityIconProgressSpinner) {
-    createjs.Tween.removeTweens(connectivityIconProgressSpinner);
-    if (connectivityOverlay.__iconType === "progress") {
-      connectivityIconProgressSpinner.rotation = 0;
-      createjs.Tween.get(connectivityIconProgressSpinner, { loop: true })
-        .to({ rotation: 360 }, 1100, createjs.Ease.linear);
-    }
-  }
-
-  if (connectivityIconCelebrateStar) {
-    createjs.Tween.removeTweens(connectivityIconCelebrateStar);
-    if (connectivityOverlay.__iconType === "celebrate") {
-      connectivityIconCelebrateStar.rotation = -4;
-      connectivityIconCelebrateStar.scaleX = connectivityIconCelebrateStar.scaleY = 0.9;
-      createjs.Tween.get(connectivityIconCelebrateStar, { loop: true })
-        .to({ scaleX: 1.05, scaleY: 1.05, rotation: 6 }, 760, createjs.Ease.sineInOut)
-        .to({ scaleX: 0.9, scaleY: 0.9, rotation: -4 }, 760, createjs.Ease.sineInOut);
-
-      if (connectivityIconCelebrateSparkles) {
-        for (var i = 0; i < connectivityIconCelebrateSparkles.length; i++) {
-          var sparkle = connectivityIconCelebrateSparkles[i];
-          if (!sparkle) {
-            continue;
-          }
-          createjs.Tween.removeTweens(sparkle);
-          sparkle.alpha = 0;
-          sparkle.scaleX = sparkle.scaleY = 0.6;
-          createjs.Tween.get(sparkle, { loop: true })
-            .wait(140 * i)
-            .to({ alpha: 0.85, scaleX: 1.1, scaleY: 1.1 }, 360, createjs.Ease.quadOut)
-            .to({ alpha: 0 }, 360, createjs.Ease.quadIn)
-            .set({ scaleX: 0.6, scaleY: 0.6 });
-        }
-      }
-    } else if (connectivityIconCelebrateSparkles) {
-      for (var j = 0; j < connectivityIconCelebrateSparkles.length; j++) {
-        var s = connectivityIconCelebrateSparkles[j];
-        if (s) {
-          createjs.Tween.removeTweens(s);
-          s.alpha = 0;
-          s.scaleX = s.scaleY = 1;
-        }
-      }
-    }
-  }
-
-  if (connectivityIconWarning) {
-    createjs.Tween.removeTweens(connectivityIconWarning);
-    if (connectivityOverlay.__iconType === "warning") {
-      connectivityIconWarning.rotation = 0;
-      createjs.Tween.get(connectivityIconWarning, { loop: true })
-        .to({ rotation: 6 }, 140, createjs.Ease.quadOut)
-        .to({ rotation: -6 }, 260, createjs.Ease.quadInOut)
-        .to({ rotation: 0 }, 180, createjs.Ease.quadOut)
-        .wait(640);
-    } else {
-      connectivityIconWarning.rotation = 0;
-    }
-  }
 }
 
 function SAUIX_showConnectivityOverlay(options) {
@@ -3069,8 +2631,6 @@ function SAUIX_showConnectivityOverlay(options) {
 
   overlay.__onClose =
     typeof options.onClose === "function" ? options.onClose : null;
-  overlay.__variant = options.variant || options.context || options.iconType || null;
-  overlay.__language = options.language || overlay.__language || null;
 
   layoutConnectivityOverlay(stageRef);
 
@@ -3093,15 +2653,6 @@ function SAUIX_hideConnectivityOverlay(options) {
   options = options || {};
 
   if (!connectivityOverlay) {
-    return;
-  }
-
-  var variant = options.variant || options.onlyIfVariant || null;
-  if (
-    variant &&
-    connectivityOverlay.__variant &&
-    connectivityOverlay.__variant !== variant
-  ) {
     return;
   }
 
@@ -3136,37 +2687,12 @@ function SAUIX_hideConnectivityOverlay(options) {
     createjs.Tween.removeTweens(connectivityOverlayCloseGlow);
   }
 
-  if (connectivityIconProgressSpinner) {
-    createjs.Tween.removeTweens(connectivityIconProgressSpinner);
-  }
-
-  if (connectivityIconCelebrateStar) {
-    createjs.Tween.removeTweens(connectivityIconCelebrateStar);
-  }
-
-  if (connectivityIconCelebrateSparkles) {
-    for (var celebrateIndex = 0; celebrateIndex < connectivityIconCelebrateSparkles.length; celebrateIndex++) {
-      var sparkle = connectivityIconCelebrateSparkles[celebrateIndex];
-      if (sparkle) {
-        createjs.Tween.removeTweens(sparkle);
-        sparkle.alpha = 0;
-      }
-    }
-  }
-
-  if (connectivityIconWarning) {
-    createjs.Tween.removeTweens(connectivityIconWarning);
-    connectivityIconWarning.rotation = 0;
-  }
-
   if (immediate) {
     connectivityOverlay.visible = false;
     connectivityOverlay.alpha = 0;
     connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
     connectivityOverlay.__active = false;
     connectivityOverlay.__onClose = null;
-    connectivityOverlay.__variant = null;
-    connectivityOverlay.__language = null;
 
     if (connectivityOverlayClose) {
       createjs.Tween.removeTweens(connectivityOverlayClose);
@@ -3190,8 +2716,6 @@ function SAUIX_hideConnectivityOverlay(options) {
       connectivityOverlay.scaleX = connectivityOverlay.scaleY = 1;
       connectivityOverlay.__active = false;
       connectivityOverlay.__onClose = null;
-      connectivityOverlay.__variant = null;
-      connectivityOverlay.__language = null;
 
       if (connectivityOverlayClose) {
         connectivityOverlayClose.visible = false;
@@ -3205,148 +2729,6 @@ function SAUIX_hideConnectivityOverlay(options) {
         } catch (hideUpdateError) {}
       }
     });
-}
-
-function SAUIX_showResultsLoadingOverlay(options) {
-  options = options || {};
-  var stageRef = options.stage || (typeof stage !== "undefined" ? stage : null);
-  var lang =
-    options.language ||
-    (typeof assetsPathLang === "string" ? assetsPathLang : "");
-  var message = options.message;
-  var detail = options.detail;
-
-  if ((!message || message === "") && typeof SAUIX_getConnectivityCopy === "function") {
-    var copy = SAUIX_getConnectivityCopy("resultsLoading", lang);
-    if (copy) {
-      if (!message || message === "") {
-        message = copy.title || message;
-      }
-      if ((typeof detail !== "string" || detail === "") && copy.detail) {
-        detail = copy.detail;
-      }
-    }
-  }
-
-  return SAUIX_showConnectivityOverlay({
-    stage: stageRef,
-    language: lang,
-    message: message || "Loading your results...",
-    detail: typeof detail === "string" ? detail : "",
-    iconType: "progress",
-    hideClose: true,
-    variant: "resultsLoading",
-  });
-}
-
-function SAUIX_hideResultsLoadingOverlay(options) {
-  options = options || {};
-  SAUIX_hideConnectivityOverlay({
-    immediate: !!options.immediate,
-    variant: "resultsLoading",
-  });
-}
-
-function SAUIX_showGameFinishedOverlay(options) {
-  options = options || {};
-  var stageRef = options.stage || (typeof stage !== "undefined" ? stage : null);
-  var lang =
-    options.language ||
-    (typeof assetsPathLang === "string" ? assetsPathLang : "");
-  var message = options.message;
-  var detail = options.detail;
-
-  if ((!message || message === "") && typeof SAUIX_getConnectivityCopy === "function") {
-    var copy = SAUIX_getConnectivityCopy("gameFinished", lang);
-    if (copy) {
-      if (!message || message === "") {
-        message = copy.title || message;
-      }
-      if ((typeof detail !== "string" || detail === "") && copy.detail) {
-        detail = copy.detail;
-      }
-    }
-  }
-
-  var hideClose = options.hideClose;
-  if (typeof hideClose !== "boolean") {
-    hideClose = true;
-  }
-
-  return SAUIX_showConnectivityOverlay({
-    stage: stageRef,
-    language: lang,
-    message: message || "Great work!",
-    detail: typeof detail === "string" ? detail : "",
-    iconType: "celebrate",
-    hideClose: hideClose,
-    variant: "gameFinished",
-    onClose: options.onClose,
-  });
-}
-
-function SAUIX_hideGameFinishedOverlay(options) {
-  options = options || {};
-  SAUIX_hideConnectivityOverlay({
-    immediate: !!options.immediate,
-    variant: "gameFinished",
-  });
-}
-
-function SAUIX_showTimeOverOverlay(options) {
-  options = options || {};
-  var stageRef = options.stage || (typeof stage !== "undefined" ? stage : null);
-  var lang =
-    options.language ||
-    (typeof assetsPathLang === "string" ? assetsPathLang : "");
-  var message = options.message;
-  var detail = options.detail;
-
-  if ((!message || message === "") && typeof SAUIX_getConnectivityCopy === "function") {
-    var copy = SAUIX_getConnectivityCopy("timeOver", lang);
-    if (copy) {
-      if (!message || message === "") {
-        message = copy.title || message;
-      }
-      if ((typeof detail !== "string" || detail === "") && copy.detail) {
-        detail = copy.detail;
-      }
-    }
-  }
-
-  var hideClose = options.hideClose;
-  if (typeof hideClose !== "boolean") {
-    hideClose = true;
-  }
-
-  return SAUIX_showConnectivityOverlay({
-    stage: stageRef,
-    language: lang,
-    message: message || "Time's up!",
-    detail: typeof detail === "string" ? detail : "",
-    iconType: "warning",
-    hideClose: hideClose,
-    variant: "timeOver",
-    onClose: options.onClose,
-  });
-}
-
-function SAUIX_hideTimeOverOverlay(options) {
-  options = options || {};
-  if (timeUpOverlayConnectivityHoldTimer) {
-    clearTimeout(timeUpOverlayConnectivityHoldTimer);
-    timeUpOverlayConnectivityHoldTimer = null;
-  }
-  if (timeUpOverlayConnectivitySafetyTimer) {
-    clearTimeout(timeUpOverlayConnectivitySafetyTimer);
-    timeUpOverlayConnectivitySafetyTimer = null;
-  }
-  timeUpOverlayConnectivityActive = false;
-
-  SAUIX_hideConnectivityOverlay({
-    immediate: !!options.immediate,
-    variant: "timeOver",
-  });
 }
 
 function SAUIX_refreshConnectivityOverlayLayout(stageRef) {
@@ -3431,7 +2813,7 @@ function ensureQuestionCard() {
   if (!questionCardContainer) {
     questionCardContainer = new createjs.Container();
     questionCardContainer.x = canvas.width / 2;
-    questionCardContainer.y = 308;
+    questionCardContainer.y = 288;
     questionCardContainer.alpha = 0;
     questionCardContainer.visible = false;
     questionCardContainer.mouseEnabled = false;
@@ -3463,7 +2845,7 @@ function ensureQuestionCard() {
 
     renderQuestionCardBackground();
 
-    question = new createjs.Text("", "800 60px 'Baloo 2'", "#F4FAFF");
+    question = new createjs.Text("", "800 80px 'Baloo 2'", "#F4FAFF");
     question.textAlign = "center";
     question.textBaseline = "middle";
     question.x = 0;

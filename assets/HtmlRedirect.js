@@ -38,6 +38,7 @@ function htmlRedirect(nav, url, tqcnt, aqcnt, cqcnt, gscore, gtime, rtime, crtim
                     do {
                         console.log("test")
                         //if (Data == 1) {
+                            bitmap.visible = false;
                             var overlayShown = false;
                             if (typeof SAUIX_showResultsLoadingOverlay === "function") {
                                 var stageRef = typeof stage !== "undefined" ? stage : null;
@@ -56,6 +57,9 @@ function htmlRedirect(nav, url, tqcnt, aqcnt, cqcnt, gscore, gtime, rtime, crtim
                                 overlayShown = !!overlay;
                             }
 
+                            if (!overlayShown && typeof resultLoading !== "undefined" && resultLoading) {
+                                resultLoading.visible = true;
+                            }
                             console.log("tewt works")
                             questionTxtR.visible = true;
                             attemptTxtR.visible = true;
