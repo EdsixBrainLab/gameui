@@ -1640,7 +1640,6 @@ function layoutHudElements(canvasWidth, canvasHeight) {
 
     cursor += questionWidth / 2 + baseGap + controlWidth / 2;
     positions.push(cursor);
-console.log("positions[0]"+positions[0]);
     if (scoreCardContainer) {
         scoreCardContainer.x = positions[0]-210;
         scoreCardContainer.baseX = positions[0]-210;
@@ -1696,8 +1695,6 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
         var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 7);
         Title.x = stageWidth / 2;
         Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
-
-console.log("Title.y::"+Title.y)
 console.log("topMargin::"+topMargin)
 console.log("titleHalfHeight::"+titleHalfHeight)
 console.log("minimumTop::"+minimumTop)
@@ -4015,7 +4012,7 @@ function createHudCard(label, type) {
 
     var valueHolder = new createjs.Container();
     valueHolder.x = icon.x + 42;
-    valueHolder.y = 5;
+    valueHolder.y = 0;
     card.addChild(valueHolder);
 
     card.background = background;
@@ -4104,7 +4101,7 @@ function buildHudLayout() {
         timerCardContainer.valueHolder.addChild(gameTimerTxt);
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
-        gameTimerTxt.y = -5;
+        gameTimerTxt.y = 0;
     }
 
     if (hudQuestionCardContainer.valueHolder) {
@@ -6906,17 +6903,28 @@ function startProceedButtonHighlightSweep(button) {
 
 
 //==========================================================================//
+var __isCreatingHowToPlay = false;
+
 function createHowToPlay() {
-    if (typeof handCursor !== "undefined" && handCursor) {
-        handCursor.visible = false;
-    }
-    hideLoaderProceedButton();
-
-    if (HowToPlayScreenImg) {
-        HowToPlayScreenImg.visible = false;
+    if (__isCreatingHowToPlay) {
+        return;
     }
 
-    createGameIntroAnimationPlay(true)
+    __isCreatingHowToPlay = true;
+    try {
+        if (typeof handCursor !== "undefined" && handCursor) {
+            handCursor.visible = false;
+        }
+        hideLoaderProceedButton();
+
+        if (HowToPlayScreenImg) {
+            HowToPlayScreenImg.visible = false;
+        }
+
+        createGameIntroAnimationPlay(true);
+    } finally {
+        __isCreatingHowToPlay = false;
+    }
 }
 //==========================================================================//
 function createHowToPlayHandler(evt) {
