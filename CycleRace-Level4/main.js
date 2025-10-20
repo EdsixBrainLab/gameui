@@ -48,6 +48,153 @@ var cycleRaceQuestionBubble,
   cycleRaceHoverInHandler = null,
   cycleRaceHoverOutHandler = null;
 
+var cycleRaceTrimCanvas = null;
+var cycleRaceTrimContext = null;
+
+function getCycleRaceTrimContext(width, height) {
+
+        if (typeof document === "undefined" || !document.createElement) {
+                return null;
+        }
+
+        if (!cycleRaceTrimCanvas) {
+                cycleRaceTrimCanvas = document.createElement("canvas");
+        }
+
+        var canvas = cycleRaceTrimCanvas;
+        canvas.width = Math.max(1, Math.ceil(width));
+        canvas.height = Math.max(1, Math.ceil(height));
+
+        cycleRaceTrimContext = canvas.getContext("2d");
+
+        if (!cycleRaceTrimContext) {
+                return null;
+        }
+
+        cycleRaceTrimContext.clearRect(0, 0, canvas.width, canvas.height);
+
+        return cycleRaceTrimContext;
+}
+
+function measureCycleRaceSpriteVisibleBounds(sprite) {
+
+        if (!sprite || !sprite.spriteSheet || typeof sprite.spriteSheet.getFrame !== "function") {
+                return null;
+        }
+
+        var frameIndex = sprite.currentFrame != null ? sprite.currentFrame : sprite._currentFrame || 0;
+        var frame = sprite.spriteSheet.getFrame(frameIndex);
+
+        if (!frame || !frame.image || !frame.rect) {
+                return null;
+        }
+
+        var rect = frame.rect;
+        var cacheStore = sprite.spriteSheet.__cycleRaceVisibleBoundsCache;
+
+        if (!cacheStore) {
+                cacheStore = sprite.spriteSheet.__cycleRaceVisibleBoundsCache = {};
+        }
+
+        var imageId = "";
+
+        if (frame.image) {
+                imageId = frame.image.currentSrc || frame.image.src || frame.image.id || "";
+        }
+
+        var cacheKey = [
+                frameIndex,
+                rect.x,
+                rect.y,
+                rect.width,
+                rect.height,
+                imageId
+        ].join("|");
+
+        if (cacheStore[cacheKey] !== undefined) {
+                return cacheStore[cacheKey];
+        }
+
+        var ctx = getCycleRaceTrimContext(rect.width, rect.height);
+
+        if (!ctx) {
+                cacheStore[cacheKey] = null;
+                return null;
+        }
+
+        try {
+                ctx.drawImage(
+                        frame.image,
+                        rect.x,
+                        rect.y,
+                        rect.width,
+                        rect.height,
+                        0,
+                        0,
+                        rect.width,
+                        rect.height
+                );
+        } catch (err) {
+                cacheStore[cacheKey] = null;
+                return null;
+        }
+
+        var imageData;
+
+        try {
+                imageData = ctx.getImageData(0, 0, rect.width, rect.height).data;
+        } catch (err) {
+                cacheStore[cacheKey] = null;
+                return null;
+        }
+
+        var left = rect.width;
+        var right = -1;
+        var top = rect.height;
+        var bottom = -1;
+
+        for (var y = 0; y < rect.height; y++) {
+                for (var x = 0; x < rect.width; x++) {
+                        var alpha = imageData[(y * rect.width + x) * 4 + 3];
+
+                        if (alpha > 8) {
+                                if (x < left) {
+                                        left = x;
+                                }
+                                if (x > right) {
+                                        right = x;
+                                }
+                                if (y < top) {
+                                        top = y;
+                                }
+                                if (y > bottom) {
+                                        bottom = y;
+                                }
+                        }
+                }
+        }
+
+        if (right < left || bottom < top) {
+                cacheStore[cacheKey] = null;
+                return null;
+        }
+
+        var visibleWidth = right - left + 1;
+        var visibleHeight = bottom - top + 1;
+        var result = {
+                left: left,
+                top: top,
+                width: visibleWidth,
+                height: visibleHeight,
+                centerOffsetX: left + visibleWidth / 2 - rect.width / 2,
+                centerOffsetY: top + visibleHeight / 2 - rect.height / 2
+        };
+
+        cacheStore[cacheKey] = result;
+
+        return result;
+}
+
 function getCycleRaceQuestionLayoutMetrics() {
 
         var centerX = 640;
@@ -300,12 +447,23 @@ function configureCycleRaceQuestionSprite(sprite, options) {
         sprite.regY = dims.height / 2;
         sprite.x = 0;
         sprite.y = 0;
-        sprite.__layoutWidth = dims.width * targetScale;
-        sprite.__layoutHeight = dims.height * targetScale;
+
+        var visible = measureCycleRaceSpriteVisibleBounds(sprite);
+        var layoutWidth = (visible && visible.width ? visible.width : dims.width) * targetScale;
+        var layoutHeight = (visible && visible.height ? visible.height : dims.height) * targetScale;
+        var offsetX = visible && visible.centerOffsetX ? visible.centerOffsetX * targetScale : 0;
+        var offsetY = visible && visible.centerOffsetY ? visible.centerOffsetY * targetScale : 0;
+
+        sprite.__layoutWidth = layoutWidth;
+        sprite.__layoutHeight = layoutHeight;
+        sprite.__visualOffsetX = offsetX;
+        sprite.__visualOffsetY = offsetY;
 
         return {
-                width: sprite.__layoutWidth,
-                height: sprite.__layoutHeight
+                width: layoutWidth,
+                height: layoutHeight,
+                offsetX: offsetX,
+                offsetY: offsetY
         };
 }
 
@@ -329,7 +487,9 @@ function layoutCycleRaceTextQuestionContent() {
                         baseScale: question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
                 });
                 question1.x = 0;
-                question1.y = innerTop + (q1Metrics.height || 0) / 2;
+                var q1OffsetY = q1Metrics && q1Metrics.offsetY ? q1Metrics.offsetY : question1.__visualOffsetY || 0;
+                var q1HalfHeight = (q1Metrics && q1Metrics.height ? q1Metrics.height : question1.__layoutHeight || 0) / 2;
+                question1.y = innerTop + q1HalfHeight - q1OffsetY;
         }
 
         if (questionText1 && questionText1.visible) {
@@ -341,13 +501,28 @@ function layoutCycleRaceTextQuestionContent() {
                 questionText1.x = 0;
                 var anchorY;
                 if (question1 && question1.visible) {
-                        anchorY = question1.y + (question1.__layoutHeight || 0) / 2;
+                        anchorY =
+                                question1.y +
+                                ((question1.__layoutHeight || 0) / 2 + (question1.__visualOffsetY || 0));
                 } else {
                         anchorY = innerTop + 8;
                 }
-                var desiredCenter = anchorY + spacing + (qTextMetrics.height || 0) / 2;
-                var maxCenter = innerBottom - (qTextMetrics.height || 0) / 2;
-                questionText1.y = Math.min(maxCenter, desiredCenter);
+                var qTextOffsetY = qTextMetrics && qTextMetrics.offsetY ? qTextMetrics.offsetY : questionText1.__visualOffsetY || 0;
+                var qTextHalfHeight = (qTextMetrics && qTextMetrics.height ? qTextMetrics.height : questionText1.__layoutHeight || 0) / 2;
+                var desiredTop = anchorY + spacing;
+                var desiredCenter = desiredTop + qTextHalfHeight - qTextOffsetY;
+                var minCenter = innerTop + qTextHalfHeight - qTextOffsetY;
+                var maxCenter = innerBottom - qTextHalfHeight - qTextOffsetY;
+                if (minCenter > maxCenter) {
+                        questionText1.y = (innerTop + innerBottom) / 2 - qTextOffsetY;
+                } else {
+                        if (desiredCenter < minCenter) {
+                                desiredCenter = minCenter;
+                        } else if (desiredCenter > maxCenter) {
+                                desiredCenter = maxCenter;
+                        }
+                        questionText1.y = desiredCenter;
+                }
         }
 
         alignCycleRaceQuestionContent();
@@ -371,9 +546,19 @@ function layoutCycleRaceImageQuestionContent() {
                 baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
         });
         question2.x = 0;
-        var centerY = (innerTop + innerBottom) / 2;
-        if (q2Metrics && q2Metrics.height && q2Metrics.height > innerBottom - innerTop) {
-                centerY = innerTop + (innerBottom - innerTop) / 2;
+        var q2OffsetY = q2Metrics && q2Metrics.offsetY ? q2Metrics.offsetY : question2.__visualOffsetY || 0;
+        var q2HalfHeight = (q2Metrics && q2Metrics.height ? q2Metrics.height : question2.__layoutHeight || 0) / 2;
+        var minCenter = innerTop + q2HalfHeight - q2OffsetY;
+        var maxCenter = innerBottom - q2HalfHeight - q2OffsetY;
+        var centerY = (innerTop + innerBottom) / 2 - q2OffsetY;
+        if (minCenter > maxCenter) {
+                centerY = (innerTop + innerBottom) / 2 - q2OffsetY;
+        } else {
+                if (centerY < minCenter) {
+                        centerY = minCenter;
+                } else if (centerY > maxCenter) {
+                        centerY = maxCenter;
+                }
         }
         question2.y = centerY;
 
@@ -412,6 +597,8 @@ function alignCycleRaceQuestionContent() {
                 var node = contentNodes[i];
                 var width = typeof node.__layoutWidth === "number" ? node.__layoutWidth : 0;
                 var height = typeof node.__layoutHeight === "number" ? node.__layoutHeight : 0;
+                var offsetX = typeof node.__visualOffsetX === "number" ? node.__visualOffsetX : 0;
+                var offsetY = typeof node.__visualOffsetY === "number" ? node.__visualOffsetY : 0;
 
                 if ((!width || !height) && typeof node.getBounds === "function") {
                         var rawBounds = node.getBounds();
@@ -428,13 +615,15 @@ function alignCycleRaceQuestionContent() {
                 nodeMetrics.push({
                         node: node,
                         width: width,
-                        height: height
+                        height: height,
+                        offsetX: offsetX,
+                        offsetY: offsetY
                 });
 
-                var left = node.x - width / 2;
-                var right = node.x + width / 2;
-                var top = node.y - height / 2;
-                var bottom = node.y + height / 2;
+                var left = node.x - width / 2 + offsetX;
+                var right = node.x + width / 2 + offsetX;
+                var top = node.y - height / 2 + offsetY;
+                var bottom = node.y + height / 2 + offsetY;
 
                 if (left < minX) {
                         minX = left;
@@ -471,11 +660,13 @@ function alignCycleRaceQuestionContent() {
                 var targetX = entry.node.x - deltaX;
                 var targetY = entry.node.y - deltaY;
                 var halfHeight = (entry.height || 0) / 2;
+                var offsetY = entry.offsetY || 0;
 
-                if (targetY - halfHeight < innerTop) {
-                        targetY = innerTop + halfHeight;
-                } else if (targetY + halfHeight > innerBottom) {
-                        targetY = innerBottom - halfHeight;
+                if (targetY - halfHeight + offsetY < innerTop) {
+                        targetY += innerTop - (targetY - halfHeight + offsetY);
+                }
+                if (targetY + halfHeight + offsetY > innerBottom) {
+                        targetY -= targetY + halfHeight + offsetY - innerBottom;
                 }
 
                 entry.node.x = targetX;
