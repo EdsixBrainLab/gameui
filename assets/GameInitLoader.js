@@ -7214,22 +7214,27 @@ function internetErrorFn() {
     }
 
     container4 = new createjs.Container();
-    stage.addChild(container4)
-    container4.parent.addChild(GameFinishedImg);
-    GameFinishedImg.visible = true;
+    stage.addChild(container4);
+
+    if (GameFinishedImg) {
+        GameFinishedImg.visible = false;
+        if (GameFinishedImg.parent) {
+            GameFinishedImg.parent.removeChild(GameFinishedImg);
+        }
+    }
 
     container4.parent.addChild(closeBtnFinal);
     closeBtnFinal.visible = true;
     closeBtnFinal.addEventListener("click", closeGameFn);
     closeBtnFinal.cursor = "pointer";
 
-    var setFinishedTxt = new createjs.Text("", "60px 'Baloo 2'", "white");
+    var setFinishedTxt = new createjs.Text("", "600 46px 'Baloo 2'", "#F5ECFF");
     setFinishedTxt.textAlign = "center";
     setFinishedTxt.textBaseline = "middle";
-    setFinishedTxt.lineWidth = 1000
-    setFinishedTxt.lineHeight = 63
+    setFinishedTxt.lineWidth = 560;
+    setFinishedTxt.lineHeight = 62;
     setFinishedTxt.x = 640;
-    setFinishedTxt.y = 367;
+    setFinishedTxt.y = 372;
     setFinishedTxt.visible = true;
     container4.parent.addChild(setFinishedTxt);
 
@@ -7291,14 +7296,46 @@ function internetErrorFn() {
         }
     }
 
-    if (setFinishedTxt.text.length <= 35) {
-        setFinishedTxt.y = 407;
-    } else if (setFinishedTxt.text.length <= 70) {
-        setFinishedTxt.font = "bold 40px 'Baloo 2'"
-        setFinishedTxt.y = 407;
-    } else {
-        setFinishedTxt.font = "bold 40px 'Baloo 2'"
-        setFinishedTxt.y = 377;
+    var measuredHeight = 0;
+    try {
+        measuredHeight = setFinishedTxt.getMeasuredHeight();
+    } catch (setFinishedMeasureErr) {
+        measuredHeight = 0;
+    }
+
+    if (!measuredHeight || !isFinite(measuredHeight)) {
+        measuredHeight = setFinishedTxt.lineHeight || 62;
+    }
+
+    if (setFinishedTxt.text.length > 70) {
+        setFinishedTxt.font = "600 40px 'Baloo 2'";
+        setFinishedTxt.lineHeight = 58;
+        try {
+            measuredHeight = setFinishedTxt.getMeasuredHeight();
+        } catch (setFinishedReMeasureErr) {
+            measuredHeight = setFinishedTxt.lineHeight || 58;
+        }
+        if (!measuredHeight || !isFinite(measuredHeight)) {
+            measuredHeight = setFinishedTxt.lineHeight || 58;
+        }
+    }
+
+    var blockHeight = Math.max(measuredHeight, setFinishedTxt.lineHeight || 62);
+    var targetCenterY = 372;
+    if (blockHeight > 0) {
+        targetCenterY = 360 + blockHeight / 2;
+    }
+    setFinishedTxt.y = targetCenterY;
+
+    var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;
+    if (shouldUseOverlay) {
+        SAUIX_showConnectivityOverlay({
+            stage: stage,
+            message: overlayCopy.title,
+            detail: overlayCopy.detail,
+            iconType: overlayCopy.iconType,
+        });
+        setFinishedTxt.visible = false;
     }
 
     var shouldUseOverlay = typeof SAUIX_showConnectivityOverlay === "function" && overlayCopy;

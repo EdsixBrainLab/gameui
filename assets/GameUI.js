@@ -2238,10 +2238,8 @@ function layoutConnectivityOverlay(stageRef) {
   connectivityOverlay.__stage = stageForLayout;
 
   if (connectivityOverlayBackdrop) {
-    connectivityOverlayBackdrop.graphics
-      .clear()
-      .beginFill("rgba(8,6,24,0.68)")
-      .drawRect(-centerX, -centerY, width, height);
+    connectivityOverlayBackdrop.alpha = 0;
+    connectivityOverlayBackdrop.graphics.clear();
   }
 
   var baseWidth = 620;
