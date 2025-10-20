@@ -48,6 +48,163 @@ var cycleRaceQuestionBubble,
   cycleRaceHoverInHandler = null,
   cycleRaceHoverOutHandler = null;
 
+function getCycleRaceQuestionLayoutMetrics() {
+
+        var centerX = 640;
+        var bubbleWidth = 780;
+        var bubbleY = 248;
+        var tailHeight = 60;
+        var bodyHeight = 240;
+
+        if (cycleRaceQuestionBubble) {
+                if (typeof cycleRaceQuestionBubble.x === "number") {
+                        centerX = cycleRaceQuestionBubble.x;
+                }
+                if (typeof cycleRaceQuestionBubble.y === "number") {
+                        bubbleY = cycleRaceQuestionBubble.y;
+                }
+                if (cycleRaceQuestionBubble.__options) {
+                        if (cycleRaceQuestionBubble.__options.width != null) {
+                                bubbleWidth = cycleRaceQuestionBubble.__options.width;
+                        }
+                        if (cycleRaceQuestionBubble.__options.tailHeight != null) {
+                                tailHeight = cycleRaceQuestionBubble.__options.tailHeight;
+                        }
+                        if (cycleRaceQuestionBubble.__options.height != null) {
+                                bodyHeight = Math.max(
+                                        cycleRaceQuestionBubble.__options.height - tailHeight,
+                                        180
+                                );
+                        }
+                }
+        }
+
+        var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+
+        return {
+                centerX: centerX,
+                width: bubbleWidth,
+                bottom: bubbleBottom
+        };
+}
+
+function computeCycleRaceTextChoiceLayout() {
+
+        var fallbackX = [480, 800, 480, 800];
+        var fallbackY = [512, 512, 648, 648];
+
+        if (typeof SAUI_computeCenteredRow !== "function") {
+                return {
+                        xPositions: fallbackX,
+                        yPositions: fallbackY
+                };
+        }
+
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        var wrapperWidth = 324;
+        var horizontalPadding = 96;
+        var availableSpan = Math.max(metrics.width - horizontalPadding * 2, wrapperWidth * 2 + 140);
+        var rowSpacing = 144;
+        var startY = Math.max(metrics.bottom + 84, fallbackY[0]);
+
+        var textRowLayout = SAUI_computeCenteredRow(2, {
+                centerX: metrics.centerX,
+                baseSpacing: wrapperWidth + 148,
+                tileSpan: wrapperWidth,
+                maxSpan: availableSpan
+        });
+
+        var positions =
+                textRowLayout && textRowLayout.positions && textRowLayout.positions.length >= 2
+                        ? textRowLayout.positions
+                        : [metrics.centerX - wrapperWidth * 0.5, metrics.centerX + wrapperWidth * 0.5];
+
+        return {
+                xPositions: [positions[0], positions[1], positions[0], positions[1]],
+                yPositions: [startY, startY, startY + rowSpacing, startY + rowSpacing]
+        };
+}
+
+function computeCycleRaceImageChoiceLayout() {
+
+        var fallbackX = [360, 520, 760, 920];
+        var fallbackY = [556, 556, 556, 556];
+
+        if (typeof SAUI_computeCenteredRow !== "function") {
+                return {
+                        xPositions: fallbackX,
+                        yPositions: fallbackY
+                };
+        }
+
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        var circleDiameter = 224;
+        var horizontalPadding = 72;
+        var availableSpan = Math.max(metrics.width - horizontalPadding * 2, circleDiameter * 4 + 240);
+        var rowY = Math.max(metrics.bottom + 108, fallbackY[0]);
+
+        var imageRowLayout = SAUI_computeCenteredRow(4, {
+                centerX: metrics.centerX,
+                baseSpacing: circleDiameter + 86,
+                tileSpan: circleDiameter,
+                maxSpan: availableSpan
+        });
+
+        var positions =
+                imageRowLayout && imageRowLayout.positions && imageRowLayout.positions.length >= 4
+                        ? imageRowLayout.positions
+                        : [
+                                metrics.centerX - circleDiameter * 1.5,
+                                metrics.centerX - circleDiameter * 0.5,
+                                metrics.centerX + circleDiameter * 0.5,
+                                metrics.centerX + circleDiameter * 1.5
+                        ];
+
+        return {
+                xPositions: positions,
+                yPositions: [rowY, rowY, rowY, rowY]
+        };
+}
+
+function centerCycleRaceOptionBitmap(bitmap) {
+
+        if (!bitmap || bitmap.__cycleRaceCentered) {
+                return;
+        }
+
+        var bounds = null;
+
+        if (typeof getBitmapNaturalBounds === "function") {
+                bounds = getBitmapNaturalBounds(bitmap);
+        }
+
+        if (!bounds && typeof bitmap.getBounds === "function") {
+                bounds = bitmap.getBounds();
+        }
+
+        if (!bounds && bitmap.image) {
+                bounds = {
+                        x: 0,
+                        y: 0,
+                        width: bitmap.image.width || 0,
+                        height: bitmap.image.height || 0
+                };
+        }
+
+        if (!bounds || !bounds.width || !bounds.height) {
+                return;
+        }
+
+        var originX = (bounds.x || 0) + bounds.width / 2;
+        var originY = (bounds.y || 0) + bounds.height / 2;
+
+        bitmap.regX = originX;
+        bitmap.regY = originY;
+        bitmap.x = 0;
+        bitmap.y = 0;
+        bitmap.__cycleRaceCentered = true;
+}
+
 var chPosArr = [1, 0, 2, 3, 1, 0, 2, 3, 1, 0] // Only 4 Choice 
 
 var chPosArr1 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]// Only 10 questions Alternatively 
@@ -474,26 +631,15 @@ function CreateGameElements() {
 		this["cycle" + i].y = posY[i];
 
 	}
-        var choiceXArr = [480, 800, 480, 800]
-        var choiceYArr = [468, 468, 598, 598]
-        if (typeof SAUI_computeCenteredRow === "function") {
-                var textRowLayout = SAUI_computeCenteredRow(2, {
-                        centerX: 640,
-                        baseSpacing: 340,
-                        tileSpan: 340,
-                        maxSpan: 680
-                });
-                var textRowPositions = textRowLayout && textRowLayout.positions;
-                if (textRowPositions && textRowPositions.length >= 2) {
-                        choiceXArr = [
-                                textRowPositions[0],
-                                textRowPositions[1],
-                                textRowPositions[0],
-                                textRowPositions[1]
-                        ];
-                }
-                choiceYArr = [468, 468, 598, 598];
-        }
+        var textChoiceLayout = computeCycleRaceTextChoiceLayout();
+        var choiceXArr =
+                textChoiceLayout && textChoiceLayout.xPositions && textChoiceLayout.xPositions.length >= choiceCnt
+                        ? textChoiceLayout.xPositions.slice(0)
+                        : [480, 800, 480, 800];
+        var choiceYArr =
+                textChoiceLayout && textChoiceLayout.yPositions && textChoiceLayout.yPositions.length >= choiceCnt
+                        ? textChoiceLayout.yPositions.slice(0)
+                        : [512, 512, 648, 648];
 
         for (i = 0; i < choiceCnt; i++) {
                 choiceArr[i] = choice1.clone()
@@ -502,21 +648,15 @@ function CreateGameElements() {
                 choiceArr[i].y = 0;
         }
 
-        var choiceX1Arr =  [320, 520, 760, 960]
-        var choiceY1Arr = [540, 540, 540, 540]
-        if (typeof SAUI_computeCenteredRow === "function") {
-                var imageRowLayout = SAUI_computeCenteredRow(4, {
-                        centerX: 640,
-                        baseSpacing: 220,
-                        tileSpan: 220,
-                        maxSpan: 880
-                });
-                var imageRowPositions = imageRowLayout && imageRowLayout.positions;
-                if (imageRowPositions && imageRowPositions.length >= 4) {
-                        choiceX1Arr = imageRowPositions;
-                }
-                choiceY1Arr = [540, 540, 540, 540];
-        }
+        var imageChoiceLayout = computeCycleRaceImageChoiceLayout();
+        var choiceX1Arr =
+                imageChoiceLayout && imageChoiceLayout.xPositions && imageChoiceLayout.xPositions.length >= choiceCnt
+                        ? imageChoiceLayout.xPositions.slice(0)
+                        : [360, 520, 760, 920];
+        var choiceY1Arr =
+                imageChoiceLayout && imageChoiceLayout.yPositions && imageChoiceLayout.yPositions.length >= choiceCnt
+                        ? imageChoiceLayout.yPositions.slice(0)
+                        : [556, 556, 556, 556];
 
         for (i = 0; i < choiceCnt; i++) {
                 choiceArr1[i] = choice2.clone()
@@ -1143,14 +1283,14 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                 if (choiceArr[i1]) {
                         choiceArr[i1].visible = false;
                         choiceArr[i1].alpha = 1;
-                        choiceArr[i1].x = 0;
-                        choiceArr[i1].y = 0;
+                        centerCycleRaceOptionBitmap(choiceArr[i1]);
                         choiceArr[i1].mouseChildren = false;
                         choiceArr[i1].cursor = "pointer";
                         choiceArr[i1].__wrapper = textWrapper;
                         if (textWrapper && textWrapper.__hitArea) {
                                 choiceArr[i1].hitArea = textWrapper.__hitArea;
                         } else if (!textWrapper) {
+                                centerCycleRaceOptionBitmap(choiceArr[i1]);
                                 choiceArr[i1].x = cycleRaceTextChoicePositions[i1].x;
                                 choiceArr[i1].y = cycleRaceTextChoicePositions[i1].y;
                         }
@@ -1187,14 +1327,14 @@ function initializeCycleRaceChoiceWrappers(choiceXArr, choiceYArr, choiceX1Arr, 
                 if (choiceArr1[i1]) {
                         choiceArr1[i1].visible = false;
                         choiceArr1[i1].alpha = 1;
-                        choiceArr1[i1].x = 0;
-                        choiceArr1[i1].y = 0;
+                        centerCycleRaceOptionBitmap(choiceArr1[i1]);
                         choiceArr1[i1].mouseChildren = false;
                         choiceArr1[i1].cursor = "pointer";
                         choiceArr1[i1].__wrapper = imageWrapper;
                         if (imageWrapper && imageWrapper.__hitArea) {
                                 choiceArr1[i1].hitArea = imageWrapper.__hitArea;
                         } else if (!imageWrapper) {
+                                centerCycleRaceOptionBitmap(choiceArr1[i1]);
                                 choiceArr1[i1].x = cycleRaceImageChoicePositions[i1].x;
                                 choiceArr1[i1].y = cycleRaceImageChoicePositions[i1].y;
                         }

@@ -5265,7 +5265,7 @@ function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
 
     if (content) {
       content.x = 0;
-      content.y = 4;
+      content.y = 0;
     }
 
     if (badgeBg) {
