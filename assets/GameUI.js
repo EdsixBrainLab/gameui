@@ -24,37 +24,37 @@ var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
 var choiceIdleStates = [];
 
 var cycleRaceSpeechBubblePalette = {
-  stroke: ["rgba(163,198,255,0.92)", "rgba(64,88,192,0.82)"],
-  fill: ["rgba(112,151,255,0.98)", "rgba(54,80,189,0.96)"],
-  highlight: ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.05)"],
-  label: ["rgba(48,70,140,0.96)", "rgba(32,48,108,0.96)"],
-  pulse: ["rgba(90,130,255,0.32)", "rgba(42,64,160,0.0)"]
+  stroke: ["rgba(168,212,255,0.92)", "rgba(66,112,208,0.84)"],
+  fill: ["rgba(124,176,255,0.98)", "rgba(60,92,204,0.96)"],
+  highlight: ["rgba(255,255,255,0.46)", "rgba(255,255,255,0.06)"],
+  label: ["rgba(48,74,142,0.96)", "rgba(34,52,112,0.96)"],
+  pulse: ["rgba(104,152,255,0.32)", "rgba(46,74,176,0.08)"]
 };
 
 var cycleRaceTextOptionPalette = {
-  fill: ["rgba(96,236,203,0.98)", "rgba(42,168,130,0.98)"],
-  stroke: ["rgba(166,255,232,0.92)", "rgba(36,128,105,0.88)"],
-  hoverFill: ["rgba(116,248,212,1)", "rgba(54,186,142,1)"],
-  hoverStroke: ["rgba(190,255,240,0.96)", "rgba(44,138,112,0.9)"],
-  correctFill: ["rgba(132,255,220,1)", "rgba(50,190,140,1)"],
-  correctStroke: ["rgba(204,255,238,0.96)", "rgba(66,146,120,0.9)"],
-  wrongFill: ["rgba(255,178,178,0.98)", "rgba(214,92,110,0.96)"],
-  wrongStroke: ["rgba(255,214,214,0.94)", "rgba(182,68,88,0.9)"],
-  highlight: ["rgba(255,255,255,0.56)", "rgba(255,255,255,0.05)"],
-  sheen: ["rgba(255,255,255,0.8)", "rgba(255,255,255,0)"]
+  fill: ["rgba(120,224,255,0.98)", "rgba(64,144,236,0.98)"],
+  stroke: ["rgba(186,244,255,0.92)", "rgba(52,116,206,0.9)"],
+  hoverFill: ["rgba(140,236,255,1)", "rgba(82,168,246,1)"],
+  hoverStroke: ["rgba(208,250,255,0.96)", "rgba(62,134,214,0.92)"],
+  correctFill: ["rgba(148,255,228,1)", "rgba(68,190,158,1)"],
+  correctStroke: ["rgba(210,255,240,0.96)", "rgba(80,152,138,0.92)"],
+  wrongFill: ["rgba(255,186,196,0.98)", "rgba(220,96,128,0.96)"],
+  wrongStroke: ["rgba(255,220,226,0.94)", "rgba(188,72,104,0.9)"],
+  highlight: ["rgba(255,255,255,0.54)", "rgba(255,255,255,0.08)"],
+  sheen: ["rgba(255,255,255,0.36)", "rgba(255,255,255,0)"]
 };
 
 var cycleRaceImageOptionPalette = {
-  fill: ["rgba(255,202,134,0.98)", "rgba(226,136,62,0.96)"],
-  stroke: ["rgba(255,228,180,0.9)", "rgba(214,112,48,0.88)"],
-  hoverFill: ["rgba(255,214,158,1)", "rgba(236,154,78,1)"],
-  hoverStroke: ["rgba(255,238,204,0.94)", "rgba(210,132,66,0.9)"],
-  correctFill: ["rgba(140,248,214,1)", "rgba(54,188,140,1)"],
-  correctStroke: ["rgba(206,255,238,0.94)", "rgba(72,146,124,0.9)"],
-  wrongFill: ["rgba(255,170,170,0.98)", "rgba(214,82,106,0.96)"],
-  wrongStroke: ["rgba(255,212,212,0.94)", "rgba(184,62,86,0.9)"],
-  highlight: ["rgba(255,255,255,0.5)", "rgba(255,255,255,0.08)"],
-  sheen: ["rgba(255,255,255,0.82)", "rgba(255,255,255,0)"]
+  fill: ["rgba(255,214,160,0.98)", "rgba(244,154,82,0.96)"],
+  stroke: ["rgba(255,236,200,0.9)", "rgba(226,128,70,0.88)"],
+  hoverFill: ["rgba(255,224,184,1)", "rgba(250,170,100,1)"],
+  hoverStroke: ["rgba(255,242,212,0.94)", "rgba(224,142,82,0.9)"],
+  correctFill: ["rgba(156,252,224,1)", "rgba(74,196,162,1)"],
+  correctStroke: ["rgba(214,255,242,0.94)", "rgba(90,156,140,0.9)"],
+  wrongFill: ["rgba(255,190,196,0.98)", "rgba(218,100,122,0.96)"],
+  wrongStroke: ["rgba(255,222,226,0.94)", "rgba(190,78,98,0.9)"],
+  highlight: ["rgba(255,255,255,0.46)", "rgba(255,255,255,0.08)"],
+  sheen: ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"]
 };
 
 function computeCenteredRowLayout(count, options) {
@@ -5074,13 +5074,33 @@ function SAUI_showCycleRaceSpeechBubble(bubble, delay) {
 
   bubble.visible = true;
   bubble.alpha = 0;
-  bubble.scaleX = bubble.scaleY = 0.94;
+
+  if (typeof bubble.__homeX !== "number") {
+    bubble.__homeX = typeof bubble.x === "number" ? bubble.x : 0;
+  } else if (typeof bubble.x === "number") {
+    bubble.__homeX = bubble.x;
+  }
+
+  if (typeof bubble.__homeY !== "number") {
+    bubble.__homeY = typeof bubble.y === "number" ? bubble.y : 0;
+  } else if (typeof bubble.y === "number") {
+    bubble.__homeY = bubble.y;
+  }
+
+  var baseY = bubble.__homeY != null ? bubble.__homeY : 0;
+
+  bubble.scaleX = bubble.scaleY = 0.9;
+  bubble.y = baseY - 42;
 
   createjs.Tween.removeTweens(bubble);
   createjs.Tween.get(bubble, { override: true })
     .wait(delay || 0)
-    .to({ alpha: 1, scaleX: 1.04, scaleY: 1.04 }, 260, createjs.Ease.quartOut)
-    .to({ scaleX: 1, scaleY: 1 }, 190, createjs.Ease.quadOut);
+    .to(
+      { alpha: 1, scaleX: 1.05, scaleY: 1.05, y: baseY + 12 },
+      300,
+      createjs.Ease.quartOut
+    )
+    .to({ scaleX: 1, scaleY: 1, y: baseY }, 260, createjs.Ease.bounceOut);
 
   if (bubble.__pulse) {
     var pulse = bubble.__pulse;
@@ -5098,12 +5118,25 @@ function SAUI_hideCycleRaceSpeechBubble(bubble) {
     return;
   }
 
+  var baseY =
+    typeof bubble.__homeY === "number"
+      ? bubble.__homeY
+      : typeof bubble.y === "number"
+      ? bubble.y
+      : 0;
+
   createjs.Tween.removeTweens(bubble);
   createjs.Tween.get(bubble, { override: true })
-    .to({ alpha: 0, scaleX: 0.95, scaleY: 0.95 }, 160, createjs.Ease.quadIn)
+    .to({ alpha: 0, scaleX: 0.94, scaleY: 0.94, y: baseY - 24 }, 180, createjs.Ease.quadIn)
     .call(function () {
       bubble.visible = false;
       bubble.scaleX = bubble.scaleY = 1;
+      if (typeof bubble.__homeX === "number") {
+        bubble.x = bubble.__homeX;
+      }
+      if (typeof bubble.__homeY === "number") {
+        bubble.y = bubble.__homeY;
+      }
     });
 
   if (bubble.__pulse) {
@@ -5441,13 +5474,16 @@ function SAUI_resetCycleRaceOptionBubble(wrapper) {
   if (wrapper.__sheen) {
     var sheen = wrapper.__sheen;
     createjs.Tween.removeTweens(sheen);
-    sheen.alpha = 0;
-    if (wrapper.__sheenBaseX != null) {
-      sheen.x = wrapper.__sheenBaseX;
-    }
-    if (wrapper.__sheenBaseY != null) {
-      sheen.y = wrapper.__sheenBaseY;
-    }
+    sheen.alpha = 0.22;
+    sheen.x = 0;
+    sheen.y = 0;
+  }
+
+  if (typeof wrapper.__homeX === "number") {
+    wrapper.x = wrapper.__homeX;
+  }
+  if (typeof wrapper.__homeY === "number") {
+    wrapper.y = wrapper.__homeY;
   }
 
   wrapper.scaleX = wrapper.scaleY = 1;
@@ -5463,13 +5499,32 @@ function SAUI_showCycleRaceOptionBubble(wrapper, delay) {
 
   wrapper.visible = true;
   wrapper.alpha = 0;
-  wrapper.scaleX = wrapper.scaleY = 0.88;
+  wrapper.scaleX = wrapper.scaleY = 0.9;
+
+  if (typeof wrapper.__homeX !== "number") {
+    wrapper.__homeX = typeof wrapper.x === "number" ? wrapper.x : 0;
+  } else if (typeof wrapper.x === "number") {
+    wrapper.__homeX = wrapper.x;
+  }
+
+  if (typeof wrapper.__homeY !== "number") {
+    wrapper.__homeY = typeof wrapper.y === "number" ? wrapper.y : 0;
+  } else if (typeof wrapper.y === "number") {
+    wrapper.__homeY = wrapper.y;
+  }
+
+  var baseY = wrapper.__homeY != null ? wrapper.__homeY : 0;
+  wrapper.y = baseY + 48;
 
   createjs.Tween.removeTweens(wrapper);
   createjs.Tween.get(wrapper, { override: true })
     .wait(delay || 0)
-    .to({ alpha: 1, scaleX: 1.08, scaleY: 1.08 }, 260, createjs.Ease.quartOut)
-    .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut);
+    .to(
+      { alpha: 1, scaleX: 1.08, scaleY: 1.08, y: baseY - 10 },
+      280,
+      createjs.Ease.quartOut
+    )
+    .to({ scaleX: 1, scaleY: 1, y: baseY }, 240, createjs.Ease.bounceOut);
 
   if (wrapper.__pulse) {
     var pulse = wrapper.__pulse;
@@ -5483,19 +5538,9 @@ function SAUI_showCycleRaceOptionBubble(wrapper, delay) {
   }
 
   if (wrapper.__sheen) {
-    var sheen = wrapper.__sheen;
-    var baseX = wrapper.__sheenBaseX != null ? wrapper.__sheenBaseX : sheen.x || 0;
-    var baseY = wrapper.__sheenBaseY != null ? wrapper.__sheenBaseY : sheen.y || 0;
-    var span = wrapper.__sheenSpan != null ? wrapper.__sheenSpan : wrapper.__width || 0;
-    createjs.Tween.removeTweens(sheen);
-    sheen.alpha = 0;
-    sheen.x = baseX - span * 0.45;
-    sheen.y = baseY;
-    createjs.Tween.get(sheen, { override: true })
-      .wait((delay || 0) + 160)
-      .to({ alpha: 0.85 }, 120, createjs.Ease.quadOut)
-      .to({ x: baseX + span * 0.45 }, 360, createjs.Ease.sineOut)
-      .to({ alpha: 0 }, 220, createjs.Ease.quadIn);
+    wrapper.__sheen.alpha = 0.22;
+    wrapper.__sheen.x = 0;
+    wrapper.__sheen.y = 0;
   }
 }
 
@@ -5525,6 +5570,15 @@ function SAUI_startCycleRaceOptionIdle(wrapper) {
     return;
   }
 
+  if (typeof wrapper.__homeX === "number") {
+    wrapper.x = wrapper.__homeX;
+  }
+  if (typeof wrapper.__homeY !== "number") {
+    wrapper.__homeY = typeof wrapper.y === "number" ? wrapper.y : 0;
+  }
+
+  var baseY = wrapper.__homeY != null ? wrapper.__homeY : 0;
+
   if (wrapper.__pulse) {
     var pulse = wrapper.__pulse;
     createjs.Tween.removeTweens(pulse);
@@ -5544,22 +5598,13 @@ function SAUI_startCycleRaceOptionIdle(wrapper) {
       .to({ alpha: 0.78 }, 720, createjs.Ease.sineInOut);
   }
 
-  if (wrapper.__sheen) {
-    var sheen = wrapper.__sheen;
-    var baseX = wrapper.__sheenBaseX != null ? wrapper.__sheenBaseX : sheen.x || 0;
-    var baseY = wrapper.__sheenBaseY != null ? wrapper.__sheenBaseY : sheen.y || 0;
-    var span = wrapper.__sheenSpan != null ? wrapper.__sheenSpan : wrapper.__width || 0;
-    createjs.Tween.removeTweens(sheen);
-    sheen.alpha = 0;
-    sheen.y = baseY;
-    sheen.x = baseX - span * 0.55;
-    createjs.Tween.get(sheen, { override: false, loop: true })
-      .to({ alpha: 0.78 }, 200, createjs.Ease.quadOut)
-      .to({ x: baseX + span * 0.55 }, 700, createjs.Ease.sineInOut)
-      .to({ alpha: 0 }, 220, createjs.Ease.quadIn)
-      .wait(260)
-      .to({ x: baseX - span * 0.55 }, 0);
-  }
+  createjs.Tween.removeTweens(wrapper);
+  createjs.Tween.get(wrapper, { override: false, loop: true })
+    .wait(220 + Math.random() * 200)
+    .to({ y: baseY - 12 }, 360, createjs.Ease.quadOut)
+    .to({ y: baseY + 8 }, 420, createjs.Ease.sineInOut)
+    .to({ y: baseY }, 360, createjs.Ease.sineOut)
+    .wait(160);
 }
 
 function SAUI_stopCycleRaceOptionIdle(wrapper) {
@@ -5578,17 +5623,14 @@ function SAUI_stopCycleRaceOptionIdle(wrapper) {
     wrapper.__highlight.alpha = 0.86;
   }
 
-  if (wrapper.__sheen) {
-    var sheen = wrapper.__sheen;
-    createjs.Tween.removeTweens(sheen);
-    sheen.alpha = 0;
-    if (wrapper.__sheenBaseX != null) {
-      sheen.x = wrapper.__sheenBaseX;
-    }
-    if (wrapper.__sheenBaseY != null) {
-      sheen.y = wrapper.__sheenBaseY;
-    }
+  createjs.Tween.removeTweens(wrapper);
+  if (typeof wrapper.__homeX === "number") {
+    wrapper.x = wrapper.__homeX;
   }
+  if (typeof wrapper.__homeY === "number") {
+    wrapper.y = wrapper.__homeY;
+  }
+  wrapper.scaleX = wrapper.scaleY = 1;
 }
 
 function SAUI_markCycleRaceOptionResult(wrapper, isCorrect) {
