@@ -23,6 +23,50 @@ var CLUE_SLOT_SUCCESS_COLORS = ["rgba(94,222,201,0.94)", "rgba(34,156,136,0.94)"
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,153,171,0.94)", "rgba(184,46,89,0.94)"];
 var choiceIdleStates = [];
 
+var cycleRaceSpeechBubblePalette = {
+  stroke: ["rgba(163,198,255,0.92)", "rgba(64,88,192,0.82)"],
+  fill: ["rgba(112,151,255,0.98)", "rgba(54,80,189,0.96)"],
+  highlight: ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.05)"],
+  label: ["rgba(48,70,140,0.96)", "rgba(32,48,108,0.96)"],
+  pulse: ["rgba(90,130,255,0.32)", "rgba(42,64,160,0.0)"]
+};
+
+var cycleRaceTextOptionPalette = {
+  fill: ["rgba(96,236,203,0.98)", "rgba(42,168,130,0.98)"],
+  stroke: ["rgba(166,255,232,0.92)", "rgba(36,128,105,0.88)"],
+  hoverFill: ["rgba(116,248,212,1)", "rgba(54,186,142,1)"],
+  hoverStroke: ["rgba(190,255,240,0.96)", "rgba(44,138,112,0.9)"],
+  correctFill: ["rgba(132,255,220,1)", "rgba(50,190,140,1)"],
+  correctStroke: ["rgba(204,255,238,0.96)", "rgba(66,146,120,0.9)"],
+  wrongFill: ["rgba(255,178,178,0.98)", "rgba(214,92,110,0.96)"],
+  wrongStroke: ["rgba(255,214,214,0.94)", "rgba(182,68,88,0.9)"],
+  highlight: ["rgba(255,255,255,0.56)", "rgba(255,255,255,0.05)"],
+  badge: {
+    base: ["rgba(36,58,104,0.96)", "rgba(22,37,74,0.96)"],
+    correct: ["rgba(56,170,132,0.96)", "rgba(28,110,92,0.96)"],
+    wrong: ["rgba(220,96,122,0.96)", "rgba(166,38,72,0.96)"],
+    text: "#F7FBFF"
+  }
+};
+
+var cycleRaceImageOptionPalette = {
+  fill: ["rgba(255,202,134,0.98)", "rgba(226,136,62,0.96)"],
+  stroke: ["rgba(255,228,180,0.9)", "rgba(214,112,48,0.88)"],
+  hoverFill: ["rgba(255,214,158,1)", "rgba(236,154,78,1)"],
+  hoverStroke: ["rgba(255,238,204,0.94)", "rgba(210,132,66,0.9)"],
+  correctFill: ["rgba(140,248,214,1)", "rgba(54,188,140,1)"],
+  correctStroke: ["rgba(206,255,238,0.94)", "rgba(72,146,124,0.9)"],
+  wrongFill: ["rgba(255,170,170,0.98)", "rgba(214,82,106,0.96)"],
+  wrongStroke: ["rgba(255,212,212,0.94)", "rgba(184,62,86,0.9)"],
+  highlight: ["rgba(255,255,255,0.5)", "rgba(255,255,255,0.08)"],
+  badge: {
+    base: ["rgba(36,58,104,0.96)", "rgba(22,37,74,0.96)"],
+    correct: ["rgba(56,170,132,0.96)", "rgba(28,110,92,0.96)"],
+    wrong: ["rgba(220,96,122,0.96)", "rgba(166,38,72,0.96)"],
+    text: "#F7FBFF"
+  }
+};
+
 function computeCenteredRowLayout(count, options) {
   options = options || {};
   var centerX =
@@ -4732,4 +4776,755 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
     refresh: draw,
     destroy: () => { if (tickH) createjs.Ticker.off("tick", tickH); if (bg.parent) bg.parent.removeChild(bg); }
   };
+}
+
+function SAUI_createCycleRaceSpeechBubble(options) {
+  options = options || {};
+
+  var bubble = new createjs.Container();
+  bubble.visible = false;
+  bubble.alpha = 0;
+  bubble.mouseEnabled = false;
+  bubble.mouseChildren = true;
+
+  bubble.__options = {
+    width: options.width != null ? options.width : 760,
+    height: options.height != null ? options.height : 308,
+    tailHeight: options.tailHeight != null ? options.tailHeight : 56,
+    tailWidth: options.tailWidth != null ? options.tailWidth : 140,
+    cornerRadius: options.cornerRadius != null ? options.cornerRadius : 54,
+    title: options.title != null ? options.title : "Question"
+  };
+
+  var shadow = new createjs.Shape();
+  var pulse = new createjs.Shape();
+  var body = new createjs.Shape();
+  var highlight = new createjs.Shape();
+  var content = new createjs.Container();
+  var labelBg = new createjs.Shape();
+  var labelText = new createjs.Text(bubble.__options.title, "800 32px 'Baloo 2'", "#F7FBFF");
+  labelText.textAlign = "center";
+  labelText.textBaseline = "middle";
+
+  bubble.addChild(shadow, pulse, body, highlight, content, labelBg, labelText);
+
+  bubble.__shadow = shadow;
+  bubble.__pulse = pulse;
+  bubble.__body = body;
+  bubble.__highlight = highlight;
+  bubble.__content = content;
+  bubble.__labelBg = labelBg;
+  bubble.__labelText = labelText;
+  bubble.__palette = cycleRaceSpeechBubblePalette;
+
+  renderCycleRaceSpeechBubble(bubble, options);
+
+  return bubble;
+}
+
+function renderCycleRaceSpeechBubble(bubble, overrideOptions) {
+  if (!bubble) {
+    return;
+  }
+
+  bubble.__options = bubble.__options || {};
+  overrideOptions = overrideOptions || {};
+
+  var width =
+    overrideOptions.width != null ? overrideOptions.width : bubble.__options.width;
+  var height =
+    overrideOptions.height != null ? overrideOptions.height : bubble.__options.height;
+  var tailHeight =
+    overrideOptions.tailHeight != null
+      ? overrideOptions.tailHeight
+      : bubble.__options.tailHeight;
+  var tailWidth =
+    overrideOptions.tailWidth != null ? overrideOptions.tailWidth : bubble.__options.tailWidth;
+  var cornerRadius =
+    overrideOptions.cornerRadius != null
+      ? overrideOptions.cornerRadius
+      : bubble.__options.cornerRadius;
+  var title =
+    overrideOptions.title != null ? overrideOptions.title : bubble.__options.title;
+
+  bubble.__options.width = width;
+  bubble.__options.height = height;
+  bubble.__options.tailHeight = tailHeight;
+  bubble.__options.tailWidth = tailWidth;
+  bubble.__options.cornerRadius = cornerRadius;
+  bubble.__options.title = title;
+
+  var palette = bubble.__palette || cycleRaceSpeechBubblePalette;
+  var bodyHeight = Math.max(height - tailHeight, 180);
+  var halfWidth = width / 2;
+  var halfBody = bodyHeight / 2;
+  var topY = -halfBody;
+  var bottomY = halfBody;
+  var highlightInset = 26;
+  var highlightRadius = Math.max(cornerRadius - 14, 24);
+  var highlightTailHeight = Math.max(tailHeight - 18, 28);
+  var highlightTailWidth = Math.max(tailWidth - 34, 86);
+
+  var shadow = bubble.__shadow;
+  var body = bubble.__body;
+  var highlight = bubble.__highlight;
+  var pulse = bubble.__pulse;
+  var labelBg = bubble.__labelBg;
+  var labelText = bubble.__labelText;
+  var content = bubble.__content;
+
+  if (shadow) {
+    shadow.graphics
+      .clear()
+      .beginRadialGradientFill(
+        ["rgba(8,18,44,0.28)", "rgba(8,18,44,0)"] ,
+        [0, 1],
+        0,
+        bottomY + tailHeight * 0.62,
+        0,
+        0,
+        bottomY + tailHeight * 0.62,
+        width * 0.68
+      )
+      .drawEllipse(-width * 0.36, bottomY + tailHeight * 0.72, width * 0.72, 54);
+    shadow.alpha = 0.52;
+  }
+
+  if (body) {
+    body.graphics
+      .clear()
+      .setStrokeStyle(5, "round", "round")
+      .beginLinearGradientStroke(
+        palette.stroke,
+        [0, 1],
+        -halfWidth,
+        topY,
+        halfWidth,
+        bottomY
+      )
+      .beginLinearGradientFill(
+        palette.fill,
+        [0, 1],
+        -halfWidth,
+        topY,
+        halfWidth,
+        bottomY
+      )
+      .moveTo(-halfWidth + cornerRadius, topY)
+      .quadraticCurveTo(-halfWidth, topY, -halfWidth, topY + cornerRadius)
+      .lineTo(-halfWidth, bottomY - cornerRadius)
+      .quadraticCurveTo(-halfWidth, bottomY, -halfWidth + cornerRadius, bottomY)
+      .lineTo(-tailWidth / 2, bottomY)
+      .lineTo(0, bottomY + tailHeight)
+      .lineTo(tailWidth / 2, bottomY)
+      .lineTo(halfWidth - cornerRadius, bottomY)
+      .quadraticCurveTo(halfWidth, bottomY, halfWidth, bottomY - cornerRadius)
+      .lineTo(halfWidth, topY + cornerRadius)
+      .quadraticCurveTo(halfWidth, topY, halfWidth - cornerRadius, topY)
+      .lineTo(-halfWidth + cornerRadius, topY)
+      .closePath();
+  }
+
+  if (pulse) {
+    pulse.graphics
+      .clear()
+      .beginLinearGradientFill(
+        palette.pulse,
+        [0, 1],
+        -halfWidth,
+        topY,
+        halfWidth,
+        bottomY + tailHeight
+      )
+      .moveTo(-halfWidth + cornerRadius, topY)
+      .quadraticCurveTo(-halfWidth, topY, -halfWidth, topY + cornerRadius)
+      .lineTo(-halfWidth, bottomY - cornerRadius)
+      .quadraticCurveTo(-halfWidth, bottomY, -halfWidth + cornerRadius, bottomY)
+      .lineTo(-tailWidth / 2, bottomY)
+      .lineTo(0, bottomY + tailHeight)
+      .lineTo(tailWidth / 2, bottomY)
+      .lineTo(halfWidth - cornerRadius, bottomY)
+      .quadraticCurveTo(halfWidth, bottomY, halfWidth, bottomY - cornerRadius)
+      .lineTo(halfWidth, topY + cornerRadius)
+      .quadraticCurveTo(halfWidth, topY, halfWidth - cornerRadius, topY)
+      .lineTo(-halfWidth + cornerRadius, topY)
+      .closePath();
+    pulse.alpha = 0;
+    pulse.__baseScale = 1.04;
+  }
+
+  if (highlight) {
+    var highlightTop = topY + highlightInset;
+    var highlightBottom = bottomY - highlightInset;
+    highlight.graphics
+      .clear()
+      .beginLinearGradientFill(
+        palette.highlight,
+        [0, 1],
+        -halfWidth + highlightInset,
+        highlightTop,
+        halfWidth - highlightInset,
+        highlightBottom
+      )
+      .moveTo(-halfWidth + highlightInset + highlightRadius, highlightTop)
+      .quadraticCurveTo(
+        -halfWidth + highlightInset,
+        highlightTop,
+        -halfWidth + highlightInset,
+        highlightTop + highlightRadius
+      )
+      .lineTo(-halfWidth + highlightInset, highlightBottom - highlightRadius)
+      .quadraticCurveTo(
+        -halfWidth + highlightInset,
+        highlightBottom,
+        -halfWidth + highlightInset + highlightRadius,
+        highlightBottom
+      )
+      .lineTo(-highlightTailWidth / 2, highlightBottom)
+      .lineTo(0, highlightBottom + Math.max(highlightTailHeight - 12, 20))
+      .lineTo(highlightTailWidth / 2, highlightBottom)
+      .lineTo(halfWidth - highlightInset - highlightRadius, highlightBottom)
+      .quadraticCurveTo(
+        halfWidth - highlightInset,
+        highlightBottom,
+        halfWidth - highlightInset,
+        highlightBottom - highlightRadius
+      )
+      .lineTo(halfWidth - highlightInset, highlightTop + highlightRadius)
+      .quadraticCurveTo(
+        halfWidth - highlightInset,
+        highlightTop,
+        halfWidth - highlightInset - highlightRadius,
+        highlightTop
+      )
+      .lineTo(-halfWidth + highlightInset + highlightRadius, highlightTop)
+      .closePath();
+    highlight.alpha = 0.84;
+  }
+
+  if (labelBg) {
+    var labelWidth = Math.min(188, Math.max(150, width * 0.22));
+    var labelHeight = 48;
+    labelBg.graphics
+      .clear()
+      .beginLinearGradientFill(
+        palette.label,
+        [0, 1],
+        -labelWidth / 2,
+        0,
+        labelWidth / 2,
+        0
+      )
+      .drawRoundRect(-labelWidth / 2, -labelHeight / 2, labelWidth, labelHeight, labelHeight / 2);
+    labelBg.x = -halfWidth + labelWidth / 2 + 28;
+    labelBg.y = topY - labelHeight / 2 - 18;
+    labelBg.alpha = 0.94;
+  }
+
+  if (labelText) {
+    labelText.text = title || "Question";
+    labelText.font = "800 32px 'Baloo 2'";
+    labelText.x = labelBg ? labelBg.x : -halfWidth + 90;
+    labelText.y = labelBg ? labelBg.y : topY - 18;
+    labelText.color = "#F7FBFF";
+  }
+
+  if (content) {
+    content.x = 0;
+    content.y = -tailHeight * 0.16;
+  }
+}
+
+function SAUI_showCycleRaceSpeechBubble(bubble, delay) {
+  if (!bubble) {
+    return;
+  }
+
+  renderCycleRaceSpeechBubble(bubble);
+
+  bubble.visible = true;
+  bubble.alpha = 0;
+  bubble.scaleX = bubble.scaleY = 0.94;
+
+  createjs.Tween.removeTweens(bubble);
+  createjs.Tween.get(bubble, { override: true })
+    .wait(delay || 0)
+    .to({ alpha: 1, scaleX: 1.04, scaleY: 1.04 }, 260, createjs.Ease.quartOut)
+    .to({ scaleX: 1, scaleY: 1 }, 190, createjs.Ease.quadOut);
+
+  if (bubble.__pulse) {
+    var pulse = bubble.__pulse;
+    pulse.alpha = 0.18;
+    pulse.scaleX = pulse.scaleY = 1;
+    createjs.Tween.removeTweens(pulse);
+    createjs.Tween.get(pulse, { override: true, loop: true })
+      .to({ alpha: 0.38, scaleX: pulse.__baseScale || 1.04, scaleY: pulse.__baseScale || 1.04 }, 1100, createjs.Ease.sineInOut)
+      .to({ alpha: 0.18, scaleX: 1, scaleY: 1 }, 1100, createjs.Ease.sineInOut);
+  }
+}
+
+function SAUI_hideCycleRaceSpeechBubble(bubble) {
+  if (!bubble) {
+    return;
+  }
+
+  createjs.Tween.removeTweens(bubble);
+  createjs.Tween.get(bubble, { override: true })
+    .to({ alpha: 0, scaleX: 0.95, scaleY: 0.95 }, 160, createjs.Ease.quadIn)
+    .call(function () {
+      bubble.visible = false;
+      bubble.scaleX = bubble.scaleY = 1;
+    });
+
+  if (bubble.__pulse) {
+    createjs.Tween.removeTweens(bubble.__pulse);
+    bubble.__pulse.alpha = 0;
+  }
+}
+
+function SAUI_createCycleRaceOptionBubble(options) {
+  options = options || {};
+  var variant = options.variant === "image" ? "image" : "text";
+
+  var wrapper = new createjs.Container();
+  wrapper.visible = false;
+  wrapper.alpha = 0;
+  wrapper.mouseEnabled = false;
+  wrapper.mouseChildren = true;
+  wrapper.__variant = variant;
+  wrapper.__options = {
+    width: options.width,
+    height: options.height,
+    cornerRadius: options.cornerRadius,
+    radius: options.radius
+  };
+  wrapper.__palette = variant === "image" ? cycleRaceImageOptionPalette : cycleRaceTextOptionPalette;
+  wrapper.__badgePalette = wrapper.__palette.badge;
+
+  var shadow = new createjs.Shape();
+  var pulse = new createjs.Shape();
+  var background = new createjs.Shape();
+  var highlight = new createjs.Shape();
+  var content = new createjs.Container();
+  var badgeBg = new createjs.Shape();
+  var badgeLabel = new createjs.Text("", "700 26px 'Baloo 2'", wrapper.__palette.badge.text);
+  badgeLabel.textAlign = "center";
+  badgeLabel.textBaseline = "middle";
+  var hitArea = new createjs.Shape();
+
+  wrapper.addChild(shadow, pulse, background, highlight, content, badgeBg, badgeLabel);
+
+  wrapper.__shadow = shadow;
+  wrapper.__pulse = pulse;
+  wrapper.__background = background;
+  wrapper.__highlight = highlight;
+  wrapper.__content = content;
+  wrapper.__badgeBg = badgeBg;
+  wrapper.__badgeLabel = badgeLabel;
+  wrapper.__hitArea = hitArea;
+  wrapper.__badgeRadius = variant === "image" ? 26 : 24;
+  wrapper.__pulse.__baseScale = variant === "image" ? 1.1 : 1.08;
+  wrapper.__pulse.alpha = 0;
+
+  layoutCycleRaceOptionBubble(wrapper, options);
+
+  return wrapper;
+}
+
+function layoutCycleRaceOptionBubble(wrapper, overrideOptions) {
+  if (!wrapper) {
+    return;
+  }
+
+  wrapper.__options = wrapper.__options || {};
+  overrideOptions = overrideOptions || {};
+  var variant = wrapper.__variant || "text";
+
+  var width =
+    overrideOptions.width != null ? overrideOptions.width : wrapper.__options.width;
+  var height =
+    overrideOptions.height != null ? overrideOptions.height : wrapper.__options.height;
+  var cornerRadius =
+    overrideOptions.cornerRadius != null
+      ? overrideOptions.cornerRadius
+      : wrapper.__options.cornerRadius;
+  var radius =
+    overrideOptions.radius != null ? overrideOptions.radius : wrapper.__options.radius;
+
+  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
+
+  var shadow = wrapper.__shadow;
+  var pulse = wrapper.__pulse;
+  var background = wrapper.__background;
+  var highlight = wrapper.__highlight;
+  var badgeBg = wrapper.__badgeBg;
+  var badgeLabel = wrapper.__badgeLabel;
+  var content = wrapper.__content;
+  var hitArea = wrapper.__hitArea;
+
+  if (variant === "image") {
+    var circleRadius = radius != null ? radius : 112;
+    wrapper.__radius = circleRadius;
+    wrapper.__width = circleRadius * 2;
+    wrapper.__height = circleRadius * 2;
+
+    if (shadow) {
+      shadow.graphics
+        .clear()
+        .beginRadialGradientFill(
+          ["rgba(8,18,44,0.32)", "rgba(8,18,44,0)"] ,
+          [0, 1],
+          0,
+          circleRadius + 12,
+          0,
+          0,
+          circleRadius + 12,
+          circleRadius * 1.42
+        )
+        .drawEllipse(-circleRadius * 0.8, circleRadius + 18, circleRadius * 1.6, 52);
+      shadow.alpha = 0.48;
+    }
+
+    if (pulse) {
+      pulse.graphics
+        .clear()
+        .beginRadialGradientFill(
+          [palette.fill[0], palette.fill[1]],
+          [0, 1],
+          0,
+          -circleRadius * 0.65,
+          circleRadius * 0.2,
+          0,
+          0,
+          circleRadius * 1.18
+        )
+        .drawCircle(0, 0, circleRadius);
+      pulse.alpha = 0;
+    }
+
+    if (hitArea) {
+      hitArea.graphics.clear().beginFill("#000").drawCircle(0, 0, circleRadius);
+    }
+
+    if (content) {
+      content.x = 0;
+      content.y = 0;
+    }
+
+    if (badgeBg) {
+      badgeBg.x = 0;
+      badgeBg.y = -circleRadius - wrapper.__badgeRadius + 10;
+    }
+  } else {
+    var rectWidth = width != null ? width : 324;
+    var rectHeight = height != null ? height : 120;
+    var rectRadius = cornerRadius != null ? cornerRadius : 44;
+
+    wrapper.__width = rectWidth;
+    wrapper.__height = rectHeight;
+    wrapper.__radius = rectRadius;
+
+    if (shadow) {
+      shadow.graphics
+        .clear()
+        .beginRadialGradientFill(
+          ["rgba(8,18,44,0.32)", "rgba(8,18,44,0)"] ,
+          [0, 1],
+          0,
+          rectHeight / 2 + 12,
+          0,
+          0,
+          rectHeight / 2 + 12,
+          rectWidth * 0.86
+        )
+        .drawEllipse(-rectWidth / 2, rectHeight / 2 + 18, rectWidth, 46);
+      shadow.alpha = 0.46;
+    }
+
+    if (pulse) {
+      pulse.graphics
+        .clear()
+        .beginLinearGradientFill(
+          [palette.fill[0], palette.fill[1]],
+          [0, 1],
+          -rectWidth / 2,
+          -rectHeight / 2,
+          rectWidth / 2,
+          rectHeight / 2
+        )
+        .drawRoundRect(-rectWidth / 2, -rectHeight / 2, rectWidth, rectHeight, rectRadius);
+      pulse.alpha = 0;
+    }
+
+    if (hitArea) {
+      hitArea.graphics
+        .clear()
+        .beginFill("#000")
+        .drawRoundRect(-rectWidth / 2, -rectHeight / 2, rectWidth, rectHeight, rectRadius);
+    }
+
+    if (content) {
+      content.x = 0;
+      content.y = 4;
+    }
+
+    if (badgeBg) {
+      badgeBg.x = -rectWidth / 2 + wrapper.__badgeRadius + 14;
+      badgeBg.y = -rectHeight / 2 - wrapper.__badgeRadius + 6;
+    }
+  }
+
+  if (badgeLabel) {
+    badgeLabel.x = badgeBg ? badgeBg.x : 0;
+    badgeLabel.y = badgeBg ? badgeBg.y : 0;
+    badgeLabel.color = wrapper.__palette.badge.text;
+  }
+
+  paintCycleRaceOptionBackground(wrapper, wrapper.__palette.fill, wrapper.__palette.stroke);
+  paintCycleRaceOptionBadge(wrapper, "base");
+}
+
+function paintCycleRaceOptionBackground(wrapper, fillColors, strokeColors) {
+  if (!wrapper) {
+    return;
+  }
+
+  var variant = wrapper.__variant || "text";
+  var background = wrapper.__background;
+  var highlight = wrapper.__highlight;
+  var width = wrapper.__width;
+  var height = wrapper.__height;
+  var radius = wrapper.__radius;
+  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
+
+  var fill = fillColors || palette.fill;
+  var stroke = strokeColors || palette.stroke;
+
+  if (background) {
+    background.graphics.clear().setStrokeStyle(4, "round", "round");
+
+    if (variant === "image") {
+      background.graphics
+        .beginLinearGradientStroke(stroke, [0, 1], -radius, -radius, radius, radius)
+        .beginRadialGradientFill(
+          [fill[0], fill[1]],
+          [0, 1],
+          0,
+          -radius * 0.6,
+          radius * 0.2,
+          0,
+          0,
+          radius
+        )
+        .drawCircle(0, 0, radius);
+    } else {
+      background.graphics
+        .beginLinearGradientStroke(stroke, [0, 1], -width / 2, -height / 2, width / 2, height / 2)
+        .beginLinearGradientFill(fill, [0, 1], -width / 2, -height / 2, width / 2, height / 2)
+        .drawRoundRect(-width / 2, -height / 2, width, height, radius);
+    }
+  }
+
+  if (highlight) {
+    highlight.graphics.clear();
+
+    if (variant === "image") {
+      highlight.graphics
+        .beginRadialGradientFill(
+          palette.highlight,
+          [0, 1],
+          0,
+          -radius * 0.65,
+          radius * 0.25,
+          0,
+          0,
+          radius * 0.92
+        )
+        .drawCircle(0, 0, Math.max(radius - 16, 40));
+    } else {
+      var insetX = Math.min(44, Math.max(28, width * 0.14));
+      var insetY = Math.min(42, Math.max(24, height * 0.18));
+      highlight.graphics
+        .beginLinearGradientFill(
+          palette.highlight,
+          [0, 1],
+          -width / 2 + insetX,
+          -height / 2 + insetY,
+          width / 2 - insetX,
+          height / 2 - insetY
+        )
+        .drawRoundRect(
+          -width / 2 + insetX,
+          -height / 2 + insetY,
+          width - insetX * 2,
+          height - insetY * 2,
+          Math.max(radius - 14, 20)
+        );
+    }
+    highlight.alpha = 0.86;
+  }
+}
+
+function paintCycleRaceOptionBadge(wrapper, state) {
+  if (!wrapper) {
+    return;
+  }
+
+  var badgeBg = wrapper.__badgeBg;
+  if (!badgeBg) {
+    return;
+  }
+
+  var palette = wrapper.__badgePalette || cycleRaceTextOptionPalette.badge;
+  var colors =
+    state === "correct"
+      ? palette.correct
+      : state === "wrong"
+      ? palette.wrong
+      : palette.base;
+  var radius = wrapper.__badgeRadius || 24;
+  badgeBg.graphics
+    .clear()
+    .beginLinearGradientFill(colors, [0, 1], -radius, 0, radius, 0)
+    .drawCircle(0, 0, radius);
+  badgeBg.alpha = 0.94;
+}
+
+function SAUI_resetCycleRaceOptionBubble(wrapper) {
+  if (!wrapper) {
+    return;
+  }
+
+  paintCycleRaceOptionBackground(wrapper, wrapper.__palette.fill, wrapper.__palette.stroke);
+  paintCycleRaceOptionBadge(wrapper, "base");
+
+  if (wrapper.__highlight) {
+    wrapper.__highlight.alpha = 0.86;
+  }
+
+  if (wrapper.__pulse) {
+    createjs.Tween.removeTweens(wrapper.__pulse);
+    wrapper.__pulse.alpha = 0;
+    wrapper.__pulse.scaleX = wrapper.__pulse.scaleY = 1;
+  }
+
+  wrapper.scaleX = wrapper.scaleY = 1;
+  wrapper.alpha = 1;
+}
+
+function SAUI_showCycleRaceOptionBubble(wrapper, delay) {
+  if (!wrapper) {
+    return;
+  }
+
+  SAUI_resetCycleRaceOptionBubble(wrapper);
+
+  wrapper.visible = true;
+  wrapper.alpha = 0;
+  wrapper.scaleX = wrapper.scaleY = 0.88;
+
+  createjs.Tween.removeTweens(wrapper);
+  createjs.Tween.get(wrapper, { override: true })
+    .wait(delay || 0)
+    .to({ alpha: 1, scaleX: 1.08, scaleY: 1.08 }, 260, createjs.Ease.quartOut)
+    .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.quadOut);
+
+  if (wrapper.__pulse) {
+    var pulse = wrapper.__pulse;
+    pulse.alpha = 0;
+    pulse.scaleX = pulse.scaleY = 1;
+    createjs.Tween.removeTweens(pulse);
+    createjs.Tween.get(pulse, { override: true })
+      .wait((delay || 0) + 80)
+      .to({ alpha: 0.3, scaleX: pulse.__baseScale || 1.08, scaleY: pulse.__baseScale || 1.08 }, 320, createjs.Ease.quadOut)
+      .to({ alpha: 0, scaleX: 1, scaleY: 1 }, 260, createjs.Ease.quadIn);
+  }
+}
+
+function SAUI_setCycleRaceOptionHoverState(wrapper, isHover) {
+  if (!wrapper) {
+    return;
+  }
+
+  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
+  paintCycleRaceOptionBackground(
+    wrapper,
+    isHover ? palette.hoverFill : palette.fill,
+    isHover ? palette.hoverStroke : palette.stroke
+  );
+
+  if (wrapper.__highlight) {
+    createjs.Tween.get(wrapper.__highlight, { override: true })
+      .to({ alpha: isHover ? 1 : 0.86 }, 150, createjs.Ease.quadOut);
+  }
+
+  createjs.Tween.get(wrapper, { override: false })
+    .to({ scaleX: isHover ? 1.04 : 1, scaleY: isHover ? 1.04 : 1 }, 160, createjs.Ease.quadOut);
+}
+
+function SAUI_startCycleRaceOptionIdle(wrapper) {
+  if (!wrapper || !wrapper.__pulse) {
+    return;
+  }
+
+  var pulse = wrapper.__pulse;
+  createjs.Tween.removeTweens(pulse);
+  pulse.alpha = 0.22;
+  pulse.scaleX = pulse.scaleY = 1;
+  createjs.Tween.get(pulse, { override: true, loop: true })
+    .to({ alpha: 0.42, scaleX: pulse.__baseScale || 1.08, scaleY: pulse.__baseScale || 1.08 }, 900, createjs.Ease.sineInOut)
+    .to({ alpha: 0.22, scaleX: 1, scaleY: 1 }, 900, createjs.Ease.sineInOut);
+}
+
+function SAUI_stopCycleRaceOptionIdle(wrapper) {
+  if (!wrapper || !wrapper.__pulse) {
+    return;
+  }
+
+  createjs.Tween.removeTweens(wrapper.__pulse);
+  wrapper.__pulse.alpha = 0;
+  wrapper.__pulse.scaleX = wrapper.__pulse.scaleY = 1;
+}
+
+function SAUI_markCycleRaceOptionResult(wrapper, isCorrect) {
+  if (!wrapper) {
+    return;
+  }
+
+  var palette = wrapper.__palette || cycleRaceTextOptionPalette;
+  paintCycleRaceOptionBackground(
+    wrapper,
+    isCorrect ? palette.correctFill : palette.wrongFill,
+    isCorrect ? palette.correctStroke : palette.wrongStroke
+  );
+  paintCycleRaceOptionBadge(wrapper, isCorrect ? "correct" : "wrong");
+
+  if (wrapper.__highlight) {
+    createjs.Tween.get(wrapper.__highlight, { override: true })
+      .to({ alpha: isCorrect ? 1 : 0.6 }, 180, createjs.Ease.quadOut);
+  }
+
+  if (wrapper.__pulse) {
+    createjs.Tween.removeTweens(wrapper.__pulse);
+    wrapper.__pulse.alpha = 0;
+  }
+
+  createjs.Tween.get(wrapper, { override: false })
+    .to({ scaleX: isCorrect ? 1.05 : 0.96, scaleY: isCorrect ? 1.05 : 0.96 }, 200, createjs.Ease.quadOut)
+    .to({ scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadOut);
+}
+
+if (globalHelperScope) {
+  globalHelperScope.SAUI_createCycleRaceSpeechBubble = SAUI_createCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_showCycleRaceSpeechBubble = SAUI_showCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_hideCycleRaceSpeechBubble = SAUI_hideCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_createCycleRaceOptionBubble = SAUI_createCycleRaceOptionBubble;
+  globalHelperScope.SAUI_showCycleRaceOptionBubble = SAUI_showCycleRaceOptionBubble;
+  globalHelperScope.SAUI_resetCycleRaceOptionBubble = SAUI_resetCycleRaceOptionBubble;
+  globalHelperScope.SAUI_setCycleRaceOptionHoverState = SAUI_setCycleRaceOptionHoverState;
+  globalHelperScope.SAUI_startCycleRaceOptionIdle = SAUI_startCycleRaceOptionIdle;
+  globalHelperScope.SAUI_stopCycleRaceOptionIdle = SAUI_stopCycleRaceOptionIdle;
+  globalHelperScope.SAUI_markCycleRaceOptionResult = SAUI_markCycleRaceOptionResult;
+  globalHelperScope.layoutCycleRaceOptionBubble = layoutCycleRaceOptionBubble;
+  globalHelperScope.renderCycleRaceSpeechBubble = renderCycleRaceSpeechBubble;
 }
