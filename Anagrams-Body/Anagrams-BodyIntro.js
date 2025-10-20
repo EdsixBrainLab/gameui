@@ -282,6 +282,7 @@ function highlightIntroClueTarget(index) {
 
 
 function commongameintro() {
+	
     introClueArr = [];
     introClueBgArr = [null];
     introChoiceBgArr = [null];
