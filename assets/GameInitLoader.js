@@ -1908,13 +1908,47 @@ function alignHudValueText(target) {
     }
 
     var metrics = typeof target.getMetrics === "function" ? target.getMetrics() : null;
-    if (metrics && typeof metrics.height === "number") {
-        var baseline = typeof metrics.baseline === "number" ? metrics.baseline : metrics.height * 0.8;
-        target.textBaseline = "alphabetic";
-        target.y = baseline - metrics.height / 2;
-        target.__valueTextBaseline = target.textBaseline;
-        target.__valueTextOffset = target.y;
-        return;
+    if (metrics) {
+        var ascentCandidates = [
+            metrics.actualBoundingBoxAscent,
+            metrics.fontBoundingBoxAscent,
+            metrics.emHeightAscent,
+            metrics.baseline
+        ];
+        var descentCandidates = [
+            metrics.actualBoundingBoxDescent,
+            metrics.fontBoundingBoxDescent,
+            metrics.emHeightDescent
+        ];
+
+        var ascent = findFirstNumber(ascentCandidates);
+        var descent = findFirstNumber(descentCandidates);
+        var total = null;
+
+        if (typeof ascent === "number" && typeof descent === "number") {
+            total = ascent + descent;
+        }
+
+        if (total === null || !total) {
+            if (typeof metrics.height === "number" && typeof ascent === "number") {
+                total = metrics.height;
+                if (typeof descent !== "number") {
+                    descent = total - ascent;
+                }
+            } else if (typeof metrics.height === "number") {
+                total = metrics.height;
+                ascent = total * 0.8;
+                descent = total - ascent;
+            }
+        }
+
+        if (typeof ascent === "number" && typeof total === "number" && total) {
+            target.textBaseline = "alphabetic";
+            target.y = ascent - total / 2;
+            target.__valueTextBaseline = target.textBaseline;
+            target.__valueTextOffset = target.y;
+            return;
+        }
     }
 
     target.textBaseline = "middle";
@@ -1922,6 +1956,20 @@ function alignHudValueText(target) {
     target.y = fallbackLineHeight ? fallbackLineHeight * 0.08 : 0;
     target.__valueTextBaseline = target.textBaseline;
     target.__valueTextOffset = target.y;
+}
+
+function findFirstNumber(candidates) {
+    if (!candidates || !candidates.length) {
+        return null;
+    }
+
+    for (var i = 0; i < candidates.length; i++) {
+        if (typeof candidates[i] === "number" && !isNaN(candidates[i])) {
+            return candidates[i];
+        }
+    }
+
+    return null;
 }
 
 function updateHudIconWrapper(wrapper, paletteConfig, theme) {
