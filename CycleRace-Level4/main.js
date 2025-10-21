@@ -50,6 +50,24 @@ var cycleRaceQuestionBubble,
 
 var cycleRaceTrimCanvas = null;
 var cycleRaceTrimContext = null;
+var cycleRaceTextMeasureCanvas = null;
+var cycleRaceTextMeasureContext = null;
+
+var cycleRaceQuestionTextMeasure = null;
+var cycleRaceImageQuestionTexts = [
+        "Who was in the first place?",
+        "Who was in the second place?",
+        "Who was in the third place?",
+        "Who was in the fourth place?",
+        "Who was in the fifth place?",
+        "Who was in the sixth place?",
+        "Who was in the seventh place?",
+        "Who was in the eighth place?",
+        "Who was in the last place?",
+        "What was my place in the race?"
+];
+var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
+var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
 
 var cycleRaceQuestionTextMeasure = null;
 var cycleRaceImageQuestionTexts = [
@@ -211,6 +229,32 @@ function measureCycleRaceSpriteVisibleBounds(sprite) {
         return result;
 }
 
+function getCycleRaceTextMeasureContext(width, height) {
+
+        if (typeof document === "undefined" || !document.createElement) {
+                return null;
+        }
+
+        if (!cycleRaceTextMeasureCanvas) {
+                cycleRaceTextMeasureCanvas = document.createElement("canvas");
+        }
+
+        var canvas = cycleRaceTextMeasureCanvas;
+        canvas.width = Math.max(1, Math.ceil(width));
+        canvas.height = Math.max(1, Math.ceil(height));
+
+        cycleRaceTextMeasureContext = canvas.getContext("2d");
+
+        if (!cycleRaceTextMeasureContext) {
+                return null;
+        }
+
+        cycleRaceTextMeasureContext.setTransform(1, 0, 0, 1, 0, 0);
+        cycleRaceTextMeasureContext.clearRect(0, 0, canvas.width, canvas.height);
+
+        return cycleRaceTextMeasureContext;
+}
+
 function isCycleRaceTextDisplay(node) {
 
         if (typeof createjs === "undefined" || !createjs.Text) {
@@ -349,6 +393,105 @@ function wrapCycleRaceQuestionText(rawText, font, maxWidth) {
         return resultLines;
 }
 
+function measureCycleRaceQuestionTextBounds(lines, font, lineHeight, layoutWidth, layoutHeight) {
+
+        if (!lines || !lines.length) {
+                return null;
+        }
+
+        if (!font) {
+                font = "700 36px 'Baloo 2'";
+        }
+
+        if (!lineHeight || !isFinite(lineHeight)) {
+                lineHeight = 44;
+        }
+
+        var padX = Math.ceil(Math.max(6, Math.min(14, lineHeight * 0.35)));
+        var padY = Math.ceil(Math.max(6, Math.min(14, lineHeight * 0.5)));
+        var drawWidth = Math.max(1, Math.ceil((layoutWidth || 0) + padX * 2));
+        var drawHeight = Math.max(
+                1,
+                Math.ceil((layoutHeight && isFinite(layoutHeight) ? layoutHeight : lineHeight * lines.length) + padY * 2)
+        );
+
+        var ctx = getCycleRaceTextMeasureContext(drawWidth, drawHeight);
+        if (!ctx) {
+                return null;
+        }
+
+        ctx.save();
+
+        try {
+                ctx.font = font;
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
+                ctx.fillStyle = "#000000";
+
+                var baseY = padY;
+                for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i];
+                        if (line) {
+                                ctx.fillText(line, padX, baseY);
+                        }
+                        baseY += lineHeight;
+                }
+
+                var imageData;
+
+                try {
+                        imageData = ctx.getImageData(0, 0, drawWidth, drawHeight).data;
+                } catch (err) {
+                        return null;
+                }
+
+                var left = drawWidth;
+                var right = -1;
+                var top = drawHeight;
+                var bottom = -1;
+
+                for (var y = 0; y < drawHeight; y++) {
+                        for (var x = 0; x < drawWidth; x++) {
+                                var alpha = imageData[(y * drawWidth + x) * 4 + 3];
+
+                                if (alpha > 8) {
+                                        if (x < left) {
+                                                left = x;
+                                        }
+                                        if (x > right) {
+                                                right = x;
+                                        }
+                                        if (y < top) {
+                                                top = y;
+                                        }
+                                        if (y > bottom) {
+                                                bottom = y;
+                                        }
+                                }
+                        }
+                }
+
+                if (right < left || bottom < top) {
+                        return null;
+                }
+
+                var visibleHeight = bottom - top + 1;
+                var centerY = top + visibleHeight / 2;
+                var localCenterY = centerY - padY;
+                var layoutCenter = (layoutHeight && isFinite(layoutHeight) ? layoutHeight : lineHeight * lines.length) / 2;
+                if (!isFinite(layoutCenter)) {
+                        layoutCenter = (lineHeight * lines.length) / 2;
+                }
+
+                return {
+                        height: visibleHeight,
+                        offsetY: -layoutCenter + localCenterY
+                };
+        } finally {
+                ctx.restore();
+        }
+}
+
 function configureCycleRaceQuestionDisplay(node, options) {
 
         if (isCycleRaceTextDisplay(node)) {
@@ -443,6 +586,11 @@ function configureCycleRaceQuestionText(textDisplay, options) {
         var visualOffsetY = (layoutHeight - measuredHeight) / 2;
         if (!isFinite(visualOffsetY)) {
                 visualOffsetY = 0;
+        }
+
+        var textBounds = measureCycleRaceQuestionTextBounds(lines, font, lineHeight, width, layoutHeight);
+        if (textBounds && typeof textBounds.offsetY === "number" && isFinite(textBounds.offsetY)) {
+                visualOffsetY = textBounds.offsetY;
         }
 
         textDisplay.regX = width / 2;
