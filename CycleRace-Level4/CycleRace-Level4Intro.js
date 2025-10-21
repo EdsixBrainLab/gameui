@@ -75,14 +75,22 @@ function introConfigureQuestionSprite(sprite, options) {
 
     options = options || {};
 
-    if (typeof configureCycleRaceQuestionSprite === "function" && typeof cycleRaceQuestionBubble !== "undefined") {
+    if (typeof configureCycleRaceQuestionDisplay === "function" && typeof cycleRaceQuestionBubble !== "undefined") {
         var previousBubble = cycleRaceQuestionBubble;
         cycleRaceQuestionBubble = introQuestionBubble;
         try {
-            return configureCycleRaceQuestionSprite(sprite, options);
+            return configureCycleRaceQuestionDisplay(sprite, options);
         } finally {
             cycleRaceQuestionBubble = previousBubble;
         }
+    }
+
+    if (
+        typeof configureCycleRaceQuestionText === "function" &&
+        typeof isCycleRaceTextDisplay === "function" &&
+        isCycleRaceTextDisplay(sprite)
+    ) {
+        return configureCycleRaceQuestionText(sprite, options);
     }
 
     var dims = introGetSpriteDimensions(sprite);
@@ -140,6 +148,32 @@ function introConfigureQuestionSprite(sprite, options) {
 
 function getIntroQuestionLayoutMetrics() {
 
+    if (!introQuestionBubble) {
+        return null;
+    }
+
+    if (typeof getCycleRaceQuestionLayoutMetrics === "function") {
+        var hadBubble = typeof cycleRaceQuestionBubble !== "undefined";
+        var previousBubble = hadBubble ? cycleRaceQuestionBubble : null;
+        try {
+            cycleRaceQuestionBubble = introQuestionBubble;
+            var sharedMetrics = getCycleRaceQuestionLayoutMetrics();
+            if (sharedMetrics) {
+                return sharedMetrics;
+            }
+        } finally {
+            if (hadBubble) {
+                cycleRaceQuestionBubble = previousBubble;
+            } else {
+                try {
+                    delete cycleRaceQuestionBubble;
+                } catch (err) {
+                    cycleRaceQuestionBubble = previousBubble;
+                }
+            }
+        }
+    }
+
     var centerX = 640;
     var bubbleWidth = 780;
     var bubbleY = 248;
@@ -177,12 +211,27 @@ function getIntroQuestionLayoutMetrics() {
         }
     }
 
-    var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+    var bubbleTop = bubbleY - bodyHeight / 2;
+    var bubbleBottom = bubbleY + bodyHeight / 2;
+    var tailBottom = bubbleBottom + tailHeight;
+    var innerTopLocal = -bodyHeight / 2 + 36;
+    var innerBottomLocal = bodyHeight / 2 - 32;
+    var innerTopAbsolute = bubbleY + innerTopLocal;
+    var innerBottomAbsolute = bubbleY + innerBottomLocal;
 
     return {
         centerX: centerX,
         width: bubbleWidth,
-        bottom: bubbleBottom
+        bottom: tailBottom,
+        bubbleY: bubbleY,
+        bodyHeight: bodyHeight,
+        tailHeight: tailHeight,
+        bubbleTop: bubbleTop,
+        bubbleBottom: bubbleBottom,
+        innerTop: innerTopLocal,
+        innerBottom: innerBottomLocal,
+        innerTopAbsolute: innerTopAbsolute,
+        innerBottomAbsolute: innerBottomAbsolute
     };
 }
 
@@ -346,12 +395,37 @@ function layoutIntroQuestionContent() {
         return null;
     }
 
+    var metrics = getIntroQuestionLayoutMetrics();
+    if (!metrics) {
+        return null;
+    }
+
     var content = introQuestionBubble.__content || introQuestionBubble;
     var bubbleOptions = introQuestionBubble.__options || {};
-    var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-    var innerTop = -bodyHeight / 2 + 36;
-    var innerBottom = bodyHeight / 2 - 36;
-    var availableWidth = (bubbleOptions.width || 760) - 220;
+    var hasWrapper = !!introQuestionBubble.__content;
+    var contentOffsetX = hasWrapper && bubbleOptions.contentOffsetX ? bubbleOptions.contentOffsetX : 0;
+    var contentOffsetY = hasWrapper && bubbleOptions.contentOffsetY ? bubbleOptions.contentOffsetY : 0;
+    var bubbleWidth = bubbleOptions.width != null ? bubbleOptions.width : metrics.width || 760;
+    var tailHeightOption = bubbleOptions.tailHeight != null ? bubbleOptions.tailHeight : metrics.tailHeight || 60;
+    var heightOption = bubbleOptions.height != null ? bubbleOptions.height - tailHeightOption : null;
+    var bodyHeight = Math.max(
+        heightOption != null ? heightOption : metrics.bodyHeight || 240,
+        200
+    );
+    var innerTopBase = metrics.innerTop != null ? metrics.innerTop : -bodyHeight / 2 + 36;
+    var innerBottomBase = metrics.innerBottom != null ? metrics.innerBottom : bodyHeight / 2 - 32;
+    var innerTop = hasWrapper
+        ? innerTopBase - contentOffsetY
+        : metrics.innerTopAbsolute != null && metrics.bubbleY != null
+        ? metrics.innerTopAbsolute - metrics.bubbleY
+        : innerTopBase;
+    var innerBottom = hasWrapper
+        ? innerBottomBase - contentOffsetY
+        : metrics.innerBottomAbsolute != null && metrics.bubbleY != null
+        ? metrics.innerBottomAbsolute - metrics.bubbleY
+        : innerBottomBase;
+    var availableWidth = (bubbleWidth || 760) - 220;
+    var centerX = hasWrapper ? -contentOffsetX : 0;
     var nodes = [];
 
     if (introQuestxt1 && introQuestxt1.visible && introQuestxt1.parent === content) {
@@ -379,13 +453,20 @@ function layoutIntroQuestionContent() {
 
     for (var i = 0; i < nodes.length; i++) {
         var entry = nodes[i];
+        var widthValue = entry.metrics && entry.metrics.width ? entry.metrics.width : entry.node.__layoutWidth || 0;
         var height = entry.metrics && entry.metrics.height ? entry.metrics.height : entry.node.__layoutHeight || 0;
-        if (!height && typeof entry.node.getBounds === "function") {
-            var b = entry.node.getBounds();
-            if (b) {
-                height = (b.height || 0) * Math.abs(entry.node.scaleY || 1);
+        if ((!widthValue || !height) && typeof entry.node.getBounds === "function") {
+            var rawBounds = entry.node.getBounds();
+            if (rawBounds) {
+                if (!widthValue) {
+                    widthValue = Math.abs((rawBounds.width || 0) * (entry.node.scaleX || 1));
+                }
+                if (!height) {
+                    height = Math.abs((rawBounds.height || 0) * (entry.node.scaleY || 1));
+                }
             }
         }
+        entry.__width = widthValue;
         entry.__height = height;
         totalHeight += height;
         if (i < nodes.length - 1) {
@@ -398,7 +479,6 @@ function layoutIntroQuestionContent() {
 
     for (var j = 0; j < nodes.length; j++) {
         var item = nodes[j];
-        var width = item.metrics && item.metrics.width ? item.metrics.width : item.node.__layoutWidth || 0;
         var heightVal = item.__height || 0;
         var offsetX = item.metrics && item.metrics.offsetX ? item.metrics.offsetX : item.node.__visualOffsetX || 0;
         var offsetY = item.metrics && item.metrics.offsetY ? item.metrics.offsetY : item.node.__visualOffsetY || 0;
@@ -412,12 +492,61 @@ function layoutIntroQuestionContent() {
             targetCenterY = innerBottom - halfHeight - offsetY;
         }
 
-        item.node.x = -offsetX;
+        item.node.x = centerX - offsetX;
         item.node.y = targetCenterY - offsetY;
         item.node.__introTargetY = item.node.y;
         item.node.__introTargetX = item.node.x;
 
         currentY += heightVal + (j < nodes.length - 1 ? spacing : 0);
+    }
+
+    var desiredCenterX = hasWrapper ? -contentOffsetX : 0;
+    var desiredCenterY = hasWrapper ? -contentOffsetY : 0;
+    var minX = Infinity;
+    var maxX = -Infinity;
+    var minY = Infinity;
+    var maxY = -Infinity;
+
+    for (var n = 0; n < nodes.length; n++) {
+        var nodeEntry = nodes[n];
+        var nodeWidth = nodeEntry.__width || 0;
+        var nodeHeight = nodeEntry.__height || 0;
+        var nodeOffsetX = nodeEntry.metrics && nodeEntry.metrics.offsetX ? nodeEntry.metrics.offsetX : nodeEntry.node.__visualOffsetX || 0;
+        var nodeOffsetY = nodeEntry.metrics && nodeEntry.metrics.offsetY ? nodeEntry.metrics.offsetY : nodeEntry.node.__visualOffsetY || 0;
+        var left = nodeEntry.node.x - nodeWidth / 2 + nodeOffsetX;
+        var right = nodeEntry.node.x + nodeWidth / 2 + nodeOffsetX;
+        var top = nodeEntry.node.y - nodeHeight / 2 + nodeOffsetY;
+        var bottom = nodeEntry.node.y + nodeHeight / 2 + nodeOffsetY;
+
+        if (left < minX) {
+            minX = left;
+        }
+        if (right > maxX) {
+            maxX = right;
+        }
+        if (top < minY) {
+            minY = top;
+        }
+        if (bottom > maxY) {
+            maxY = bottom;
+        }
+    }
+
+    if (isFinite(minX) && isFinite(maxX) && isFinite(minY) && isFinite(maxY)) {
+        var currentCenterX = (minX + maxX) / 2;
+        var currentCenterY = (minY + maxY) / 2;
+        var deltaX = desiredCenterX - currentCenterX;
+        var deltaY = desiredCenterY - currentCenterY;
+
+        if (deltaX || deltaY) {
+            for (var p = 0; p < nodes.length; p++) {
+                var adjustEntry = nodes[p];
+                adjustEntry.node.x += deltaX;
+                adjustEntry.node.y += deltaY;
+                adjustEntry.node.__introTargetX = adjustEntry.node.x;
+                adjustEntry.node.__introTargetY = adjustEntry.node.y;
+            }
+        }
     }
 
     return { nodes: nodes };
@@ -507,7 +636,28 @@ function hideIntroQuestionBubble() {
 function commongameintro() {
     Title.visible=true;
      
-    introQuestxt1 = questionText1.clone();
+    if (typeof createCycleRaceQuestionTextDisplay === "function") {
+        introQuestxt1 = createCycleRaceQuestionTextDisplay({
+            font:
+                questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'",
+            lineHeight:
+                questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40,
+            color: questionText1 && questionText1.color ? questionText1.color : "#202D72"
+        });
+    } else if (typeof createjs !== "undefined" && createjs.Text) {
+        var introFont = questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'";
+        var introColor = questionText1 && questionText1.color ? questionText1.color : "#202D72";
+        introQuestxt1 = new createjs.Text("", introFont, introColor);
+        introQuestxt1.textAlign = "center";
+        introQuestxt1.textBaseline = "middle";
+        introQuestxt1.lineHeight = questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40;
+        introQuestxt1.__rawText = "";
+        if (typeof createjs.Shadow === "function") {
+            introQuestxt1.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
+        }
+    } else {
+        introQuestxt1 = null;
+    }
     introcycle1 = cycle1.clone();
     introcycle2 = cycle2.clone();
     introcycle3 = cycle3.clone();
@@ -550,9 +700,20 @@ function commongameintro() {
         introChoiceArr[i].gotoAndStop(value[i]);
 
     }
-    introQuestxt1.gotoAndStop(8)
-    introQuestxt1.visible = false;
-    introQuestxt1.alpha = 0;
+    var introPrompt = typeof getCycleRaceIntroPrompt === "function"
+        ? getCycleRaceIntroPrompt()
+        : typeof cycleRaceIntroPrompt !== "undefined"
+        ? cycleRaceIntroPrompt
+        : "";
+    if (introQuestxt1) {
+        if (typeof setCycleRaceQuestionText === "function") {
+            setCycleRaceQuestionText(introQuestxt1, introPrompt);
+        } else {
+            introQuestxt1.text = introPrompt;
+        }
+        introQuestxt1.visible = false;
+        introQuestxt1.alpha = 0;
+    }
 
     introImg.visible = false;
     introImg.alpha = 0;
