@@ -573,12 +573,27 @@ function getCycleRaceQuestionLayoutMetrics() {
                 }
         }
 
-        var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+        var bubbleTop = bubbleY - bodyHeight / 2;
+        var bubbleBottom = bubbleY + bodyHeight / 2;
+        var tailBottom = bubbleBottom + tailHeight;
+        var innerTopLocal = -bodyHeight / 2 + 36;
+        var innerBottomLocal = bodyHeight / 2 - 32;
+        var innerTopAbsolute = bubbleY + innerTopLocal;
+        var innerBottomAbsolute = bubbleY + innerBottomLocal;
 
         return {
                 centerX: centerX,
                 width: bubbleWidth,
-                bottom: bubbleBottom
+                bottom: tailBottom,
+                bubbleY: bubbleY,
+                bodyHeight: bodyHeight,
+                tailHeight: tailHeight,
+                bubbleTop: bubbleTop,
+                bubbleBottom: bubbleBottom,
+                innerTop: innerTopLocal,
+                innerBottom: innerBottomLocal,
+                innerTopAbsolute: innerTopAbsolute,
+                innerBottomAbsolute: innerBottomAbsolute
         };
 }
 
@@ -808,15 +823,30 @@ function configureCycleRaceQuestionSprite(sprite, options) {
 
 function layoutCycleRaceTextQuestionContent() {
 
-        if (!cycleRaceQuestionBubble) {
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        if (!metrics) {
                 return;
         }
 
-        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
-        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-        var innerTop = -bodyHeight / 2 + 36;
-        var innerBottom = bodyHeight / 2 - 32;
-        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var bubbleWidth = bubbleOptions.width != null ? bubbleOptions.width : metrics.width || 760;
+        var tailHeightOption = bubbleOptions.tailHeight != null ? bubbleOptions.tailHeight : metrics.tailHeight || 60;
+        var heightOption = bubbleOptions.height != null ? bubbleOptions.height - tailHeightOption : null;
+        var bodyHeight = Math.max(
+                heightOption != null ? heightOption : metrics.bodyHeight || 240,
+                200
+        );
+        var innerTop =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerTop
+                        : metrics.innerTopAbsolute;
+        var innerBottom =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerBottom
+                        : metrics.innerBottomAbsolute;
+        var centerX =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var availableWidth = (bubbleWidth || 760) - 220;
         var spacing = Math.min(54, Math.max(32, bodyHeight * 0.12));
 
         if (question1 && question1.visible) {
@@ -826,7 +856,7 @@ function layoutCycleRaceTextQuestionContent() {
                         baseScale:
                                 question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
                 });
-                question1.x = 0;
+                question1.x = centerX;
                 var q1OffsetY = q1Metrics && q1Metrics.offsetY ? q1Metrics.offsetY : question1.__visualOffsetY || 0;
                 var q1HalfHeight = (q1Metrics && q1Metrics.height ? q1Metrics.height : question1.__layoutHeight || 0) / 2;
                 question1.y = innerTop + q1HalfHeight - q1OffsetY;
@@ -839,7 +869,7 @@ function layoutCycleRaceTextQuestionContent() {
                         baseScale:
                                 questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
                 });
-                questionText1.x = 0;
+                questionText1.x = centerX;
                 var anchorY;
                 if (question1 && question1.visible) {
                         anchorY =
@@ -871,22 +901,41 @@ function layoutCycleRaceTextQuestionContent() {
 
 function layoutCycleRaceImageQuestionContent() {
 
-        if (!cycleRaceQuestionBubble || !question2 || !question2.visible) {
+        if (!question2 || !question2.visible) {
                 return;
         }
 
-        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
-        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-        var innerTop = -bodyHeight / 2 + 36;
-        var innerBottom = bodyHeight / 2 - 32;
-        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        if (!metrics) {
+                return;
+        }
+
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var bubbleWidth = bubbleOptions.width != null ? bubbleOptions.width : metrics.width || 760;
+        var tailHeightOption = bubbleOptions.tailHeight != null ? bubbleOptions.tailHeight : metrics.tailHeight || 60;
+        var heightOption = bubbleOptions.height != null ? bubbleOptions.height - tailHeightOption : null;
+        var bodyHeight = Math.max(
+                heightOption != null ? heightOption : metrics.bodyHeight || 240,
+                200
+        );
+        var innerTop =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerTop
+                        : metrics.innerTopAbsolute;
+        var innerBottom =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerBottom
+                        : metrics.innerBottomAbsolute;
+        var centerX =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var availableWidth = (bubbleWidth || 760) - 220;
 
         var q2Metrics = configureCycleRaceQuestionDisplay(question2, {
                 maxWidth: availableWidth,
                 maxHeight: Math.max(bodyHeight * 0.68, 140),
                 baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
         });
-        question2.x = 0;
+        question2.x = centerX;
         var q2OffsetY = q2Metrics && q2Metrics.offsetY ? q2Metrics.offsetY : question2.__visualOffsetY || 0;
         var q2HalfHeight = (q2Metrics && q2Metrics.height ? q2Metrics.height : question2.__layoutHeight || 0) / 2;
         var minCenter = innerTop + q2HalfHeight - q2OffsetY;
