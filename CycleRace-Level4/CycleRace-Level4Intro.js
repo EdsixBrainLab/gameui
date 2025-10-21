@@ -702,8 +702,8 @@ this.onComplete = function (e) {
         var banner = ensureIntroHintBanner();
 
         if (introQuestxt1) {
-            introQuestxt1.visible = false;
-            introQuestxt1.alpha = 0;
+            introQuestxt1.visible = true;
+            introQuestxt1.alpha = 1;
         }
         if (introImg) {
             introImg.visible = false;
@@ -715,7 +715,9 @@ this.onComplete = function (e) {
         if (introQuestionBubble) {
             introQuestionBubble.x = 640;
             introQuestionBubble.y = 248;
-            hideIntroQuestionBubble();
+            if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
+                showIntroQuestionBubble(0);
+            }
         }
 
         if (banner) {
