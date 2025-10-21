@@ -702,8 +702,8 @@ this.onComplete = function (e) {
         var banner = ensureIntroHintBanner();
 
         if (introQuestxt1) {
-            introQuestxt1.visible = true;
-            introQuestxt1.alpha = 1;
+            introQuestxt1.visible = false;
+            introQuestxt1.alpha = 0;
         }
         if (introImg) {
             introImg.visible = false;
@@ -715,9 +715,7 @@ this.onComplete = function (e) {
         if (introQuestionBubble) {
             introQuestionBubble.x = 640;
             introQuestionBubble.y = 248;
-            if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
-                showIntroQuestionBubble(0);
-            }
+            hideIntroQuestionBubble();
         }
 
         if (banner) {
@@ -725,7 +723,7 @@ this.onComplete = function (e) {
                 text: "Watch the racers carefully!",
                 width: 540
             });
-            banner.x = 640;
+            banner.x = 540;
             banner.y = 438;
             if (banner.parent) {
                 banner.parent.setChildIndex(banner, banner.parent.numChildren - 1);
@@ -910,9 +908,7 @@ function handleComplete1_6() {
 function introCh(){
     ensureIntroQuestionSurface();
     showIntroQuestionBubble(0);
-    if (introQuestxt1) {
-        introQuestxt1.visible = false;
-    }
+    
     if (!introImg) {
         handleComplete2_1();
         return;
