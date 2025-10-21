@@ -4833,6 +4833,39 @@ function SAUI_createCycleRaceSpeechBubble(options) {
   return bubble;
 }
 
+function SAUI_createCycleRaceQuestionLabel(options) {
+  options = options || {};
+
+  var fontSize = options.fontSize != null ? options.fontSize : 46;
+  var maxWidth = options.maxWidth != null ? options.maxWidth : 520;
+  var fill = options.color || "#FFFFFF";
+  var text = new createjs.Text(
+    options.text != null ? options.text : "",
+    fontSize + "px 'Baloo 2'",
+    fill
+  );
+
+  text.textAlign = "center";
+  text.textBaseline = "middle";
+  text.lineWidth = maxWidth;
+  text.lineHeight =
+    options.lineHeight != null
+      ? options.lineHeight
+      : Math.round(fontSize * 1.18);
+  text.__baseScale = options.baseScale != null ? options.baseScale : 1;
+  text.__textDirty = true;
+
+  if (options.shadow !== false) {
+    var shadow =
+      options.shadow instanceof createjs.Shadow
+        ? options.shadow
+        : new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, Math.max(6, Math.round(fontSize * 0.16)));
+    text.shadow = shadow;
+  }
+
+  return text;
+}
+
 function renderCycleRaceSpeechBubble(bubble, overrideOptions) {
   if (!bubble) {
     return;
@@ -5917,6 +5950,7 @@ function SAUI_markCycleRaceOptionResult(wrapper, isCorrect) {
 
 if (globalHelperScope) {
   globalHelperScope.SAUI_createCycleRaceSpeechBubble = SAUI_createCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_createCycleRaceQuestionLabel = SAUI_createCycleRaceQuestionLabel;
   globalHelperScope.SAUI_showCycleRaceSpeechBubble = SAUI_showCycleRaceSpeechBubble;
   globalHelperScope.SAUI_hideCycleRaceSpeechBubble = SAUI_hideCycleRaceSpeechBubble;
   globalHelperScope.SAUI_createCycleRaceHintBanner = SAUI_createCycleRaceHintBanner;
