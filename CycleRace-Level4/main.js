@@ -418,28 +418,48 @@ function configureCycleRaceQuestionText(textDisplay, options) {
 
         width = Math.min(width, wrapWidth);
 
-        var height = lines.length ? lineHeight * lines.length : 0;
+        var lineCount = Math.max(1, lines.length);
+        var rawHeight = lineCount * lineHeight;
+        var height = rawHeight;
         if (availableHeight && availableHeight > 0) {
                 height = Math.min(height, availableHeight);
         }
 
         textDisplay.text = lines.join("\n");
         textDisplay.lineHeight = lineHeight;
+
+        var measuredHeight = 0;
+        if (typeof textDisplay.getMeasuredHeight === "function") {
+                measuredHeight = textDisplay.getMeasuredHeight();
+        }
+        if ((!measuredHeight || !isFinite(measuredHeight)) && measure && typeof measure.getMeasuredLineHeight === "function") {
+                measuredHeight = measure.getMeasuredLineHeight() * lineCount;
+        }
+        if (!measuredHeight || !isFinite(measuredHeight)) {
+                measuredHeight = rawHeight;
+        }
+
+        var layoutHeight = Math.max(height, measuredHeight);
+        var visualOffsetY = (layoutHeight - measuredHeight) / 2;
+        if (!isFinite(visualOffsetY)) {
+                visualOffsetY = 0;
+        }
+
         textDisplay.regX = width / 2;
-        textDisplay.regY = height / 2;
+        textDisplay.regY = layoutHeight / 2;
         textDisplay.x = 0;
         textDisplay.y = 0;
         textDisplay.scaleX = textDisplay.scaleY = 1;
         textDisplay.__layoutWidth = width;
-        textDisplay.__layoutHeight = height;
+        textDisplay.__layoutHeight = layoutHeight;
         textDisplay.__visualOffsetX = 0;
-        textDisplay.__visualOffsetY = 0;
+        textDisplay.__visualOffsetY = visualOffsetY;
 
         return {
                 width: width,
-                height: height,
+                height: layoutHeight,
                 offsetX: 0,
-                offsetY: 0
+                offsetY: visualOffsetY
         };
 }
 
