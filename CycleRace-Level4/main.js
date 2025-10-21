@@ -4,7 +4,7 @@ var messageField;		//Message display field
 var assets = [];
 var assetsPath, gameAssetsPath, soundpath, bg;
 var cnt = -1, qscnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 4, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, question, quesMarkMc, questionText, questionText1, resultLoading, preloadMc, background2, chHolderMc;
+var startBtn, introScrn, container, question, quesMarkMc, questionText, questionText1, question2, resultLoading, preloadMc, background2, chHolderMc;
 var startMc, questionInterval = 0, chHolderMc = 0, backGround1;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc, targetMc, titleBg;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
