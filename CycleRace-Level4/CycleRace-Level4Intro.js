@@ -671,7 +671,11 @@ this.onComplete = function (e) {
         getRaceStop();
 		
 		// Replace image with dynamic text
-introHintTextMc = new createjs.Text("Remember their positions", "bold 28px 'Baloo 2'", "red");
+introHintTextMc = new createjs.Text(
+    "Watch the racers carefully!",
+    "800 28px 'Baloo 2'",
+    "#FFE47E"
+);
 introHintTextMc.x = canvas.width / 2;
 introHintTextMc.y = 400;
 introHintTextMc.textAlign = "center";
@@ -772,6 +776,23 @@ function choiceTween() {
     layoutIntroQuestionContent();
     initializeIntroChoiceWrappers();
 
+    if (introQuestionBubble) {
+        if (introQuestionBubble.parent) {
+            introQuestionBubble.parent.setChildIndex(
+                introQuestionBubble,
+                introQuestionBubble.parent.numChildren - 1
+            );
+        }
+        if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
+            showIntroQuestionBubble(0);
+        }
+    }
+
+    if (introQuestxt1) {
+        introQuestxt1.visible = true;
+        introQuestxt1.alpha = 1;
+    }
+
     var longestDelay = 0;
 
     for (i = 0; i < introChoiceArr.length; i++) {
@@ -822,6 +843,7 @@ function handleComplete1_6() {
 }
 function introCh(){
     ensureIntroQuestionSurface();
+    showIntroQuestionBubble(0);
     if (introQuestxt1) {
         introQuestxt1.visible = false;
     }
