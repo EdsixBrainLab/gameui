@@ -7,13 +7,503 @@ var introArrowX = 820, introArrowY = 350;
 var introfingureX = 860, introfingureY = 460;
 var cycleTweenArr = []
 var introChoiceArr = []
-var btnx = [220, 420, 620, 820]
 var posY1 = [420, 440, 480, 500]
 //var posY1 = [350, 380, 400, 440, 470, 510]
 //var introCycleCntArr = [1, 2, 3, 4, 5, 9]
 var introCycleCntArr = [1, 2, 3, 9]
 var value = [0, 2, 1, 8]
-var introHintTextMc;
+var introHintBanner = null;
+var introQuestionBubble = null;
+var introImageChoiceWrappers = [];
+var introImageChoicePositions = [];
+
+function introGetSpriteDimensions(sprite) {
+
+    if (!sprite) {
+        return null;
+    }
+
+    if (sprite.__naturalWidth && sprite.__naturalHeight) {
+        return {
+            width: sprite.__naturalWidth,
+            height: sprite.__naturalHeight
+        };
+    }
+
+    var bounds = null;
+
+    if (typeof sprite.getBounds === "function") {
+        bounds = sprite.getBounds();
+    }
+
+    if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrameBounds === "function") {
+        bounds = sprite.spriteSheet.getFrameBounds(sprite.currentFrame || 0);
+    }
+
+    if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrame === "function") {
+        var frame = sprite.spriteSheet.getFrame(sprite.currentFrame || 0);
+        if (frame && frame.rect) {
+            bounds = {
+                width: frame.rect.width,
+                height: frame.rect.height
+            };
+        }
+    }
+
+    if (!bounds && sprite.image) {
+        bounds = {
+            width: sprite.image.width || 0,
+            height: sprite.image.height || 0
+        };
+    }
+
+    if (!bounds) {
+        return null;
+    }
+
+    return {
+        width: bounds.width || 0,
+        height: bounds.height || 0
+    };
+}
+
+function introConfigureQuestionSprite(sprite, options) {
+
+    if (!sprite) {
+        return { width: 0, height: 0, offsetX: 0, offsetY: 0 };
+    }
+
+    options = options || {};
+
+    if (typeof configureCycleRaceQuestionSprite === "function" && typeof cycleRaceQuestionBubble !== "undefined") {
+        var previousBubble = cycleRaceQuestionBubble;
+        cycleRaceQuestionBubble = introQuestionBubble;
+        try {
+            return configureCycleRaceQuestionSprite(sprite, options);
+        } finally {
+            cycleRaceQuestionBubble = previousBubble;
+        }
+    }
+
+    var dims = introGetSpriteDimensions(sprite);
+    if (!dims || !dims.width || !dims.height) {
+        return { width: 0, height: 0, offsetX: 0, offsetY: 0 };
+    }
+
+    var bubbleOptions = (introQuestionBubble && introQuestionBubble.__options) || {};
+    var availableWidth =
+        options.maxWidth != null ? options.maxWidth : (bubbleOptions.width || 760) - 200;
+    var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+    var availableHeight = options.maxHeight != null ? options.maxHeight : bodyHeight - 80;
+    var baseScale =
+        options.baseScale != null
+            ? options.baseScale
+            : sprite.__baseScale != null
+            ? sprite.__baseScale
+            : sprite.scaleX || 1;
+
+    var scaleX = dims.width ? availableWidth / dims.width : baseScale;
+    var scaleY = dims.height ? availableHeight / dims.height : baseScale;
+    var targetScale = Math.min(baseScale, scaleX, scaleY);
+    if (options.minScale != null) {
+        targetScale = Math.max(options.minScale, targetScale);
+    }
+
+    sprite.scaleX = sprite.scaleY = targetScale;
+    sprite.regX = dims.width / 2;
+    sprite.regY = dims.height / 2;
+    sprite.x = 0;
+    sprite.y = 0;
+
+    var visible = null;
+    if (typeof measureCycleRaceSpriteVisibleBounds === "function") {
+        visible = measureCycleRaceSpriteVisibleBounds(sprite);
+    }
+
+    var layoutWidth = (visible && visible.width ? visible.width : dims.width) * targetScale;
+    var layoutHeight = (visible && visible.height ? visible.height : dims.height) * targetScale;
+    var offsetX = visible && visible.centerOffsetX ? visible.centerOffsetX * targetScale : 0;
+    var offsetY = visible && visible.centerOffsetY ? visible.centerOffsetY * targetScale : 0;
+
+    sprite.__layoutWidth = layoutWidth;
+    sprite.__layoutHeight = layoutHeight;
+    sprite.__visualOffsetX = offsetX;
+    sprite.__visualOffsetY = offsetY;
+
+    return {
+        width: layoutWidth,
+        height: layoutHeight,
+        offsetX: offsetX,
+        offsetY: offsetY
+    };
+}
+
+function getIntroQuestionLayoutMetrics() {
+
+    var centerX = 640;
+    var bubbleWidth = 780;
+    var bubbleY = 248;
+    var tailHeight = 60;
+    var bodyHeight = 240;
+
+    if (introQuestionBubble) {
+        if (typeof introQuestionBubble.x === "number") {
+            centerX = introQuestionBubble.x;
+        }
+        if (typeof introQuestionBubble.y === "number") {
+            bubbleY = introQuestionBubble.y;
+        }
+        if (typeof introQuestionBubble.__visualCenterOffset === "number") {
+            centerX += introQuestionBubble.__visualCenterOffset;
+        } else if (
+            introQuestionBubble.__options &&
+            typeof introQuestionBubble.__options.visualCenterOffset === "number"
+        ) {
+            centerX += introQuestionBubble.__options.visualCenterOffset;
+        }
+        if (introQuestionBubble.__options) {
+            if (introQuestionBubble.__options.width != null) {
+                bubbleWidth = introQuestionBubble.__options.width;
+            }
+            if (introQuestionBubble.__options.tailHeight != null) {
+                tailHeight = introQuestionBubble.__options.tailHeight;
+            }
+            if (introQuestionBubble.__options.height != null) {
+                bodyHeight = Math.max(
+                    introQuestionBubble.__options.height - tailHeight,
+                    180
+                );
+            }
+        }
+    }
+
+    var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+
+    return {
+        centerX: centerX,
+        width: bubbleWidth,
+        bottom: bubbleBottom
+    };
+}
+
+function computeIntroImageChoiceLayout() {
+
+    var fallbackX = [360, 520, 760, 920];
+    var fallbackY = [556, 556, 556, 556];
+
+    if (typeof SAUI_computeCenteredRow !== "function") {
+        return {
+            xPositions: fallbackX,
+            yPositions: fallbackY
+        };
+    }
+
+    var metrics = getIntroQuestionLayoutMetrics();
+    var circleDiameter = 224;
+    var horizontalPadding = 72;
+    var availableSpan = Math.max(metrics.width - horizontalPadding * 2, circleDiameter * 4 + 240);
+    var rowY = Math.max(metrics.bottom + 108, fallbackY[0]);
+
+    var imageRowLayout = SAUI_computeCenteredRow(4, {
+        centerX: metrics.centerX,
+        baseSpacing: circleDiameter + 86,
+        tileSpan: circleDiameter,
+        maxSpan: availableSpan
+    });
+
+    var positions =
+        imageRowLayout && imageRowLayout.positions && imageRowLayout.positions.length >= 4
+            ? imageRowLayout.positions
+            : [
+                  metrics.centerX - circleDiameter * 1.5,
+                  metrics.centerX - circleDiameter * 0.5,
+                  metrics.centerX + circleDiameter * 0.5,
+                  metrics.centerX + circleDiameter * 1.5
+              ];
+
+    return {
+        xPositions: positions,
+        yPositions: [rowY, rowY, rowY, rowY]
+    };
+}
+
+function introCenterOptionBitmap(bitmap) {
+
+    if (typeof centerCycleRaceOptionBitmap === "function") {
+        return centerCycleRaceOptionBitmap(bitmap);
+    }
+
+    if (!bitmap || bitmap.__introCentered) {
+        return;
+    }
+
+    var bounds = null;
+
+    if (typeof getBitmapNaturalBounds === "function") {
+        bounds = getBitmapNaturalBounds(bitmap);
+    }
+
+    if (!bounds && typeof bitmap.getBounds === "function") {
+        bounds = bitmap.getBounds();
+    }
+
+    if (!bounds && bitmap.image) {
+        bounds = {
+            x: 0,
+            y: 0,
+            width: bitmap.image.width || 0,
+            height: bitmap.image.height || 0
+        };
+    }
+
+    if (!bounds || !bounds.width || !bounds.height) {
+        return;
+    }
+
+    var originX = (bounds.x || 0) + bounds.width / 2;
+    var originY = (bounds.y || 0) + bounds.height / 2;
+
+    bitmap.regX = originX;
+    bitmap.regY = originY;
+    bitmap.x = 0;
+    bitmap.y = 0;
+    bitmap.__introCentered = true;
+}
+
+function ensureIntroQuestionSurface() {
+
+    if (typeof SAUI_createCycleRaceSpeechBubble === "function") {
+        if (!introQuestionBubble) {
+            introQuestionBubble = SAUI_createCycleRaceSpeechBubble({
+                width: 780,
+                height: 300,
+                tailHeight: 60,
+                tailWidth: 150,
+                cornerRadius: 52,
+                title: null,
+                visualCenterOffset: 16,
+                contentOffsetY: -12
+            });
+            introQuestionBubble.x = 640;
+            introQuestionBubble.y = 248;
+        }
+
+        if (!introQuestionBubble.parent) {
+            container.parent.addChild(introQuestionBubble);
+        }
+
+        var content = introQuestionBubble.__content || introQuestionBubble;
+        if (introQuestxt1 && introQuestxt1.parent !== content) {
+            content.addChild(introQuestxt1);
+        }
+        if (introImg && introImg.parent !== content) {
+            content.addChild(introImg);
+        }
+
+        introQuestionBubble.visible = false;
+        introQuestionBubble.alpha = 0;
+    } else {
+        if (introQuestxt1 && !introQuestxt1.parent) {
+            container.parent.addChild(introQuestxt1);
+        }
+        if (introImg && !introImg.parent) {
+            container.parent.addChild(introImg);
+        }
+    }
+}
+
+function ensureIntroHintBanner() {
+
+    if (typeof SAUI_createCycleRaceHintBanner !== "function") {
+        return null;
+    }
+
+    if (!introHintBanner) {
+        introHintBanner = SAUI_createCycleRaceHintBanner({
+            text: "Watch the racers carefully!",
+            width: 520,
+            height: 92,
+            padX: 48,
+            padY: 20
+        });
+        introHintBanner.x = 640;
+        introHintBanner.y = 438;
+    }
+
+    if (!introHintBanner.parent && container && container.parent) {
+        container.parent.addChild(introHintBanner);
+    }
+
+    introHintBanner.visible = false;
+    introHintBanner.alpha = 0;
+
+    return introHintBanner;
+}
+
+function layoutIntroQuestionContent() {
+
+    if (!introQuestionBubble) {
+        return null;
+    }
+
+    var content = introQuestionBubble.__content || introQuestionBubble;
+    var bubbleOptions = introQuestionBubble.__options || {};
+    var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+    var innerTop = -bodyHeight / 2 + 36;
+    var innerBottom = bodyHeight / 2 - 36;
+    var availableWidth = (bubbleOptions.width || 760) - 220;
+    var nodes = [];
+
+    if (introQuestxt1 && introQuestxt1.visible && introQuestxt1.parent === content) {
+        var textMetrics = introConfigureQuestionSprite(introQuestxt1, {
+            maxWidth: availableWidth - 16,
+            maxHeight: Math.max(bodyHeight * 0.38, 120)
+        });
+        nodes.push({ node: introQuestxt1, metrics: textMetrics });
+    }
+
+    if (introImg && introImg.visible && introImg.parent === content) {
+        var imageMetrics = introConfigureQuestionSprite(introImg, {
+            maxWidth: availableWidth,
+            maxHeight: Math.max(bodyHeight * 0.6, 160)
+        });
+        nodes.push({ node: introImg, metrics: imageMetrics });
+    }
+
+    if (!nodes.length) {
+        return null;
+    }
+
+    var spacing = nodes.length > 1 ? Math.min(48, Math.max(30, bodyHeight * 0.1)) : 0;
+    var totalHeight = 0;
+
+    for (var i = 0; i < nodes.length; i++) {
+        var entry = nodes[i];
+        var height = entry.metrics && entry.metrics.height ? entry.metrics.height : entry.node.__layoutHeight || 0;
+        if (!height && typeof entry.node.getBounds === "function") {
+            var b = entry.node.getBounds();
+            if (b) {
+                height = (b.height || 0) * Math.abs(entry.node.scaleY || 1);
+            }
+        }
+        entry.__height = height;
+        totalHeight += height;
+        if (i < nodes.length - 1) {
+            totalHeight += spacing;
+        }
+    }
+
+    var centerY = (innerTop + innerBottom) / 2;
+    var currentY = centerY - totalHeight / 2;
+
+    for (var j = 0; j < nodes.length; j++) {
+        var item = nodes[j];
+        var width = item.metrics && item.metrics.width ? item.metrics.width : item.node.__layoutWidth || 0;
+        var heightVal = item.__height || 0;
+        var offsetX = item.metrics && item.metrics.offsetX ? item.metrics.offsetX : item.node.__visualOffsetX || 0;
+        var offsetY = item.metrics && item.metrics.offsetY ? item.metrics.offsetY : item.node.__visualOffsetY || 0;
+        var halfHeight = heightVal / 2;
+        var targetCenterY = currentY + halfHeight;
+
+        if (targetCenterY - halfHeight + offsetY < innerTop) {
+            targetCenterY = innerTop + halfHeight - offsetY;
+        }
+        if (targetCenterY + halfHeight + offsetY > innerBottom) {
+            targetCenterY = innerBottom - halfHeight - offsetY;
+        }
+
+        item.node.x = -offsetX;
+        item.node.y = targetCenterY - offsetY;
+        item.node.__introTargetY = item.node.y;
+        item.node.__introTargetX = item.node.x;
+
+        currentY += heightVal + (j < nodes.length - 1 ? spacing : 0);
+    }
+
+    return { nodes: nodes };
+}
+
+function initializeIntroChoiceWrappers() {
+
+    var layout = computeIntroImageChoiceLayout();
+    var positionsX = layout.xPositions || [];
+    var positionsY = layout.yPositions || [];
+
+    for (var idx = 0; idx < introChoiceArr.length; idx++) {
+        introImageChoicePositions[idx] = {
+            x: positionsX[idx] != null ? positionsX[idx] : 360 + idx * 120,
+            y: positionsY[idx] != null ? positionsY[idx] : 556
+        };
+
+        var wrapper = introImageChoiceWrappers[idx];
+        if (!wrapper && typeof SAUI_createCycleRaceOptionBubble === "function") {
+            wrapper = SAUI_createCycleRaceOptionBubble({ variant: "image" });
+            introImageChoiceWrappers[idx] = wrapper;
+        }
+
+        if (wrapper) {
+            wrapper.visible = false;
+            wrapper.alpha = 0;
+            wrapper.mouseEnabled = false;
+            wrapper.cursor = "default";
+            wrapper.x = introImageChoicePositions[idx].x;
+            wrapper.y = introImageChoicePositions[idx].y;
+            wrapper.__homeX = wrapper.x;
+            wrapper.__homeY = wrapper.y;
+            if (!wrapper.parent) {
+                container.parent.addChild(wrapper);
+            }
+            if (wrapper.__content && wrapper.__content.numChildren) {
+                wrapper.__content.removeAllChildren();
+            }
+        }
+
+        if (introChoiceArr[idx]) {
+            introCenterOptionBitmap(introChoiceArr[idx]);
+            introChoiceArr[idx].visible = true;
+            introChoiceArr[idx].alpha = 1;
+            introChoiceArr[idx].x = 0;
+            introChoiceArr[idx].y = 0;
+            if (wrapper && wrapper.__content && introChoiceArr[idx].parent !== wrapper.__content) {
+                wrapper.__content.addChild(introChoiceArr[idx]);
+            } else if (wrapper && introChoiceArr[idx].parent !== wrapper) {
+                wrapper.addChild(introChoiceArr[idx]);
+            } else if (!wrapper && !introChoiceArr[idx].parent) {
+                container.parent.addChild(introChoiceArr[idx]);
+                introChoiceArr[idx].x = introImageChoicePositions[idx].x;
+                introChoiceArr[idx].y = introImageChoicePositions[idx].y;
+            }
+        }
+    }
+}
+
+function showIntroQuestionBubble(delay) {
+
+    if (!introQuestionBubble) {
+        return;
+    }
+
+    if (typeof SAUI_showCycleRaceSpeechBubble === "function") {
+        SAUI_showCycleRaceSpeechBubble(introQuestionBubble, delay || 0);
+    } else {
+        introQuestionBubble.visible = true;
+        introQuestionBubble.alpha = 1;
+    }
+}
+
+function hideIntroQuestionBubble() {
+
+    if (!introQuestionBubble) {
+        return;
+    }
+
+    if (typeof SAUI_hideCycleRaceSpeechBubble === "function") {
+        SAUI_hideCycleRaceSpeechBubble(introQuestionBubble);
+    } else {
+        introQuestionBubble.visible = false;
+        introQuestionBubble.alpha = 0;
+    }
+}
 function commongameintro() {
     Title.visible=true;
      
@@ -50,28 +540,29 @@ function commongameintro() {
         CycleIntroArr[i].visible = true;
 
     }
-    container.parent.addChild(introChHolder)
+    introChHolder.visible = false;
     for (i = 0; i < 4; i++) {
         introChoiceArr[i] = introChoice.clone()
-        container.parent.addChild(introChoiceArr[i])
         introChoiceArr[i].visible = false;
-        introChoiceArr[i].x = btnx[i]
-        introChoiceArr[i].scaleX = introChoiceArr[i].scaleY = .8;
-        introChoiceArr[i].y = 310;
+        introChoiceArr[i].scaleX = introChoiceArr[i].scaleY = .78;
+        introChoiceArr[i].x = 0;
+        introChoiceArr[i].y = 0;
         introChoiceArr[i].gotoAndStop(value[i]);
 
     }
-    container.parent.addChild(introQuestxt1);
     introQuestxt1.gotoAndStop(8)
-    introQuestxt1.x = 360; introQuestxt1.y = 330;
     introQuestxt1.visible = false;
     introQuestxt1.alpha = 0;
 
-    container.parent.addChild(introImg);
     introImg.visible = false;
+    introImg.alpha = 0;
     introImg.scaleX=introImg.scaleY=.7
-    introImg.y=225;
-    introImg.x =915;
+    introImg.x = 0;
+    introImg.y = 0;
+
+    ensureIntroQuestionSurface();
+    initializeIntroChoiceWrappers();
+    layoutIntroQuestionContent();
 
     //introText = new createjs.Text("Remember their positions", "30px Lato-Bold", "white")
     introText = new createjs.Text("", "30px Lato-Bold", "white")
@@ -206,32 +697,68 @@ this.onComplete = function (e) {
     }
     else {
         getRaceStop();
-		
-		// Replace image with dynamic text
-introHintTextMc = new createjs.Text("Remember their positions", "bold 28px 'Baloo 2'", "red");
-introHintTextMc.x = canvas.width / 2;
-introHintTextMc.y = 400;
-introHintTextMc.textAlign = "center";
-introHintTextMc.shadow = new createjs.Shadow("#000000", 2, 2, 5);
-introHintTextMc.alpha = 0;
-stage.addChild(introHintTextMc);
 
-// Animate visibility with tween (similar to original)
-createjs.Tween.get(introHintTextMc)
-  .to({ alpha: 1 }, 1000)
-  .wait(3000)
-  .call(handleComplete20_1);
+        ensureIntroQuestionSurface();
+        var banner = ensureIntroHintBanner();
 
- 
+        if (introQuestxt1) {
+            introQuestxt1.visible = true;
+            introQuestxt1.alpha = 1;
+        }
+        if (introImg) {
+            introImg.visible = false;
+            introImg.alpha = 0;
+        }
 
-      
+        layoutIntroQuestionContent();
+
+        if (introQuestionBubble) {
+            introQuestionBubble.x = 640;
+            introQuestionBubble.y = 248;
+            if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
+                showIntroQuestionBubble(0);
+            }
+        }
+
+        if (banner) {
+            SAUI_renderCycleRaceHintBanner(banner, {
+                text: "Watch the racers carefully!",
+                width: 540
+            });
+            banner.x = 640;
+            banner.y = 438;
+            if (banner.parent) {
+                banner.parent.setChildIndex(banner, banner.parent.numChildren - 1);
+            }
+            SAUI_showCycleRaceHintBanner(banner, 80);
+            if (introQuestionBubble && introQuestionBubble.parent === banner.parent) {
+                introQuestionBubble.parent.setChildIndex(
+                    introQuestionBubble,
+                    introQuestionBubble.parent.numChildren - 1
+                );
+            }
+        }
+
+        createjs.Tween.get({}).wait(3400).call(handleComplete20_1);
+
     }
 
 }
 function handleComplete20_1(){
-	introHintTextMc.alpha = 0;
     createjs.Tween.removeAllTweens();
-    setIntroDelay()
+    if (introHintBanner && typeof SAUI_hideCycleRaceHintBanner === "function") {
+        SAUI_hideCycleRaceHintBanner(introHintBanner, {
+            onComplete: function () {
+                if (introHintBanner) {
+                    introHintBanner.visible = false;
+                    introHintBanner.alpha = 0;
+                }
+                setIntroDelay();
+            }
+        });
+    } else {
+        setIntroDelay();
+    }
 }
 function setIntroDelay() {
     if (stopValue == 0) {
@@ -267,11 +794,32 @@ function setIntroHolder() {
     }
     else {
         introText.visible=false;
-        introHintTextMc.alpha = 0;
-        introChHolder.visible = true;       
-        introQuestxt1.visible = true;
-        introQuestxt1.alpha = 0;
-        createjs.Tween.get(introQuestxt1).to({ alpha: 1 },1000).call(handleComplete1_5);
+        if (introHintBanner) {
+            if (typeof SAUI_hideCycleRaceHintBanner === "function") {
+                SAUI_hideCycleRaceHintBanner(introHintBanner);
+            }
+            introHintBanner.visible = false;
+            introHintBanner.alpha = 0;
+        }
+        if (introChHolder) {
+            introChHolder.visible = false;
+        }
+        ensureIntroQuestionSurface();
+        if (introImg) {
+            introImg.visible = false;
+            introImg.alpha = 0;
+        }
+        if (introQuestxt1) {
+            introQuestxt1.visible = true;
+            introQuestxt1.alpha = 0;
+        }
+        layoutIntroQuestionContent();
+        showIntroQuestionBubble(100);
+        if (introQuestxt1) {
+            createjs.Tween.get(introQuestxt1).to({ alpha: 1 }, 700).call(handleComplete1_5);
+        } else {
+            handleComplete1_5();
+        }
 
     }
 
@@ -291,15 +839,60 @@ function handleComplete1_5() {
 }
 function choiceTween() {
 
-    for (i = 0; i < 4; i++) {
-        introChoiceArr[i].visible = true;
-        introChoiceArr[i].alpha = 0;
-    }
-    createjs.Tween.get(introChoiceArr[0]).wait(100).to({ x: introChoiceArr[0].x, y: 410, alpha: 0 }, 500).to({ x: introChoiceArr[0].x, y: 430, alpha: 0.5 }, 500).to({ x: introChoiceArr[0].x, y: 410, alpha: 1 })
-    createjs.Tween.get(introChoiceArr[1]).wait(200).to({ x: introChoiceArr[1].x, y: 430, alpha: 0 }, 500).to({ x: introChoiceArr[1].x, y: 410, alpha: 0.5 }, 500).to({ x: introChoiceArr[1].x, y: 410, alpha: 1 })
-    createjs.Tween.get(introChoiceArr[2]).wait(300).to({ x: introChoiceArr[2].x, y: 410, alpha: 0 }, 500).to({ x: introChoiceArr[2].x, y: 430, alpha: 0.5 }, 500).to({ x: introChoiceArr[2].x, y: 410, alpha: 1 })
-    createjs.Tween.get(introChoiceArr[3]).wait(400).to({ x: introChoiceArr[3].x, y: 430, alpha: 0 }, 500).to({ x: introChoiceArr[3].x, y: 410, alpha: 0.5 }, 500).to({ x: introChoiceArr[3].x, y: 410, alpha: 1 }).wait(2000).call(handleComplete1_6);
+    layoutIntroQuestionContent();
+    initializeIntroChoiceWrappers();
 
+    if (introQuestionBubble) {
+        if (introQuestionBubble.parent) {
+            introQuestionBubble.parent.setChildIndex(
+                introQuestionBubble,
+                introQuestionBubble.parent.numChildren - 1
+            );
+        }
+        if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
+            showIntroQuestionBubble(0);
+        }
+    }
+
+    if (introQuestxt1) {
+        introQuestxt1.visible = true;
+        introQuestxt1.alpha = 1;
+    }
+
+    var longestDelay = 0;
+
+    for (i = 0; i < introChoiceArr.length; i++) {
+        var wrapper = introImageChoiceWrappers[i];
+        var delay = 220 + i * 140;
+
+        if (wrapper && typeof SAUI_showCycleRaceOptionBubble === "function") {
+            SAUI_showCycleRaceOptionBubble(wrapper, delay);
+            if (typeof SAUI_startCycleRaceOptionIdle === "function") {
+                (function (targetWrapper, waitDelay) {
+                    createjs.Tween.get(targetWrapper, { override: false })
+                        .wait(waitDelay + 620)
+                        .call(function () {
+                            SAUI_startCycleRaceOptionIdle(targetWrapper);
+                        });
+                })(wrapper, delay);
+            }
+            longestDelay = Math.max(longestDelay, delay);
+        } else if (introChoiceArr[i]) {
+            var choiceDisplay = introChoiceArr[i];
+            choiceDisplay.visible = true;
+            choiceDisplay.alpha = 0;
+            if (introImageChoicePositions[i]) {
+                choiceDisplay.x = introImageChoicePositions[i].x;
+                choiceDisplay.y = introImageChoicePositions[i].y;
+            }
+            createjs.Tween.get(choiceDisplay)
+                .wait(delay)
+                .to({ alpha: 1 }, 320, createjs.Ease.quadOut);
+            longestDelay = Math.max(longestDelay, delay);
+        }
+    }
+
+    createjs.Tween.get({}).wait(longestDelay + 1800).call(handleComplete1_6);
 
 }
 function handleComplete1_6() {
@@ -315,8 +908,26 @@ function handleComplete1_6() {
 
 }
 function introCh(){
-    introImg.y = 400
-    createjs.Tween.get(introImg).to({ visible : true }).to({ alpha : 0 }).to({alpha : 1 , y : 205 }, 500).wait(4000).call(handleComplete2_1);
+    ensureIntroQuestionSurface();
+    showIntroQuestionBubble(0);
+    if (introQuestxt1) {
+        introQuestxt1.visible = false;
+    }
+    if (!introImg) {
+        handleComplete2_1();
+        return;
+    }
+    introImg.visible = true;
+    introImg.alpha = 0;
+    layoutIntroQuestionContent();
+    var targetY = typeof introImg.__introTargetY === "number" ? introImg.__introTargetY : 0;
+    var targetX = typeof introImg.__introTargetX === "number" ? introImg.__introTargetX : 0;
+    introImg.y = targetY + 120;
+    introImg.x = targetX;
+    createjs.Tween.get(introImg)
+        .to({ alpha: 1, y: targetY }, 520, createjs.Ease.quartOut)
+        .wait(4000)
+        .call(handleComplete2_1);
 }
 function handleComplete2_1(){
     createjs.Tween.removeAllTweens();
@@ -431,9 +1042,39 @@ function setCallDelay() {
 function removeGameIntro() {
     Title.visible=false;
     createjs.Tween.removeAllTweens();
+    hideIntroQuestionBubble();
+    if (introQuestxt1) {
+        introQuestxt1.visible = false;
+        introQuestxt1.alpha = 0;
+        if (introQuestionBubble && introQuestionBubble.__content && introQuestxt1.parent === introQuestionBubble.__content) {
+            introQuestionBubble.__content.removeChild(introQuestxt1);
+        }
+    }
+    if (introImg) {
+        introImg.visible = false;
+        introImg.alpha = 0;
+        if (introQuestionBubble && introQuestionBubble.__content && introImg.parent === introQuestionBubble.__content) {
+            introQuestionBubble.__content.removeChild(introImg);
+        }
+    }
+    for (i = 0; i < introImageChoiceWrappers.length; i++) {
+        var wrapper = introImageChoiceWrappers[i];
+        if (wrapper) {
+            if (typeof SAUI_stopCycleRaceOptionIdle === "function") {
+                SAUI_stopCycleRaceOptionIdle(wrapper);
+            }
+            wrapper.visible = false;
+            wrapper.alpha = 0;
+            wrapper.mouseEnabled = false;
+        }
+        if (introChoiceArr[i]) {
+            introChoiceArr[i].visible = false;
+            introChoiceArr[i].alpha = 0;
+        }
+    }
     container.parent.removeChild(introTarget)
     introTarget.visible = false
-	container.parent.removeChild(introArrow)
+        container.parent.removeChild(introArrow)
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
@@ -443,23 +1084,28 @@ function removeGameIntro() {
 introQuestxt.visible = false;
 container.parent.removeChild(introQuestxt);
 introQuestxt = null;
-    container.parent.addChild(introQuestxt1);
-    introQuestxt1.visible = false
     container.parent.removeChild(introcycle1)
     introcycle1.visible = false
     container.parent.removeChild(introcycle2)
     introcycle2.visible = false
     container.parent.removeChild(introcycle3)
     introcycle3.visible = false
-    container.parent.removeChild(introImg);
-    introImg.visible = false;
     container.parent.removeChild(introcycle9)
     introcycle9.visible = false
     container.parent.removeChild(introChHolder)
     introChHolder.visible = false;
 
-    container.parent.removeChild(introHintTextMc)
-    introHintTextMc.alpha = 0;
+    if (introHintBanner) {
+        createjs.Tween.removeTweens(introHintBanner);
+        if (introHintBanner.__highlight) {
+            createjs.Tween.removeTweens(introHintBanner.__highlight);
+        }
+        if (introHintBanner.parent) {
+            introHintBanner.parent.removeChild(introHintBanner);
+        }
+        introHintBanner.visible = false;
+        introHintBanner.alpha = 0;
+    }
     
 
     if (highlightTweenArr[0]) {
