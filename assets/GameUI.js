@@ -5090,7 +5090,7 @@ function renderCycleRaceSpeechBubble(bubble, overrideOptions) {
   if (labelText) {
     if (title) {
       labelText.text = title;
-      labelText.font = "800 32px 'Baloo 2'";
+      labelText.font = "800 38px 'Baloo 2'";
       labelText.x = labelBg ? labelBg.x : -halfWidth + 90;
       labelText.y = labelBg ? labelBg.y : topY - 18;
       labelText.color = "#F7FBFF";
