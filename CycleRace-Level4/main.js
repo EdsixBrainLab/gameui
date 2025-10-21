@@ -51,12 +51,6 @@ var cycleRaceQuestionBubble,
 var cycleRaceTrimCanvas = null;
 var cycleRaceTrimContext = null;
 
-var cycleRaceTextQuestionPrompt = "Which position did this racer finish?";
-
-if (typeof window !== "undefined") {
-        window.CycleRaceTextQuestionPrompt = cycleRaceTextQuestionPrompt;
-}
-
 function getCycleRaceTrimContext(width, height) {
 
         if (typeof document === "undefined" || !document.createElement) {
@@ -379,45 +373,6 @@ function getCycleRaceSpriteDimensions(sprite) {
                 };
         }
 
-        var isTextDisplay =
-                (typeof createjs !== "undefined" && sprite instanceof createjs.Text) ||
-                (sprite.text != null && typeof sprite.getMeasuredWidth === "function");
-
-        if (isTextDisplay) {
-                if (sprite.lineWidth == null && sprite.__naturalWidth) {
-                        sprite.lineWidth = sprite.__naturalWidth;
-                }
-
-                var measuredWidth = sprite.getMeasuredWidth ? sprite.getMeasuredWidth() : 0;
-                if (sprite.lineWidth && sprite.lineWidth > 0) {
-                        measuredWidth = Math.min(measuredWidth || sprite.lineWidth, sprite.lineWidth);
-                }
-
-                var textValue = String(sprite.text || "");
-                var lines = textValue.length ? textValue.split(/\r?\n/) : [""];
-                var lineHeight = sprite.lineHeight || 0;
-
-                if (!lineHeight && typeof sprite.getMeasuredLineHeight === "function") {
-                        lineHeight = sprite.getMeasuredLineHeight();
-                }
-
-                if (!lineHeight) {
-                        var fontMatch = /([0-9]+)px/.exec(sprite.font || "");
-                        if (fontMatch) {
-                                lineHeight = parseFloat(fontMatch[1]) * 1.2;
-                        }
-                }
-
-                if (!lineHeight) {
-                        lineHeight = 40;
-                }
-
-                return {
-                        width: measuredWidth || 0,
-                        height: lineHeight * Math.max(lines.length, 1)
-                };
-        }
-
         var bounds = null;
 
         if (typeof sprite.getBounds === "function") {
@@ -429,13 +384,13 @@ function getCycleRaceSpriteDimensions(sprite) {
         }
 
         if (!bounds && sprite.spriteSheet && typeof sprite.spriteSheet.getFrame === "function") {
-                var frame = sprite.spriteSheet.getFrame(sprite.currentFrame || 0);
-                if (frame && frame.rect) {
-                        bounds = {
-                                width: frame.rect.width,
-                                height: frame.rect.height
-                        };
-                }
+                        var frame = sprite.spriteSheet.getFrame(sprite.currentFrame || 0);
+                        if (frame && frame.rect) {
+                                bounds = {
+                                        width: frame.rect.width,
+                                        height: frame.rect.height
+                                };
+                        }
         }
 
         if (!bounds && sprite.image) {
@@ -462,10 +417,6 @@ function configureCycleRaceQuestionSprite(sprite, options) {
         }
 
         options = options || {};
-
-        if (sprite.text != null && typeof sprite.getMeasuredWidth === "function" && options.maxWidth != null) {
-                sprite.lineWidth = options.maxWidth;
-        }
 
         var dims = getCycleRaceSpriteDimensions(sprite);
         if (!dims || !dims.width || !dims.height) {
@@ -497,14 +448,6 @@ function configureCycleRaceQuestionSprite(sprite, options) {
         sprite.x = 0;
         sprite.y = 0;
 
-        if (sprite.__textDirty) {
-                sprite.__layoutWidth = null;
-                sprite.__layoutHeight = null;
-                sprite.__visualOffsetX = null;
-                sprite.__visualOffsetY = null;
-                sprite.__textDirty = false;
-        }
-
         var visible = measureCycleRaceSpriteVisibleBounds(sprite);
         var layoutWidth = (visible && visible.width ? visible.width : dims.width) * targetScale;
         var layoutHeight = (visible && visible.height ? visible.height : dims.height) * targetScale;
@@ -522,58 +465,6 @@ function configureCycleRaceQuestionSprite(sprite, options) {
                 offsetX: offsetX,
                 offsetY: offsetY
         };
-}
-
-function cycleRaceOrdinalSuffix(position) {
-
-        var mod10 = position % 10;
-        var mod100 = position % 100;
-
-        if (mod10 === 1 && mod100 !== 11) {
-                return "st";
-        }
-        if (mod10 === 2 && mod100 !== 12) {
-                return "nd";
-        }
-        if (mod10 === 3 && mod100 !== 13) {
-                return "rd";
-        }
-        return "th";
-}
-
-function cycleRaceBuildImagePrompt(index) {
-
-        var place = (index || 0) + 1;
-        return "Who finished " + place + cycleRaceOrdinalSuffix(place) + "?";
-}
-
-if (typeof window !== "undefined" && typeof window.CycleRaceBuildImagePrompt !== "function") {
-        window.CycleRaceBuildImagePrompt = cycleRaceBuildImagePrompt;
-}
-
-function cycleRaceSetTextQuestionPrompt() {
-
-        if (!questionText1) {
-                return;
-        }
-
-        if (questionText1.text !== cycleRaceTextQuestionPrompt) {
-                questionText1.text = cycleRaceTextQuestionPrompt;
-                questionText1.__textDirty = true;
-        }
-}
-
-function cycleRaceSetImageQuestionPrompt(index) {
-
-        if (!question2) {
-                return;
-        }
-
-        var prompt = cycleRaceBuildImagePrompt(index != null ? index : 0);
-        if (question2.text !== prompt) {
-                question2.text = prompt;
-                question2.__textDirty = true;
-        }
 }
 
 function layoutCycleRaceTextQuestionContent() {
@@ -911,7 +802,8 @@ function init() {
 			{ id: "choice2", src: gameAssetsPath + "ChoiceImages2.png" },
 			{ id: "chHolder", src: gameAssetsPath + "chHolder.png" },
 			{ id: "introImg", src: gameAssetsPath + "introImg.png" },
-                        { id: "choice1", src: questionTextPath + "CycleRace-Level4-QT3.png" },
+			{ id: "question2", src: questionTextPath + "CycleRace-Level4-QT2.png" },
+			{ id: "choice1", src: questionTextPath + "CycleRace-Level4-QT3.png" },
 			{ id: "introHintTextMc", src: questionTextPath + "CycleRace-Level4-QT4.png" }
 		)
 		
@@ -1137,7 +1029,38 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 
         }
-        if (id == "choice1") {
+        if (id == "question2") {
+                var spriteSheet10 = new createjs.SpriteSheet({
+			framerate: 30,
+			"images": [preload.getResult("question2")],
+			"frames": { "regX": 82, "height": 63, "count": 300, "regY": 0, "width": 574 },
+			// define two animations, run (loops, 1.5x speed) and jump (returns to run):
+			"animations": {
+				"run": [0, 16, "run", .4]
+
+			}
+		});
+                question2 = new createjs.Sprite(spriteSheet10, "run");
+                container.parent.addChild(question2);
+
+                question2.visible = false;
+                question2.regX = 574 / 2;
+                question2.regY = 63 / 2;
+                question2.x = 0;
+                question2.y = 0;
+                questionText1 = question2.clone();
+                questionText1.regX = question2.regX;
+                questionText1.regY = question2.regY;
+                question2.__naturalWidth = 574;
+                question2.__naturalHeight = 63;
+                question2.__baseScale = 1;
+                questionText1.__naturalWidth = 574;
+                questionText1.__naturalHeight = 63;
+                questionText1.__baseScale = 0.96;
+        }
+	//
+
+	if (id == "choice1") {
 		var spriteSheet11 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("choice1")],
@@ -1508,7 +1431,7 @@ function createQuestions() {
 
                 if (questionText1) {
                         questionText1.visible = true;
-                        cycleRaceSetTextQuestionPrompt();
+                        questionText1.gotoAndStop(9);
                         questionText1.scaleX = questionText1.scaleY =
                                 questionText1.__baseScale != null ? questionText1.__baseScale : 1;
                         questionText1.x = 0;
@@ -1543,7 +1466,7 @@ function createQuestions() {
         } else {
                 question2.visible = true;
                 question2.scaleX = question2.scaleY = question2.__baseScale != null ? question2.__baseScale : 1;
-                cycleRaceSetImageQuestionPrompt(chPosArr3[type2Cnt] - 1);
+                question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
                 question2.x = 0;
                 question2.y = 0;
                 layoutCycleRaceImageQuestionContent();
@@ -1584,8 +1507,7 @@ function createQuestions() {
 
 }
 
-//==============================================================================================================================
-======//
+//====================================================================================================================================//
 function enablechoices() {
 
         if (chPosArr1[cnt] == 0) {
@@ -1741,8 +1663,7 @@ function disablechoices() {
                 question2.visible = false;
         }
 }
-//===================================================================MOUSE ROLL OVER/ROLL OUT===================================
-===========================//
+//===================================================================MOUSE ROLL OVER/ROLL OUT==============================================================//
 
 function answerSelected(e) {
         e.preventDefault();
@@ -1796,56 +1717,6 @@ function ensureCycleRaceQuestionSurface() {
                         container.parent.addChild(cycleRaceQuestionBubble);
                 }
 
-                var bubbleOptions = cycleRaceQuestionBubble.__options || {};
-                var maxContentWidth = (bubbleOptions.width || 760) - 220;
-
-                if (!question2) {
-                        if (typeof SAUI_createCycleRaceQuestionLabel === "function") {
-                                question2 = SAUI_createCycleRaceQuestionLabel({
-                                        fontSize: 46,
-                                        maxWidth: maxContentWidth
-                                });
-                        } else {
-                                question2 = new createjs.Text("", "46px 'Baloo 2'", "#FFFFFF");
-                                question2.textAlign = "center";
-                                question2.textBaseline = "middle";
-                                question2.lineWidth = maxContentWidth;
-                                question2.lineHeight = 54;
-                                question2.shadow = new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, 8);
-                        }
-                        question2.__baseScale = 1;
-                        question2.__textDirty = true;
-                        question2.visible = false;
-                } else if (maxContentWidth > 0 && question2.lineWidth !== maxContentWidth) {
-                        question2.lineWidth = maxContentWidth;
-                        question2.__textDirty = true;
-                }
-
-                if (!questionText1) {
-                        if (typeof SAUI_createCycleRaceQuestionLabel === "function") {
-                                questionText1 = SAUI_createCycleRaceQuestionLabel({
-                                        fontSize: 42,
-                                        maxWidth: maxContentWidth,
-                                        text: cycleRaceTextQuestionPrompt
-                                });
-                        } else {
-                                questionText1 = new createjs.Text(cycleRaceTextQuestionPrompt, "42px 'Baloo 2'", "#FFFFFF");
-                                questionText1.textAlign = "center";
-                                questionText1.textBaseline = "middle";
-                                questionText1.lineWidth = maxContentWidth;
-                                questionText1.lineHeight = 50;
-                                questionText1.shadow = new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, 8);
-                        }
-                        questionText1.__baseScale = 1;
-                        questionText1.__textDirty = true;
-                        questionText1.visible = false;
-                } else if (maxContentWidth > 0 && questionText1.lineWidth !== maxContentWidth) {
-                        questionText1.lineWidth = maxContentWidth;
-                        questionText1.__textDirty = true;
-                }
-
-                cycleRaceSetTextQuestionPrompt();
-
                 if (cycleRaceQuestionBubble.__content) {
                         if (question1 && question1.parent !== cycleRaceQuestionBubble.__content) {
                                 cycleRaceQuestionBubble.__content.addChild(question1);
@@ -1858,28 +1729,6 @@ function ensureCycleRaceQuestionSurface() {
                         }
                 }
         } else {
-                if (!question2) {
-                        question2 = new createjs.Text("", "46px 'Baloo 2'", "#FFFFFF");
-                        question2.textAlign = "center";
-                        question2.textBaseline = "middle";
-                        question2.lineWidth = 520;
-                        question2.lineHeight = 54;
-                        question2.shadow = new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, 8);
-                        question2.__baseScale = 1;
-                        question2.__textDirty = true;
-                        question2.visible = false;
-                }
-                if (!questionText1) {
-                        questionText1 = new createjs.Text(cycleRaceTextQuestionPrompt, "42px 'Baloo 2'", "#FFFFFF");
-                        questionText1.textAlign = "center";
-                        questionText1.textBaseline = "middle";
-                        questionText1.lineWidth = 520;
-                        questionText1.lineHeight = 50;
-                        questionText1.shadow = new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, 8);
-                        questionText1.__baseScale = 1;
-                        questionText1.__textDirty = true;
-                        questionText1.visible = false;
-                }
                 if (question1 && !question1.parent) {
                         container.parent.addChild(question1);
                 }
@@ -1890,8 +1739,6 @@ function ensureCycleRaceQuestionSurface() {
                         container.parent.addChild(questionText1);
                 }
         }
-
-        cycleRaceSetTextQuestionPrompt();
 
         if (question1) {
                 question1.visible = false;

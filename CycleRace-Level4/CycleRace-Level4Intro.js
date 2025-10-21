@@ -30,45 +30,6 @@ function introGetSpriteDimensions(sprite) {
         };
     }
 
-    var isTextDisplay =
-        (typeof createjs !== "undefined" && sprite instanceof createjs.Text) ||
-        (sprite.text != null && typeof sprite.getMeasuredWidth === "function");
-
-    if (isTextDisplay) {
-        if (sprite.lineWidth == null && sprite.__naturalWidth) {
-            sprite.lineWidth = sprite.__naturalWidth;
-        }
-
-        var measuredWidth = sprite.getMeasuredWidth ? sprite.getMeasuredWidth() : 0;
-        if (sprite.lineWidth && sprite.lineWidth > 0) {
-            measuredWidth = Math.min(measuredWidth || sprite.lineWidth, sprite.lineWidth);
-        }
-
-        var textValue = String(sprite.text || "");
-        var lines = textValue.length ? textValue.split(/\r?\n/) : [""];
-        var lineHeight = sprite.lineHeight || 0;
-
-        if (!lineHeight && typeof sprite.getMeasuredLineHeight === "function") {
-            lineHeight = sprite.getMeasuredLineHeight();
-        }
-
-        if (!lineHeight) {
-            var fontMatch = /([0-9]+)px/.exec(sprite.font || "");
-            if (fontMatch) {
-                lineHeight = parseFloat(fontMatch[1]) * 1.2;
-            }
-        }
-
-        if (!lineHeight) {
-            lineHeight = 40;
-        }
-
-        return {
-            width: measuredWidth || 0,
-            height: lineHeight * Math.max(lines.length, 1)
-        };
-    }
-
     var bounds = null;
 
     if (typeof sprite.getBounds === "function") {
@@ -141,10 +102,6 @@ function introConfigureQuestionSprite(sprite, options) {
             ? sprite.__baseScale
             : sprite.scaleX || 1;
 
-    if (sprite.text != null && typeof sprite.getMeasuredWidth === "function") {
-        sprite.lineWidth = availableWidth;
-    }
-
     var scaleX = dims.width ? availableWidth / dims.width : baseScale;
     var scaleY = dims.height ? availableHeight / dims.height : baseScale;
     var targetScale = Math.min(baseScale, scaleX, scaleY);
@@ -157,14 +114,6 @@ function introConfigureQuestionSprite(sprite, options) {
     sprite.regY = dims.height / 2;
     sprite.x = 0;
     sprite.y = 0;
-
-    if (sprite.__textDirty) {
-        sprite.__layoutWidth = null;
-        sprite.__layoutHeight = null;
-        sprite.__visualOffsetX = null;
-        sprite.__visualOffsetY = null;
-        sprite.__textDirty = false;
-    }
 
     var visible = null;
     if (typeof measureCycleRaceSpriteVisibleBounds === "function") {
@@ -348,7 +297,7 @@ function ensureIntroQuestionSurface() {
             content.addChild(introQuestxt1);
         }
         if (introImg && introImg.parent !== content) {
-            content.addChild(introImg);
+            container.parent.addChild(introImg);
         }
 
         introQuestionBubble.visible = false;
@@ -557,29 +506,8 @@ function hideIntroQuestionBubble() {
 }
 function commongameintro() {
     Title.visible=true;
-
-    var introPrompt =
-        (typeof window !== "undefined" && window.CycleRaceTextQuestionPrompt)
-            ? window.CycleRaceTextQuestionPrompt
-            : "Which position did this racer finish?";
-
-    if (typeof SAUI_createCycleRaceQuestionLabel === "function") {
-        introQuestxt1 = SAUI_createCycleRaceQuestionLabel({
-            fontSize: 42,
-            maxWidth: 520,
-            text: introPrompt
-        });
-    } else {
-        introQuestxt1 = new createjs.Text(introPrompt, "42px 'Baloo 2'", "#FFFFFF");
-        introQuestxt1.textAlign = "center";
-        introQuestxt1.textBaseline = "middle";
-        introQuestxt1.lineWidth = 520;
-        introQuestxt1.lineHeight = 50;
-        introQuestxt1.shadow = new createjs.Shadow("rgba(10,36,64,0.45)", 0, 3, 8);
-    }
-    introQuestxt1.__baseScale = 1;
-    introQuestxt1.__textDirty = true;
-
+     
+    introQuestxt1 = questionText1.clone();
     introcycle1 = cycle1.clone();
     introcycle2 = cycle2.clone();
     introcycle3 = cycle3.clone();
@@ -622,12 +550,13 @@ function commongameintro() {
         introChoiceArr[i].gotoAndStop(value[i]);
 
     }
+    introQuestxt1.gotoAndStop(8)
     introQuestxt1.visible = false;
     introQuestxt1.alpha = 0;
 
     introImg.visible = false;
     introImg.alpha = 0;
-    introImg.scaleX=introImg.scaleY=.7
+    introImg.scaleX=introImg.scaleY=.4
     introImg.x = 0;
     introImg.y = 0;
 
@@ -773,8 +702,8 @@ this.onComplete = function (e) {
         var banner = ensureIntroHintBanner();
 
         if (introQuestxt1) {
-            introQuestxt1.visible = true;
-            introQuestxt1.alpha = 1;
+            introQuestxt1.visible = false;
+            introQuestxt1.alpha = 0;
         }
         if (introImg) {
             introImg.visible = false;
@@ -786,9 +715,7 @@ this.onComplete = function (e) {
         if (introQuestionBubble) {
             introQuestionBubble.x = 640;
             introQuestionBubble.y = 248;
-            if (!introQuestionBubble.visible || introQuestionBubble.alpha < 0.95) {
-                showIntroQuestionBubble(0);
-            }
+            hideIntroQuestionBubble();
         }
 
         if (banner) {
@@ -796,7 +723,7 @@ this.onComplete = function (e) {
                 text: "Watch the racers carefully!",
                 width: 540
             });
-            banner.x = 640;
+            banner.x = 540;
             banner.y = 438;
             if (banner.parent) {
                 banner.parent.setChildIndex(banner, banner.parent.numChildren - 1);
@@ -979,24 +906,23 @@ function handleComplete1_6() {
 
 }
 function introCh(){
-    ensureIntroQuestionSurface();
-    showIntroQuestionBubble(0);
-    if (introQuestxt1) {
-        introQuestxt1.visible = false;
-    }
+    //ensureIntroQuestionSurface();
+    //showIntroQuestionBubble(0);
+    
     if (!introImg) {
         handleComplete2_1();
         return;
     }
+	container.parent.setChildIndex(introImg, container.parent.numChildren - 1);
     introImg.visible = true;
     introImg.alpha = 0;
     layoutIntroQuestionContent();
     var targetY = typeof introImg.__introTargetY === "number" ? introImg.__introTargetY : 0;
     var targetX = typeof introImg.__introTargetX === "number" ? introImg.__introTargetX : 0;
-    introImg.y = targetY + 120;
-    introImg.x = targetX;
+    introImg.y = 240;
+    introImg.x = 850;
     createjs.Tween.get(introImg)
-        .to({ alpha: 1, y: targetY }, 520, createjs.Ease.quartOut)
+        .to({ alpha: 1, y: introImg.y }, 520, createjs.Ease.quartOut)
         .wait(4000)
         .call(handleComplete2_1);
 }
