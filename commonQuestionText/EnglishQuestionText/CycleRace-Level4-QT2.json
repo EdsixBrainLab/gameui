@@ -1,0 +1,12 @@
+{
+  "imageQuestions": [
+    "Who finished first?",
+    "Who finished second?",
+    "Who finished third?",
+    "Who finished fourth?",
+    "Who finished fifth?",
+    "Who finished sixth?"
+  ],
+  "textModePrompt": "Choose the racer that matches the clue.",
+  "introPrompt": "Watch the race carefully and remember the racers' finishing places."
+}
