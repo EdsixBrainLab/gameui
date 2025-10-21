@@ -69,6 +69,22 @@ var cycleRaceImageQuestionTexts = [
 var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
 var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
 
+var cycleRaceQuestionTextMeasure = null;
+var cycleRaceImageQuestionTexts = [
+        "Who was in the first place?",
+        "Who was in the second place?",
+        "Who was in the third place?",
+        "Who was in the fourth place?",
+        "Who was in the fifth place?",
+        "Who was in the sixth place?",
+        "Who was in the seventh place?",
+        "Who was in the eighth place?",
+        "Who was in the last place?",
+        "What was my place in the race?"
+];
+var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
+var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
+
 function getCycleRaceTrimContext(width, height) {
 
         if (typeof document === "undefined" || !document.createElement) {
