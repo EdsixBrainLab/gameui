@@ -12,7 +12,7 @@ var posY1 = [420, 440, 480, 500]
 //var introCycleCntArr = [1, 2, 3, 4, 5, 9]
 var introCycleCntArr = [1, 2, 3, 9]
 var value = [0, 2, 1, 8]
-var introHintTextMc;
+var introHintBanner = null;
 var introQuestionBubble = null;
 var introImageChoiceWrappers = [];
 var introImageChoicePositions = [];
@@ -310,6 +310,34 @@ function ensureIntroQuestionSurface() {
             container.parent.addChild(introImg);
         }
     }
+}
+
+function ensureIntroHintBanner() {
+
+    if (typeof SAUI_createCycleRaceHintBanner !== "function") {
+        return null;
+    }
+
+    if (!introHintBanner) {
+        introHintBanner = SAUI_createCycleRaceHintBanner({
+            text: "Watch the racers carefully!",
+            width: 520,
+            height: 92,
+            padX: 48,
+            padY: 20
+        });
+        introHintBanner.x = 640;
+        introHintBanner.y = 438;
+    }
+
+    if (!introHintBanner.parent && container && container.parent) {
+        container.parent.addChild(introHintBanner);
+    }
+
+    introHintBanner.visible = false;
+    introHintBanner.alpha = 0;
+
+    return introHintBanner;
 }
 
 function layoutIntroQuestionContent() {
@@ -669,36 +697,72 @@ this.onComplete = function (e) {
     }
     else {
         getRaceStop();
-		
-		// Replace image with dynamic text
-introHintTextMc = new createjs.Text(
-    "Watch the racers carefully!",
-    "800 28px 'Baloo 2'",
-    "#FFE47E"
-);
-introHintTextMc.x = canvas.width / 2;
-introHintTextMc.y = 400;
-introHintTextMc.textAlign = "center";
-introHintTextMc.shadow = new createjs.Shadow("#000000", 2, 2, 5);
-introHintTextMc.alpha = 0;
-stage.addChild(introHintTextMc);
 
-// Animate visibility with tween (similar to original)
-createjs.Tween.get(introHintTextMc)
-  .to({ alpha: 1 }, 1000)
-  .wait(3000)
-  .call(handleComplete20_1);
+        ensureIntroQuestionSurface();
+        var banner = ensureIntroHintBanner();
 
- 
+        if (introQuestxt1) {
+            introQuestxt1.visible = true;
+            introQuestxt1.alpha = 1;
+        }
+        if (introImg) {
+            introImg.visible = false;
+            introImg.alpha = 0;
+        }
 
-      
+        layoutIntroQuestionContent();
+
+        if (introQuestionBubble) {
+            introQuestionBubble.x = 640;
+            introQuestionBubble.y = 248;
+            showIntroQuestionBubble(80);
+            if (introQuestionBubble.parent) {
+                introQuestionBubble.parent.setChildIndex(
+                    introQuestionBubble,
+                    introQuestionBubble.parent.numChildren - 1
+                );
+            }
+        }
+
+        if (banner) {
+            SAUI_renderCycleRaceHintBanner(banner, {
+                text: "Watch the racers carefully!",
+                width: 540
+            });
+            banner.x = 640;
+            banner.y = 438;
+            if (banner.parent) {
+                banner.parent.setChildIndex(banner, banner.parent.numChildren - 1);
+            }
+            SAUI_showCycleRaceHintBanner(banner, 80);
+            if (introQuestionBubble && introQuestionBubble.parent === banner.parent) {
+                introQuestionBubble.parent.setChildIndex(
+                    introQuestionBubble,
+                    introQuestionBubble.parent.numChildren - 1
+                );
+            }
+        }
+
+        createjs.Tween.get({}).wait(3400).call(handleComplete20_1);
+
     }
 
 }
 function handleComplete20_1(){
-	introHintTextMc.alpha = 0;
     createjs.Tween.removeAllTweens();
-    setIntroDelay()
+    if (introHintBanner && typeof SAUI_hideCycleRaceHintBanner === "function") {
+        SAUI_hideCycleRaceHintBanner(introHintBanner, {
+            onComplete: function () {
+                if (introHintBanner) {
+                    introHintBanner.visible = false;
+                    introHintBanner.alpha = 0;
+                }
+                setIntroDelay();
+            }
+        });
+    } else {
+        setIntroDelay();
+    }
 }
 function setIntroDelay() {
     if (stopValue == 0) {
@@ -734,7 +798,13 @@ function setIntroHolder() {
     }
     else {
         introText.visible=false;
-        introHintTextMc.alpha = 0;
+        if (introHintBanner) {
+            if (typeof SAUI_hideCycleRaceHintBanner === "function") {
+                SAUI_hideCycleRaceHintBanner(introHintBanner);
+            }
+            introHintBanner.visible = false;
+            introHintBanner.alpha = 0;
+        }
         if (introChHolder) {
             introChHolder.visible = false;
         }
@@ -1029,8 +1099,17 @@ introQuestxt = null;
     container.parent.removeChild(introChHolder)
     introChHolder.visible = false;
 
-    container.parent.removeChild(introHintTextMc)
-    introHintTextMc.alpha = 0;
+    if (introHintBanner) {
+        createjs.Tween.removeTweens(introHintBanner);
+        if (introHintBanner.__highlight) {
+            createjs.Tween.removeTweens(introHintBanner.__highlight);
+        }
+        if (introHintBanner.parent) {
+            introHintBanner.parent.removeChild(introHintBanner);
+        }
+        introHintBanner.visible = false;
+        introHintBanner.alpha = 0;
+    }
     
 
     if (highlightTweenArr[0]) {

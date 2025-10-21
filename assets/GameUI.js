@@ -57,6 +57,14 @@ var cycleRaceImageOptionPalette = {
   sheen: ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"]
 };
 
+var cycleRaceHintPalette = {
+  fill: ["rgba(255,236,188,0.98)", "rgba(255,192,108,0.98)"],
+  stroke: ["rgba(255,252,232,0.88)", "rgba(226,140,66,0.9)"],
+  highlight: ["rgba(255,255,255,0.55)", "rgba(255,255,255,0.04)"],
+  glow: "rgba(10,20,44,0.42)",
+  text: "#2A2F55"
+};
+
 function computeCenteredRowLayout(count, options) {
   options = options || {};
   var centerX =
@@ -5145,6 +5153,247 @@ function SAUI_hideCycleRaceSpeechBubble(bubble) {
   }
 }
 
+function SAUI_createCycleRaceHintBanner(options) {
+  options = options || {};
+
+  var banner = new createjs.Container();
+  banner.visible = false;
+  banner.alpha = 0;
+  banner.mouseEnabled = false;
+  banner.__palette = options.palette || cycleRaceHintPalette;
+  banner.__options = {
+    width: options.width,
+    height: options.height,
+    padX: options.padX != null ? options.padX : 42,
+    padY: options.padY != null ? options.padY : 20,
+    cornerRadius: options.cornerRadius,
+    font: options.font || "800 28px 'Baloo 2'",
+    text: options.text || "",
+    textColor:
+      options.textColor ||
+      (banner.__palette && banner.__palette.text ? banner.__palette.text : "#243360")
+  };
+
+  var shadow = new createjs.Shape();
+  var body = new createjs.Shape();
+  var highlight = new createjs.Shape();
+  var text = new createjs.Text(
+    banner.__options.text,
+    banner.__options.font,
+    banner.__options.textColor
+  );
+
+  text.textAlign = "center";
+  text.textBaseline = "middle";
+
+  banner.addChild(shadow, body, highlight, text);
+
+  banner.__shadow = shadow;
+  banner.__body = body;
+  banner.__highlight = highlight;
+  banner.__text = text;
+
+  renderCycleRaceHintBanner(banner, options);
+
+  return banner;
+}
+
+function renderCycleRaceHintBanner(banner, overrideOptions) {
+  if (!banner) {
+    return;
+  }
+
+  overrideOptions = overrideOptions || {};
+  banner.__options = banner.__options || {};
+
+  var palette = banner.__palette || cycleRaceHintPalette;
+  var text = banner.__text;
+
+  if (!text) {
+    return;
+  }
+
+  if (overrideOptions.font) {
+    banner.__options.font = overrideOptions.font;
+  }
+  if (overrideOptions.textColor) {
+    banner.__options.textColor = overrideOptions.textColor;
+  }
+  if (overrideOptions.text != null) {
+    banner.__options.text = overrideOptions.text;
+  }
+
+  text.font = banner.__options.font || text.font;
+  text.color = banner.__options.textColor || text.color;
+  if (banner.__options.text != null) {
+    text.text = banner.__options.text;
+  }
+
+  var padX =
+    overrideOptions.padX != null
+      ? overrideOptions.padX
+      : banner.__options.padX != null
+      ? banner.__options.padX
+      : 42;
+  var padY =
+    overrideOptions.padY != null
+      ? overrideOptions.padY
+      : banner.__options.padY != null
+      ? banner.__options.padY
+      : 20;
+
+  banner.__options.padX = padX;
+  banner.__options.padY = padY;
+
+  var measuredWidth = text.getMeasuredWidth ? text.getMeasuredWidth() : 0;
+  var lineHeight = text.getMeasuredLineHeight ? text.getMeasuredLineHeight() : text.lineHeight || 36;
+
+  var width =
+    overrideOptions.width != null
+      ? overrideOptions.width
+      : banner.__options.width != null
+      ? banner.__options.width
+      : Math.max(360, measuredWidth + padX * 2);
+
+  var height =
+    overrideOptions.height != null
+      ? overrideOptions.height
+      : banner.__options.height != null
+      ? banner.__options.height
+      : Math.max(80, lineHeight + padY * 2);
+
+  var cornerRadius =
+    overrideOptions.cornerRadius != null
+      ? overrideOptions.cornerRadius
+      : banner.__options.cornerRadius != null
+      ? banner.__options.cornerRadius
+      : Math.min(height / 2, 44);
+
+  banner.__options.width = width;
+  banner.__options.height = height;
+  banner.__options.cornerRadius = cornerRadius;
+
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+
+  if (banner.__shadow) {
+    var glowColor = palette.glow || "rgba(12,24,58,0.35)";
+    banner.__shadow.graphics
+      .clear()
+      .beginFill(glowColor)
+      .drawRoundRect(-halfWidth, -halfHeight + 12, width, height, cornerRadius);
+    banner.__shadow.alpha = 0.7;
+    banner.__shadow.y = 8;
+  }
+
+  if (banner.__body) {
+    banner.__body.graphics
+      .clear()
+      .setStrokeStyle(4, "round", "round")
+      .beginLinearGradientStroke(palette.stroke, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+      .beginLinearGradientFill(palette.fill, [0, 1], -halfWidth, -halfHeight, halfWidth, halfHeight)
+      .drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius)
+      .endFill();
+  }
+
+  if (banner.__highlight) {
+    banner.__highlight.graphics
+      .clear()
+      .beginLinearGradientFill(
+        palette.highlight,
+        [0, 1],
+        0,
+        -halfHeight,
+        0,
+        halfHeight * 0.6
+      )
+      .drawRoundRect(-halfWidth + 8, -halfHeight + 8, width - 16, height * 0.58, Math.max(16, cornerRadius - 12));
+    banner.__highlight.alpha = 0.78;
+  }
+
+  text.x = 0;
+  text.y = 0;
+
+  if (!banner.hitArea) {
+    banner.hitArea = new createjs.Shape();
+  }
+  banner.hitArea.graphics
+    .clear()
+    .beginFill("#000")
+    .drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
+}
+
+function SAUI_startCycleRaceHintIdle(banner) {
+  if (!banner || !banner.__highlight) {
+    return;
+  }
+
+  if (banner.__highlightIdle) {
+    return;
+  }
+
+  banner.__highlightIdle = createjs.Tween.get(banner.__highlight, {
+    loop: true,
+    override: true
+  })
+    .to({ alpha: 0.92 }, 1200, createjs.Ease.sineInOut)
+    .to({ alpha: 0.68 }, 1200, createjs.Ease.sineInOut);
+}
+
+function SAUI_stopCycleRaceHintIdle(banner) {
+  if (!banner || !banner.__highlight) {
+    return;
+  }
+
+  if (banner.__highlightIdle) {
+    createjs.Tween.removeTweens(banner.__highlight);
+    banner.__highlightIdle = null;
+  }
+}
+
+function SAUI_showCycleRaceHintBanner(banner, delay) {
+  if (!banner) {
+    return;
+  }
+
+  renderCycleRaceHintBanner(banner);
+
+  banner.visible = true;
+  banner.alpha = 0;
+  banner.scaleX = banner.scaleY = 0.9;
+
+  createjs.Tween.removeTweens(banner);
+  createjs.Tween.get(banner, { override: true })
+    .wait(delay || 0)
+    .to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 240, createjs.Ease.quadOut)
+    .to({ scaleX: 1, scaleY: 1 }, 220, createjs.Ease.quadOut)
+    .call(function () {
+      SAUI_startCycleRaceHintIdle(banner);
+    });
+}
+
+function SAUI_hideCycleRaceHintBanner(banner, options) {
+  if (!banner) {
+    if (options && typeof options.onComplete === "function") {
+      options.onComplete();
+    }
+    return;
+  }
+
+  SAUI_stopCycleRaceHintIdle(banner);
+
+  createjs.Tween.removeTweens(banner);
+  createjs.Tween.get(banner, { override: true })
+    .to({ alpha: 0, scaleX: 0.94, scaleY: 0.94 }, 200, createjs.Ease.quadIn)
+    .call(function () {
+      banner.visible = false;
+      banner.scaleX = banner.scaleY = 1;
+      if (options && typeof options.onComplete === "function") {
+        options.onComplete();
+      }
+    });
+}
+
 function SAUI_createCycleRaceOptionBubble(options) {
   options = options || {};
   var variant = options.variant === "image" ? "image" : "text";
@@ -5670,6 +5919,10 @@ if (globalHelperScope) {
   globalHelperScope.SAUI_createCycleRaceSpeechBubble = SAUI_createCycleRaceSpeechBubble;
   globalHelperScope.SAUI_showCycleRaceSpeechBubble = SAUI_showCycleRaceSpeechBubble;
   globalHelperScope.SAUI_hideCycleRaceSpeechBubble = SAUI_hideCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_createCycleRaceHintBanner = SAUI_createCycleRaceHintBanner;
+  globalHelperScope.SAUI_renderCycleRaceHintBanner = renderCycleRaceHintBanner;
+  globalHelperScope.SAUI_showCycleRaceHintBanner = SAUI_showCycleRaceHintBanner;
+  globalHelperScope.SAUI_hideCycleRaceHintBanner = SAUI_hideCycleRaceHintBanner;
   globalHelperScope.SAUI_createCycleRaceOptionBubble = SAUI_createCycleRaceOptionBubble;
   globalHelperScope.SAUI_showCycleRaceOptionBubble = SAUI_showCycleRaceOptionBubble;
   globalHelperScope.SAUI_resetCycleRaceOptionBubble = SAUI_resetCycleRaceOptionBubble;
