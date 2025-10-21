@@ -40,6 +40,7 @@ var feedbackContainer,
   feedbackOverlayShape,
   feedbackOutlineShape,
   feedbackSheenShape,
+  feedbackAnswerHighlight,
   feedbackAccentContainer,
   feedbackAccentGlow,
   feedbackAccentBg,
@@ -51,6 +52,7 @@ var feedbackContainer,
   feedbackTitleTxt,
   feedbackAnswerTxt,
   feedbackMessageTxt;
+
 
 var confettiLayer;
 var confettiColors = ["#f9d342", "#ff6f61", "#50c878", "#4fc3f7", "#af7ac5", "#ffd1dc"]; // soft vibrant palette
@@ -287,16 +289,24 @@ function ensureFeedbackContainer() {
     feedbackSheenShape.alpha = 0;
     feedbackContainer.addChild(feedbackSheenShape);
 
+    feedbackAnswerHighlight = new createjs.Shape();
+    feedbackAnswerHighlight.visible = false;
+    feedbackAnswerHighlight.mouseEnabled = false;
+    feedbackAnswerHighlight.mouseChildren = false;
+    feedbackContainer.addChild(feedbackAnswerHighlight);
+
     feedbackTitleTxt = new createjs.Text("", "800 28px 'Baloo 2'", "#FFFFFF");
     feedbackTitleTxt.textAlign = "left";
+    feedbackTitleTxt.textBaseline = "top";
     feedbackTitleTxt.x = -120;
     feedbackTitleTxt.y = -26;
     feedbackContainer.addChild(feedbackTitleTxt);
 
     feedbackAnswerTxt = new createjs.Text("", "900 24px 'Baloo 2'", "#FFFFFF");
     feedbackAnswerTxt.textAlign = "left";
-    feedbackAnswerTxt.lineWidth = 360;
-    feedbackAnswerTxt.lineHeight = 30;
+    feedbackAnswerTxt.textBaseline = "top";
+    feedbackAnswerTxt.lineWidth = 320;
+    feedbackAnswerTxt.lineHeight = 32;
     feedbackAnswerTxt.x = -120;
     feedbackAnswerTxt.y = 18;
     feedbackAnswerTxt.visible = false;
@@ -305,6 +315,7 @@ function ensureFeedbackContainer() {
 
     feedbackMessageTxt = new createjs.Text("", "400 18px 'Baloo 2'", "#E3ECFF");
     feedbackMessageTxt.textAlign = "left";
+    feedbackMessageTxt.textBaseline = "top";
     feedbackMessageTxt.lineWidth = 360;
     feedbackMessageTxt.lineHeight = 24;
     feedbackMessageTxt.x = -120;
@@ -327,7 +338,10 @@ function getFeedbackPalette(isCorrect) {
             iconStroke: "#F0FDFA",
             titleColor: "#ECFEFF",
             messageColor: "#D1FAF9",
-            answerColor: "#FEF08A",
+            answerTextColor: "#0F172A",
+            answerHighlight: "rgba(254, 240, 138, 0.9)",
+            answerHighlightStroke: "rgba(202, 138, 4, 0.55)",
+            answerShadow: "rgba(250, 204, 21, 0.45)",
             particleColors: ["#2DD4BF", "#5EEAD4", "#38BDF8", "#C4F1F9"],
             sparkColor: "#FFFFFF"
         };
@@ -344,7 +358,10 @@ function getFeedbackPalette(isCorrect) {
         iconStroke: "#FFE4F1",
         titleColor: "#FFE4F1",
         messageColor: "#FBCFE8",
-        answerColor: "#FFE4E6",
+        answerTextColor: "#4A044E",
+        answerHighlight: "rgba(255, 228, 230, 0.92)",
+        answerHighlightStroke: "rgba(244, 114, 182, 0.55)",
+        answerShadow: "rgba(244, 114, 182, 0.35)",
         particleColors: ["#FB7185", "#F472B6", "#C084FC", "#FDA4AF"],
         sparkColor: "#FFFFFF"
     };
@@ -395,13 +412,10 @@ function animateFeedbackAccent(palette, isCorrect) {
     }
 }
 
-function animateFeedbackSheen(palette) {
+function animateFeedbackSheen(palette, cardWidth, cardHeight) {
     if (!feedbackSheenShape) {
         return;
     }
-
-    var cardWidth = 520;
-    var cardHeight = 128;
 
     feedbackSheenShape.graphics.clear();
     feedbackSheenShape.graphics
@@ -520,7 +534,24 @@ function showFeedbackBanner(isCorrect) {
 
     var palette = getFeedbackPalette(isCorrect);
     var cardWidth = 520;
-    var cardHeight = 128;
+    var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? String(correctAnswer).toUpperCase() : "";
+    var hasAnswer = !!answerText;
+    var answerLabel = isCorrect ? "Answer locked:" : "Correct answer:";
+    var displayAnswer = hasAnswer ? answerLabel + " " + answerText : "";
+    var answerBlockWidth = 0;
+    var answerBlockHeight = 0;
+
+    if (feedbackAnswerTxt) {
+        if (hasAnswer) {
+            feedbackAnswerTxt.text = displayAnswer;
+            answerBlockWidth = Math.min(feedbackAnswerTxt.lineWidth, feedbackAnswerTxt.getMeasuredWidth());
+            answerBlockHeight = Math.max(feedbackAnswerTxt.lineHeight, feedbackAnswerTxt.getMeasuredHeight());
+        } else {
+            feedbackAnswerTxt.text = "";
+        }
+    }
+
+    var cardHeight = hasAnswer ? Math.max(168, 124 + answerBlockHeight) : 136;
     var halfWidth = cardWidth / 2;
     var halfHeight = cardHeight / 2;
     var cornerRadius = 36;
@@ -601,29 +632,64 @@ function showFeedbackBanner(isCorrect) {
     feedbackTitleTxt.color = palette.titleColor;
     feedbackMessageTxt.color = palette.messageColor;
 
-    var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? correctAnswer.toUpperCase() : "";
-    var hasAnswer = !!answerText;
+    var contentTop = -halfHeight + 26;
+    feedbackTitleTxt.y = contentTop;
 
     if (feedbackAnswerTxt) {
         if (hasAnswer) {
-            var answerLabel = isCorrect ? "Answer locked:" : "Correct answer:";
+            var paddingX = 18;
+            var paddingY = 10;
+            var minHighlightWidth = 160;
+            var answerY = contentTop + 44;
+
             feedbackAnswerTxt.visible = true;
-            feedbackAnswerTxt.text = answerLabel + " " + answerText;
-            feedbackAnswerTxt.color = palette.answerColor || "#FFFFFF";
-            feedbackAnswerTxt.shadow = new createjs.Shadow(
-                applyColorAlpha(palette.answerColor || "#FFFFFF", 0.45),
-                0,
-                6,
-                18
-            );
+            feedbackAnswerTxt.text = displayAnswer;
+            feedbackAnswerTxt.color = palette.answerTextColor || palette.titleColor;
+            feedbackAnswerTxt.y = answerY;
+
+            var measuredWidth = answerBlockWidth || Math.min(feedbackAnswerTxt.lineWidth, feedbackAnswerTxt.getMeasuredWidth());
+            answerBlockHeight = Math.max(answerBlockHeight, Math.max(feedbackAnswerTxt.lineHeight, feedbackAnswerTxt.getMeasuredHeight()));
+            var highlightWidth = Math.max(minHighlightWidth, measuredWidth + paddingX * 2);
+            var maxHighlightWidth = cardWidth - 160;
+            highlightWidth = Math.min(highlightWidth, maxHighlightWidth);
+            var highlightHeight = answerBlockHeight + paddingY * 2;
+
+            if (feedbackAnswerHighlight) {
+                feedbackAnswerHighlight.visible = true;
+                feedbackAnswerHighlight.graphics
+                    .clear()
+                    .setStrokeStyle(2)
+                    .beginStroke(
+                        palette.answerHighlightStroke || applyColorAlpha(palette.answerHighlight || "#FFFFFF", 0.6)
+                    )
+                    .beginFill(palette.answerHighlight || "rgba(255,255,255,0.85)")
+                    .drawRoundRect(
+                        feedbackAnswerTxt.x - paddingX,
+                        answerY - paddingY,
+                        highlightWidth,
+                        highlightHeight,
+                        18
+                    );
+            }
+
+            feedbackAnswerTxt.shadow = palette.answerShadow
+                ? new createjs.Shadow(palette.answerShadow, 0, 4, 12)
+                : null;
         } else {
             feedbackAnswerTxt.visible = false;
             feedbackAnswerTxt.text = "";
             feedbackAnswerTxt.shadow = null;
+            if (feedbackAnswerHighlight) {
+                feedbackAnswerHighlight.visible = false;
+                feedbackAnswerHighlight.graphics.clear();
+            }
         }
     }
 
-    feedbackMessageTxt.y = hasAnswer ? 56 : 18;
+    var messageY = hasAnswer
+        ? feedbackAnswerTxt.y + answerBlockHeight + 20
+        : contentTop + 44;
+    feedbackMessageTxt.y = messageY;
 
     if (isCorrect) {
         feedbackTitleTxt.text = "Brilliant match!";
@@ -655,7 +721,7 @@ function showFeedbackBanner(isCorrect) {
         });
 
     animateFeedbackAccent(palette, isCorrect);
-    animateFeedbackSheen(palette);
+    animateFeedbackSheen(palette, cardWidth, cardHeight);
     spawnFeedbackParticles(palette, isCorrect);
 }
 function getValidation(aStr) {
