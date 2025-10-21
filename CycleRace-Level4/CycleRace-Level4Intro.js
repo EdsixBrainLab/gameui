@@ -521,16 +521,19 @@ function commongameintro() {
                 questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'",
             lineHeight:
                 questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40,
-            color: questionText1 && questionText1.color ? questionText1.color : "#2F2F2F"
+            color: questionText1 && questionText1.color ? questionText1.color : "#202D72"
         });
     } else if (typeof createjs !== "undefined" && createjs.Text) {
         var introFont = questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'";
-        var introColor = questionText1 && questionText1.color ? questionText1.color : "#2F2F2F";
+        var introColor = questionText1 && questionText1.color ? questionText1.color : "#202D72";
         introQuestxt1 = new createjs.Text("", introFont, introColor);
         introQuestxt1.textAlign = "center";
         introQuestxt1.textBaseline = "middle";
         introQuestxt1.lineHeight = questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40;
         introQuestxt1.__rawText = "";
+        if (typeof createjs.Shadow === "function") {
+            introQuestxt1.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
+        }
     } else {
         introQuestxt1 = null;
     }

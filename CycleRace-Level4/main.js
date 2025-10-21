@@ -53,12 +53,16 @@ var cycleRaceTrimContext = null;
 
 var cycleRaceQuestionTextMeasure = null;
 var cycleRaceImageQuestionTexts = [
-        "Who finished first?",
-        "Who finished second?",
-        "Who finished third?",
-        "Who finished fourth?",
-        "Who finished fifth?",
-        "Who finished sixth?"
+        "Who was in the first place?",
+        "Who was in the second place?",
+        "Who was in the third place?",
+        "Who was in the fourth place?",
+        "Who was in the fifth place?",
+        "Who was in the sixth place?",
+        "Who was in the seventh place?",
+        "Who was in the eighth place?",
+        "Who was in the last place?",
+        "What was my place in the race?"
 ];
 var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
 var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
@@ -225,7 +229,7 @@ function createCycleRaceQuestionTextDisplay(options) {
         options = options || {};
 
         var font = options.font || "700 36px 'Baloo 2'";
-        var color = options.color || "#2F2F2F";
+        var color = options.color || "#202D72";
         var text = new createjs.Text("", font, color);
         text.textAlign = options.textAlign || "center";
         text.textBaseline = options.textBaseline || "middle";
@@ -237,6 +241,9 @@ function createCycleRaceQuestionTextDisplay(options) {
         text.__layoutHeight = 0;
         text.__visualOffsetX = 0;
         text.__visualOffsetY = 0;
+        if (typeof createjs.Shadow === "function") {
+                text.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
+        }
 
         return text;
 }
@@ -370,7 +377,7 @@ function configureCycleRaceQuestionText(textDisplay, options) {
         var lines = wrapCycleRaceQuestionText(textDisplay.__rawText != null ? textDisplay.__rawText : textDisplay.text, font, wrapWidth);
 
         if (!cycleRaceQuestionTextMeasure && typeof createjs !== "undefined" && createjs.Text) {
-                cycleRaceQuestionTextMeasure = new createjs.Text("", font, textDisplay.color || "#2F2F2F");
+                cycleRaceQuestionTextMeasure = new createjs.Text("", font, textDisplay.color || "#202D72");
         }
 
         var measure = cycleRaceQuestionTextMeasure;
@@ -452,7 +459,8 @@ function getCycleRaceImageQuestionText(index) {
                 return cycleRaceImageQuestionTexts[normalized] || "";
         }
 
-        return cycleRaceImageQuestionTexts[index] || "";
+        var value = cycleRaceImageQuestionTexts[index];
+        return value != null ? String(value).trim() : "";
 }
 
 function getCycleRaceTextPrompt() {
@@ -463,35 +471,6 @@ function getCycleRaceTextPrompt() {
 function getCycleRaceIntroPrompt() {
 
         return cycleRaceIntroPrompt || cycleRaceTextModePrompt || "";
-}
-
-function updateCycleRaceQuestionTextData(data) {
-
-        if (!data) {
-                return;
-        }
-
-        if (Array.isArray(data.imageQuestions)) {
-                cycleRaceImageQuestionTexts = data.imageQuestions.map(function (entry) {
-                        return entry != null ? String(entry) : "";
-                });
-        }
-
-        if (typeof data.textModePrompt === "string") {
-                cycleRaceTextModePrompt = data.textModePrompt;
-        }
-
-        if (typeof data.introPrompt === "string") {
-                cycleRaceIntroPrompt = data.introPrompt;
-        }
-
-        if (questionText1) {
-                setCycleRaceQuestionText(questionText1, getCycleRaceTextPrompt());
-        }
-
-        if (typeof introQuestxt1 !== "undefined" && introQuestxt1) {
-                setCycleRaceQuestionText(introQuestxt1, getCycleRaceIntroPrompt());
-        }
 }
 
 function ensureCycleRaceQuestionTextDisplays() {
@@ -1145,10 +1124,6 @@ function init() {
 			{ id: "choice2", src: gameAssetsPath + "ChoiceImages2.png" },
 			{ id: "chHolder", src: gameAssetsPath + "chHolder.png" },
                         { id: "introImg", src: gameAssetsPath + "introImg.png" },
-                        {
-                                id: "questionTextData",
-                                src: questionTextPath + "CycleRace-Level4-QT2.json"
-                        },
                         { id: "choice1", src: questionTextPath + "CycleRace-Level4-QT3.png" },
                         { id: "introHintTextMc", src: questionTextPath + "CycleRace-Level4-QT4.png" }
                 )
@@ -1375,12 +1350,6 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 
         }
-        if (id == "questionTextData") {
-                updateCycleRaceQuestionTextData(event.result || {});
-                ensureCycleRaceQuestionTextDisplays();
-        }
-	//
-
 	if (id == "choice1") {
 		var spriteSheet11 = new createjs.SpriteSheet({
 			framerate: 30,
