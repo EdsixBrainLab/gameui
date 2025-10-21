@@ -75,14 +75,22 @@ function introConfigureQuestionSprite(sprite, options) {
 
     options = options || {};
 
-    if (typeof configureCycleRaceQuestionSprite === "function" && typeof cycleRaceQuestionBubble !== "undefined") {
+    if (typeof configureCycleRaceQuestionDisplay === "function" && typeof cycleRaceQuestionBubble !== "undefined") {
         var previousBubble = cycleRaceQuestionBubble;
         cycleRaceQuestionBubble = introQuestionBubble;
         try {
-            return configureCycleRaceQuestionSprite(sprite, options);
+            return configureCycleRaceQuestionDisplay(sprite, options);
         } finally {
             cycleRaceQuestionBubble = previousBubble;
         }
+    }
+
+    if (
+        typeof configureCycleRaceQuestionText === "function" &&
+        typeof isCycleRaceTextDisplay === "function" &&
+        isCycleRaceTextDisplay(sprite)
+    ) {
+        return configureCycleRaceQuestionText(sprite, options);
     }
 
     var dims = introGetSpriteDimensions(sprite);
@@ -507,7 +515,28 @@ function hideIntroQuestionBubble() {
 function commongameintro() {
     Title.visible=true;
      
-    introQuestxt1 = questionText1.clone();
+    if (typeof createCycleRaceQuestionTextDisplay === "function") {
+        introQuestxt1 = createCycleRaceQuestionTextDisplay({
+            font:
+                questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'",
+            lineHeight:
+                questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40,
+            color: questionText1 && questionText1.color ? questionText1.color : "#202D72"
+        });
+    } else if (typeof createjs !== "undefined" && createjs.Text) {
+        var introFont = questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'";
+        var introColor = questionText1 && questionText1.color ? questionText1.color : "#202D72";
+        introQuestxt1 = new createjs.Text("", introFont, introColor);
+        introQuestxt1.textAlign = "center";
+        introQuestxt1.textBaseline = "middle";
+        introQuestxt1.lineHeight = questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40;
+        introQuestxt1.__rawText = "";
+        if (typeof createjs.Shadow === "function") {
+            introQuestxt1.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
+        }
+    } else {
+        introQuestxt1 = null;
+    }
     introcycle1 = cycle1.clone();
     introcycle2 = cycle2.clone();
     introcycle3 = cycle3.clone();
@@ -550,9 +579,20 @@ function commongameintro() {
         introChoiceArr[i].gotoAndStop(value[i]);
 
     }
-    introQuestxt1.gotoAndStop(8)
-    introQuestxt1.visible = false;
-    introQuestxt1.alpha = 0;
+    var introPrompt = typeof getCycleRaceIntroPrompt === "function"
+        ? getCycleRaceIntroPrompt()
+        : typeof cycleRaceIntroPrompt !== "undefined"
+        ? cycleRaceIntroPrompt
+        : "";
+    if (introQuestxt1) {
+        if (typeof setCycleRaceQuestionText === "function") {
+            setCycleRaceQuestionText(introQuestxt1, introPrompt);
+        } else {
+            introQuestxt1.text = introPrompt;
+        }
+        introQuestxt1.visible = false;
+        introQuestxt1.alpha = 0;
+    }
 
     introImg.visible = false;
     introImg.alpha = 0;
