@@ -49,6 +49,7 @@ var feedbackContainer,
   feedbackIconShape,
   feedbackParticleLayer,
   feedbackTitleTxt,
+  feedbackAnswerTxt,
   feedbackMessageTxt;
 
 var confettiLayer;
@@ -292,12 +293,22 @@ function ensureFeedbackContainer() {
     feedbackTitleTxt.y = -26;
     feedbackContainer.addChild(feedbackTitleTxt);
 
+    feedbackAnswerTxt = new createjs.Text("", "900 24px 'Baloo 2'", "#FFFFFF");
+    feedbackAnswerTxt.textAlign = "left";
+    feedbackAnswerTxt.lineWidth = 360;
+    feedbackAnswerTxt.lineHeight = 30;
+    feedbackAnswerTxt.x = -120;
+    feedbackAnswerTxt.y = 18;
+    feedbackAnswerTxt.visible = false;
+    feedbackAnswerTxt.mouseEnabled = false;
+    feedbackContainer.addChild(feedbackAnswerTxt);
+
     feedbackMessageTxt = new createjs.Text("", "400 18px 'Baloo 2'", "#E3ECFF");
     feedbackMessageTxt.textAlign = "left";
     feedbackMessageTxt.lineWidth = 360;
     feedbackMessageTxt.lineHeight = 24;
     feedbackMessageTxt.x = -120;
-    feedbackMessageTxt.y = 18;
+    feedbackMessageTxt.y = 56;
     feedbackContainer.addChild(feedbackMessageTxt);
 
     container.parent.addChild(feedbackContainer);
@@ -316,6 +327,7 @@ function getFeedbackPalette(isCorrect) {
             iconStroke: "#F0FDFA",
             titleColor: "#ECFEFF",
             messageColor: "#D1FAF9",
+            answerColor: "#FEF08A",
             particleColors: ["#2DD4BF", "#5EEAD4", "#38BDF8", "#C4F1F9"],
             sparkColor: "#FFFFFF"
         };
@@ -332,6 +344,7 @@ function getFeedbackPalette(isCorrect) {
         iconStroke: "#FFE4F1",
         titleColor: "#FFE4F1",
         messageColor: "#FBCFE8",
+        answerColor: "#FFE4E6",
         particleColors: ["#FB7185", "#F472B6", "#C084FC", "#FDA4AF"],
         sparkColor: "#FFFFFF"
     };
@@ -589,15 +602,38 @@ function showFeedbackBanner(isCorrect) {
     feedbackMessageTxt.color = palette.messageColor;
 
     var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? correctAnswer.toUpperCase() : "";
+    var hasAnswer = !!answerText;
+
+    if (feedbackAnswerTxt) {
+        if (hasAnswer) {
+            var answerLabel = isCorrect ? "Answer locked:" : "Correct answer:";
+            feedbackAnswerTxt.visible = true;
+            feedbackAnswerTxt.text = answerLabel + " " + answerText;
+            feedbackAnswerTxt.color = palette.answerColor || "#FFFFFF";
+            feedbackAnswerTxt.shadow = new createjs.Shadow(
+                applyColorAlpha(palette.answerColor || "#FFFFFF", 0.45),
+                0,
+                6,
+                18
+            );
+        } else {
+            feedbackAnswerTxt.visible = false;
+            feedbackAnswerTxt.text = "";
+            feedbackAnswerTxt.shadow = null;
+        }
+    }
+
+    feedbackMessageTxt.y = hasAnswer ? 56 : 18;
+
     if (isCorrect) {
-        feedbackTitleTxt.text = answerText ? "Brilliant match!" : "Brilliant match!";
-        feedbackMessageTxt.text = answerText
-            ? "\"" + answerText + "\" locked in perfectly. Keep that momentum!"
+        feedbackTitleTxt.text = "Brilliant match!";
+        feedbackMessageTxt.text = hasAnswer
+            ? "Locked in perfectly. Keep that momentum!"
             : "Everything clicked beautifully—ride the streak!";
     } else {
         feedbackTitleTxt.text = "Almost there!";
-        feedbackMessageTxt.text = answerText
-            ? "The answer was \"" + answerText + "\". Shake it off and take on the next one!"
+        feedbackMessageTxt.text = hasAnswer
+            ? "Shake it off and take on the next one!"
             : "Take a breath, reset, and crush the next puzzle.";
     }
 
@@ -626,6 +662,14 @@ function getValidation(aStr) {
 
     rightCnt++;
     var isCorrectAnswer = aStr == "correct";
+
+    if (typeof pauseTimer === "function") {
+        pauseTimer();
+    }
+
+    if (typeof gameResponseTimerStop === "function") {
+        gameResponseTimerStop();
+    }
 
     closeBtn.mouseEnabled = false;
     fullScreenBtn.mouseEnabled = false;
