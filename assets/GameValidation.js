@@ -40,6 +40,7 @@ var feedbackContainer,
   feedbackOverlayShape,
   feedbackOutlineShape,
   feedbackSheenShape,
+  feedbackAnswerHighlight,
   feedbackAccentContainer,
   feedbackAccentGlow,
   feedbackAccentBg,
@@ -49,7 +50,9 @@ var feedbackContainer,
   feedbackIconShape,
   feedbackParticleLayer,
   feedbackTitleTxt,
+  feedbackAnswerTxt,
   feedbackMessageTxt;
+
 
 var confettiLayer;
 var confettiColors = ["#f9d342", "#ff6f61", "#50c878", "#4fc3f7", "#af7ac5", "#ffd1dc"]; // soft vibrant palette
@@ -286,18 +289,37 @@ function ensureFeedbackContainer() {
     feedbackSheenShape.alpha = 0;
     feedbackContainer.addChild(feedbackSheenShape);
 
+    feedbackAnswerHighlight = new createjs.Shape();
+    feedbackAnswerHighlight.visible = false;
+    feedbackAnswerHighlight.mouseEnabled = false;
+    feedbackAnswerHighlight.mouseChildren = false;
+    feedbackContainer.addChild(feedbackAnswerHighlight);
+
     feedbackTitleTxt = new createjs.Text("", "800 28px 'Baloo 2'", "#FFFFFF");
     feedbackTitleTxt.textAlign = "left";
+    feedbackTitleTxt.textBaseline = "top";
     feedbackTitleTxt.x = -120;
     feedbackTitleTxt.y = -26;
     feedbackContainer.addChild(feedbackTitleTxt);
 
+    feedbackAnswerTxt = new createjs.Text("", "900 24px 'Baloo 2'", "#FFFFFF");
+    feedbackAnswerTxt.textAlign = "left";
+    feedbackAnswerTxt.textBaseline = "top";
+    feedbackAnswerTxt.lineWidth = 320;
+    feedbackAnswerTxt.lineHeight = 32;
+    feedbackAnswerTxt.x = -120;
+    feedbackAnswerTxt.y = 18;
+    feedbackAnswerTxt.visible = false;
+    feedbackAnswerTxt.mouseEnabled = false;
+    feedbackContainer.addChild(feedbackAnswerTxt);
+
     feedbackMessageTxt = new createjs.Text("", "400 18px 'Baloo 2'", "#E3ECFF");
     feedbackMessageTxt.textAlign = "left";
+    feedbackMessageTxt.textBaseline = "top";
     feedbackMessageTxt.lineWidth = 360;
     feedbackMessageTxt.lineHeight = 24;
     feedbackMessageTxt.x = -120;
-    feedbackMessageTxt.y = 18;
+    feedbackMessageTxt.y = 56;
     feedbackContainer.addChild(feedbackMessageTxt);
 
     container.parent.addChild(feedbackContainer);
@@ -316,6 +338,10 @@ function getFeedbackPalette(isCorrect) {
             iconStroke: "#F0FDFA",
             titleColor: "#ECFEFF",
             messageColor: "#D1FAF9",
+            answerTextColor: "#064E3B",
+            answerHighlight: "rgba(16, 185, 129, 0.9)",
+            answerHighlightStroke: "rgba(4, 120, 87, 0.6)",
+            answerShadow: "rgba(45, 212, 191, 0.45)",
             particleColors: ["#2DD4BF", "#5EEAD4", "#38BDF8", "#C4F1F9"],
             sparkColor: "#FFFFFF"
         };
@@ -332,6 +358,10 @@ function getFeedbackPalette(isCorrect) {
         iconStroke: "#FFE4F1",
         titleColor: "#FFE4F1",
         messageColor: "#FBCFE8",
+        answerTextColor: "#7F1D1D",
+        answerHighlight: "rgba(248, 113, 113, 0.92)",
+        answerHighlightStroke: "rgba(185, 28, 28, 0.58)",
+        answerShadow: "rgba(248, 113, 113, 0.4)",
         particleColors: ["#FB7185", "#F472B6", "#C084FC", "#FDA4AF"],
         sparkColor: "#FFFFFF"
     };
@@ -382,13 +412,10 @@ function animateFeedbackAccent(palette, isCorrect) {
     }
 }
 
-function animateFeedbackSheen(palette) {
+function animateFeedbackSheen(palette, cardWidth, cardHeight) {
     if (!feedbackSheenShape) {
         return;
     }
-
-    var cardWidth = 520;
-    var cardHeight = 128;
 
     feedbackSheenShape.graphics.clear();
     feedbackSheenShape.graphics
@@ -507,7 +534,74 @@ function showFeedbackBanner(isCorrect) {
 
     var palette = getFeedbackPalette(isCorrect);
     var cardWidth = 520;
-    var cardHeight = 128;
+    var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? String(correctAnswer).toUpperCase() : "";
+    var hasAnswer = !!answerText;
+    var answerLabel = isCorrect ? "Answer locked:" : "Correct answer:";
+    var displayAnswer = hasAnswer ? answerLabel + " " + answerText : "";
+    var titleCopy = isCorrect ? "Brilliant match!" : "Almost there!";
+    var messageCopy = isCorrect
+        ? (hasAnswer ? "Locked in perfectly. Keep that momentum!" : "Everything clicked beautifully—ride the streak!")
+        : (hasAnswer ? "Shake it off and take on the next one!" : "Take a breath, reset, and crush the next puzzle.");
+    var answerBlockWidth = 0;
+    var answerBlockHeight = 0;
+
+    feedbackTitleTxt.text = titleCopy;
+    feedbackMessageTxt.text = messageCopy;
+
+    if (feedbackAnswerTxt) {
+        if (hasAnswer) {
+            feedbackAnswerTxt.text = displayAnswer;
+            var measuredAnswerWidth = typeof feedbackAnswerTxt.getMeasuredWidth === "function"
+                ? feedbackAnswerTxt.getMeasuredWidth()
+                : feedbackAnswerTxt.lineWidth;
+            if (!measuredAnswerWidth) {
+                measuredAnswerWidth = feedbackAnswerTxt.lineWidth;
+            }
+            answerBlockWidth = Math.min(feedbackAnswerTxt.lineWidth, measuredAnswerWidth);
+
+            var measuredAnswerHeight = typeof feedbackAnswerTxt.getMeasuredHeight === "function"
+                ? feedbackAnswerTxt.getMeasuredHeight()
+                : feedbackAnswerTxt.lineHeight || 0;
+            if (!measuredAnswerHeight) {
+                measuredAnswerHeight = feedbackAnswerTxt.lineHeight || 0;
+            }
+            answerBlockHeight = Math.max(feedbackAnswerTxt.lineHeight || 0, measuredAnswerHeight);
+        } else {
+            feedbackAnswerTxt.text = "";
+            answerBlockHeight = 0;
+        }
+    }
+
+    var titleHeight = Math.max(
+        typeof feedbackTitleTxt.getMeasuredHeight === "function" ? feedbackTitleTxt.getMeasuredHeight() : 0,
+        feedbackTitleTxt.lineHeight || 0,
+        28
+    );
+    var messageHeight = Math.max(
+        typeof feedbackMessageTxt.getMeasuredHeight === "function" ? feedbackMessageTxt.getMeasuredHeight() : 0,
+        feedbackMessageTxt.lineHeight || 0,
+        24
+    );
+    var paddingTop = 26;
+    var paddingBottom = 32;
+    var titleToAnswerGap = 18;
+    var answerToMessageGap = 18;
+    var titleToMessageGap = 26;
+    var answerPaddingX = 18;
+    var answerPaddingY = 10;
+    var minHighlightWidth = 160;
+    var minCardHeight = hasAnswer ? 204 : 140;
+    var highlightHeight = hasAnswer ? answerBlockHeight + answerPaddingY * 2 : 0;
+
+    var contentHeight = paddingTop + titleHeight;
+    if (hasAnswer) {
+        contentHeight += titleToAnswerGap + highlightHeight + answerToMessageGap + messageHeight;
+    } else {
+        contentHeight += titleToMessageGap + messageHeight;
+    }
+    contentHeight += paddingBottom;
+
+    var cardHeight = Math.max(minCardHeight, Math.ceil(contentHeight));
     var halfWidth = cardWidth / 2;
     var halfHeight = cardHeight / 2;
     var cornerRadius = 36;
@@ -588,18 +682,68 @@ function showFeedbackBanner(isCorrect) {
     feedbackTitleTxt.color = palette.titleColor;
     feedbackMessageTxt.color = palette.messageColor;
 
-    var answerText = typeof correctAnswer !== "undefined" && correctAnswer ? correctAnswer.toUpperCase() : "";
-    if (isCorrect) {
-        feedbackTitleTxt.text = answerText ? "Brilliant match!" : "Brilliant match!";
-        feedbackMessageTxt.text = answerText
-            ? "\"" + answerText + "\" locked in perfectly. Keep that momentum!"
-            : "Everything clicked beautifully—ride the streak!";
-    } else {
-        feedbackTitleTxt.text = "Almost there!";
-        feedbackMessageTxt.text = answerText
-            ? "The answer was \"" + answerText + "\". Shake it off and take on the next one!"
-            : "Take a breath, reset, and crush the next puzzle.";
+    var contentTop = -halfHeight + paddingTop;
+    feedbackTitleTxt.y = contentTop;
+
+    var titleBottom = contentTop + titleHeight;
+    var messageY = titleBottom + titleToMessageGap;
+
+    if (feedbackAnswerTxt) {
+        if (hasAnswer) {
+            var answerY = titleBottom + titleToAnswerGap;
+
+            feedbackAnswerTxt.visible = true;
+            feedbackAnswerTxt.text = displayAnswer;
+            feedbackAnswerTxt.color = palette.answerTextColor || palette.titleColor;
+            feedbackAnswerTxt.y = answerY;
+
+            var measuredWidth = answerBlockWidth || Math.min(
+                feedbackAnswerTxt.lineWidth,
+                typeof feedbackAnswerTxt.getMeasuredWidth === "function"
+                    ? feedbackAnswerTxt.getMeasuredWidth()
+                    : feedbackAnswerTxt.lineWidth
+            );
+            var highlightWidth = Math.max(minHighlightWidth, measuredWidth + answerPaddingX * 2);
+            var maxHighlightWidth = cardWidth - 160;
+            highlightWidth = Math.min(highlightWidth, maxHighlightWidth);
+            var highlightHeightValue = answerBlockHeight + answerPaddingY * 2;
+
+            if (feedbackAnswerHighlight) {
+                feedbackAnswerHighlight.visible = true;
+                feedbackAnswerHighlight.graphics
+                    .clear()
+                    .setStrokeStyle(2)
+                    .beginStroke(
+                        palette.answerHighlightStroke || applyColorAlpha(palette.answerHighlight || "#FFFFFF", 0.6)
+                    )
+                    .beginFill(palette.answerHighlight || "rgba(255,255,255,0.85)")
+                    .drawRoundRect(
+                        feedbackAnswerTxt.x - answerPaddingX,
+                        answerY - answerPaddingY,
+                        highlightWidth,
+                        highlightHeightValue,
+                        18
+                    );
+            }
+
+            feedbackAnswerTxt.shadow = palette.answerShadow
+                ? new createjs.Shadow(palette.answerShadow, 0, 4, 12)
+                : null;
+
+            var highlightBottom = answerY - answerPaddingY + highlightHeightValue;
+            messageY = highlightBottom + answerToMessageGap;
+        } else {
+            feedbackAnswerTxt.visible = false;
+            feedbackAnswerTxt.text = "";
+            feedbackAnswerTxt.shadow = null;
+            if (feedbackAnswerHighlight) {
+                feedbackAnswerHighlight.visible = false;
+                feedbackAnswerHighlight.graphics.clear();
+            }
+        }
     }
+
+    feedbackMessageTxt.y = messageY;
 
     feedbackParticleLayer.removeAllChildren();
 
@@ -619,13 +763,21 @@ function showFeedbackBanner(isCorrect) {
         });
 
     animateFeedbackAccent(palette, isCorrect);
-    animateFeedbackSheen(palette);
+    animateFeedbackSheen(palette, cardWidth, cardHeight);
     spawnFeedbackParticles(palette, isCorrect);
 }
 function getValidation(aStr) {
 
     rightCnt++;
     var isCorrectAnswer = aStr == "correct";
+
+    if (typeof pauseTimer === "function") {
+        pauseTimer();
+    }
+
+    if (typeof gameResponseTimerStop === "function") {
+        gameResponseTimerStop();
+    }
 
     closeBtn.mouseEnabled = false;
     fullScreenBtn.mouseEnabled = false;
