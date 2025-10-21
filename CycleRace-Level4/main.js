@@ -4,7 +4,7 @@ var messageField;		//Message display field
 var assets = [];
 var assetsPath, gameAssetsPath, soundpath, bg;
 var cnt = -1, qscnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 4, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, question, quesMarkMc, questionText, questionText1, resultLoading, preloadMc, background2, chHolderMc;
+var startBtn, introScrn, container, question, quesMarkMc, questionText, questionText1, question2, resultLoading, preloadMc, background2, chHolderMc;
 var startMc, questionInterval = 0, chHolderMc = 0, backGround1;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc, targetMc, titleBg;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -50,6 +50,22 @@ var cycleRaceQuestionBubble,
 
 var cycleRaceTrimCanvas = null;
 var cycleRaceTrimContext = null;
+
+var cycleRaceQuestionTextMeasure = null;
+var cycleRaceImageQuestionTexts = [
+        "Who was in the first place?",
+        "Who was in the second place?",
+        "Who was in the third place?",
+        "Who was in the fourth place?",
+        "Who was in the fifth place?",
+        "Who was in the sixth place?",
+        "Who was in the seventh place?",
+        "Who was in the eighth place?",
+        "Who was in the last place?",
+        "What was my place in the race?"
+];
+var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
+var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
 
 function getCycleRaceTrimContext(width, height) {
 
@@ -195,6 +211,329 @@ function measureCycleRaceSpriteVisibleBounds(sprite) {
         return result;
 }
 
+function isCycleRaceTextDisplay(node) {
+
+        if (typeof createjs === "undefined" || !createjs.Text) {
+                return false;
+        }
+
+        return node instanceof createjs.Text;
+}
+
+function createCycleRaceQuestionTextDisplay(options) {
+
+        if (typeof createjs === "undefined" || !createjs.Text) {
+                return null;
+        }
+
+        options = options || {};
+
+        var font = options.font || "700 36px 'Baloo 2'";
+        var color = options.color || "#202D72";
+        var text = new createjs.Text("", font, color);
+        text.textAlign = options.textAlign || "center";
+        text.textBaseline = options.textBaseline || "middle";
+        text.lineHeight = options.lineHeight || 44;
+        text.visible = false;
+        text.__baseScale = 1;
+        text.__rawText = "";
+        text.__layoutWidth = 0;
+        text.__layoutHeight = 0;
+        text.__visualOffsetX = 0;
+        text.__visualOffsetY = 0;
+        if (typeof createjs.Shadow === "function") {
+                text.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
+        }
+
+        return text;
+}
+
+function setCycleRaceQuestionText(display, text) {
+
+        if (!display) {
+                return;
+        }
+
+        var value = text != null ? String(text) : "";
+
+        display.__rawText = value;
+        if (typeof display.text === "string" || typeof display.text === "undefined") {
+                display.text = value;
+        }
+
+        display.__layoutWidth = 0;
+        display.__layoutHeight = 0;
+        display.__visualOffsetX = 0;
+        display.__visualOffsetY = 0;
+}
+
+function wrapCycleRaceQuestionText(rawText, font, maxWidth) {
+
+        var resultLines = [];
+
+        if (rawText == null) {
+                return resultLines;
+        }
+
+        var textValue = String(rawText).replace(/\r\n/g, "\n");
+        var paragraphs = textValue.split("\n");
+
+        if (!cycleRaceQuestionTextMeasure && typeof createjs !== "undefined" && createjs.Text) {
+                cycleRaceQuestionTextMeasure = new createjs.Text("", font || "700 36px 'Baloo 2'", "#000000");
+        }
+
+        var measure = cycleRaceQuestionTextMeasure;
+        var limit = maxWidth && maxWidth > 0 ? maxWidth : 0;
+
+        for (var p = 0; p < paragraphs.length; p++) {
+                var paragraph = paragraphs[p];
+
+                if (!limit) {
+                        resultLines.push(paragraph);
+                        continue;
+                }
+
+                var trimmed = paragraph.trim();
+                if (!trimmed) {
+                        resultLines.push("");
+                        continue;
+                }
+
+                var words = trimmed.split(/\s+/);
+                var current = "";
+
+                for (var w = 0; w < words.length; w++) {
+                        var word = words[w];
+                        if (!word) {
+                                continue;
+                        }
+
+                        var candidate = current ? current + " " + word : word;
+
+                        if (measure) {
+                                if (font) {
+                                        measure.font = font;
+                                }
+                                measure.text = candidate;
+                        }
+
+                        var width = measure && typeof measure.getMeasuredWidth === "function"
+                                ? measure.getMeasuredWidth()
+                                : 0;
+
+                        if (limit > 0 && width > limit && current) {
+                                resultLines.push(current);
+                                current = "";
+                                w--;
+                                continue;
+                        }
+
+                        if (limit > 0 && width > limit) {
+                                resultLines.push(candidate);
+                                current = "";
+                                continue;
+                        }
+
+                        current = candidate;
+                }
+
+                if (current) {
+                        resultLines.push(current);
+                }
+        }
+
+        if (!resultLines.length) {
+                resultLines.push("");
+        }
+
+        return resultLines;
+}
+
+function configureCycleRaceQuestionDisplay(node, options) {
+
+        if (isCycleRaceTextDisplay(node)) {
+                return configureCycleRaceQuestionText(node, options);
+        }
+
+        return configureCycleRaceQuestionSprite(node, options || {});
+}
+
+function configureCycleRaceQuestionText(textDisplay, options) {
+
+        if (!textDisplay) {
+                return { width: 0, height: 0, offsetX: 0, offsetY: 0 };
+        }
+
+        options = options || {};
+
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var availableWidth = options.maxWidth != null ? options.maxWidth : (bubbleOptions.width || 760) - 220;
+        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var availableHeight = options.maxHeight != null ? options.maxHeight : bodyHeight - 80;
+        var wrapWidth = options.wrapWidth != null ? options.wrapWidth : availableWidth;
+        wrapWidth = Math.max(40, wrapWidth || 0);
+
+        var font = textDisplay.font || "700 36px 'Baloo 2'";
+        var lines = wrapCycleRaceQuestionText(textDisplay.__rawText != null ? textDisplay.__rawText : textDisplay.text, font, wrapWidth);
+
+        if (!cycleRaceQuestionTextMeasure && typeof createjs !== "undefined" && createjs.Text) {
+                cycleRaceQuestionTextMeasure = new createjs.Text("", font, textDisplay.color || "#202D72");
+        }
+
+        var measure = cycleRaceQuestionTextMeasure;
+        if (measure && font) {
+                measure.font = font;
+        }
+
+        var lineHeight = options.lineHeight != null ? options.lineHeight : 0;
+        if (!lineHeight && measure && typeof measure.getMeasuredLineHeight === "function") {
+                lineHeight = measure.getMeasuredLineHeight() * 1.15;
+        }
+        if (!lineHeight || !isFinite(lineHeight)) {
+                lineHeight = textDisplay.lineHeight || 44;
+        }
+        if (!lineHeight || !isFinite(lineHeight)) {
+                lineHeight = 44;
+        }
+
+        var width = 0;
+        if (measure && typeof measure.getMeasuredWidth === "function") {
+                for (var i = 0; i < lines.length; i++) {
+                        measure.text = lines[i];
+                        var measured = measure.getMeasuredWidth();
+                        if (!isFinite(measured)) {
+                                measured = 0;
+                        }
+                        if (measured > width) {
+                                width = measured;
+                        }
+                }
+        } else {
+                for (var j = 0; j < lines.length; j++) {
+                        if (lines[j].length > width) {
+                                width = lines[j].length * 18;
+                        }
+                }
+        }
+
+        width = Math.min(width, wrapWidth);
+
+        var lineCount = Math.max(1, lines.length);
+        var rawHeight = lineCount * lineHeight;
+        var height = rawHeight;
+        if (availableHeight && availableHeight > 0) {
+                height = Math.min(height, availableHeight);
+        }
+
+        textDisplay.text = lines.join("\n");
+        textDisplay.lineHeight = lineHeight;
+
+        var measuredHeight = 0;
+        if (typeof textDisplay.getMeasuredHeight === "function") {
+                measuredHeight = textDisplay.getMeasuredHeight();
+        }
+        if ((!measuredHeight || !isFinite(measuredHeight)) && measure && typeof measure.getMeasuredLineHeight === "function") {
+                measuredHeight = measure.getMeasuredLineHeight() * lineCount;
+        }
+        if (!measuredHeight || !isFinite(measuredHeight)) {
+                measuredHeight = rawHeight;
+        }
+
+        var layoutHeight = Math.max(height, measuredHeight);
+        var visualOffsetY = (layoutHeight - measuredHeight) / 2;
+        if (!isFinite(visualOffsetY)) {
+                visualOffsetY = 0;
+        }
+
+        textDisplay.regX = width / 2;
+        textDisplay.regY = layoutHeight / 2;
+        textDisplay.x = 0;
+        textDisplay.y = 0;
+        textDisplay.scaleX = textDisplay.scaleY = 1;
+        textDisplay.__layoutWidth = width;
+        textDisplay.__layoutHeight = layoutHeight;
+        textDisplay.__visualOffsetX = 0;
+        textDisplay.__visualOffsetY = visualOffsetY;
+
+        return {
+                width: width,
+                height: layoutHeight,
+                offsetX: 0,
+                offsetY: visualOffsetY
+        };
+}
+
+function getCycleRaceImageQuestionText(index) {
+
+        if (!cycleRaceImageQuestionTexts || !cycleRaceImageQuestionTexts.length) {
+                return "";
+        }
+
+        if (index == null || isNaN(index)) {
+                return cycleRaceImageQuestionTexts[0] || "";
+        }
+
+        if (index < 0 || index >= cycleRaceImageQuestionTexts.length) {
+                var normalized = ((index % cycleRaceImageQuestionTexts.length) + cycleRaceImageQuestionTexts.length) %
+                        cycleRaceImageQuestionTexts.length;
+                return cycleRaceImageQuestionTexts[normalized] || "";
+        }
+
+        var value = cycleRaceImageQuestionTexts[index];
+        return value != null ? String(value).trim() : "";
+}
+
+function getCycleRaceTextPrompt() {
+
+        return cycleRaceTextModePrompt || "";
+}
+
+function getCycleRaceIntroPrompt() {
+
+        return cycleRaceIntroPrompt || cycleRaceTextModePrompt || "";
+}
+
+function ensureCycleRaceQuestionTextDisplays() {
+
+        if (typeof createjs === "undefined" || !createjs.Text) {
+                return;
+        }
+
+        if (!container || !container.parent) {
+                return;
+        }
+
+        if (!isCycleRaceTextDisplay(question2)) {
+                if (question2 && question2.parent) {
+                        question2.parent.removeChild(question2);
+                }
+                question2 = createCycleRaceQuestionTextDisplay();
+                if (question2) {
+                        container.parent.addChild(question2);
+                }
+        }
+
+        if (!isCycleRaceTextDisplay(questionText1)) {
+                if (questionText1 && questionText1.parent) {
+                        questionText1.parent.removeChild(questionText1);
+                }
+                questionText1 = createCycleRaceQuestionTextDisplay({ font: "700 32px 'Baloo 2'", lineHeight: 40 });
+                if (questionText1) {
+                        container.parent.addChild(questionText1);
+                }
+        }
+
+        if (question2) {
+                setCycleRaceQuestionText(question2, "");
+                question2.visible = false;
+        }
+
+        if (questionText1) {
+                setCycleRaceQuestionText(questionText1, getCycleRaceTextPrompt());
+                questionText1.visible = false;
+        }
+}
+
 function getCycleRaceQuestionLayoutMetrics() {
 
         var centerX = 640;
@@ -234,12 +573,27 @@ function getCycleRaceQuestionLayoutMetrics() {
                 }
         }
 
-        var bubbleBottom = bubbleY + bodyHeight / 2 + tailHeight;
+        var bubbleTop = bubbleY - bodyHeight / 2;
+        var bubbleBottom = bubbleY + bodyHeight / 2;
+        var tailBottom = bubbleBottom + tailHeight;
+        var innerTopLocal = -bodyHeight / 2 + 36;
+        var innerBottomLocal = bodyHeight / 2 - 32;
+        var innerTopAbsolute = bubbleY + innerTopLocal;
+        var innerBottomAbsolute = bubbleY + innerBottomLocal;
 
         return {
                 centerX: centerX,
                 width: bubbleWidth,
-                bottom: bubbleBottom
+                bottom: tailBottom,
+                bubbleY: bubbleY,
+                bodyHeight: bodyHeight,
+                tailHeight: tailHeight,
+                bubbleTop: bubbleTop,
+                bubbleBottom: bubbleBottom,
+                innerTop: innerTopLocal,
+                innerBottom: innerBottomLocal,
+                innerTopAbsolute: innerTopAbsolute,
+                innerBottomAbsolute: innerBottomAbsolute
         };
 }
 
@@ -469,36 +823,53 @@ function configureCycleRaceQuestionSprite(sprite, options) {
 
 function layoutCycleRaceTextQuestionContent() {
 
-        if (!cycleRaceQuestionBubble) {
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        if (!metrics) {
                 return;
         }
 
-        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
-        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-        var innerTop = -bodyHeight / 2 + 36;
-        var innerBottom = bodyHeight / 2 - 32;
-        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var bubbleWidth = bubbleOptions.width != null ? bubbleOptions.width : metrics.width || 760;
+        var tailHeightOption = bubbleOptions.tailHeight != null ? bubbleOptions.tailHeight : metrics.tailHeight || 60;
+        var heightOption = bubbleOptions.height != null ? bubbleOptions.height - tailHeightOption : null;
+        var bodyHeight = Math.max(
+                heightOption != null ? heightOption : metrics.bodyHeight || 240,
+                200
+        );
+        var innerTop =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerTop
+                        : metrics.innerTopAbsolute;
+        var innerBottom =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerBottom
+                        : metrics.innerBottomAbsolute;
+        var centerX =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var availableWidth = (bubbleWidth || 760) - 220;
         var spacing = Math.min(54, Math.max(32, bodyHeight * 0.12));
 
         if (question1 && question1.visible) {
-                var q1Metrics = configureCycleRaceQuestionSprite(question1, {
+                var q1Metrics = configureCycleRaceQuestionDisplay(question1, {
                         maxWidth: availableWidth,
                         maxHeight: Math.max(bodyHeight * 0.56, 140),
-                        baseScale: question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
+                        baseScale:
+                                question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
                 });
-                question1.x = 0;
+                question1.x = centerX;
                 var q1OffsetY = q1Metrics && q1Metrics.offsetY ? q1Metrics.offsetY : question1.__visualOffsetY || 0;
                 var q1HalfHeight = (q1Metrics && q1Metrics.height ? q1Metrics.height : question1.__layoutHeight || 0) / 2;
                 question1.y = innerTop + q1HalfHeight - q1OffsetY;
         }
 
         if (questionText1 && questionText1.visible) {
-                var qTextMetrics = configureCycleRaceQuestionSprite(questionText1, {
+                var qTextMetrics = configureCycleRaceQuestionDisplay(questionText1, {
                         maxWidth: availableWidth - 16,
                         maxHeight: Math.max(bodyHeight * 0.32, 100),
-                        baseScale: questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
+                        baseScale:
+                                questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
                 });
-                questionText1.x = 0;
+                questionText1.x = centerX;
                 var anchorY;
                 if (question1 && question1.visible) {
                         anchorY =
@@ -530,22 +901,41 @@ function layoutCycleRaceTextQuestionContent() {
 
 function layoutCycleRaceImageQuestionContent() {
 
-        if (!cycleRaceQuestionBubble || !question2 || !question2.visible) {
+        if (!question2 || !question2.visible) {
                 return;
         }
 
-        var bubbleOptions = cycleRaceQuestionBubble.__options || {};
-        var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-        var innerTop = -bodyHeight / 2 + 36;
-        var innerBottom = bodyHeight / 2 - 32;
-        var availableWidth = (bubbleOptions.width || 760) - 220;
+        var metrics = getCycleRaceQuestionLayoutMetrics();
+        if (!metrics) {
+                return;
+        }
 
-        var q2Metrics = configureCycleRaceQuestionSprite(question2, {
+        var bubbleOptions = (cycleRaceQuestionBubble && cycleRaceQuestionBubble.__options) || {};
+        var bubbleWidth = bubbleOptions.width != null ? bubbleOptions.width : metrics.width || 760;
+        var tailHeightOption = bubbleOptions.tailHeight != null ? bubbleOptions.tailHeight : metrics.tailHeight || 60;
+        var heightOption = bubbleOptions.height != null ? bubbleOptions.height - tailHeightOption : null;
+        var bodyHeight = Math.max(
+                heightOption != null ? heightOption : metrics.bodyHeight || 240,
+                200
+        );
+        var innerTop =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerTop
+                        : metrics.innerTopAbsolute;
+        var innerBottom =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
+                        ? metrics.innerBottom
+                        : metrics.innerBottomAbsolute;
+        var centerX =
+                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var availableWidth = (bubbleWidth || 760) - 220;
+
+        var q2Metrics = configureCycleRaceQuestionDisplay(question2, {
                 maxWidth: availableWidth,
                 maxHeight: Math.max(bodyHeight * 0.68, 140),
                 baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
         });
-        question2.x = 0;
+        question2.x = centerX;
         var q2OffsetY = q2Metrics && q2Metrics.offsetY ? q2Metrics.offsetY : question2.__visualOffsetY || 0;
         var q2HalfHeight = (q2Metrics && q2Metrics.height ? q2Metrics.height : question2.__layoutHeight || 0) / 2;
         var minCenter = innerTop + q2HalfHeight - q2OffsetY;
@@ -761,11 +1151,12 @@ function init() {
 	container = new createjs.Container();
 	stage.addChild(container)
 
-	cycleContainer = new createjs.Container()
-	stage.addChild(cycleContainer);
-	callLoader();
-	createLoader()
-	createCanvasResize()
+        cycleContainer = new createjs.Container()
+        stage.addChild(cycleContainer);
+        ensureCycleRaceQuestionTextDisplays();
+        callLoader();
+        createLoader()
+        createCanvasResize()
 
 	stage.update();
 	stage.enableMouseOver(40);
@@ -801,11 +1192,10 @@ function init() {
 			{ id: "question1", src: gameAssetsPath + "ChoiceImages2.png" },
 			{ id: "choice2", src: gameAssetsPath + "ChoiceImages2.png" },
 			{ id: "chHolder", src: gameAssetsPath + "chHolder.png" },
-			{ id: "introImg", src: gameAssetsPath + "introImg.png" },
-			{ id: "question2", src: questionTextPath + "CycleRace-Level4-QT2.png" },
-			{ id: "choice1", src: questionTextPath + "CycleRace-Level4-QT3.png" },
-			{ id: "introHintTextMc", src: questionTextPath + "CycleRace-Level4-QT4.png" }
-		)
+                        { id: "introImg", src: gameAssetsPath + "introImg.png" },
+                        { id: "choice1", src: questionTextPath + "CycleRace-Level4-QT3.png" },
+                        { id: "introHintTextMc", src: questionTextPath + "CycleRace-Level4-QT4.png" }
+                )
 		
 		preloadAllAssets()
 		stage.update();
@@ -1004,8 +1394,8 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 		quesPanel.visible = false;
 	}
 
-	if (id == "question1") {
-		var spriteSheet9 = new createjs.SpriteSheet({
+        if (id == "question1") {
+                var spriteSheet9 = new createjs.SpriteSheet({
 			framerate: 30,
 			"images": [preload.getResult("question1")],
 			"frames": { "regX": 82, "height": 239, "count": 300, "regY": 0, "width": 241 },
@@ -1029,37 +1419,6 @@ call_UI_gameQuestion(container,"Watch the animation carefully and answer the que
 
 
         }
-        if (id == "question2") {
-                var spriteSheet10 = new createjs.SpriteSheet({
-			framerate: 30,
-			"images": [preload.getResult("question2")],
-			"frames": { "regX": 82, "height": 63, "count": 300, "regY": 0, "width": 574 },
-			// define two animations, run (loops, 1.5x speed) and jump (returns to run):
-			"animations": {
-				"run": [0, 16, "run", .4]
-
-			}
-		});
-                question2 = new createjs.Sprite(spriteSheet10, "run");
-                container.parent.addChild(question2);
-
-                question2.visible = false;
-                question2.regX = 574 / 2;
-                question2.regY = 63 / 2;
-                question2.x = 0;
-                question2.y = 0;
-                questionText1 = question2.clone();
-                questionText1.regX = question2.regX;
-                questionText1.regY = question2.regY;
-                question2.__naturalWidth = 574;
-                question2.__naturalHeight = 63;
-                question2.__baseScale = 1;
-                questionText1.__naturalWidth = 574;
-                questionText1.__naturalHeight = 63;
-                questionText1.__baseScale = 0.96;
-        }
-	//
-
 	if (id == "choice1") {
 		var spriteSheet11 = new createjs.SpriteSheet({
 			framerate: 30,
@@ -1430,10 +1789,11 @@ function createQuestions() {
                 question1.y = 0;
 
                 if (questionText1) {
-                        questionText1.visible = true;
-                        questionText1.gotoAndStop(9);
-                        questionText1.scaleX = questionText1.scaleY =
-                                questionText1.__baseScale != null ? questionText1.__baseScale : 1;
+                        var promptText = getCycleRaceTextPrompt();
+                        var hasPrompt = promptText && String(promptText).trim().length > 0;
+                        setCycleRaceQuestionText(questionText1, promptText);
+                        questionText1.visible = !!hasPrompt;
+                        questionText1.scaleX = questionText1.scaleY = 1;
                         questionText1.x = 0;
                         questionText1.y = 0;
                 }
@@ -1464,11 +1824,15 @@ function createQuestions() {
                 ans = chVal;
 
         } else {
-                question2.visible = true;
-                question2.scaleX = question2.scaleY = question2.__baseScale != null ? question2.__baseScale : 1;
-                question2.gotoAndStop(chPosArr3[type2Cnt] - 1)
-                question2.x = 0;
-                question2.y = 0;
+                var questionTextValue = getCycleRaceImageQuestionText(chPosArr3[type2Cnt] - 1);
+                var hasImagePrompt = questionTextValue && String(questionTextValue).trim().length > 0;
+                if (question2) {
+                        setCycleRaceQuestionText(question2, questionTextValue);
+                        question2.visible = !!hasImagePrompt;
+                        question2.scaleX = question2.scaleY = 1;
+                        question2.x = 0;
+                        question2.y = 0;
+                }
                 layoutCycleRaceImageQuestionContent();
                 if (questionText1) {
                         questionText1.visible = false;
