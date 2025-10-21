@@ -3,8 +3,8 @@ var introQuestxt, introQuestxt1, introChoice,introText, introTarget, introcycle1
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introArrowX = 820, introArrowY = 350;
-var introfingureX = 860, introfingureY = 460;
+var introArrowX = 1120, introArrowY = 356;
+var introfingureX = 1170, introfingureY = 556;
 var cycleTweenArr = []
 var introChoiceArr = []
 var posY1 = [420, 440, 480, 500]
@@ -369,7 +369,7 @@ function ensureIntroHintBanner() {
 
     if (!introHintBanner) {
         introHintBanner = SAUI_createCycleRaceHintBanner({
-            text: "Watch the racers carefully!",
+            text: "Remember their positions",
             width: 520,
             height: 92,
             padX: 48,
@@ -642,16 +642,18 @@ function commongameintro() {
                 questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'",
             lineHeight:
                 questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40,
-            color: questionText1 && questionText1.color ? questionText1.color : "#202D72"
+            color: questionText1 && questionText1.color ? questionText1.color : "#FFFFFF"
         });
     } else if (typeof createjs !== "undefined" && createjs.Text) {
         var introFont = questionText1 && questionText1.font ? questionText1.font : "700 32px 'Baloo 2'";
-        var introColor = questionText1 && questionText1.color ? questionText1.color : "#202D72";
+        var introColor = questionText1 && questionText1.color ? questionText1.color : "#FFFFFF";
         introQuestxt1 = new createjs.Text("", introFont, introColor);
         introQuestxt1.textAlign = "center";
         introQuestxt1.textBaseline = "middle";
         introQuestxt1.lineHeight = questionText1 && questionText1.lineHeight ? questionText1.lineHeight : 40;
+		introQuestxt1.x = 0;
         introQuestxt1.__rawText = "";
+        
         if (typeof createjs.Shadow === "function") {
             introQuestxt1.shadow = new createjs.Shadow("rgba(0,0,0,0.22)", 0, 4, 8);
         }
@@ -712,6 +714,7 @@ function commongameintro() {
             introQuestxt1.text = introPrompt;
         }
         introQuestxt1.visible = false;
+		introQuestxt1.x = 0;
         introQuestxt1.alpha = 0;
     }
 
@@ -720,10 +723,11 @@ function commongameintro() {
     introImg.scaleX=introImg.scaleY=.4
     introImg.x = 0;
     introImg.y = 0;
+	introQuestxt1.x = 0;
 
     ensureIntroQuestionSurface();
     initializeIntroChoiceWrappers();
-    layoutIntroQuestionContent();
+    //layoutIntroQuestionContent();
 
     //introText = new createjs.Text("Remember their positions", "30px Lato-Bold", "white")
     introText = new createjs.Text("", "30px Lato-Bold", "white")
@@ -864,14 +868,16 @@ this.onComplete = function (e) {
 
         if (introQuestxt1) {
             introQuestxt1.visible = false;
+			introQuestxt1.x = 0;
             introQuestxt1.alpha = 0;
         }
         if (introImg) {
             introImg.visible = false;
+			introQuestxt1.x = 0;
             introImg.alpha = 0;
         }
 
-        layoutIntroQuestionContent();
+        //layoutIntroQuestionContent();
 
         if (introQuestionBubble) {
             introQuestionBubble.x = 640;
@@ -881,7 +887,7 @@ this.onComplete = function (e) {
 
         if (banner) {
             SAUI_renderCycleRaceHintBanner(banner, {
-                text: "Watch the racers carefully!",
+                text: "Remember their positions",
                 width: 540
             });
             banner.x = 540;
@@ -967,12 +973,14 @@ function setIntroHolder() {
         if (introImg) {
             introImg.visible = false;
             introImg.alpha = 0;
+			introQuestxt1.x = 0;
         }
         if (introQuestxt1) {
             introQuestxt1.visible = true;
+			introQuestxt1.x = 0;
             introQuestxt1.alpha = 0;
         }
-        layoutIntroQuestionContent();
+        //layoutIntroQuestionContent();
         showIntroQuestionBubble(100);
         if (introQuestxt1) {
             createjs.Tween.get(introQuestxt1).to({ alpha: 1 }, 700).call(handleComplete1_5);
@@ -998,7 +1006,7 @@ function handleComplete1_5() {
 }
 function choiceTween() {
 
-    layoutIntroQuestionContent();
+    //layoutIntroQuestionContent();
     initializeIntroChoiceWrappers();
 
     if (introQuestionBubble) {
@@ -1015,6 +1023,7 @@ function choiceTween() {
 
     if (introQuestxt1) {
         introQuestxt1.visible = true;
+		introQuestxt1.x = 0;
         introQuestxt1.alpha = 1;
     }
 
@@ -1076,12 +1085,13 @@ function introCh(){
     }
 	container.parent.setChildIndex(introImg, container.parent.numChildren - 1);
     introImg.visible = true;
+	introQuestxt1.x = 0;
     introImg.alpha = 0;
-    layoutIntroQuestionContent();
+    //layoutIntroQuestionContent();
     var targetY = typeof introImg.__introTargetY === "number" ? introImg.__introTargetY : 0;
     var targetX = typeof introImg.__introTargetX === "number" ? introImg.__introTargetX : 0;
-    introImg.y = 240;
-    introImg.x = 850;
+    introImg.y = 130;
+    introImg.x = 920;
     createjs.Tween.get(introImg)
         .to({ alpha: 1, y: introImg.y }, 520, createjs.Ease.quartOut)
         .wait(4000)
@@ -1203,6 +1213,7 @@ function removeGameIntro() {
     hideIntroQuestionBubble();
     if (introQuestxt1) {
         introQuestxt1.visible = false;
+		introQuestxt1.x = 0;
         introQuestxt1.alpha = 0;
         if (introQuestionBubble && introQuestionBubble.__content && introQuestxt1.parent === introQuestionBubble.__content) {
             introQuestionBubble.__content.removeChild(introQuestxt1);
@@ -1210,6 +1221,7 @@ function removeGameIntro() {
     }
     if (introImg) {
         introImg.visible = false;
+		introQuestxt1.x = 0;
         introImg.alpha = 0;
         if (introQuestionBubble && introQuestionBubble.__content && introImg.parent === introQuestionBubble.__content) {
             introQuestionBubble.__content.removeChild(introImg);

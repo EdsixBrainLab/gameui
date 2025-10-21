@@ -66,25 +66,9 @@ var cycleRaceImageQuestionTexts = [
         "Who was in the last place?",
         "What was my place in the race?"
 ];
-var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
-var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
-
-var cycleRaceQuestionTextMeasure = null;
-var cycleRaceImageQuestionTexts = [
-        "Who was in the first place?",
-        "Who was in the second place?",
-        "Who was in the third place?",
-        "Who was in the fourth place?",
-        "Who was in the fifth place?",
-        "Who was in the sixth place?",
-        "Who was in the seventh place?",
-        "Who was in the eighth place?",
-        "Who was in the last place?",
-        "What was my place in the race?"
-];
-var cycleRaceTextModePrompt = "Choose the racer that matches the clue.";
-var cycleRaceIntroPrompt = "Watch the race carefully and remember the racers' finishing places.";
-
+var cycleRaceTextModePrompt = "What was my place in the race?";
+var cycleRaceIntroPrompt = "Who was in the last place?";
+ 
 function getCycleRaceTrimContext(width, height) {
 
         if (typeof document === "undefined" || !document.createElement) {
@@ -272,8 +256,8 @@ function createCycleRaceQuestionTextDisplay(options) {
 
         options = options || {};
 
-        var font = options.font || "700 36px 'Baloo 2'";
-        var color = options.color || "#202D72";
+        var font = options.font || "700 38px 'Baloo 2'";
+        var color = options.color || "#FFFFFF";
         var text = new createjs.Text("", font, color);
         text.textAlign = options.textAlign || "center";
         text.textBaseline = options.textBaseline || "middle";
@@ -323,7 +307,7 @@ function wrapCycleRaceQuestionText(rawText, font, maxWidth) {
         var paragraphs = textValue.split("\n");
 
         if (!cycleRaceQuestionTextMeasure && typeof createjs !== "undefined" && createjs.Text) {
-                cycleRaceQuestionTextMeasure = new createjs.Text("", font || "700 36px 'Baloo 2'", "#000000");
+                cycleRaceQuestionTextMeasure = new createjs.Text("", font || "700 38px 'Baloo 2'", "#000000");
         }
 
         var measure = cycleRaceQuestionTextMeasure;
@@ -400,7 +384,7 @@ function measureCycleRaceQuestionTextBounds(lines, font, lineHeight, layoutWidth
         }
 
         if (!font) {
-                font = "700 36px 'Baloo 2'";
+                font = "700 38px 'Baloo 2'";
         }
 
         if (!lineHeight || !isFinite(lineHeight)) {
@@ -516,11 +500,11 @@ function configureCycleRaceQuestionText(textDisplay, options) {
         var wrapWidth = options.wrapWidth != null ? options.wrapWidth : availableWidth;
         wrapWidth = Math.max(40, wrapWidth || 0);
 
-        var font = textDisplay.font || "700 36px 'Baloo 2'";
+        var font = textDisplay.font || "700 38px 'Baloo 2'";
         var lines = wrapCycleRaceQuestionText(textDisplay.__rawText != null ? textDisplay.__rawText : textDisplay.text, font, wrapWidth);
 
         if (!cycleRaceQuestionTextMeasure && typeof createjs !== "undefined" && createjs.Text) {
-                cycleRaceQuestionTextMeasure = new createjs.Text("", font, textDisplay.color || "#202D72");
+                cycleRaceQuestionTextMeasure = new createjs.Text("", font, textDisplay.color || "#FFFFFF");
         }
 
         var measure = cycleRaceQuestionTextMeasure;
@@ -665,7 +649,7 @@ function ensureCycleRaceQuestionTextDisplays() {
                 if (questionText1 && questionText1.parent) {
                         questionText1.parent.removeChild(questionText1);
                 }
-                questionText1 = createCycleRaceQuestionTextDisplay({ font: "700 32px 'Baloo 2'", lineHeight: 40 });
+                questionText1 = createCycleRaceQuestionTextDisplay({ font: "700 38px 'Baloo 2'", lineHeight: 40 });
                 if (questionText1) {
                         container.parent.addChild(questionText1);
                 }
@@ -748,7 +732,7 @@ function getCycleRaceQuestionLayoutMetrics() {
 function computeCycleRaceTextChoiceLayout() {
 
         var fallbackX = [480, 800, 480, 800];
-        var fallbackY = [512, 512, 648, 648];
+        var fallbackY = [412, 412, 548, 548];
 
         if (typeof SAUI_computeCenteredRow !== "function") {
                 return {
@@ -762,7 +746,7 @@ function computeCycleRaceTextChoiceLayout() {
         var horizontalPadding = 96;
         var availableSpan = Math.max(metrics.width - horizontalPadding * 2, wrapperWidth * 2 + 140);
         var rowSpacing = 144;
-        var startY = Math.max(metrics.bottom + 84, fallbackY[0]);
+        var startY = Math.max(metrics.bottom + 54, fallbackY[0]);
 
         var textRowLayout = SAUI_computeCenteredRow(2, {
                 centerX: metrics.centerX,
@@ -1000,7 +984,7 @@ function layoutCycleRaceTextQuestionContent() {
                         baseScale:
                                 question1.__baseScale != null ? question1.__baseScale : question1.scaleX || 1
                 });
-                question1.x = centerX;
+                question1.x = centerX+60;
                 var q1OffsetY = q1Metrics && q1Metrics.offsetY ? q1Metrics.offsetY : question1.__visualOffsetY || 0;
                 var q1HalfHeight = (q1Metrics && q1Metrics.height ? q1Metrics.height : question1.__layoutHeight || 0) / 2;
                 question1.y = innerTop + q1HalfHeight - q1OffsetY;
@@ -1013,7 +997,7 @@ function layoutCycleRaceTextQuestionContent() {
                         baseScale:
                                 questionText1.__baseScale != null ? questionText1.__baseScale : questionText1.scaleX || 1
                 });
-                questionText1.x = centerX;
+                questionText1.x = centerX+250;
                 var anchorY;
                 if (question1 && question1.visible) {
                         anchorY =
@@ -1029,18 +1013,18 @@ function layoutCycleRaceTextQuestionContent() {
                 var minCenter = innerTop + qTextHalfHeight - qTextOffsetY;
                 var maxCenter = innerBottom - qTextHalfHeight - qTextOffsetY;
                 if (minCenter > maxCenter) {
-                        questionText1.y = (innerTop + innerBottom) / 2 - qTextOffsetY;
+                        questionText1.y = (innerTop + innerBottom) / 2 - qTextOffsetY + 10;
                 } else {
                         if (desiredCenter < minCenter) {
                                 desiredCenter = minCenter;
                         } else if (desiredCenter > maxCenter) {
                                 desiredCenter = maxCenter;
                         }
-                        questionText1.y = desiredCenter;
+                        questionText1.y = desiredCenter+10;
                 }
         }
 
-        alignCycleRaceQuestionContent();
+       // alignCycleRaceQuestionContent();
 }
 
 function layoutCycleRaceImageQuestionContent() {
@@ -1075,7 +1059,7 @@ function layoutCycleRaceImageQuestionContent() {
                 maxHeight: Math.max(bodyHeight * 0.68, 140),
                 baseScale: question2.__baseScale != null ? question2.__baseScale : question2.scaleX || 1
         });
-        question2.x = centerX;
+        question2.x = centerX+230;
         var q2OffsetY = q2Metrics && q2Metrics.offsetY ? q2Metrics.offsetY : question2.__visualOffsetY || 0;
         var q2HalfHeight = (q2Metrics && q2Metrics.height ? q2Metrics.height : question2.__layoutHeight || 0) / 2;
         var minCenter = innerTop + q2HalfHeight - q2OffsetY;
@@ -1090,9 +1074,9 @@ function layoutCycleRaceImageQuestionContent() {
                         centerY = maxCenter;
                 }
         }
-        question2.y = centerY;
+        question2.y = centerY+10;
 
-        alignCycleRaceQuestionContent();
+        //alignCycleRaceQuestionContent();
 }
 
 function alignCycleRaceQuestionContent() {
@@ -1672,7 +1656,7 @@ function CreateGameElements() {
         var choiceYArr =
                 textChoiceLayout && textChoiceLayout.yPositions && textChoiceLayout.yPositions.length >= choiceCnt
                         ? textChoiceLayout.yPositions.slice(0)
-                        : [512, 512, 648, 648];
+                        : [412, 412, 548, 548];
 
         for (i = 0; i < choiceCnt; i++) {
                 choiceArr[i] = choice1.clone()
