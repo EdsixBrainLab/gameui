@@ -356,10 +356,16 @@ function layoutIntroQuestionContent() {
 
     var content = introQuestionBubble.__content || introQuestionBubble;
     var bubbleOptions = introQuestionBubble.__options || {};
+    var hasWrapper = !!introQuestionBubble.__content;
+    var contentOffsetX = hasWrapper && bubbleOptions.contentOffsetX ? bubbleOptions.contentOffsetX : 0;
+    var contentOffsetY = hasWrapper && bubbleOptions.contentOffsetY ? bubbleOptions.contentOffsetY : 0;
     var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
-    var innerTop = -bodyHeight / 2 + 36;
-    var innerBottom = bodyHeight / 2 - 36;
+    var innerTopBase = -bodyHeight / 2 + 36;
+    var innerBottomBase = bodyHeight / 2 - 36;
+    var innerTop = hasWrapper ? innerTopBase - contentOffsetY : innerTopBase;
+    var innerBottom = hasWrapper ? innerBottomBase - contentOffsetY : innerBottomBase;
     var availableWidth = (bubbleOptions.width || 760) - 220;
+    var centerX = hasWrapper ? -contentOffsetX : 0;
     var nodes = [];
 
     if (introQuestxt1 && introQuestxt1.visible && introQuestxt1.parent === content) {
@@ -420,7 +426,7 @@ function layoutIntroQuestionContent() {
             targetCenterY = innerBottom - halfHeight - offsetY;
         }
 
-        item.node.x = -offsetX;
+        item.node.x = centerX - offsetX;
         item.node.y = targetCenterY - offsetY;
         item.node.__introTargetY = item.node.y;
         item.node.__introTargetX = item.node.x;

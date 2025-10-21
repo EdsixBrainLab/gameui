@@ -836,16 +836,12 @@ function layoutCycleRaceTextQuestionContent() {
                 heightOption != null ? heightOption : metrics.bodyHeight || 240,
                 200
         );
-        var innerTop =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
-                        ? metrics.innerTop
-                        : metrics.innerTopAbsolute;
-        var innerBottom =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
-                        ? metrics.innerBottom
-                        : metrics.innerBottomAbsolute;
-        var centerX =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var hasWrapper = !!(cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content);
+        var contentOffsetX = hasWrapper && bubbleOptions.contentOffsetX ? bubbleOptions.contentOffsetX : 0;
+        var contentOffsetY = hasWrapper && bubbleOptions.contentOffsetY ? bubbleOptions.contentOffsetY : 0;
+        var innerTop = hasWrapper ? metrics.innerTop - contentOffsetY : metrics.innerTopAbsolute;
+        var innerBottom = hasWrapper ? metrics.innerBottom - contentOffsetY : metrics.innerBottomAbsolute;
+        var centerX = hasWrapper ? -contentOffsetX : metrics.centerX;
         var availableWidth = (bubbleWidth || 760) - 220;
         var spacing = Math.min(54, Math.max(32, bodyHeight * 0.12));
 
@@ -918,16 +914,12 @@ function layoutCycleRaceImageQuestionContent() {
                 heightOption != null ? heightOption : metrics.bodyHeight || 240,
                 200
         );
-        var innerTop =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
-                        ? metrics.innerTop
-                        : metrics.innerTopAbsolute;
-        var innerBottom =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content
-                        ? metrics.innerBottom
-                        : metrics.innerBottomAbsolute;
-        var centerX =
-                cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content ? 0 : metrics.centerX;
+        var hasWrapper = !!(cycleRaceQuestionBubble && cycleRaceQuestionBubble.__content);
+        var contentOffsetX = hasWrapper && bubbleOptions.contentOffsetX ? bubbleOptions.contentOffsetX : 0;
+        var contentOffsetY = hasWrapper && bubbleOptions.contentOffsetY ? bubbleOptions.contentOffsetY : 0;
+        var innerTop = hasWrapper ? metrics.innerTop - contentOffsetY : metrics.innerTopAbsolute;
+        var innerBottom = hasWrapper ? metrics.innerBottom - contentOffsetY : metrics.innerBottomAbsolute;
+        var centerX = hasWrapper ? -contentOffsetX : metrics.centerX;
         var availableWidth = (bubbleWidth || 760) - 220;
 
         var q2Metrics = configureCycleRaceQuestionDisplay(question2, {
@@ -1038,11 +1030,16 @@ function alignCycleRaceQuestionContent() {
 
         var bubbleOptions = cycleRaceQuestionBubble.__options || {};
         var bodyHeight = Math.max((bubbleOptions.height || 300) - (bubbleOptions.tailHeight || 60), 200);
+        var contentOffsetX = bubbleOptions.contentOffsetX || 0;
+        var contentOffsetY = bubbleOptions.contentOffsetY || 0;
         var innerTop = -bodyHeight / 2 + 36;
         var innerBottom = bodyHeight / 2 - 36;
-        var targetCenterY = (innerTop + innerBottom) / 2;
+        var localInnerTop = innerTop - contentOffsetY;
+        var localInnerBottom = innerBottom - contentOffsetY;
+        var targetCenterX = -contentOffsetX;
+        var targetCenterY = (localInnerTop + localInnerBottom) / 2;
 
-        var deltaX = centerX;
+        var deltaX = centerX - targetCenterX;
         var deltaY = centerY - targetCenterY;
 
         for (var j = 0; j < nodeMetrics.length; j++) {
@@ -1052,11 +1049,11 @@ function alignCycleRaceQuestionContent() {
                 var halfHeight = (entry.height || 0) / 2;
                 var offsetY = entry.offsetY || 0;
 
-                if (targetY - halfHeight + offsetY < innerTop) {
-                        targetY += innerTop - (targetY - halfHeight + offsetY);
+                if (targetY - halfHeight + offsetY < localInnerTop) {
+                        targetY += localInnerTop - (targetY - halfHeight + offsetY);
                 }
-                if (targetY + halfHeight + offsetY > innerBottom) {
-                        targetY -= targetY + halfHeight + offsetY - innerBottom;
+                if (targetY + halfHeight + offsetY > localInnerBottom) {
+                        targetY -= targetY + halfHeight + offsetY - localInnerBottom;
                 }
 
                 entry.node.x = targetX;
