@@ -702,8 +702,8 @@ this.onComplete = function (e) {
         var banner = ensureIntroHintBanner();
 
         if (introQuestxt1) {
-            introQuestxt1.visible = true;
-            introQuestxt1.alpha = 1;
+            introQuestxt1.visible = false;
+            introQuestxt1.alpha = 0;
         }
         if (introImg) {
             introImg.visible = false;
@@ -715,13 +715,7 @@ this.onComplete = function (e) {
         if (introQuestionBubble) {
             introQuestionBubble.x = 640;
             introQuestionBubble.y = 248;
-            showIntroQuestionBubble(80);
-            if (introQuestionBubble.parent) {
-                introQuestionBubble.parent.setChildIndex(
-                    introQuestionBubble,
-                    introQuestionBubble.parent.numChildren - 1
-                );
-            }
+            hideIntroQuestionBubble();
         }
 
         if (banner) {
