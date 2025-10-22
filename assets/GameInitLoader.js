@@ -2862,7 +2862,7 @@ function applyHudThemeToTexts(theme) {
         applyTextStyle(gameTimerTxt, timerStyle);
         gameTimerTxt.__baseColor = gameTimerTxt.color;
         gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
-        alignHudValueText(gameTimerTxt);
+        //alignHudValueText(gameTimerTxt);
     }
 }
 
@@ -3889,7 +3889,7 @@ function watchRestart() {
     applyTextStyle(gameTimerTxt, timerTextStyle);
     gameTimerTxt.__baseColor = gameTimerTxt.color;
     gameTimerTxt.__baseShadow = gameTimerTxt.shadow;
-    alignHudValueText(gameTimerTxt);
+    //alignHudValueText(gameTimerTxt);
 
     gameQCntTxt = new createjs.Text("", "700 28px 'Baloo 2'", (valueTextStyle && valueTextStyle.color) || "#FFFFFF");
     gameQCntTxt.textAlign = "left";
@@ -4302,7 +4302,7 @@ function buildHudLayout() {
         gameTimerTxt.textAlign = "left";
         gameTimerTxt.x = 0;
         gameTimerTxt.y = 0;
-        alignHudValueText(gameTimerTxt);
+       // alignHudValueText(gameTimerTxt);
     }
 
     if (hudQuestionCardContainer.valueHolder) {
@@ -4471,7 +4471,7 @@ function refreshHudValues() {
 
     var timerValue = typeof formatTimerValue === "function" ? formatTimerValue(time) : String(parseInt(time, 10) || 0);
     gameTimerTxt.text = timerValue;
-    alignHudValueText(gameTimerTxt);
+   // alignHudValueText(gameTimerTxt);
 
     var numericTime = typeof time !== "undefined" ? parseInt(time, 10) || 0 : 0;
    animateTimerTick();
