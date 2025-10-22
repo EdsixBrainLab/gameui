@@ -19,8 +19,8 @@ var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, btnImages, is
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd, currTime = 0;
 var tqcnt = 0, aqcnt = 0, ccnt = 0, cqcnt = 0, gscore = 0, gscrper = 0, gtime = 0, rtime = 0, crtime = 0, wrtime = 0;
 var alphabetArr = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-var words_arry = ["parrot", "peacock", "pigeon", "quail", "crow", "kiwi", "eagle", "owl", "woodpecker", "flamingo",
-"tern","quetzal","turkey","pelican","ostrich","rooster","toucan","uguisu","zebrafinch","nightingale"];
+var words_arry = ["frock","tie","underwear","shirt","socks","belt","gloves","coat","pant","skirt",
+"singlet","tanktop","strawhat","overalls","earmuffs","boots","beanies","sweater","jacket","scarf","mittens"];
 var maxLetterCnt = 10
 var quesArr = []
 var alphabetArr1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -29,7 +29,6 @@ var answerArr = []
 var indexArr1 = []
 var indexArr2 = []
 var indexArr3 = []
-var QusTxtString;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -58,7 +57,7 @@ var lastW, lastH, lastS = 1;
 var borderPadding = 10, barHeight = 20;
 
 var loadProgressLabel, progresPrecentage, loaderWidth;
-
+var QusTxtString;
 
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -72,7 +71,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
-	 call_UI_ambientOverlay(container);
+	call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
 
     loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
@@ -95,7 +94,7 @@ function init() {
      */
 
     assetsPath = "assets/";
-    gameAssetsPath = "WhoAmI-Birds/";
+    gameAssetsPath = "WhoAmI-Clothes/";
     soundpath = "FA/"
 
     var success = createManifest();
@@ -120,14 +119,13 @@ function doneLoading1(event) {
     loaderBar.visible = false;
     stage.update();
 	
-	 call_UI_gameQuestion(container,"Click on the correct letter to complete the name of the bird");
-	 
-	 
+	call_UI_gameQuestion(container,"Click on the correct letter to complete the name of the item of clothing");
+	QusTxtString.y = INTRO_PROMPT_Y-80;
     if (id == "question") {
         var choiceSpriteSheet = new createjs.SpriteSheet({
             framerate: 30,
             "images": [preload.getResult("question")],
-            "frames": { "regX": 50, "height": 312, "count": 64, "regY": 50, "width": 313 },
+            "frames": { "regX": 50, "height": 352, "count": 64, "regY": 50, "width": 352 },
             // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         });
 
@@ -159,10 +157,9 @@ function doneLoading1(event) {
         container.parent.addChild(choice1);
         choice1.visible = false;
 
-    }
-  
+    } 
 
-    
+     
 
 }
 
@@ -175,10 +172,10 @@ function tick(e) {
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========///////////////////////////////////////////////////////////////////
 
 function handleClick(e) {
-    qno = between(0, 19);   
-         qno.splice(qno.indexOf(4), 1)  
-    qno.push(4);
- console.log("qno" + qno)
+    qno = between(0, 19);     
+        qno.splice(qno.indexOf(5), 1)  
+    qno.push(5);   
+ console.log("qno" + qno) 
     CreateGameStart()
     if (gameType == 0) {
         CreateGameElements()
@@ -191,12 +188,12 @@ function handleClick(e) {
 }
 
 function CreateGameElements() {
-   container.parent.addChild(QusTxtString);
+     container.parent.addChild(QusTxtString);
   QusTxtString.visible = false;
     container.parent.addChild(question);
     question.visible = false;
-    question.x = 600;
-    question.y = 250;
+    question.x = 580;
+    question.y = 255;
     question.visible = false;
     question.scaleX = question.scaleY = .8;
     container.parent.addChild(choice1);
@@ -211,12 +208,12 @@ function CreateGameElements() {
         choiceArr[i].y = 620;
     }
  
-    for (i = 0; i < 11; i++) {
+    for (i = 0; i < 10; i++) {
         quesArr[i] = question1.clone()
         quesArr[i].visible = false;
         container.parent.addChild(quesArr[i]);
         quesArr[i].x = 105 + (i * 120);
-        quesArr[i].y = 490;
+        quesArr[i].y = 510;
     }
     if (isQuestionAllVariations) {
         //createGameWiseQuestions()
@@ -260,13 +257,11 @@ function pickques() {
     isCorrect = "";
 	QusTxtString.visible = true;
  panelVisibleFn()
-
     correctAnswer = words_arry[qno[cnt]];
     question.gotoAndStop(qno[cnt])
     question.visible = false;
     ans = correctAnswer;
     cLen = ans.length;
-    console.log("correct3Answer= " + correctAnswer)
     for (i = 0; i < cLen; i++) {
         answerArr[i] = ans.charAt(i);
         indexArr1[i] = alphabetArr.indexOf(answerArr[i].toUpperCase())
@@ -300,33 +295,31 @@ function pickques() {
     for (i = 0; i < cLen; i++) {
 
         if (cLen == 3) {
-            quesArr[i].x = 480 + (i * 150);
+            quesArr[i].x = 485 + (i * 150);
         }
         if (cLen == 4) {
-            quesArr[i].x = 405 + (i * 150);
+            quesArr[i].x = 410 + (i * 150);
         }
         if (cLen == 5) {
-            quesArr[i].x = 390 + (i * 120);
+            quesArr[i].x = 400 + (i * 120);
         }
         if (cLen == 6) {
-            quesArr[i].x = 330 + (i * 120);
+            quesArr[i].x = 335 + (i * 120);
         }
         if (cLen == 7) {
-            quesArr[i].x = 273 + (i * 120);
+            quesArr[i].x = 275 + (i * 120);
         }
         if (cLen == 8) {
-            quesArr[i].x = 215 + (i * 120);
+            quesArr[i].x = 220 + (i * 120);
         }
+
         if (cLen == 9) {
-            quesArr[i].x = 145 + (i * 120);
+            quesArr[i].x = 155 + (i * 120);
         }
         if (cLen == 10) {
-            quesArr[i].x = 95 + (i * 120);
+            quesArr[i].x = 85 + (i * 120);
         }
-        if (cLen == 11) {
-            quesArr[i].x = 85 + (i * 110);
-          
-        }
+
 
     }
     createTween()
@@ -337,13 +330,14 @@ function pickques() {
 function createTween() {
 
  
+   
 
     ////////////////////////////////holder//////////////////////
     question.visible = true;
     question.alpha = 0
     question.regX=50;
     question.regY=50;
-createjs.Tween.get(question)
+   createjs.Tween.get(question)
   .wait(500)
   .to({ scaleX: 0.75, scaleY: 0.75, alpha: 1 }, 250)
   .to({ scaleX: 0.8, scaleY: 0.8, alpha: 1 }, 250)
@@ -373,33 +367,35 @@ var time=1000
     }
 
     ///////////////////////////choice tween////////////////////////////////////
-    var val =1800
+    var val =2000
     for (i = 0; i < 3; i++) {
         choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-        choiceArr[i].y = 600,
+        choiceArr[i].y = 620, 
         choiceArr[i].visible = true;
          choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].alpha = 0;
-        var tween = createjs.Tween.get(choiceArr[i])
-        .wait(val)
-        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500);
         if(i==2)
         {
-        tween.call(AddListenerFn);
+        createjs.Tween.get(choiceArr[i]).wait(val)
+        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
+        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
+        }
+        else{
+        createjs.Tween.get(choiceArr[i]).wait(val)
+        .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
+        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
         }
         val = val + 150
     }
+
+    repTimeClearInterval = setTimeout(AddListenerFn, 3000)
 
 
 
 }
 function AddListenerFn() {
 
-    if (typeof repTimeClearInterval !== "undefined" && repTimeClearInterval) {
-        clearTimeout(repTimeClearInterval)
-        repTimeClearInterval = 0
-    }
+    clearTimeout(repTimeClearInterval)
   
 
 
@@ -411,10 +407,8 @@ function AddListenerFn() {
         choiceArr[i].mouseEnabled = true;
         choiceArr[i].cursor = "pointer";
         choiceArr[i].addEventListener("click", answerSelected);
-
-    
-  try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
-}
+try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
+    }
 
     rst = 0;
     gameResponseTimerStart();
@@ -435,8 +429,7 @@ function disablechoices() {
 }
 
 function answerSelected(e) {
-  try { ChoiceFX_pressRipple(container, e.stageX, e.stageY); } catch(_e){}
-
+	 try { ChoiceFX_pressRipple(container, e.stageX, e.stageY); } catch(_e){}
     e.preventDefault();
     lCnt++;
     uans = e.currentTarget.name;
@@ -453,7 +446,7 @@ function answerSelected(e) {
         disableMouse()
       
         quesArr[rand].gotoAndStop(indexArr2[rand])
-try { ChoiceFX_revealPop(quesArr[rand], "pop"); } catch(_e){}
+		try { ChoiceFX_revealPop(quesArr[rand], "pop"); } catch(_e){}
         for (i = 0; i < 3; i++) {
             choiceArr[i].removeEventListener("click", answerSelected)
         }
@@ -483,3 +476,6 @@ function enableMouse() {
 
 
 //===============================================================================================//
+
+
+

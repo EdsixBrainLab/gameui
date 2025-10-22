@@ -1,5 +1,4 @@
 var messageField;		//Message display field
-
 var assets = [];
 var choiceArr = [];
 var choiceMcArr = []
@@ -13,14 +12,13 @@ var txtLabel;
 var clueMcArr = [];
 var clueArr = []
 var clueTxtArr = []
-var cnt = -1,qscnt=-1, ans, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
-var startBtn, introScrn, container, question, circleOutline, chHolderMC, choice1, choice2, choice3, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
+var cnt = -1,qscnt = -1, ans, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
+var startBtn, introScrn, container, question, circleOutline, chHolderMC, choice1, choice2, choice3, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, btnImages, isCorrect = "";
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd, currTime = 0;
 var tqcnt = 0, aqcnt = 0, ccnt = 0, cqcnt = 0, gscore = 0, gscrper = 0, gtime = 0, rtime = 0, crtime = 0, wrtime = 0;
 var alphabetArr = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-var words_arry = ["parrot", "peacock", "pigeon", "quail", "crow", "kiwi", "eagle", "owl", "woodpecker", "flamingo",
-"tern","quetzal","turkey","pelican","ostrich","rooster","toucan","uguisu","zebrafinch","nightingale"];
+var words_arry = ["jasmine", "canna", "hibiscus", "lotus", "periwinkle", "daisy", "rose", "sunflower", "tulip", "dahlia"];
 var maxLetterCnt = 10
 var quesArr = []
 var alphabetArr1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -29,7 +27,6 @@ var answerArr = []
 var indexArr1 = []
 var indexArr2 = []
 var indexArr3 = []
-var QusTxtString;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -52,66 +49,51 @@ var isResp = true;
 var respDim = 'both'
 var isScale = true
 var scaleType = 1;
-
 var lastW, lastH, lastS = 1;
-
 var borderPadding = 10, barHeight = 20;
-
 var loadProgressLabel, progresPrecentage, loaderWidth;
-
-
+var QusTxtString;
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
     checkBrowserSupport();
 }
 ///////////////////////////////////////////////////////////////////
-
 function init() {
-
     canvas = document.getElementById("gameCanvas");
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
-	 call_UI_ambientOverlay(container);
+	call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
-
     loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
     loaderBar = new createjs.Container();
     var txt = new createjs.Container();
     bar = new createjs.Shape();
     bar.graphics.beginFill(loaderColor).drawRect(0, 0, 1, barHeight).endFill();
     loaderWidth = 300;
-
     createLoader()
     createCanvasResize()
-
     stage.update();
     stage.enableMouseOver(40);
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
-
-    /*Always specify the following terms as given in manifest array. 
+  /*Always specify the following terms as given in manifest array. 
          1. choice image name as "ChoiceImages1.png"
          2. question text image name as "questiontext.png"
-     */
-
+ */
     assetsPath = "assets/";
-    gameAssetsPath = "WhoAmI-Birds/";
+    gameAssetsPath = "WhoAmI-Flowers/";
     soundpath = "FA/"
-
     var success = createManifest();
     if (success == 1) {
         manifest.push(
-             { id: "question", src: gameAssetsPath + "question.png" },
-            { id: "question1", src: gameAssetsPath + "question1.png" },         
-            { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" }
-            
+            { id: "question", src: gameAssetsPath + "question.png" },
+            { id: "question1", src: gameAssetsPath + "question1.png" },
+            { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" }         
         )
         preloadAllAssets()
         stage.update();
     }
-
 }
-
 //=====================================================================//
 function doneLoading1(event) {
     var event = assets[i];
@@ -119,34 +101,30 @@ function doneLoading1(event) {
     console.log(" doneLoading ")
     loaderBar.visible = false;
     stage.update();
-	
-	 call_UI_gameQuestion(container,"Click on the correct letter to complete the name of the bird");
-	 
-	 
+	call_UI_gameQuestion(container,"Click on the correct letter to complete the name of the flower");
     if (id == "question") {
         var choiceSpriteSheet = new createjs.SpriteSheet({
             framerate: 30,
             "images": [preload.getResult("question")],
-            "frames": { "regX": 50, "height": 312, "count": 64, "regY": 50, "width": 313 },
+            "frames": { "regX": 50, "height": 302, "count": 64, "regY": 50, "width": 302 },
             // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         });
-
         question = new createjs.Sprite(choiceSpriteSheet);
         container.parent.addChild(question);
         question.visible = false;
-
     }
     if (id == "question1") {
         var choiceSpriteSheet = new createjs.SpriteSheet({
             framerate: 30,
             "images": [preload.getResult("question1")],
-            "frames": { "regX": 50, "height": 105, "count": 64, "regY": 50, "width": 102 },
+            "frames": { "regX": 50, "height": 116, "count": 64, "regY": 50, "width": 112 },
             // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         });
+
         question1 = new createjs.Sprite(choiceSpriteSheet);
         container.parent.addChild(question1);
         question1.visible = false;
-        }
+    }
     if (id == "choice1") {
         var choiceSpriteSheet = new createjs.SpriteSheet({
             framerate: 30,
@@ -160,10 +138,9 @@ function doneLoading1(event) {
         choice1.visible = false;
 
     }
-  
 
     
-
+  
 }
 
 function tick(e) {
@@ -175,10 +152,10 @@ function tick(e) {
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========///////////////////////////////////////////////////////////////////
 
 function handleClick(e) {
-    qno = between(0, 19);   
-         qno.splice(qno.indexOf(4), 1)  
-    qno.push(4);
- console.log("qno" + qno)
+    qno = between(0, 9);
+       qno.splice(qno.indexOf(6), 1)  
+    qno.push(6);   
+
     CreateGameStart()
     if (gameType == 0) {
         CreateGameElements()
@@ -188,17 +165,18 @@ function handleClick(e) {
         getdomainpath()
         //end
     }
+
 }
 
 function CreateGameElements() {
-   container.parent.addChild(QusTxtString);
-  QusTxtString.visible = false;
+     
     container.parent.addChild(question);
     question.visible = false;
-    question.x = 600;
-    question.y = 250;
+    question.x =600;
+    question.y = 240;
     question.visible = false;
     question.scaleX = question.scaleY = .8;
+
     container.parent.addChild(choice1);
     choice1.visible = false;
     //maxLetterCnt
@@ -210,8 +188,8 @@ function CreateGameElements() {
         choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].y = 620;
     }
- 
-    for (i = 0; i < 11; i++) {
+
+    for (i = 0; i < 10; i++) {
         quesArr[i] = question1.clone()
         quesArr[i].visible = false;
         container.parent.addChild(quesArr[i]);
@@ -242,10 +220,9 @@ function helpEnable() {
 }
 //=================================================================================================================================//
 function pickques() {
-        pauseTimer()
-        tx = 0;
-      qscnt++;
-    
+    pauseTimer()
+    tx = 0;
+    qscnt++;
     cnt++;
     quesCnt++;
     chpos = [];
@@ -259,14 +236,12 @@ function pickques() {
     //txtLabel.text = "";
     isCorrect = "";
 	QusTxtString.visible = true;
- panelVisibleFn()
-
+    panelVisibleFn()
     correctAnswer = words_arry[qno[cnt]];
     question.gotoAndStop(qno[cnt])
-    question.visible = false;
+    question.visible = true;
     ans = correctAnswer;
     cLen = ans.length;
-    console.log("correct3Answer= " + correctAnswer)
     for (i = 0; i < cLen; i++) {
         answerArr[i] = ans.charAt(i);
         indexArr1[i] = alphabetArr.indexOf(answerArr[i].toUpperCase())
@@ -283,7 +258,7 @@ function pickques() {
         if (i == rand) {
             quesArr[i].gotoAndStop(26)
         }
-        quesArr[i].visible = false;
+        quesArr[i].visible = true;
     }
     rand1 =chposArr[cnt]
     for (i = 0; i < 3; i++) {
@@ -293,57 +268,55 @@ function pickques() {
             choiceArr[i].gotoAndStop(indexArr2[rand])
             choiceArr[i].name = indexArr2[rand]
         }
-        choiceArr[i].visible = false;
+        choiceArr[i].visible = true;
     }
     ans = indexArr2[rand]
     console.log("correct3Answer= " + correctAnswer)
-    for (i = 0; i < cLen; i++) {
-
+     for (i = 0; i < cLen; i++) {
+console.log("clen"+cLen)
         if (cLen == 3) {
             quesArr[i].x = 480 + (i * 150);
         }
         if (cLen == 4) {
-            quesArr[i].x = 405 + (i * 150);
+            quesArr[i].x = 410 + (i * 150);
         }
         if (cLen == 5) {
-            quesArr[i].x = 390 + (i * 120);
+            quesArr[i].x = 395 + (i * 120);
         }
         if (cLen == 6) {
-            quesArr[i].x = 330 + (i * 120);
+            quesArr[i].x = 332 + (i * 120);
         }
         if (cLen == 7) {
-            quesArr[i].x = 273 + (i * 120);
+            quesArr[i].x = 272 + (i * 120);
         }
         if (cLen == 8) {
-            quesArr[i].x = 215 + (i * 120);
-        }
-        if (cLen == 9) {
-            quesArr[i].x = 145 + (i * 120);
-        }
-        if (cLen == 10) {
-            quesArr[i].x = 95 + (i * 120);
-        }
-        if (cLen == 11) {
-            quesArr[i].x = 85 + (i * 110);
-          
+            quesArr[i].x = 213 + (i * 120);
         }
 
-    }
+        if (cLen == 9) {
+            quesArr[i].x = 149 + (i * 120);
+        }
+        if (cLen == 10) {
+            quesArr[i].x = 90 + (i * 120);
+        }
+    }   
+
     createTween()
     question.Text = "";
+
     createjs.Ticker.addEventListener("tick", tick);
     stage.update();
 }
+
 function createTween() {
-
  
-
+ 
     ////////////////////////////////holder//////////////////////
     question.visible = true;
     question.alpha = 0
     question.regX=50;
     question.regY=50;
-createjs.Tween.get(question)
+    createjs.Tween.get(question)
   .wait(500)
   .to({ scaleX: 0.75, scaleY: 0.75, alpha: 1 }, 250)
   .to({ scaleX: 0.8, scaleY: 0.8, alpha: 1 }, 250)
@@ -376,34 +349,24 @@ var time=1000
     var val =1800
     for (i = 0; i < 3; i++) {
         choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
-        choiceArr[i].y = 600,
+        choiceArr[i].y = 600, 
         choiceArr[i].visible = true;
          choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].alpha = 0;
-        var tween = createjs.Tween.get(choiceArr[i])
-        .wait(val)
+        createjs.Tween.get(choiceArr[i]).wait(val)
         .to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 100)
-        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500);
-        if(i==2)
-        {
-        tween.call(AddListenerFn);
-        }
+        .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 500)
         val = val + 150
     }
+
+    repTimeClearInterval = setTimeout(AddListenerFn, 3000)
 
 
 
 }
 function AddListenerFn() {
-
-    if (typeof repTimeClearInterval !== "undefined" && repTimeClearInterval) {
-        clearTimeout(repTimeClearInterval)
-        repTimeClearInterval = 0
-    }
-  
-
-
-    for (i = 0; i < 3; i++) {
+     clearTimeout(repTimeClearInterval)
+   for (i = 0; i < 3; i++) {
         choiceArr[i].visible = true
         choiceArr[i].id = i
         choiceArr[i].mouseEnabled = true;
@@ -411,16 +374,12 @@ function AddListenerFn() {
         choiceArr[i].mouseEnabled = true;
         choiceArr[i].cursor = "pointer";
         choiceArr[i].addEventListener("click", answerSelected);
-
-    
-  try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
-}
-
-    rst = 0;
+		try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
+   }
+       rst = 0;
     gameResponseTimerStart();
     restartTimer()
 }
-
 //===============================================//
 function disablechoices() {
     for (i = 0; i < 3; i++) {
@@ -429,14 +388,20 @@ function disablechoices() {
         choiceArr[i].visible = false;
     }
     for (i = 0; i < cLen; i++) {
-        quesArr[i].visible = false
+    quesArr[i].visible = false
     }
     question.visible = false
+   
 }
 
-function answerSelected(e) {
-  try { ChoiceFX_pressRipple(container, e.stageX, e.stageY); } catch(_e){}
+function onRoll_over(e) {
 
+}
+function onRoll_out(e) {
+
+}
+function answerSelected(e) {
+	try { ChoiceFX_pressRipple(container, e.stageX, e.stageY); } catch(_e){}
     e.preventDefault();
     lCnt++;
     uans = e.currentTarget.name;
@@ -453,7 +418,7 @@ function answerSelected(e) {
         disableMouse()
       
         quesArr[rand].gotoAndStop(indexArr2[rand])
-try { ChoiceFX_revealPop(quesArr[rand], "pop"); } catch(_e){}
+		try { ChoiceFX_revealPop(quesArr[rand], "pop"); } catch(_e){}
         for (i = 0; i < 3; i++) {
             choiceArr[i].removeEventListener("click", answerSelected)
         }
@@ -481,5 +446,7 @@ function enableMouse() {
 
 }
 
-
 //===============================================================================================//
+
+
+
