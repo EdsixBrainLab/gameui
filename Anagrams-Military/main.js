@@ -449,7 +449,7 @@ function tick(e) {
 
 function handleClick(e) {
   qno = between(0, nameArr.length-1);
-  qno.splice(qno.indexOf(5), 1);
+  qno.splice(qno.indexOf(3), 1);
   CreateGameStart();
   if (gameType == 0) {
     CreateGameElements();
