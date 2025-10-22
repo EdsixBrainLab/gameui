@@ -829,6 +829,8 @@ function choiceTween() {
     if (!choiceLetter) {
       continue;
     }
+    highlightTweenArr[0] = null;
+  }
 
     if (clueBg) {
       clueBg.visible = true;
@@ -1049,6 +1051,13 @@ function setFingureTween() {
     } else {
       fingerTween.call(handleComplete4_1);
     }
+    var isFinalStep = TempIntroVal === cluegotoArr.length - 1;
+    var fingerTween = createjs.Tween.get(introfingure)
+      .to({ x: fingerBaseX }, 300)
+      .to({ x: fingerPressX }, 300)
+      .to({ x: fingerBaseX }, 300)
+      .to({ x: fingerPressX }, 300)
+      .wait(200);
 
     highlightTweenArr[1] = fingerTween;
   }
