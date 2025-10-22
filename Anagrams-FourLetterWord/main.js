@@ -160,8 +160,8 @@ var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
 var CHOICE_ROW_Y = 620;
 var CHOICE_ROW_ENTRY_OFFSET = 42;
-var CLUE_ROW_Y = 470;
-var CLUE_ROW_SPACING = 92;
+var CLUE_ROW_Y = 380;
+var CLUE_ROW_SPACING = 94;
 
 var globalHelperScope =
   typeof globalThis !== "undefined"
@@ -803,13 +803,28 @@ function enablechoices() {
     tileSpan: 158
   });
 
-  var clueRowLayout = computeRowLayout(WORD_LENGTH, {
+  var clueRowCenter = null;
+  if (choiceLayout && choiceLayout.positions && choiceLayout.positions.length) {
+    var firstChoiceX = choiceLayout.positions[0];
+    var lastChoiceX = choiceLayout.positions[choiceLayout.positions.length - 1];
+    if (!isNaN(firstChoiceX) && !isNaN(lastChoiceX)) {
+      clueRowCenter = (firstChoiceX + lastChoiceX) / 2;
+    }
+  }
+
+  var clueRowOptions = {
     baseSpacing: 134,
     baseScale: 1,
     minScale: 0.82,
     maxSpan: 720,
     tileSpan: 108
-  });
+  };
+
+  if (clueRowCenter != null) {
+    clueRowOptions.centerX = clueRowCenter;
+  }
+
+  var clueRowLayout = computeRowLayout(WORD_LENGTH, clueRowOptions);
 
   for (i = 0; i < cLen; i++) {
     var tileScale = choiceLayout.scale;

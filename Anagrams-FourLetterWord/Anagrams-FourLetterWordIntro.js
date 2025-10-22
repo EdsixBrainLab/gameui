@@ -23,13 +23,13 @@ var introQuestxtY = 150;
 var introQues1X = 640;
 var introQues1Y = 294;
 var introChoice1X = 376;
-var introChoice1Y = 640;
+var introChoice1Y = 620;
 var introChoice2X = 552;
-var introChoice2Y = 640;
+var introChoice2Y = 620;
 var introChoice3X = 728;
-var introChoice3Y = 640;
+var introChoice3Y = 620;
 var introChoice4X = 904;
-var introChoice4Y = 640;
+var introChoice4Y = 620;
 var introChoiceDefaultX = [
   null,
   introChoice1X,
@@ -44,8 +44,8 @@ var introCluBaseX = [
   700,
   820
 ];
-var introCluBaseY = 490;
-var introClueRowSpacing = 92;
+var introCluBaseY = 380;
+var introClueRowSpacing = 94;
 var introArrowY = introCluBaseY - 46;
 var introfingureX = introChoice2X;
 var introfingureY = introChoice2Y + 32;
