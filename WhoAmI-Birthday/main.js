@@ -45,7 +45,35 @@ var CHOICE_LETTER_FONT = "800 66px 'Baloo 2'";
 var CLUE_LETTER_FONT = "800 60px 'Baloo 2'";
 var CLUE_LETTER_VERTICAL_OFFSET = 6;
 var LETTER_FILL_COLOR = "#FFFFFF";
-var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+var globalHelperScope =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof window !== "undefined"
+    ? window
+    : this;
+
+function getCreatejsRef() {
+  if (typeof createjs !== "undefined" && createjs) {
+    return createjs;
+  }
+  if (globalHelperScope && globalHelperScope.createjs) {
+    return globalHelperScope.createjs;
+  }
+  return null;
+}
+
+var LETTER_SHADOW = null;
+
+function ensureLetterShadow() {
+  if (!LETTER_SHADOW) {
+    var lib = getCreatejsRef();
+    if (!lib || typeof lib.Shadow !== "function") {
+      return null;
+    }
+    LETTER_SHADOW = new lib.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+  }
+  return LETTER_SHADOW;
+}
 
 var CLUE_ROW_Y = 490;
 var CHOICE_ROW_Y = 620;
@@ -58,84 +86,103 @@ var QUESTION_PANEL_WIDTH = 440;
 var QUESTION_PANEL_HEIGHT = 292;
 var QUESTION_PANEL_BASE_SCALE = 0.98;
 
-var globalHelperScope =
-  typeof globalThis !== "undefined"
-    ? globalThis
-    : typeof window !== "undefined"
-    ? window
-    : this;
+var letterHelpers = null;
 
-var letterHelpers =
-  globalHelperScope && typeof globalHelperScope.SAUI_createAnagramLetterHelpers === "function"
-    ? globalHelperScope.SAUI_createAnagramLetterHelpers({
-        choiceInteractive: true,
-        choiceScale: 0.78,
-        choiceFont: CHOICE_LETTER_FONT,
-        choiceColor: LETTER_FILL_COLOR,
-        choiceShadow: LETTER_SHADOW,
-        choiceHitRadius: 78,
-        clueScale: 1,
-        clueFont: CLUE_LETTER_FONT,
-        clueColor: LETTER_FILL_COLOR,
-        clueShadow: LETTER_SHADOW
-      })
-    : null;
+function ensureLetterHelpers() {
+  if (
+    !letterHelpers &&
+    globalHelperScope &&
+    typeof globalHelperScope.SAUI_createAnagramLetterHelpers === "function"
+  ) {
+    letterHelpers = globalHelperScope.SAUI_createAnagramLetterHelpers({
+      choiceInteractive: true,
+      choiceScale: 0.78,
+      choiceFont: CHOICE_LETTER_FONT,
+      choiceColor: LETTER_FILL_COLOR,
+      choiceShadow: ensureLetterShadow(),
+      choiceHitRadius: 78,
+      clueScale: 1,
+      clueFont: CLUE_LETTER_FONT,
+      clueColor: LETTER_FILL_COLOR,
+      clueShadow: ensureLetterShadow()
+    });
+  }
+  return letterHelpers;
+}
 
-var buildChoiceLetterDisplay =
-  letterHelpers && typeof letterHelpers.buildChoice === "function"
-    ? letterHelpers.buildChoice
-    : function () {
-        var label = new createjs.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
-        label.textAlign = "center";
-        label.textBaseline = "middle";
-        label.shadow = LETTER_SHADOW;
-        label.mouseEnabled = true;
-        label.mouseChildren = false;
-        label.__baseScale = 0.78;
-        var hitArea = new createjs.Shape();
-        hitArea.graphics.beginFill("#000").drawRoundRect(-78, -78, 156, 156, 52);
-        label.hitArea = hitArea;
-        label.__hitArea = hitArea;
-        return label;
-      };
+function buildChoiceLetterDisplay() {
+  var helpers = ensureLetterHelpers();
+  if (helpers && typeof helpers.buildChoice === "function") {
+    return helpers.buildChoice();
+  }
 
-var updateChoiceLetterDisplay =
-  letterHelpers && typeof letterHelpers.updateChoice === "function"
-    ? letterHelpers.updateChoice
-    : function (display, letter) {
-        if (!display) {
-          return;
-        }
-        var value = letter ? String(letter).toUpperCase() : "";
-        display.text = value;
-        display.alpha = value ? 1 : 0;
-      };
+  var lib = getCreatejsRef();
+  if (!lib) {
+    return null;
+  }
 
-var buildClueLetterDisplay =
-  letterHelpers && typeof letterHelpers.buildClue === "function"
-    ? letterHelpers.buildClue
-    : function () {
-        var label = new createjs.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
-        label.textAlign = "center";
-        label.textBaseline = "middle";
-        label.shadow = LETTER_SHADOW;
-        label.mouseEnabled = false;
-        label.mouseChildren = false;
-        label.__baseScale = 1;
-        return label;
-      };
+  var label = new lib.Text("", CHOICE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = ensureLetterShadow();
+  label.mouseEnabled = true;
+  label.mouseChildren = false;
+  label.__baseScale = 0.78;
+  var hitArea = new lib.Shape();
+  hitArea.graphics.beginFill("#000").drawRoundRect(-78, -78, 156, 156, 52);
+  label.hitArea = hitArea;
+  label.__hitArea = hitArea;
+  return label;
+}
 
-var updateClueLetterDisplay =
-  letterHelpers && typeof letterHelpers.updateClue === "function"
-    ? letterHelpers.updateClue
-    : function (display, letter) {
-        if (!display) {
-          return;
-        }
-        var value = letter ? String(letter).toUpperCase() : "";
-        display.text = value;
-        display.alpha = value ? 1 : 0;
-      };
+function updateChoiceLetterDisplay(display, letter) {
+  var helpers = ensureLetterHelpers();
+  if (helpers && typeof helpers.updateChoice === "function") {
+    return helpers.updateChoice(display, letter);
+  }
+
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
+
+function buildClueLetterDisplay() {
+  var helpers = ensureLetterHelpers();
+  if (helpers && typeof helpers.buildClue === "function") {
+    return helpers.buildClue();
+  }
+
+  var lib = getCreatejsRef();
+  if (!lib) {
+    return null;
+  }
+
+  var label = new lib.Text("", CLUE_LETTER_FONT, LETTER_FILL_COLOR);
+  label.textAlign = "center";
+  label.textBaseline = "middle";
+  label.shadow = ensureLetterShadow();
+  label.mouseEnabled = false;
+  label.mouseChildren = false;
+  label.__baseScale = 1;
+  return label;
+}
+
+function updateClueLetterDisplay(display, letter) {
+  var helpers = ensureLetterHelpers();
+  if (helpers && typeof helpers.updateClue === "function") {
+    return helpers.updateClue(display, letter);
+  }
+
+  if (!display) {
+    return;
+  }
+  var value = letter ? String(letter).toUpperCase() : "";
+  display.text = value;
+  display.alpha = value ? 1 : 0;
+}
 
 var computeRowLayout = function (count, options) {
   if (globalHelperScope && typeof globalHelperScope.SAUI_computeRowLayout === "function") {
