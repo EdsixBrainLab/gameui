@@ -158,10 +158,19 @@ var CLUE_LETTER_VERTICAL_OFFSET = 6;
 var LETTER_FILL_COLOR = "#FFFFFF";
 var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
+var CHOICE_LAYOUT_BASE_SPACING = 174;
+var CHOICE_LAYOUT_BASE_SCALE = 0.74;
+var CHOICE_LAYOUT_MIN_SCALE = 0.56;
+var CHOICE_LAYOUT_TILE_SPAN = 150;
 var CHOICE_ROW_Y = 620;
 var CHOICE_ROW_ENTRY_OFFSET = 42;
-var CLUE_TOP_ROW_Y = 380;
-var CLUE_BOTTOM_ROW_Y = 500;
+
+var CLUE_LAYOUT_BASE_SPACING = 128;
+var CLUE_LAYOUT_BASE_SCALE = 0.9;
+var CLUE_LAYOUT_MIN_SCALE = 0.72;
+var CLUE_LAYOUT_TILE_SPAN = 102;
+var CLUE_TOP_ROW_Y = 360;
+var CLUE_BOTTOM_ROW_Y = 490;
 var CLUE_SIDE_OFFSET_RATIO = 0.28;
 var CLUE_SIDE_OFFSET_MAX = 340;
 var CLUE_SIDE_MIN_CENTER = 220;
@@ -177,12 +186,12 @@ var letterHelpers =
   globalHelperScope && typeof globalHelperScope.SAUI_createAnagramLetterHelpers === "function"
     ? globalHelperScope.SAUI_createAnagramLetterHelpers({
         choiceInteractive: true,
-        choiceScale: 0.8,
+        choiceScale: CHOICE_LAYOUT_BASE_SCALE,
         choiceFont: CHOICE_LETTER_FONT,
         choiceColor: LETTER_FILL_COLOR,
         choiceShadow: LETTER_SHADOW,
-        choiceHitRadius: 78,
-        clueScale: 1,
+        choiceHitRadius: 72,
+        clueScale: CLUE_LAYOUT_BASE_SCALE,
         clueFont: CLUE_LETTER_FONT,
         clueColor: LETTER_FILL_COLOR,
         clueShadow: LETTER_SHADOW
@@ -199,7 +208,7 @@ var buildChoiceLetterDisplay =
         label.shadow = LETTER_SHADOW;
         label.mouseEnabled = true;
         label.mouseChildren = false;
-        label.__baseScale = 0.8;
+        label.__baseScale = CHOICE_LAYOUT_BASE_SCALE;
         label.__isChoiceLetter = true;
         var hitArea = new createjs.Shape();
         hitArea.graphics
@@ -232,7 +241,7 @@ var buildClueLetterDisplay =
         label.shadow = LETTER_SHADOW;
         label.mouseEnabled = false;
         label.mouseChildren = false;
-        label.__baseScale = 1;
+        label.__baseScale = CLUE_LAYOUT_BASE_SCALE;
         label.__isClueLetter = true;
         return label;
       };
@@ -497,7 +506,7 @@ function CreateGameElements() {
       clueBgArr[i].alpha = 0;
       clueBgArr[i].visible = false;
       clueBgArr[i].shadow = new createjs.Shadow("rgba(6,14,30,0.45)", 0, 10, 28);
-      clueBgArr[i].__baseScale = 1;
+      clueBgArr[i].__baseScale = CLUE_LAYOUT_BASE_SCALE;
       clueBgArr[i].mouseEnabled = false;
       clueBgArr[i].mouseChildren = false;
       container.parent.addChild(clueBgArr[i]);
@@ -552,7 +561,7 @@ function CreateGameElements() {
       choiceBgArr[i].alpha = 0;
       choiceBgArr[i].visible = false;
       choiceBgArr[i].shadow = new createjs.Shadow("rgba(9,18,36,0.4)", 0, 18, 36);
-      choiceBgArr[i].__baseScale = 1;
+      choiceBgArr[i].__baseScale = CHOICE_LAYOUT_BASE_SCALE * 1.06;
       choiceBgArr[i].mouseEnabled = false;
       choiceBgArr[i].mouseChildren = false;
     }
@@ -615,7 +624,9 @@ function CreateGameElements() {
 
     updateChoiceLetterDisplay(choiceArr[i], "");
     choiceArr[i].visible = false;
-    choiceArr[i].scaleX = choiceArr[i].scaleY = choiceArr[i].__baseScale || 0.8;
+    choiceArr[i].scaleX =
+      choiceArr[i].scaleY =
+      choiceArr[i].__baseScale || CHOICE_LAYOUT_BASE_SCALE;
     choiceArr[i].x = 0;
     choiceArr[i].y = 0;
 
@@ -799,11 +810,11 @@ function enablechoices() {
 
 
   var choiceLayout = computeRowLayout(cLen, {
-    baseSpacing: 182,
-    baseScale: 0.8,
-    minScale: 0.58,
+    baseSpacing: CHOICE_LAYOUT_BASE_SPACING,
+    baseScale: CHOICE_LAYOUT_BASE_SCALE,
+    minScale: CHOICE_LAYOUT_MIN_SCALE,
     maxSpan: 720,
-    tileSpan: 158
+    tileSpan: CHOICE_LAYOUT_TILE_SPAN
   });
 
   var clueRowCenter = null;
@@ -816,11 +827,11 @@ function enablechoices() {
   }
 
   var clueRowOptions = {
-    baseSpacing: 134,
-    baseScale: 1,
-    minScale: 0.82,
+    baseSpacing: CLUE_LAYOUT_BASE_SPACING,
+    baseScale: CLUE_LAYOUT_BASE_SCALE,
+    minScale: CLUE_LAYOUT_MIN_SCALE,
     maxSpan: 720,
-    tileSpan: 108
+    tileSpan: CLUE_LAYOUT_TILE_SPAN
   };
 
   if (clueRowCenter != null) {
@@ -905,8 +916,8 @@ function enablechoices() {
       drawChoiceTileBackground(choiceBgArr[i]);
       choiceBgArr[i].x = 0;
       choiceBgArr[i].y = 0;
-      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.12;
-      choiceBgArr[i].__baseScale = tileScale * 1.12;
+      choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.06;
+      choiceBgArr[i].__baseScale = tileScale * 1.06;
       choiceBgArr[i].visible = true;
       choiceBgArr[i].alpha = 0;
     }
@@ -1069,7 +1080,10 @@ function createTween() {
   var val = 420;
   for (i = 0; i < cLen; i++) {
     var tileContainer = choiceMcArr[i];
-    var targetScale = choiceArr[i] && choiceArr[i].__baseScale ? choiceArr[i].__baseScale : 0.8;
+    var targetScale =
+      choiceArr[i] && choiceArr[i].__baseScale
+        ? choiceArr[i].__baseScale
+        : CHOICE_LAYOUT_BASE_SCALE;
 
     if (tileContainer) {
       tileContainer.visible = true;
@@ -1087,7 +1101,9 @@ function createTween() {
         );
     }
 
-    var bgTargetScale = choiceBgArr[i] ? choiceBgArr[i].__baseScale || targetScale * 1.18 : null;
+    var bgTargetScale = choiceBgArr[i]
+      ? choiceBgArr[i].__baseScale || targetScale * 1.06
+      : null;
     if (choiceBgArr[i]) {
       choiceBgArr[i].alpha = 0;
       choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = bgTargetScale * 0.9;

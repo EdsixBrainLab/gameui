@@ -45,8 +45,16 @@ var introCluFallbackX = [
   820
 ];
 var INTRO_WORD_LENGTH = 4;
-var introClueTopRowY = 380;
-var introClueBottomRowY = 500;
+var introChoiceBaseSpacing = 174;
+var introChoiceBaseScale = 0.74;
+var introChoiceMinScale = 0.56;
+var introChoiceTileSpan = 150;
+var introClueBaseSpacing = 128;
+var introClueBaseScale = 0.9;
+var introClueMinScale = 0.72;
+var introClueTileSpan = 102;
+var introClueTopRowY = 360;
+var introClueBottomRowY = 490;
 var introClueRowYPositions = [
   introClueTopRowY,
   introClueBottomRowY,
@@ -185,11 +193,11 @@ function introComputeClueRowLayout(rowIndex) {
   var width = introResolveCanvasWidth();
   var layoutOptions = {
     centerX: introComputeRowCenter(rowIndex),
-    baseSpacing: 134,
-    baseScale: 1,
-    minScale: 0.82,
+    baseSpacing: introClueBaseSpacing,
+    baseScale: introClueBaseScale,
+    minScale: introClueMinScale,
     maxSpan: Math.max(720, width * 0.72),
-    tileSpan: 108
+    tileSpan: introClueTileSpan
   };
 
   var layout =
@@ -265,14 +273,14 @@ function buildIntroChoiceLetter() {
     getIntroHelper("SA_buildChoiceLetterDisplay") ||
     getIntroHelper("SAUI_buildChoiceLetterDisplay");
   if (typeof builder === "function") {
-    return builder({ interactive: false, baseScale: 0.8 });
+    return builder({ interactive: false, baseScale: introChoiceBaseScale });
   }
   var txt = new createjs.Text("", "700 64px 'Baloo 2'", "#FFFFFF");
   txt.textAlign = "center";
   txt.textBaseline = "middle";
   txt.mouseEnabled = false;
   txt.mouseChildren = false;
-  txt.__baseScale = 0.8;
+  txt.__baseScale = introChoiceBaseScale;
   return txt;
 }
 
@@ -297,14 +305,14 @@ function buildIntroClueLetter() {
     getIntroHelper("SA_buildClueLetterDisplay") ||
     getIntroHelper("SAUI_buildClueLetterDisplay");
   if (typeof builder === "function") {
-    return builder({ baseScale: 1, interactive: false });
+    return builder({ baseScale: introClueBaseScale, interactive: false });
   }
   var txt = new createjs.Text("", "700 60px 'Baloo 2'", "#FFFFFF");
   txt.textAlign = "center";
   txt.textBaseline = "middle";
   txt.mouseEnabled = false;
   txt.mouseChildren = false;
-  txt.__baseScale = 1;
+  txt.__baseScale = introClueBaseScale;
   return txt;
 }
 
@@ -353,7 +361,8 @@ function highlightIntroChoiceTile(index, isActive) {
   }
 
   if (bg) {
-    var baseScale = bg.__baseScale || 1;
+    var baseScale =
+      bg.__baseScale != null ? bg.__baseScale : introChoiceBaseScale * 1.06;
     drawChoiceTileBackground(
       bg,
       isActive ? CHOICE_TILE_HOVER_COLORS : CHOICE_TILE_BASE_COLORS
@@ -371,7 +380,8 @@ function highlightIntroChoiceTile(index, isActive) {
   }
 
   if (tile) {
-    var tileBase = tile.__baseScale || tile.scaleX || 0.8;
+    var tileBase =
+      tile.__baseScale || tile.scaleX || introChoiceBaseScale;
     createjs.Tween.get(tile, { override: true })
       .to(
         {
@@ -443,7 +453,8 @@ function styleIntroClueSlot(index, isFilled) {
     return;
   }
 
-  var baseScale = bg.__baseScale || 1;
+  var baseScale =
+    bg.__baseScale != null ? bg.__baseScale : introClueBaseScale;
   var colors = isFilled ? CLUE_SLOT_SUCCESS_COLORS : CLUE_SLOT_BASE_COLORS;
   drawClueSlotBackground(bg, colors);
   createjs.Tween.get(bg, { override: true })
@@ -474,7 +485,8 @@ function highlightIntroClueTarget(index) {
     return;
   }
 
-  var baseScale = bg.__baseScale || 1;
+  var baseScale =
+    bg.__baseScale != null ? bg.__baseScale : introClueBaseScale;
   drawClueSlotBackground(bg, CLUE_SLOT_HIGHLIGHT_COLORS);
   createjs.Tween.get(bg, { override: true })
     .to({ scaleX: baseScale * 1.04, scaleY: baseScale * 1.04, alpha: 1 }, 220, createjs.Ease.quadOut)
@@ -498,8 +510,8 @@ function ensureSupportRowBackground(rowIndex) {
     positions[positions.length - 1] != null
       ? positions[positions.length - 1]
       : introCluFallbackX[4];
-  var width = Math.max(320, rightX - leftX + 188);
-  var height = 128;
+  var width = Math.max(320, rightX - leftX + introClueTileSpan + 64);
+  var height = 120;
   rowBg.graphics
     .beginLinearGradientFill(
       ["rgba(30,22,74,0.18)", "rgba(30,22,74,0.08)"],
@@ -586,11 +598,15 @@ function commongameintro() {
   ];
 
   var resolvedChoiceX = introChoiceDefaultX.slice();
+  var choiceLayout = null;
   if (typeof computeIntroRow === "function") {
-    var choiceLayout = computeIntroRow(choiceConfigs.length, {
+    choiceLayout = computeIntroRow(choiceConfigs.length, {
       centerX: introQuestxtX,
-      baseSpacing: 184,
-      maxSpan: 820
+      baseSpacing: introChoiceBaseSpacing,
+      baseScale: introChoiceBaseScale,
+      minScale: introChoiceMinScale,
+      tileSpan: introChoiceTileSpan,
+      maxSpan: Math.max(720, introResolveCanvasWidth() * 0.72)
     });
 
     if (
@@ -612,6 +628,11 @@ function commongameintro() {
   introfingureX = introChoice2X;
   introfingureY = introChoice2Y + 32;
 
+  var resolvedChoiceScale =
+    choiceLayout && typeof choiceLayout.scale === "number"
+      ? choiceLayout.scale
+      : introChoiceBaseScale;
+
   for (var c = 0; c < choiceConfigs.length; c++) {
     var cfg = choiceConfigs[c];
     cfg.x = resolvedChoiceX[cfg.index] != null ? resolvedChoiceX[cfg.index] : introChoiceDefaultX[cfg.index];
@@ -630,8 +651,8 @@ function commongameintro() {
     bg.y = cfg.y;
     bg.visible = false;
     bg.alpha = 0;
-    var baseLetterScale = 0.8;
-    bg.__baseScale = baseLetterScale * 1.08;
+    var baseLetterScale = resolvedChoiceScale;
+    bg.__baseScale = baseLetterScale * 1.06;
     bg.shadow = new createjs.Shadow("rgba(10,18,44,0.45)", 0, 12, 28);
     bg.mouseEnabled = false;
     bg.mouseChildren = false;
@@ -654,8 +675,10 @@ function commongameintro() {
 
     var tileScale = letter.__baseScale || baseLetterScale;
     glow.scaleX = glow.scaleY = tileScale * 1.28;
+    glow.__baseScale = glow.scaleX;
 
-    var bgScale = bg.__baseScale || tileScale * 1.08;
+    var bgScale =
+      bg.__baseScale != null ? bg.__baseScale : introChoiceBaseScale * 1.06;
     var tileHeight = 148 * bgScale;
     var tileTop = cfg.y - tileHeight / 2;
     var tipTargetY = tileTop + tileHeight * 0.28;
@@ -678,7 +701,7 @@ function commongameintro() {
   var clueScale =
     clueLayout && typeof clueLayout.scale === "number"
       ? clueLayout.scale
-      : 1;
+      : introClueBaseScale;
   var clueY = introGetClueRowY(clueRowIndex);
   introArrowY = clueY - 46;
 
@@ -812,7 +835,8 @@ function choiceTween() {
     if (clueBg) {
       clueBg.visible = true;
       clueBg.alpha = 0;
-      clueBg.scaleX = clueBg.scaleY = clueBg.__baseScale || 1;
+      clueBg.scaleX = clueBg.scaleY =
+        clueBg.__baseScale != null ? clueBg.__baseScale : introClueBaseScale;
       createjs.Tween.get(clueBg, { override: true })
         .wait(Math.max(val - 320, 0))
         .to({ alpha: 0.95 }, 260, createjs.Ease.quadOut);
@@ -824,17 +848,22 @@ function choiceTween() {
       createjs.Tween.get(clueLetter, { override: true })
         .wait(Math.max(val - 320, 0))
         .to({ alpha: 0.95 }, 260, createjs.Ease.quadOut)
-        .call(function (idx) {
-          return function () {
-            styleIntroClueSlot(idx, false);
-          };
-        }(i));
+        .call(
+          (function (idx) {
+            return function () {
+              styleIntroClueSlot(idx, false);
+            };
+          })(i)
+        );
     }
 
     if (choiceBg) {
       choiceBg.visible = true;
       choiceBg.alpha = 0;
-      choiceBg.scaleX = choiceBg.scaleY = choiceBg.__baseScale || 1;
+      choiceBg.scaleX = choiceBg.scaleY =
+        choiceBg.__baseScale != null
+          ? choiceBg.__baseScale
+          : introChoiceBaseScale * 1.06;
       createjs.Tween.get(choiceBg, { override: true })
         .wait(val)
         .to({ alpha: 0.95 }, 320, createjs.Ease.quadOut);
@@ -843,7 +872,11 @@ function choiceTween() {
     if (choiceGlow) {
       choiceGlow.visible = true;
       choiceGlow.alpha = 0;
-      choiceGlow.scaleX = choiceGlow.scaleY = (choiceGlow.__baseScale || 1) * 1.05;
+      var glowBase =
+        choiceGlow.__baseScale != null
+          ? choiceGlow.__baseScale
+          : introChoiceBaseScale * 1.28;
+      choiceGlow.scaleX = choiceGlow.scaleY = glowBase * 1.05;
       createjs.Tween.get(choiceGlow, { override: true })
         .wait(val)
         .to({ alpha: 0.35 }, 320, createjs.Ease.quadOut);
@@ -1020,8 +1053,6 @@ function setFingureTween() {
     } else {
       fingerTween.call(handleComplete4_1);
     }
-  }
-  introSupportRowBgArr = [];
 
     highlightTweenArr[1] = fingerTween;
   }
