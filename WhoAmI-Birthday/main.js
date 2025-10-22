@@ -8,17 +8,23 @@ var choicePulseArr = [];
 var choiceDisabledOverlayArr = [];
 var choiceReadyBadgeArr = [];
 var choiceMcArr = [];
+var choicePanelBg = null;
 var textArr = [];
 var qno = [];
 var strArr = []
 var chpos = [];
 var getChar = [];
 var quesMcArr = []
+var cluePanelBg = null;
 var txtLabel;
 var clueMcArr = [];
 var clueArr = []
 var clueTxtArr = []
 var quesArr = [];
+var questionPanel = null;
+var questionPanelBg = null;
+var questionPanelHighlight = null;
+var questionImageHolder = null;
 var cnt = -1,qscnt=-1, ans, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
 var startBtn, introScrn, container, question, circleOutline, chHolderMC, choice2, choice3, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, btnImages, isCorrect = "";
@@ -43,6 +49,14 @@ var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
 var CLUE_ROW_Y = 490;
 var CHOICE_ROW_Y = 620;
+var QUESTION_PANEL_Y = 300;
+var CLUE_PANEL_HEIGHT = 168;
+var CHOICE_PANEL_HEIGHT = 188;
+var CLUE_PANEL_SIDE_PADDING = 72;
+var CHOICE_PANEL_SIDE_PADDING = 68;
+var QUESTION_PANEL_WIDTH = 440;
+var QUESTION_PANEL_HEIGHT = 292;
+var QUESTION_PANEL_BASE_SCALE = 0.98;
 
 var globalHelperScope =
   typeof globalThis !== "undefined"
@@ -187,6 +201,274 @@ var choiceInteractiveHelper =
     ? globalHelperScope.SA_setChoiceInteractiveState
     : null;
 
+function drawQuestionPanelBackground(targetShape, width, height) {
+  if (!targetShape) {
+    return;
+  }
+
+  width = width || QUESTION_PANEL_WIDTH;
+  height = height || QUESTION_PANEL_HEIGHT;
+
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+  var cornerRadius = 58;
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(6, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(248,244,255,0.55)", "rgba(143,120,255,0.65)"],
+    [0, 1],
+    -halfWidth,
+    -halfHeight,
+    halfWidth,
+    halfHeight
+  );
+  g.beginLinearGradientFill(
+    ["rgba(122,100,252,0.96)", "rgba(84,58,204,0.96)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.58)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -halfHeight + 12,
+    0,
+    -halfHeight + height * 0.55
+  );
+  g.drawRoundRect(
+    -halfWidth + 14,
+    -halfHeight + 12,
+    width - 28,
+    height * 0.58,
+    cornerRadius - 18
+  );
+
+  g.beginLinearGradientFill(
+    ["rgba(74,47,182,0.72)", "rgba(74,47,182,0)"],
+    [0, 1],
+    0,
+    0,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(
+    -halfWidth + 18,
+    -halfHeight + height * 0.42,
+    width - 36,
+    height * 0.46,
+    cornerRadius - 22
+  );
+}
+
+function drawCluePanelBackground(targetShape, width, height) {
+  if (!targetShape) {
+    return;
+  }
+
+  width = Math.max(320, width || 0);
+  height = height || CLUE_PANEL_HEIGHT;
+
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+  var cornerRadius = 54;
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(244,236,255,0.48)", "rgba(150,118,255,0.62)"],
+    [0, 1],
+    -halfWidth,
+    -halfHeight,
+    halfWidth,
+    halfHeight
+  );
+  g.beginLinearGradientFill(
+    ["rgba(112,88,238,0.88)", "rgba(74,53,186,0.9)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.34)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -halfHeight + 10,
+    0,
+    -halfHeight + height * 0.55
+  );
+  g.drawRoundRect(
+    -halfWidth + 12,
+    -halfHeight + 10,
+    width - 24,
+    height * 0.55,
+    cornerRadius - 18
+  );
+}
+
+function drawChoicePanelBackground(targetShape, width, height) {
+  if (!targetShape) {
+    return;
+  }
+
+  width = Math.max(300, width || 0);
+  height = height || CHOICE_PANEL_HEIGHT;
+
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+  var cornerRadius = 56;
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.setStrokeStyle(5, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(245,242,255,0.48)", "rgba(166,134,255,0.6)"],
+    [0, 1],
+    -halfWidth,
+    -halfHeight,
+    halfWidth,
+    halfHeight
+  );
+  g.beginLinearGradientFill(
+    ["rgba(102,74,236,0.88)", "rgba(66,40,182,0.92)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, cornerRadius);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.32)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -halfHeight + 12,
+    0,
+    -halfHeight + height * 0.5
+  );
+  g.drawRoundRect(
+    -halfWidth + 14,
+    -halfHeight + 12,
+    width - 28,
+    height * 0.5,
+    cornerRadius - 18
+  );
+}
+
+function drawChoiceGlow(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+
+  var g = targetShape.graphics;
+  g.clear();
+  g.beginRadialGradientFill(
+    ["rgba(214,186,255,0.62)", "rgba(214,186,255,0)"],
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    124
+  );
+  g.drawCircle(0, 0, 124);
+}
+
+function drawClueSlotPlaceholder(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+
+  var g = targetShape.graphics;
+  g.clear();
+
+  g.beginRadialGradientFill(
+    ["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    42
+  );
+  g.drawCircle(0, 0, 42);
+
+  g.beginLinearGradientStroke(
+    ["rgba(253,215,255,0.85)", "rgba(146,116,255,0.8)"],
+    [0, 1],
+    -26,
+    -18,
+    26,
+    18
+  );
+  g.setStrokeStyle(4, "round", "round");
+  g.drawRoundRect(-28, -16, 56, 32, 14);
+
+  g.beginRadialGradientFill(
+    ["rgba(255,226,150,0.85)", "rgba(238,112,193,0.85)", "rgba(238,112,193,0)"],
+    [0, 0.6, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    22
+  );
+  g.drawPolyStar(0, 0, 20, 6, 0.58, -90);
+}
+
+function updatePanelBackground(shape, centerX, width, height, drawFn) {
+  if (!shape || typeof drawFn !== "function") {
+    return;
+  }
+
+  drawFn(shape, width, height);
+  shape.x = centerX;
+}
+
+function startCluePlaceholderTwinkle(slot) {
+  if (!slot || !slot.placeholder) {
+    return;
+  }
+
+  var ph = slot.placeholder;
+  ph.visible = true;
+  ph.alpha = 0.72;
+  ph.scaleX = ph.scaleY = 1;
+  ph.rotation = 0;
+  createjs.Tween.removeTweens(ph);
+  createjs.Tween.get(ph, { loop: true })
+    .to({ alpha: 1, scaleX: 1.08, scaleY: 1.08, rotation: 6 }, 520, createjs.Ease.quadInOut)
+    .to({ alpha: 0.58, scaleX: 0.92, scaleY: 0.92, rotation: -5 }, 520, createjs.Ease.quadInOut);
+}
+
+function stopCluePlaceholderTwinkle(slot) {
+  if (!slot || !slot.placeholder) {
+    return;
+  }
+
+  var ph = slot.placeholder;
+  createjs.Tween.removeTweens(ph);
+  ph.visible = false;
+  ph.alpha = 0;
+  ph.scaleX = ph.scaleY = 1;
+  ph.rotation = 0;
+}
+
 function updateChoiceTileBackground(tile, colors) {
   if (!tile || !tile.bg || typeof drawChoiceTileBackground !== "function") {
     return;
@@ -195,27 +477,63 @@ function updateChoiceTileBackground(tile, colors) {
 }
 
 function setChoiceInteractiveState(index, enabled, options) {
-  var tile = choiceArr[index];
-  if (!tile) {
-    return;
-  }
-
-  tile.mouseEnabled = !!enabled;
-  tile.mouseChildren = false;
-  tile.cursor = enabled ? "pointer" : "default";
-
-  if (!options || !options.skipBackground) {
-    if (!enabled && CHOICE_TILE_DISABLED_COLORS_REF) {
-      updateChoiceTileBackground(tile, CHOICE_TILE_DISABLED_COLORS_REF);
-    } else {
-      updateChoiceTileBackground(tile, CHOICE_TILE_BASE_COLORS_REF);
-    }
-  }
+  options = options || {};
 
   if (choiceInteractiveHelper) {
     try {
       choiceInteractiveHelper(index, enabled, options);
+      return;
     } catch (_e) {}
+  }
+
+  var tile = choiceArr[index];
+  var bg = choiceBgArr[index];
+  var glow = choiceGlowArr[index];
+  var pulse = choicePulseArr[index];
+  var overlay = choiceDisabledOverlayArr[index];
+  var badge = choiceReadyBadgeArr[index];
+
+  if (!tile && !bg && !glow && !pulse) {
+    return;
+  }
+
+  if (tile) {
+    tile.mouseEnabled = !!enabled;
+    tile.mouseChildren = false;
+    tile.cursor = enabled ? "pointer" : "default";
+    tile.alpha = enabled ? 1 : options.keepVisible ? tile.alpha : 0.6;
+  }
+
+  if (!options.skipBackground && bg) {
+    if (!enabled && CHOICE_TILE_DISABLED_COLORS_REF) {
+      updateChoiceTileBackground(tile, CHOICE_TILE_DISABLED_COLORS_REF);
+      bg.alpha = 0.62;
+    } else {
+      updateChoiceTileBackground(tile, CHOICE_TILE_BASE_COLORS_REF);
+      bg.alpha = 0.95;
+    }
+  }
+
+  if (glow) {
+    glow.visible = enabled;
+    glow.alpha = enabled ? 0.42 : 0.18;
+  }
+
+  if (pulse) {
+    pulse.visible = enabled;
+    var pulseScale = pulse.__baseScale || (tile ? tile.__baseScale || tile.scaleX : 1);
+    pulse.alpha = enabled ? 0.72 : 0;
+    pulse.scaleX = pulse.scaleY = pulseScale;
+  }
+
+  if (overlay) {
+    overlay.visible = !enabled;
+    overlay.alpha = enabled ? 0 : 0.58;
+  }
+
+  if (badge) {
+    badge.visible = !!enabled && !options.suppressBadge;
+    badge.alpha = badge.visible ? 1 : 0;
   }
 }
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
@@ -356,13 +674,105 @@ function handleClick(e) {
 }
 
 function CreateGameElements() {
-    container.parent.addChild(QusTxtString);
+    var stageRef = container.parent || stage;
+    if (!stageRef) {
+        return;
+    }
+
+    stageRef.addChild(QusTxtString);
     QusTxtString.visible = false;
-    container.parent.addChild(question);
-    question.visible = false;
-    question.x = 580;
-    question.y = 235;
-    question.scaleX = question.scaleY = 0.8;
+
+    var centerX = canvas && !isNaN(canvas.width) ? canvas.width / 2 : 640;
+
+    if (!questionPanel) {
+        questionPanel = new createjs.Container();
+        questionPanel.visible = false;
+        questionPanel.alpha = 0;
+        questionPanel.mouseEnabled = false;
+        questionPanel.mouseChildren = false;
+
+        questionPanelBg = new createjs.Shape();
+        questionPanelBg.shadow = new createjs.Shadow("rgba(6,14,36,0.42)", 0, 18, 44);
+        questionPanel.addChild(questionPanelBg);
+
+        questionPanelHighlight = new createjs.Shape();
+        questionPanelHighlight.mouseEnabled = false;
+        questionPanelHighlight.mouseChildren = false;
+        questionPanelHighlight.alpha = 0.72;
+        questionPanelHighlight.graphics
+            .beginRadialGradientFill(
+                ["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"],
+                [0, 1],
+                0,
+                0,
+                0,
+                0,
+                0,
+                128
+            )
+            .drawCircle(0, 0, 128);
+        questionPanelHighlight.y = -QUESTION_PANEL_HEIGHT * 0.18;
+        questionPanel.addChild(questionPanelHighlight);
+
+        questionImageHolder = new createjs.Container();
+        questionImageHolder.mouseEnabled = false;
+        questionImageHolder.mouseChildren = false;
+        questionPanel.addChild(questionImageHolder);
+
+        stageRef.addChild(questionPanel);
+    }
+
+    drawQuestionPanelBackground(questionPanelBg, QUESTION_PANEL_WIDTH, QUESTION_PANEL_HEIGHT);
+    questionPanel.x = centerX;
+    questionPanel.y = QUESTION_PANEL_Y;
+    questionPanel.scaleX = questionPanel.scaleY = QUESTION_PANEL_BASE_SCALE;
+    questionPanel.visible = false;
+    questionPanel.alpha = 0;
+
+    if (questionPanelHighlight) {
+        questionPanelHighlight.alpha = 0.72;
+        questionPanelHighlight.scaleX = questionPanelHighlight.scaleY = 1;
+    }
+
+    if (question) {
+        question.regX = question.regY = 174;
+        question.x = 0;
+        question.y = 16;
+        question.scaleX = question.scaleY = 0.66;
+        question.alpha = 0;
+        question.visible = false;
+        if (question.parent !== questionImageHolder && questionImageHolder) {
+            if (question.parent) {
+                question.parent.removeChild(question);
+            }
+            questionImageHolder.addChild(question);
+        }
+    }
+
+    if (!cluePanelBg) {
+        cluePanelBg = new createjs.Shape();
+        cluePanelBg.visible = false;
+        cluePanelBg.alpha = 0;
+        cluePanelBg.mouseEnabled = false;
+        cluePanelBg.mouseChildren = false;
+        cluePanelBg.shadow = new createjs.Shadow("rgba(5,12,28,0.38)", 0, 16, 38);
+        stageRef.addChild(cluePanelBg);
+    }
+
+    if (!choicePanelBg) {
+        choicePanelBg = new createjs.Shape();
+        choicePanelBg.visible = false;
+        choicePanelBg.alpha = 0;
+        choicePanelBg.mouseEnabled = false;
+        choicePanelBg.mouseChildren = false;
+        choicePanelBg.shadow = new createjs.Shadow("rgba(5,12,28,0.38)", 0, 18, 42);
+        stageRef.addChild(choicePanelBg);
+    }
+
+    cluePanelBg.x = centerX;
+    cluePanelBg.y = CLUE_ROW_Y;
+    choicePanelBg.x = centerX;
+    choicePanelBg.y = CHOICE_ROW_Y;
 
     var choiceLayout = computeRowLayout(3, {
         baseSpacing: 186,
@@ -370,7 +780,7 @@ function CreateGameElements() {
         minScale: 0.68,
         maxSpan: 540,
         tileSpan: 148,
-        centerX: canvas && !isNaN(canvas.width) ? canvas.width / 2 : 640
+        centerX: centerX
     });
 
     for (i = 0; i < 3; i++) {
@@ -380,27 +790,66 @@ function CreateGameElements() {
             choiceArr[i].alpha = 0;
             choiceArr[i].mouseEnabled = false;
             choiceArr[i].mouseChildren = false;
-            choiceArr[i].shadow = new createjs.Shadow("rgba(0,0,0,0.25)", 0, 6, 12);
-            var choiceBg = new createjs.Shape();
-            choiceArr[i].addChild(choiceBg);
-            var choiceLabel = buildChoiceLetterDisplay();
-            choiceLabel.x = 0;
-            choiceLabel.y = 0;
-            choiceArr[i].addChild(choiceLabel);
-            choiceArr[i].bg = choiceBg;
-            choiceArr[i].label = choiceLabel;
+            choiceArr[i].shadow = new createjs.Shadow("rgba(9,18,36,0.35)", 0, 18, 36);
             choiceArr[i].__choiceIndex = i;
-            container.parent.addChild(choiceArr[i]);
+            choiceArr[i].__hitArea = new createjs.Shape();
+            choiceArr[i].hitArea = choiceArr[i].__hitArea;
+            stageRef.addChild(choiceArr[i]);
         }
 
-        choiceBgArr[i] = choiceArr[i].bg;
-        if (choiceBgArr[i]) {
-            choiceBgArr[i].__baseScale = choiceBgArr[i].__baseScale || 1;
+        if (!choiceGlowArr[i]) {
+            choiceGlowArr[i] = new createjs.Shape();
+            choiceGlowArr[i].mouseEnabled = false;
+            choiceGlowArr[i].mouseChildren = false;
+            choiceGlowArr[i].visible = false;
+            choiceGlowArr[i].alpha = 0;
+            drawChoiceGlow(choiceGlowArr[i]);
         }
-        choiceGlowArr[i] = choiceGlowArr[i] || null;
-        choicePulseArr[i] = choicePulseArr[i] || null;
-        choiceDisabledOverlayArr[i] = choiceDisabledOverlayArr[i] || null;
-        choiceReadyBadgeArr[i] = choiceReadyBadgeArr[i] || null;
+        if (choiceGlowArr[i].parent !== choiceArr[i]) {
+            choiceArr[i].addChild(choiceGlowArr[i]);
+        }
+
+        if (!choicePulseArr[i]) {
+            choicePulseArr[i] = new createjs.Shape();
+            choicePulseArr[i].mouseEnabled = false;
+            choicePulseArr[i].mouseChildren = false;
+            choicePulseArr[i].visible = false;
+            choicePulseArr[i].alpha = 0;
+            drawChoiceSpeechWave(choicePulseArr[i]);
+        }
+        if (choicePulseArr[i].parent !== choiceArr[i]) {
+            choiceArr[i].addChild(choicePulseArr[i]);
+        }
+
+        if (!choiceBgArr[i]) {
+            choiceBgArr[i] = new createjs.Shape();
+            choiceBgArr[i].shadow = new createjs.Shadow("rgba(9,18,36,0.38)", 0, 18, 36);
+        }
+        drawChoiceTileBackground(choiceBgArr[i]);
+        if (choiceBgArr[i].parent !== choiceArr[i]) {
+            choiceArr[i].addChild(choiceBgArr[i]);
+        }
+        choiceArr[i].bg = choiceBgArr[i];
+
+        if (!choiceDisabledOverlayArr[i]) {
+            choiceDisabledOverlayArr[i] = new createjs.Shape();
+            drawChoiceDisabledOverlay(choiceDisabledOverlayArr[i]);
+        }
+        if (choiceDisabledOverlayArr[i].parent !== choiceArr[i]) {
+            choiceArr[i].addChild(choiceDisabledOverlayArr[i]);
+        }
+
+        if (!choiceArr[i].label) {
+            choiceArr[i].label = buildChoiceLetterDisplay();
+            choiceArr[i].addChild(choiceArr[i].label);
+        }
+
+        if (!choiceReadyBadgeArr[i] && typeof SA_buildChoiceReadyBadge === "function") {
+            choiceReadyBadgeArr[i] = SA_buildChoiceReadyBadge();
+        }
+        if (choiceReadyBadgeArr[i] && choiceReadyBadgeArr[i].parent !== choiceArr[i]) {
+            choiceArr[i].addChild(choiceReadyBadgeArr[i]);
+        }
 
         choiceArr[i].x = choiceLayout.positions[i];
         choiceArr[i].y = CHOICE_ROW_Y;
@@ -412,11 +861,63 @@ function CreateGameElements() {
         choiceArr[i].name = "";
         choiceArr[i].rotation = 0;
         choiceArr[i].mouseChildren = false;
-        updateChoiceTileBackground(choiceArr[i]);
+
+        var tileScale = choiceLayout.scale;
+        if (choiceGlowArr[i]) {
+            choiceGlowArr[i].x = 0;
+            choiceGlowArr[i].y = 6 * tileScale;
+            choiceGlowArr[i].scaleX = choiceGlowArr[i].scaleY = tileScale * 1.34;
+            choiceGlowArr[i].__targetScale = choiceGlowArr[i].scaleX;
+            choiceGlowArr[i].alpha = 0;
+            choiceGlowArr[i].visible = false;
+        }
+
+        if (choicePulseArr[i]) {
+            choicePulseArr[i].x = 0;
+            choicePulseArr[i].y = 0;
+            choicePulseArr[i].scaleX = choicePulseArr[i].scaleY = tileScale;
+            choicePulseArr[i].__baseScale = tileScale;
+            choicePulseArr[i].alpha = 0;
+            choicePulseArr[i].visible = false;
+        }
+
+        if (choiceBgArr[i]) {
+            choiceBgArr[i].alpha = 0;
+            choiceBgArr[i].visible = false;
+            choiceBgArr[i].scaleX = choiceBgArr[i].scaleY = tileScale * 1.12;
+            choiceBgArr[i].__baseScale = tileScale * 1.12;
+        }
+
+        if (choiceDisabledOverlayArr[i]) {
+            choiceDisabledOverlayArr[i].alpha = 0;
+            choiceDisabledOverlayArr[i].visible = false;
+            choiceDisabledOverlayArr[i].scaleX = choiceDisabledOverlayArr[i].scaleY = tileScale * 1.12;
+        }
+
         if (choiceArr[i].label) {
             updateChoiceLetterDisplay(choiceArr[i].label, "");
             choiceArr[i].label.alpha = 0;
         }
+
+        if (choiceReadyBadgeArr[i]) {
+            var badge = choiceReadyBadgeArr[i];
+            var badgeOffset = (148 * tileScale) / 2 + 36;
+            badge.x = 0;
+            badge.y = -badgeOffset;
+            badge.alpha = 0;
+            badge.visible = false;
+            badge.__baseScale = badge.__baseScale || badge.scaleX || 1;
+            badge.scaleX = badge.scaleY = badge.__baseScale;
+        }
+
+        if (choiceArr[i].__hitArea) {
+            var hitSize = 172 * tileScale;
+            choiceArr[i].__hitArea.graphics
+                .clear()
+                .beginFill("#000")
+                .drawRoundRect(-hitSize / 2, -hitSize / 2, hitSize, hitSize, 52 * tileScale);
+        }
+
         choiceMcArr[i] = choiceArr[i];
         setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
     }
@@ -427,7 +928,7 @@ function CreateGameElements() {
         minScale: 0.82,
         maxSpan: 900,
         tileSpan: 108,
-        centerX: canvas && !isNaN(canvas.width) ? canvas.width / 2 : 640
+        centerX: centerX
     });
 
     for (i = 0; i < maxLetterCnt; i++) {
@@ -437,18 +938,45 @@ function CreateGameElements() {
             quesArr[i].alpha = 0;
             quesArr[i].mouseEnabled = false;
             quesArr[i].mouseChildren = false;
+
             var slotBg = new createjs.Shape();
             drawClueSlotBackground(slotBg);
             slotBg.shadow = new createjs.Shadow("rgba(6,14,30,0.45)", 0, 10, 28);
             quesArr[i].addChild(slotBg);
+
+            var slotPlaceholder = new createjs.Shape();
+            drawClueSlotPlaceholder(slotPlaceholder);
+            slotPlaceholder.x = 0;
+            slotPlaceholder.y = CLUE_LETTER_VERTICAL_OFFSET;
+            slotPlaceholder.visible = false;
+            slotPlaceholder.alpha = 0;
+            slotPlaceholder.mouseEnabled = false;
+            slotPlaceholder.mouseChildren = false;
+            quesArr[i].addChild(slotPlaceholder);
+
             var slotLabel = buildClueLetterDisplay();
             slotLabel.x = 0;
             slotLabel.y = CLUE_LETTER_VERTICAL_OFFSET;
             quesArr[i].addChild(slotLabel);
+
             quesArr[i].bg = slotBg;
+            quesArr[i].placeholder = slotPlaceholder;
             quesArr[i].label = slotLabel;
             quesArr[i].__baseScale = 1;
-            container.parent.addChild(quesArr[i]);
+            stageRef.addChild(quesArr[i]);
+        } else if (!quesArr[i].placeholder) {
+            quesArr[i].placeholder = new createjs.Shape();
+            drawClueSlotPlaceholder(quesArr[i].placeholder);
+            quesArr[i].placeholder.x = 0;
+            quesArr[i].placeholder.y = CLUE_LETTER_VERTICAL_OFFSET;
+            quesArr[i].placeholder.visible = false;
+            quesArr[i].placeholder.alpha = 0;
+            quesArr[i].placeholder.mouseEnabled = false;
+            quesArr[i].placeholder.mouseChildren = false;
+            quesArr[i].addChild(quesArr[i].placeholder);
+            if (quesArr[i].label) {
+                quesArr[i].addChild(quesArr[i].label);
+            }
         }
 
         quesArr[i].x = slotLayout.positions[i];
@@ -458,10 +986,18 @@ function CreateGameElements() {
         quesArr[i].visible = false;
         quesArr[i].alpha = 0;
         quesArr[i].rotation = 0;
+
         if (quesArr[i].bg) {
             drawClueSlotBackground(quesArr[i].bg);
             quesArr[i].bg.alpha = 1;
         }
+
+        if (quesArr[i].placeholder) {
+            stopCluePlaceholderTwinkle(quesArr[i]);
+            quesArr[i].placeholder.visible = false;
+            quesArr[i].placeholder.alpha = 0;
+        }
+
         if (quesArr[i].label) {
             updateClueLetterDisplay(quesArr[i].label, "");
             quesArr[i].label.alpha = 0;
@@ -578,12 +1114,51 @@ function pickques() {
             if (quesArr[i].bg) {
                 drawClueSlotBackground(quesArr[i].bg, isMissing ? CLUE_SLOT_HIGHLIGHT_COLORS : CLUE_SLOT_BASE_COLORS);
             }
+            if (quesArr[i].placeholder) {
+                if (isMissing) {
+                    quesArr[i].placeholder.visible = true;
+                    quesArr[i].placeholder.alpha = 0.82;
+                    startCluePlaceholderTwinkle(quesArr[i]);
+                } else {
+                    stopCluePlaceholderTwinkle(quesArr[i]);
+                    quesArr[i].placeholder.visible = false;
+                    quesArr[i].placeholder.alpha = 0;
+                }
+            }
             if (quesArr[i].label) {
                 updateClueLetterDisplay(quesArr[i].label, isMissing ? "" : questionLetters[i]);
                 quesArr[i].label.alpha = isMissing ? 0 : 1;
             }
         } else {
+            stopCluePlaceholderTwinkle(quesArr[i]);
             quesArr[i].visible = false;
+            if (quesArr[i].placeholder) {
+                quesArr[i].placeholder.visible = false;
+                quesArr[i].placeholder.alpha = 0;
+            }
+        }
+    }
+
+    if (cluePanelBg) {
+        if (cLen > 0 && slotLayout.positions.length >= cLen) {
+            var slotScale = slotLayout.scale;
+            var slotWidth = 108 * slotScale;
+            var slotLeft = slotLayout.positions[0] - slotWidth / 2;
+            var slotRight = slotLayout.positions[cLen - 1] + slotWidth / 2;
+            var slotCenter = (slotLeft + slotRight) / 2;
+            var slotPanelWidth = (slotRight - slotLeft) + CLUE_PANEL_SIDE_PADDING * 2;
+            updatePanelBackground(
+                cluePanelBg,
+                slotCenter,
+                slotPanelWidth,
+                CLUE_PANEL_HEIGHT,
+                drawCluePanelBackground
+            );
+            cluePanelBg.y = CLUE_ROW_Y;
+            cluePanelBg.visible = true;
+            cluePanelBg.alpha = 0;
+        } else {
+            cluePanelBg.visible = false;
         }
     }
 
@@ -616,6 +1191,25 @@ function pickques() {
         }
         setChoiceInteractiveState(i, false, { immediate: true, suppressBadge: true });
     }
+
+    if (choicePanelBg) {
+        var choiceScale = choiceLayout.scale;
+        var choiceWidth = 148 * choiceScale;
+        var choiceLeft = choiceLayout.positions[0] - choiceWidth / 2;
+        var choiceRight = choiceLayout.positions[Math.max(0, choiceLetters.length - 1)] + choiceWidth / 2;
+        var choiceCenter = (choiceLeft + choiceRight) / 2;
+        var choicePanelWidth = (choiceRight - choiceLeft) + CHOICE_PANEL_SIDE_PADDING * 2;
+        updatePanelBackground(
+            choicePanelBg,
+            choiceCenter,
+            choicePanelWidth,
+            CHOICE_PANEL_HEIGHT,
+            drawChoicePanelBackground
+        );
+        choicePanelBg.y = CHOICE_ROW_Y;
+        choicePanelBg.visible = true;
+        choicePanelBg.alpha = 0;
+    }
     createTween()
     createjs.Ticker.addEventListener("tick", tick);
     stage.update();
@@ -623,16 +1217,41 @@ function pickques() {
 function createTween() {
 
 
+    if (questionPanel) {
+        questionPanel.visible = true;
+        questionPanel.alpha = 0;
+        var panelBase = QUESTION_PANEL_BASE_SCALE;
+        questionPanel.scaleX = questionPanel.scaleY = panelBase * 0.86;
+        createjs.Tween.get(questionPanel, { override: true })
+            .wait(280)
+            .to({ alpha: 1, scaleX: panelBase * 1.02, scaleY: panelBase * 1.02 }, 360, createjs.Ease.backOut)
+            .to({ scaleX: panelBase, scaleY: panelBase }, 220, createjs.Ease.sineOut);
+    }
+
+    if (questionPanelHighlight) {
+        questionPanelHighlight.alpha = 0.72;
+        questionPanelHighlight.scaleX = questionPanelHighlight.scaleY = 1.1;
+        createjs.Tween.get(questionPanelHighlight, { override: true })
+            .wait(320)
+            .to({ alpha: 0.95, scaleX: 1, scaleY: 1 }, 420, createjs.Ease.quadOut)
+            .to({ alpha: 0.7 }, 320, createjs.Ease.quadInOut);
+    }
+
     if (question) {
         question.visible = true;
         question.alpha = 0;
-        question.regX = 50;
-        question.regY = 50;
-        question.scaleX = question.scaleY = 0.7;
+        question.scaleX = question.scaleY = 0.6;
         createjs.Tween.get(question, { override: true })
-            .wait(420)
-            .to({ alpha: 1, scaleX: 0.82, scaleY: 0.82 }, 320, createjs.Ease.quadOut)
-            .to({ scaleX: 0.8, scaleY: 0.8 }, 220, createjs.Ease.quadOut);
+            .wait(360)
+            .to({ alpha: 1, scaleX: 0.68, scaleY: 0.68 }, 320, createjs.Ease.quadOut)
+            .to({ scaleX: 0.66, scaleY: 0.66 }, 220, createjs.Ease.quadOut);
+    }
+
+    if (cluePanelBg && cluePanelBg.visible) {
+        cluePanelBg.alpha = 0;
+        createjs.Tween.get(cluePanelBg, { override: true })
+            .wait(460)
+            .to({ alpha: 1 }, 320, createjs.Ease.quadOut);
     }
 
     var time = 720;
@@ -650,6 +1269,16 @@ function createTween() {
         if (quesArr[i].label && i === missingIndex) {
             quesArr[i].label.alpha = 0;
         }
+        if (quesArr[i].placeholder && i === missingIndex) {
+            quesArr[i].placeholder.alpha = 0.82;
+        }
+    }
+
+    if (choicePanelBg && choicePanelBg.visible) {
+        choicePanelBg.alpha = 0;
+        createjs.Tween.get(choicePanelBg, { override: true })
+            .wait(1040)
+            .to({ alpha: 1 }, 320, createjs.Ease.quadOut);
     }
 
     var val = 1120;
@@ -742,9 +1371,27 @@ function disablechoices() {
         choiceArr[i].visible = false;
     }
     for (i = 0; i < cLen; i++) {
-        quesArr[i].visible = false
+        if (quesArr[i]) {
+            stopCluePlaceholderTwinkle(quesArr[i]);
+            if (quesArr[i].placeholder) {
+                quesArr[i].placeholder.visible = false;
+                quesArr[i].placeholder.alpha = 0;
+            }
+            quesArr[i].visible = false;
+        }
     }
-    question.visible = false
+    if (questionPanel) {
+        questionPanel.visible = false;
+    }
+    if (question) {
+        question.visible = false;
+    }
+    if (cluePanelBg) {
+        cluePanelBg.visible = false;
+    }
+    if (choicePanelBg) {
+        choicePanelBg.visible = false;
+    }
 }
 
 function answerSelected(e) {
@@ -770,6 +1417,11 @@ function answerSelected(e) {
       
         var revealSlot = missingIndex >= 0 ? quesArr[missingIndex] : null;
         if (revealSlot) {
+            stopCluePlaceholderTwinkle(revealSlot);
+            if (revealSlot.placeholder) {
+                revealSlot.placeholder.visible = false;
+                revealSlot.placeholder.alpha = 0;
+            }
             if (revealSlot.label) {
                 updateClueLetterDisplay(revealSlot.label, ans);
                 revealSlot.label.alpha = 1;
@@ -801,6 +1453,16 @@ function answerSelected(e) {
         var errorSlot = missingIndex >= 0 ? quesArr[missingIndex] : null;
         if (errorSlot && errorSlot.bg) {
             drawClueSlotBackground(errorSlot.bg, CLUE_SLOT_ERROR_COLORS_REF);
+        }
+        if (errorSlot && errorSlot.placeholder) {
+            createjs.Tween.removeTweens(errorSlot.placeholder);
+            errorSlot.placeholder.visible = true;
+            errorSlot.placeholder.alpha = 1;
+            errorSlot.placeholder.scaleX = errorSlot.placeholder.scaleY = 1;
+            errorSlot.placeholder.rotation = 0;
+            createjs.Tween.get(errorSlot.placeholder, { override: true })
+                .to({ scaleX: 1.12, scaleY: 1.12, rotation: 8 }, 160, createjs.Ease.quadOut)
+                .to({ scaleX: 1, scaleY: 1, rotation: 0 }, 260, createjs.Ease.quadOut);
         }
         getValidation("wrong");
         setTimeout(disablechoices, 320);
