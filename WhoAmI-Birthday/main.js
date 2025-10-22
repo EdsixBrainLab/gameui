@@ -75,6 +75,15 @@ var tqcnt = 0,
   crtime = 0,
   wrtime = 0;
 
+var isResp = true,
+  respDim = "both",
+  isScale = true,
+  scaleType = 1;
+
+var lastW,
+  lastH,
+  lastS = 1;
+
 var alphabetArr = [
   "A",
   "B",
