@@ -906,8 +906,6 @@ function handleComplete4_1() {
       updateIntroClueLetter(clueLetter, cluegotoArr[TempIntroVal]);
       styleIntroClueSlot(TempIntroVal, true);
     }
-    highlightTweenArr[1] = null;
-  }
 
     var usedChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
     if (usedChoiceIndex) {
@@ -990,7 +988,7 @@ function setArrowTween() {
       .to({ y: arrowUpY }, 250)
       .to({ y: arrowTipY }, 250)
       .wait(400)
-      .call(this.onComplete1);
+      .call(handleIntroArrowCycle);
   }
 }
 
@@ -1049,16 +1047,23 @@ function setFingureTween() {
       .wait(200);
 
     if (isFinalStep) {
-      fingerTween.call(this.onComplete2);
+      fingerTween.call(handleIntroFingerCycle);
     } else {
       fingerTween.call(handleComplete4_1);
     }
+    var isFinalStep = TempIntroVal === cluegotoArr.length - 1;
+    var fingerTween = createjs.Tween.get(introfingure)
+      .to({ x: fingerBaseX }, 300)
+      .to({ x: fingerPressX }, 300)
+      .to({ x: fingerBaseX }, 300)
+      .to({ x: fingerPressX }, 300)
+      .wait(200);
 
     highlightTweenArr[1] = fingerTween;
   }
 }
 
-this.onComplete1 = function () {
+function handleIntroArrowCycle() {
   createjs.Tween.removeTweens(introArrow);
   createjs.Tween.removeTweens(introfingure);
 
@@ -1077,9 +1082,9 @@ this.onComplete1 = function () {
   } else {
     setTimeout(setFingureTween, 200);
   }
-};
+}
 
-this.onComplete2 = function () {
+function handleIntroFingerCycle() {
   createjs.Tween.removeTweens(introArrow);
   createjs.Tween.removeTweens(introfingure);
 
@@ -1112,7 +1117,7 @@ this.onComplete2 = function () {
   } else {
     setTimeout(setCallDelay, 500);
   }
-};
+}
 
 function setCallDelay() {
   clearInterval(removeIntraval);
