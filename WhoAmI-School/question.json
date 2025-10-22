@@ -1,0 +1,91 @@
+﻿{"frames": {
+
+"Bird instance 10000":
+{
+	"frame": {"x":0,"y":0,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10001":
+{
+	"frame": {"x":362,"y":0,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10002":
+{
+	"frame": {"x":0,"y":361,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10003":
+{
+	"frame": {"x":362,"y":361,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10004":
+{
+	"frame": {"x":0,"y":722,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10005":
+{
+	"frame": {"x":362,"y":722,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10006":
+{
+	"frame": {"x":0,"y":1083,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10007":
+{
+	"frame": {"x":362,"y":1083,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10008":
+{
+	"frame": {"x":0,"y":1444,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+},
+"Bird instance 10009":
+{
+	"frame": {"x":362,"y":1444,"w":362,"h":361},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":362,"h":361},
+	"sourceSize": {"w":362,"h":361}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "question.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":2048},
+	"scale": "1"
+}
+}
