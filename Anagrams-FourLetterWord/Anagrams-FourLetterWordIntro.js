@@ -829,6 +829,8 @@ function choiceTween() {
     if (!choiceLetter) {
       continue;
     }
+    highlightTweenArr[0] = null;
+  }
 
     if (clueBg) {
       clueBg.visible = true;
@@ -904,6 +906,8 @@ function handleComplete4_1() {
       updateIntroClueLetter(clueLetter, cluegotoArr[TempIntroVal]);
       styleIntroClueSlot(TempIntroVal, true);
     }
+    highlightTweenArr[1] = null;
+  }
 
     var usedChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
     if (usedChoiceIndex) {
