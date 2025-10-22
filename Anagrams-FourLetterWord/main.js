@@ -160,8 +160,11 @@ var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
 
 var CHOICE_ROW_Y = 620;
 var CHOICE_ROW_ENTRY_OFFSET = 42;
-var CLUE_ROW_Y = 380;
-var CLUE_ROW_SPACING = 94;
+var CLUE_TOP_ROW_Y = 380;
+var CLUE_BOTTOM_ROW_Y = 500;
+var CLUE_SIDE_OFFSET_RATIO = 0.28;
+var CLUE_SIDE_OFFSET_MAX = 340;
+var CLUE_SIDE_MIN_CENTER = 220;
 
 var globalHelperScope =
   typeof globalThis !== "undefined"
@@ -515,7 +518,7 @@ function CreateGameElements() {
     updateClueLetterDisplay(clueArr[i], "");
     clueArr[i].visible = false;
     clueArr[i].x = 0;
-    clueArr[i].y = CLUE_ROW_Y + CLUE_LETTER_VERTICAL_OFFSET;
+    clueArr[i].y = CLUE_TOP_ROW_Y + CLUE_LETTER_VERTICAL_OFFSET;
   }
 
   for (i = 0; i < maxLetterCnt; i++) {
@@ -824,7 +827,44 @@ function enablechoices() {
     clueRowOptions.centerX = clueRowCenter;
   }
 
-  var clueRowLayout = computeRowLayout(WORD_LENGTH, clueRowOptions);
+  var canvasWidth = canvas && !isNaN(canvas.width) ? canvas.width : 1280;
+  var baseCenterX =
+    clueRowCenter != null
+      ? clueRowCenter
+      : typeof clueRowOptions.centerX === "number"
+      ? clueRowOptions.centerX
+      : canvasWidth / 2;
+  var rawSideOffset = canvasWidth * CLUE_SIDE_OFFSET_RATIO;
+  var computedSideOffset = Math.min(
+    CLUE_SIDE_OFFSET_MAX,
+    Math.max(rawSideOffset, 240)
+  );
+  var minCenterMargin = Math.min(CLUE_SIDE_MIN_CENTER, canvasWidth / 2);
+  var leftCenter = Math.max(minCenterMargin, baseCenterX - computedSideOffset);
+  var rightCenter = Math.min(
+    canvasWidth - minCenterMargin,
+    baseCenterX + computedSideOffset
+  );
+  var clueRowCenters = [baseCenterX, leftCenter, rightCenter];
+  var clueRowYPositions = [
+    CLUE_TOP_ROW_Y,
+    CLUE_BOTTOM_ROW_Y,
+    CLUE_BOTTOM_ROW_Y
+  ];
+  var clueRowLayouts = [];
+  var fallbackSpacing = clueRowOptions.baseSpacing || 134;
+
+  for (var rowIndex = 0; rowIndex < WORDS_PER_ROUND; rowIndex++) {
+    var rowOptions = {
+      baseSpacing: clueRowOptions.baseSpacing,
+      baseScale: clueRowOptions.baseScale,
+      minScale: clueRowOptions.minScale,
+      maxSpan: Math.max(clueRowOptions.maxSpan, canvasWidth * 0.72),
+      tileSpan: clueRowOptions.tileSpan,
+      centerX: clueRowCenters[rowIndex]
+    };
+    clueRowLayouts[rowIndex] = computeRowLayout(WORD_LENGTH, rowOptions);
+  }
 
   for (i = 0; i < cLen; i++) {
     var tileScale = choiceLayout.scale;
@@ -918,11 +958,23 @@ function enablechoices() {
   }
 
   for (var row = 0; row < WORDS_PER_ROUND; row++) {
+    var rowLayout = clueRowLayouts[row] || clueRowLayouts[0];
+    var rowPositions = rowLayout && rowLayout.positions ? rowLayout.positions : [];
+    var slotScale =
+      rowLayout && typeof rowLayout.scale === "number" ? rowLayout.scale : 1;
+    var slotY =
+      clueRowYPositions[row] != null
+        ? clueRowYPositions[row]
+        : CLUE_BOTTOM_ROW_Y;
+    var fallbackStartX =
+      baseCenterX - ((WORD_LENGTH - 1) * fallbackSpacing) / 2;
+
     for (var col = 0; col < WORD_LENGTH; col++) {
       var slotIndex = row * WORD_LENGTH + col;
-      var slotScale = clueRowLayout.scale;
-      var slotX = clueRowLayout.positions[col] || 0;
-      var slotY = CLUE_ROW_Y + row * CLUE_ROW_SPACING;
+      var slotX =
+        rowPositions.length > col
+          ? rowPositions[col]
+          : fallbackStartX + col * fallbackSpacing;
 
       if (clueArr[slotIndex]) {
         clueArr[slotIndex].visible = true;

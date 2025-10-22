@@ -37,16 +37,25 @@ var introChoiceDefaultX = [
   introChoice3X,
   introChoice4X
 ];
-var introCluBaseX = [
+var introCluFallbackX = [
   null,
   460,
   580,
   700,
   820
 ];
-var introCluBaseY = 380;
-var introClueRowSpacing = 94;
-var introArrowY = introCluBaseY - 46;
+var INTRO_WORD_LENGTH = 4;
+var introClueTopRowY = 380;
+var introClueBottomRowY = 500;
+var introClueRowYPositions = [
+  introClueTopRowY,
+  introClueBottomRowY,
+  introClueBottomRowY
+];
+var introClueSideOffsetRatio = 0.28;
+var introClueSideOffsetMax = 340;
+var introClueMinCenterMargin = 220;
+var introArrowY = introClueTopRowY - 46;
 var introfingureX = introChoice2X;
 var introfingureY = introChoice2Y + 32;
 var ArrowXArr = [null];
@@ -58,6 +67,7 @@ var introClueBgArr = [];
 var introChoiceBgArr = [];
 var introChoiceGlowArr = [];
 var introSupportRowBgArr = [];
+var introClueLayouts = [];
 var introChoiceRevealOrder = [null];
 var introCurrentDemoIndex = 0;
 var introDemoWords = [
@@ -87,6 +97,127 @@ var highlightChoiceHelper = getIntroHelper("SAUI_highlightChoiceTile");
 var markChoiceUsedHelper = getIntroHelper("SAUI_markChoiceTileUsed");
 var styleClueSlotHelper = getIntroHelper("SAUI_styleClueSlot");
 var highlightClueSlotHelper = getIntroHelper("SAUI_highlightClueSlot");
+
+function introResolveCanvasWidth() {
+  if (typeof canvas !== "undefined" && canvas && !isNaN(canvas.width)) {
+    return canvas.width;
+  }
+  if (
+    introGlobalScope &&
+    introGlobalScope.canvas &&
+    !isNaN(introGlobalScope.canvas.width)
+  ) {
+    return introGlobalScope.canvas.width;
+  }
+  return 1280;
+}
+
+function introGetBaseCenterX() {
+  if (typeof introQuestxtX === "number") {
+    return introQuestxtX;
+  }
+  return introResolveCanvasWidth() / 2;
+}
+
+function introComputeRowCenter(rowIndex) {
+  var width = introResolveCanvasWidth();
+  var baseCenter = introGetBaseCenterX();
+  var rawOffset = width * introClueSideOffsetRatio;
+  var computedOffset = Math.min(
+    introClueSideOffsetMax,
+    Math.max(rawOffset, 240)
+  );
+  var minCenter = Math.min(introClueMinCenterMargin, width / 2);
+
+  if (rowIndex === 1) {
+    return Math.max(minCenter, baseCenter - computedOffset);
+  }
+  if (rowIndex === 2) {
+    return Math.min(width - minCenter, baseCenter + computedOffset);
+  }
+  return baseCenter;
+}
+
+function introFallbackComputeRow(count, options) {
+  options = options || {};
+  var width = introResolveCanvasWidth();
+  var centerX =
+    typeof options.centerX === "number" ? options.centerX : width / 2;
+  var baseSpacing =
+    options.baseSpacing != null ? options.baseSpacing : 134;
+  var baseScale = options.baseScale != null ? options.baseScale : 1;
+  var minScale = options.minScale != null ? options.minScale : 0.8;
+  var maxSpan =
+    options.maxSpan != null ? options.maxSpan : Math.max(720, width * 0.72);
+  var tileSpan = options.tileSpan != null ? options.tileSpan : baseSpacing;
+
+  if (count <= 0) {
+    return {
+      positions: [],
+      scale: baseScale,
+      spacing: baseSpacing
+    };
+  }
+
+  var totalSpan = (count - 1) * baseSpacing + tileSpan;
+  var spanRatio = totalSpan > maxSpan && totalSpan > 0 ? maxSpan / totalSpan : 1;
+  var scale = Math.max(minScale, baseScale * spanRatio);
+  var spacing = baseSpacing * spanRatio;
+  var startX = centerX - ((count - 1) * spacing) / 2;
+  var positions = [];
+
+  for (var i = 0; i < count; i++) {
+    positions.push(startX + i * spacing);
+  }
+
+  return {
+    positions: positions,
+    scale: scale,
+    spacing: spacing
+  };
+}
+
+function introComputeClueRowLayout(rowIndex) {
+  if (introClueLayouts[rowIndex]) {
+    return introClueLayouts[rowIndex];
+  }
+
+  var width = introResolveCanvasWidth();
+  var layoutOptions = {
+    centerX: introComputeRowCenter(rowIndex),
+    baseSpacing: 134,
+    baseScale: 1,
+    minScale: 0.82,
+    maxSpan: Math.max(720, width * 0.72),
+    tileSpan: 108
+  };
+
+  var layout =
+    typeof computeIntroRow === "function"
+      ? computeIntroRow(INTRO_WORD_LENGTH, layoutOptions)
+      : null;
+
+  if (
+    !layout ||
+    !layout.positions ||
+    layout.positions.length !== INTRO_WORD_LENGTH
+  ) {
+    layout = introFallbackComputeRow(INTRO_WORD_LENGTH, layoutOptions);
+  }
+
+  introClueLayouts[rowIndex] = layout;
+  return layout;
+}
+
+function introGetClueRowY(rowIndex) {
+  if (
+    introClueRowYPositions &&
+    typeof introClueRowYPositions[rowIndex] === "number"
+  ) {
+    return introClueRowYPositions[rowIndex];
+  }
+  return rowIndex === 0 ? introClueTopRowY : introClueBottomRowY;
+}
 
 var configureIntroArrowSprite =
   getIntroHelper("SAUI_configureIntroArrowSprite") ||
@@ -356,20 +487,17 @@ function ensureSupportRowBackground(rowIndex) {
   }
 
   var rowBg = new createjs.Shape();
-  var rowY = introCluBaseY + rowIndex * introClueRowSpacing;
-  var layout = computeIntroRow
-    ? computeIntroRow(4, {
-        centerX: introQuestxtX,
-        baseSpacing: 134,
-        maxSpan: 760
-      })
-    : { positions: introCluBaseX.slice(1) };
-  var leftX = layout.positions && layout.positions.length
-    ? layout.positions[0]
-    : introCluBaseX[1];
-  var rightX = layout.positions && layout.positions.length
-    ? layout.positions[layout.positions.length - 1]
-    : introCluBaseX[4];
+  var rowY = introGetClueRowY(rowIndex);
+  var layout = introComputeClueRowLayout(rowIndex);
+  var positions =
+    layout && layout.positions && layout.positions.length === INTRO_WORD_LENGTH
+      ? layout.positions
+      : introCluFallbackX.slice(1);
+  var leftX = positions[0] != null ? positions[0] : introCluFallbackX[1];
+  var rightX =
+    positions[positions.length - 1] != null
+      ? positions[positions.length - 1]
+      : introCluFallbackX[4];
   var width = Math.max(320, rightX - leftX + 188);
   var height = 128;
   rowBg.graphics
@@ -401,7 +529,9 @@ function commongameintro() {
   FingXArr = [null];
   FingYArr = [null];
   introChoiceRevealOrder = [null];
+  introClueLayouts = [];
   TempIntroVal = 0;
+  introArrowY = introClueTopRowY - 46;
 
   var demoConfig =
     introDemoWords[introCurrentDemoIndex] || introDemoWords[0] || {
@@ -538,13 +668,24 @@ function commongameintro() {
   }
 
   var clueRowIndex = typeof demoConfig.row === "number" ? demoConfig.row : 0;
-  var clueY = introCluBaseY + clueRowIndex * introClueRowSpacing;
+  var clueLayout = introComputeClueRowLayout(clueRowIndex);
+  var cluePositions =
+    clueLayout &&
+    clueLayout.positions &&
+    clueLayout.positions.length === INTRO_WORD_LENGTH
+      ? clueLayout.positions
+      : introCluFallbackX.slice(1);
+  var clueScale =
+    clueLayout && typeof clueLayout.scale === "number"
+      ? clueLayout.scale
+      : 1;
+  var clueY = introGetClueRowY(clueRowIndex);
   introArrowY = clueY - 46;
 
   for (var supportIndex = 0; supportIndex < introDemoWords.length; supportIndex++) {
     var supportBg = ensureSupportRowBackground(supportIndex);
     if (supportBg) {
-      supportBg.y = introCluBaseY + supportIndex * introClueRowSpacing;
+      supportBg.y = introGetClueRowY(supportIndex);
       supportBg.visible = true;
       supportBg.alpha = supportIndex === clueRowIndex ? 0.55 : 0.25;
     }
@@ -557,41 +698,24 @@ function commongameintro() {
     { index: 4 }
   ];
 
-  var resolvedClueX = [null];
-  if (typeof computeIntroRow === "function") {
-    var clueLayout = computeIntroRow(clueConfigs.length, {
-      centerX: introQuestxtX,
-      baseSpacing: 134,
-      maxSpan: 720
-    });
-    if (
-      clueLayout &&
-      clueLayout.positions &&
-      clueLayout.positions.length === clueConfigs.length
-    ) {
-      resolvedClueX = [null];
-      for (var q = 0; q < clueLayout.positions.length; q++) {
-        resolvedClueX.push(clueLayout.positions[q]);
-      }
-    }
-  }
-  if (resolvedClueX.length < 5) {
-    resolvedClueX = [null].concat(introCluBaseX.slice(1));
-  }
-
   introClueArr.push("");
   for (var k = 0; k < clueConfigs.length; k++) {
     var clueCfg = clueConfigs[k];
-    clueCfg.x = resolvedClueX[clueCfg.index] != null ? resolvedClueX[clueCfg.index] : introCluBaseX[clueCfg.index];
+    var resolvedX =
+      cluePositions.length > k && cluePositions[k] != null
+        ? cluePositions[k]
+        : introCluFallbackX[clueCfg.index];
+    clueCfg.x = resolvedX;
     clueCfg.y = clueY;
 
     var clueBg = new createjs.Shape();
     drawClueSlotBackground(clueBg);
     clueBg.x = clueCfg.x;
     clueBg.y = clueCfg.y;
+    clueBg.scaleX = clueBg.scaleY = clueScale;
     clueBg.visible = false;
     clueBg.alpha = 0;
-    clueBg.__baseScale = 1;
+    clueBg.__baseScale = clueScale;
     clueBg.shadow = new createjs.Shadow("rgba(8,14,30,0.42)", 0, 10, 24);
     clueBg.mouseEnabled = false;
     clueBg.mouseChildren = false;
@@ -604,15 +728,15 @@ function commongameintro() {
     }
     clueLetter.x = clueCfg.x;
     clueLetter.y = clueCfg.y;
-    clueLetter.scaleX = clueLetter.scaleY = 1;
+    clueLetter.scaleX = clueLetter.scaleY = clueScale;
     clueLetter.__baseX = clueCfg.x;
     clueLetter.__baseY = clueCfg.y;
+    clueLetter.__baseScale = clueScale;
     clueLetter.visible = false;
     updateIntroClueLetter(clueLetter, "");
     container.parent.addChild(clueLetter);
     introClueArr.push(clueLetter);
 
-    var clueScale = clueBg.__baseScale || 1;
     var slotHeight = 112 * clueScale;
     var clueTop = clueCfg.y - slotHeight / 2;
     var tipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
@@ -682,6 +806,8 @@ function choiceTween() {
     if (!choiceLetter) {
       continue;
     }
+    highlightTweenArr[0] = null;
+  }
 
     if (clueBg) {
       clueBg.visible = true;
@@ -747,6 +873,8 @@ function handleComplete4_1() {
       updateIntroClueLetter(clueLetter, cluegotoArr[TempIntroVal]);
       styleIntroClueSlot(TempIntroVal, true);
     }
+    highlightTweenArr[1] = null;
+  }
 
     var usedChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
     if (usedChoiceIndex) {
@@ -806,7 +934,7 @@ function setArrowTween() {
     var arrowTargetX =
       typeof ArrowXArr[TempIntroVal] === "number"
         ? ArrowXArr[TempIntroVal]
-        : introCluBaseX[1];
+        : introGetBaseCenterX();
     var defaultTipGap = introArrow && introArrow.__tipGap ? introArrow.__tipGap : 22;
     var fallbackTipY = introArrowY - (56 + defaultTipGap);
     var arrowTipY =
@@ -892,6 +1020,8 @@ function setFingureTween() {
     } else {
       fingerTween.call(handleComplete4_1);
     }
+  }
+  introSupportRowBgArr = [];
 
     highlightTweenArr[1] = fingerTween;
   }
