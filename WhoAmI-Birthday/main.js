@@ -2,6 +2,11 @@ var messageField;		//Message display field
 
 var assets = [];
 var choiceArr = [];
+var choiceBgArr = [];
+var choiceGlowArr = [];
+var choicePulseArr = [];
+var choiceDisabledOverlayArr = [];
+var choiceReadyBadgeArr = [];
 var choiceMcArr = [];
 var textArr = [];
 var qno = [];
@@ -387,6 +392,15 @@ function CreateGameElements() {
             choiceArr[i].__choiceIndex = i;
             container.parent.addChild(choiceArr[i]);
         }
+
+        choiceBgArr[i] = choiceArr[i].bg;
+        if (choiceBgArr[i]) {
+            choiceBgArr[i].__baseScale = choiceBgArr[i].__baseScale || 1;
+        }
+        choiceGlowArr[i] = choiceGlowArr[i] || null;
+        choicePulseArr[i] = choicePulseArr[i] || null;
+        choiceDisabledOverlayArr[i] = choiceDisabledOverlayArr[i] || null;
+        choiceReadyBadgeArr[i] = choiceReadyBadgeArr[i] || null;
 
         choiceArr[i].x = choiceLayout.positions[i];
         choiceArr[i].y = CHOICE_ROW_Y;
