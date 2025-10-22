@@ -848,13 +848,7 @@ function choiceTween() {
       createjs.Tween.get(clueLetter, { override: true })
         .wait(Math.max(val - 320, 0))
         .to({ alpha: 0.95 }, 260, createjs.Ease.quadOut)
-        .call(
-          (function (idx) {
-            return function () {
-              styleIntroClueSlot(idx, false);
-            };
-          })(i)
-        );
+        .call(handleIntroClueReveal, [i]);
     }
 
     if (choiceBg) {
@@ -896,6 +890,13 @@ function choiceTween() {
     val += 220;
   }
   TempIntroVal = 0;
+}
+
+function handleIntroClueReveal(index) {
+  if (!index) {
+    return;
+  }
+  styleIntroClueSlot(index, false);
 }
 
 function handleComplete4_1() {
@@ -941,6 +942,50 @@ function setArrowTween() {
         highlightIntroChoiceTile(prevChoiceIndex, false);
       }
     }
+  }
+  createjs.Tween.removeTweens(introArrow);
+  createjs.Tween.removeTweens(introfingure);
+  setArrowTween();
+}
+
+function setArrowTween() {
+  TempIntroVal++;
+
+  if (stopValue == 0) {
+    removeGameIntro();
+  } else {
+    if (TempIntroVal >= cluegotoArr.length) {
+      removeGameIntro();
+      return;
+    }
+
+    var targetChoiceIndex = introChoiceIndexFromStep(TempIntroVal);
+    var targetChoice =
+      targetChoiceIndex
+        ? introGlobalScope && introGlobalScope["introChoice" + targetChoiceIndex]
+        : null;
+
+    if (TempIntroVal > 1) {
+      var prevChoiceIndex = introChoiceIndexFromStep(TempIntroVal - 1);
+      if (prevChoiceIndex) {
+        highlightIntroChoiceTile(prevChoiceIndex, false);
+      }
+    }
+
+    if (targetChoiceIndex && targetChoice && targetChoice.alpha >= 0.9) {
+      highlightIntroChoiceTile(targetChoiceIndex, true);
+    }
+
+    var pendingClue = introClueArr[TempIntroVal];
+    if (pendingClue && (!pendingClue.text || pendingClue.text === "")) {
+      highlightIntroClueTarget(TempIntroVal);
+    }
+
+    container.parent.addChild(introArrow);
+    container.parent.setChildIndex(
+      introArrow,
+      container.parent.numChildren - 1
+    );
 
     if (targetChoiceIndex && targetChoice && targetChoice.alpha >= 0.9) {
       highlightIntroChoiceTile(targetChoiceIndex, true);
@@ -1058,6 +1103,10 @@ function setFingureTween() {
       .to({ x: fingerBaseX }, 300)
       .to({ x: fingerPressX }, 300)
       .wait(200);
+
+    highlightTweenArr[1] = fingerTween;
+  }
+}
 
     highlightTweenArr[1] = fingerTween;
   }
