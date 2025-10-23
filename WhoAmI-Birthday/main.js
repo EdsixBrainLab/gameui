@@ -210,6 +210,9 @@ function CreateGameElements() {
         layoutRoot.addChild(choiceArr[i]);
         choiceArr[i].x = 0;
         choiceArr[i].y = CHOICE_ROW_Y;
+        bindBirthdayChoiceTile(choiceArr[i]);
+        choiceArr[i].mouseEnabled = false;
+        choiceArr[i].cursor = "default";
     }
 
     for (i = 0; i < 10; i++) {
@@ -234,7 +237,7 @@ function CreateGameElements() {
 }
 
 function helpDisable() {
-    for (i = 0; i < cLen; i++) {
+    for (i = 0; i < choiceArr.length; i++) {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = false;
         }
@@ -242,7 +245,7 @@ function helpDisable() {
 }
 
 function helpEnable() {
-    for (i = 0; i < cLen; i++) {
+    for (i = 0; i < choiceArr.length; i++) {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = true;
         }
@@ -544,15 +547,15 @@ function AddListenerFn() {
         repTimeClearInterval = 0;
     }
 
-    for (i = 0; i < 3; i++) {
-        choiceArr[i].visible = true
-        choiceArr[i].id = i
+    for (i = 0; i < choiceArr.length; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
+        choiceArr[i].visible = true;
+        choiceArr[i].id = i;
         choiceArr[i].mouseEnabled = true;
         choiceArr[i].alpha = 1;
-        choiceArr[i].mouseEnabled = true;
         choiceArr[i].cursor = "pointer";
-        choiceArr[i].addEventListener("click", answerSelected);
-try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
     }
 
     rst = 0;
@@ -562,12 +565,11 @@ try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
 
 //===============================================//
 function disablechoices() {
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) {
             continue;
         }
         stopBirthdayChoicePulse(choiceArr[i]);
-        choiceArr[i].removeEventListener("click", answerSelected)
         choiceArr[i].cursor = "default";
         choiceArr[i].mouseEnabled = false;
         choiceArr[i].visible = false;
@@ -598,9 +600,6 @@ function answerSelected(e) {
 
         styleBirthdayQuestionTile(quesArr[blankIndex], ans, false);
                 try { ChoiceFX_revealPop(quesArr[blankIndex], "pop"); } catch(_e){}
-        for (i = 0; i < 3; i++) {
-            choiceArr[i].removeEventListener("click", answerSelected)
-        }
         setTimeout(correct, 500)
     }
     else {
@@ -616,12 +615,13 @@ function correct() {
 
 
 function disableMouse() {
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) {
             continue;
         }
         stopBirthdayChoicePulse(choiceArr[i]);
         choiceArr[i].mouseEnabled = false;
+        choiceArr[i].cursor = "default";
     }
 }
 
@@ -699,6 +699,33 @@ function createBirthdayChoiceTile() {
         color: "#7a3600",
         textOffsetY: 3
     });
+}
+
+function bindBirthdayChoiceTile(tile) {
+    if (!tile || tile.__birthdayChoiceBound) {
+        return;
+    }
+
+    tile.__birthdayChoiceBound = true;
+    tile.mouseChildren = false;
+    tile.cursor = "pointer";
+    tile.addEventListener("click", answerSelected);
+
+    if (typeof ChoiceFX_bindHover === "function") {
+        try {
+            ChoiceFX_bindHover([tile]);
+        } catch (_e) { }
+    } else if (!tile.hitArea) {
+        var hitWidth = toFiniteNumber(tile.tileWidth, 140);
+        var hitHeight = toFiniteNumber(tile.tileHeight, 140);
+        var hitRadius = toFiniteNumber(tile.tileRadius, 36);
+        var hit = new createjs.Shape();
+        hit.graphics.beginFill("#000").drawRoundRect(-hitWidth / 2, -hitHeight / 2, hitWidth, hitHeight, hitRadius);
+        tile.hitArea = hit;
+    }
+
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
 }
 
 function styleBirthdayQuestionTile(tile, letter, isBlank) {
@@ -779,6 +806,9 @@ function resetBirthdayChoiceTile(tile) {
         tile.scaleX = tile.scaleY = baseScale;
         tile.alpha = 1;
         tile.y = CHOICE_ROW_Y;
+        tile.visible = false;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
     }
 }
 
