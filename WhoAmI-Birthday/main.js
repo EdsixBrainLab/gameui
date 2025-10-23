@@ -14,6 +14,9 @@ var clueMcArr = [];
 var clueRevealTweenArr = [];
 var questionImageHolder = null;
 var questionImageShadow = null;
+var questionImageBackdrop = null;
+var questionImageFrame = null;
+var questionImageContent = null;
 
 var cnt = -1,
   ans,
@@ -132,6 +135,59 @@ var choicePool = [];
 var answerLetters = [];
 var missingIndex = -1;
 var questionLetters = [];
+
+var BIRTHDAY_CHOICE_BASE_COLORS = [
+  "rgba(255,196,223,0.98)",
+  "rgba(255,132,188,0.98)"
+];
+var BIRTHDAY_CHOICE_HOVER_COLORS = [
+  "rgba(255,218,236,0.98)",
+  "rgba(255,164,210,0.98)"
+];
+var BIRTHDAY_CHOICE_CORRECT_COLORS = [
+  "rgba(168,236,208,0.98)",
+  "rgba(88,196,168,0.98)"
+];
+var BIRTHDAY_CHOICE_WRONG_COLORS = [
+  "rgba(255,182,194,0.98)",
+  "rgba(220,94,128,0.98)"
+];
+var BIRTHDAY_CHOICE_DISABLED_COLORS = [
+  "rgba(255,194,224,0.72)",
+  "rgba(228,132,190,0.72)"
+];
+
+var BIRTHDAY_CLUE_BASE_COLORS = [
+  "rgba(255,214,164,0.96)",
+  "rgba(255,166,122,0.96)"
+];
+var BIRTHDAY_CLUE_HIGHLIGHT_COLORS = [
+  "rgba(255,236,204,0.96)",
+  "rgba(255,190,150,0.96)"
+];
+var BIRTHDAY_CLUE_SUCCESS_COLORS = [
+  "rgba(172,236,210,0.96)",
+  "rgba(104,196,168,0.96)"
+];
+var BIRTHDAY_CLUE_ERROR_COLORS = [
+  "rgba(255,182,182,0.96)",
+  "rgba(220,104,134,0.96)"
+];
+
+var birthdayThemeApplied = false;
+var birthdayOriginalPalette = null;
+var birthdayOriginalFunctions = {};
+var birthdayCardDecor = null;
+var birthdayCardGlow = null;
+var birthdayCardStreamers = [];
+
+var progressBadgeContainer = null;
+var progressBadgeBackground = null;
+var progressBadgeIcon = null;
+var progressBadgeLabel = null;
+
+var confettiContainer = null;
+var confettiPool = [];
 
 var CHOICE_LETTER_FONT = "800 66px 'Baloo 2'";
 var CLUE_LETTER_FONT = "800 60px 'Baloo 2'";
@@ -375,6 +431,568 @@ function releasePlaceholderShape(shape) {
   placeholderShapePool.push(shape);
 }
 
+function applyBirthdayTheme() {
+  if (birthdayThemeApplied) {
+    drawBirthdayQuestionCardBackground();
+    ensureBirthdayCardDecor();
+    ensureProgressBadge();
+    drawQuestionImageBackdrop();
+    drawQuestionImageFrame();
+    ensureConfettiContainer();
+    return;
+  }
+
+  birthdayThemeApplied = true;
+
+  if (!birthdayOriginalPalette) {
+    birthdayOriginalPalette = {
+      choiceBase: typeof CHOICE_TILE_BASE_COLORS !== "undefined" ? CHOICE_TILE_BASE_COLORS.slice() : null,
+      choiceHover: typeof CHOICE_TILE_HOVER_COLORS !== "undefined" ? CHOICE_TILE_HOVER_COLORS.slice() : null,
+      choiceCorrect:
+        typeof CHOICE_TILE_CORRECT_COLORS !== "undefined" ? CHOICE_TILE_CORRECT_COLORS.slice() : null,
+      choiceWrong: typeof CHOICE_TILE_WRONG_COLORS !== "undefined" ? CHOICE_TILE_WRONG_COLORS.slice() : null,
+      choiceDisabled:
+        typeof CHOICE_TILE_DISABLED_COLORS !== "undefined" ? CHOICE_TILE_DISABLED_COLORS.slice() : null,
+      clueBase: typeof CLUE_SLOT_BASE_COLORS !== "undefined" ? CLUE_SLOT_BASE_COLORS.slice() : null,
+      clueHighlight:
+        typeof CLUE_SLOT_HIGHLIGHT_COLORS !== "undefined" ? CLUE_SLOT_HIGHLIGHT_COLORS.slice() : null,
+      clueSuccess:
+        typeof CLUE_SLOT_SUCCESS_COLORS !== "undefined" ? CLUE_SLOT_SUCCESS_COLORS.slice() : null,
+      clueError: typeof CLUE_SLOT_ERROR_COLORS !== "undefined" ? CLUE_SLOT_ERROR_COLORS.slice() : null
+    };
+  }
+
+  CHOICE_TILE_BASE_COLORS = BIRTHDAY_CHOICE_BASE_COLORS.slice();
+  CHOICE_TILE_HOVER_COLORS = BIRTHDAY_CHOICE_HOVER_COLORS.slice();
+  CHOICE_TILE_CORRECT_COLORS = BIRTHDAY_CHOICE_CORRECT_COLORS.slice();
+  CHOICE_TILE_WRONG_COLORS = BIRTHDAY_CHOICE_WRONG_COLORS.slice();
+  CHOICE_TILE_DISABLED_COLORS = BIRTHDAY_CHOICE_DISABLED_COLORS.slice();
+  CLUE_SLOT_BASE_COLORS = BIRTHDAY_CLUE_BASE_COLORS.slice();
+  CLUE_SLOT_HIGHLIGHT_COLORS = BIRTHDAY_CLUE_HIGHLIGHT_COLORS.slice();
+  CLUE_SLOT_SUCCESS_COLORS = BIRTHDAY_CLUE_SUCCESS_COLORS.slice();
+  CLUE_SLOT_ERROR_COLORS = BIRTHDAY_CLUE_ERROR_COLORS.slice();
+
+  if (typeof drawChoiceDisabledOverlay === "function") {
+    birthdayOriginalFunctions.drawChoiceDisabledOverlay = drawChoiceDisabledOverlay;
+  }
+  drawChoiceDisabledOverlay = drawBirthdayChoiceDisabledOverlay;
+  if (typeof window !== "undefined") {
+    window.SA_drawChoiceDisabledOverlay = drawBirthdayChoiceDisabledOverlay;
+  }
+
+  drawBirthdayQuestionCardBackground();
+  ensureBirthdayCardDecor();
+  ensureProgressBadge();
+  drawQuestionImageBackdrop();
+  drawQuestionImageFrame();
+  ensureConfettiContainer();
+}
+
+function drawBirthdayQuestionCardBackground() {
+  if (!questionCardBackground) {
+    return;
+  }
+
+  var halfWidth = QUESTION_CARD_WIDTH / 2;
+  var halfHeight = QUESTION_CARD_HEIGHT / 2;
+
+  questionCardBackground.graphics
+    .clear()
+    .setStrokeStyle(6, "round", "round")
+    .beginLinearGradientStroke(
+      ["rgba(255,234,250,0.92)", "rgba(204,168,255,0.72)"],
+      [0, 1],
+      -halfWidth,
+      -halfHeight,
+      halfWidth,
+      halfHeight
+    )
+    .beginLinearGradientFill(
+      ["rgba(255,200,222,0.98)", "rgba(166,136,255,0.98)"],
+      [0, 1],
+      0,
+      -halfHeight,
+      0,
+      halfHeight
+    )
+    .drawRoundRect(
+      -halfWidth,
+      -halfHeight,
+      QUESTION_CARD_WIDTH,
+      QUESTION_CARD_HEIGHT,
+      QUESTION_CARD_CORNER_RADIUS + 6
+    );
+
+  if (questionCardHighlight) {
+    var highlightPaddingX = 28;
+    var highlightPaddingY = 22;
+    var highlightWidth = QUESTION_CARD_WIDTH - highlightPaddingX * 2;
+    var highlightHeight = QUESTION_CARD_HEIGHT - highlightPaddingY * 2;
+    var highlightHalfWidth = highlightWidth / 2;
+    var highlightHalfHeight = highlightHeight / 2;
+
+    questionCardHighlight.graphics
+      .clear()
+      .beginLinearGradientFill(
+        ["rgba(255,255,255,0.58)", "rgba(255,255,255,0.08)"],
+        [0, 1],
+        -highlightHalfWidth,
+        -highlightHalfHeight,
+        highlightHalfWidth,
+        highlightHalfHeight
+      )
+      .drawRoundRect(
+        -highlightHalfWidth,
+        -highlightHalfHeight,
+        highlightWidth,
+        highlightHeight,
+        Math.max(QUESTION_CARD_CORNER_RADIUS - 8, 16)
+      );
+    questionCardHighlight.alpha = 0.9;
+  }
+}
+
+function ensureBirthdayCardDecor() {
+  if (!questionCardContainer) {
+    return;
+  }
+
+  if (!birthdayCardDecor) {
+    birthdayCardDecor = new createjs.Container();
+    birthdayCardDecor.mouseEnabled = false;
+    birthdayCardDecor.mouseChildren = false;
+    var referenceChild = questionCardBackground || questionCardContainer.getChildAt(0);
+    var backgroundIndex = 0;
+    if (referenceChild && typeof questionCardContainer.getChildIndex === "function") {
+      backgroundIndex = questionCardContainer.getChildIndex(referenceChild);
+    }
+    questionCardContainer.addChildAt(birthdayCardDecor, Math.max(backgroundIndex, 0));
+  }
+
+  if (!birthdayCardGlow) {
+    birthdayCardGlow = new createjs.Shape();
+    birthdayCardGlow.mouseEnabled = false;
+    birthdayCardGlow.mouseChildren = false;
+    birthdayCardDecor.addChild(birthdayCardGlow);
+  }
+
+  while (birthdayCardStreamers.length < 2) {
+    var streamer = new createjs.Shape();
+    streamer.mouseEnabled = false;
+    streamer.mouseChildren = false;
+    birthdayCardDecor.addChild(streamer);
+    birthdayCardStreamers.push(streamer);
+  }
+
+  drawBirthdayCardDecor();
+}
+
+function drawBirthdayCardDecor() {
+  if (!birthdayCardDecor) {
+    return;
+  }
+
+  if (birthdayCardGlow) {
+    var glowGraphics = birthdayCardGlow.graphics;
+    glowGraphics.clear();
+    glowGraphics
+      .beginRadialGradientFill(
+        ["rgba(255,236,214,0.55)", "rgba(255,236,214,0)"],
+        [0, 1],
+        0,
+        -30,
+        0,
+        0,
+        -30,
+        220
+      )
+      .drawCircle(0, -30, 220);
+    birthdayCardGlow.alpha = 0.75;
+  }
+
+  var streamerColors = [
+    ["rgba(255,204,170,0.85)", "rgba(255,158,214,0.1)"],
+    ["rgba(160,214,255,0.85)", "rgba(160,214,255,0.12)"]
+  ];
+
+  for (var i = 0; i < birthdayCardStreamers.length; i++) {
+    var streamerShape = birthdayCardStreamers[i];
+    var colors = streamerColors[i % streamerColors.length];
+    var sg = streamerShape.graphics;
+    sg.clear();
+    sg.beginLinearGradientFill(colors, [0, 1], -200, -100, 120, 140);
+    sg.moveTo(i === 0 ? -260 : 260, -30);
+    if (i === 0) {
+      sg.quadraticCurveTo(-160, -130, -60, -20);
+      sg.quadraticCurveTo(-20, 24, -120, 96);
+      sg.quadraticCurveTo(-200, 26, -260, -30);
+    } else {
+      sg.quadraticCurveTo(160, -140, 60, -26);
+      sg.quadraticCurveTo(20, 24, 110, 92);
+      sg.quadraticCurveTo(200, 30, 260, -24);
+    }
+    streamerShape.alpha = 0.68;
+    streamerShape.y = -28;
+  }
+}
+
+function ensureProgressBadge() {
+  if (!container || !container.parent) {
+    return;
+  }
+
+  if (!progressBadgeContainer) {
+    progressBadgeContainer = new createjs.Container();
+    progressBadgeContainer.mouseEnabled = false;
+    progressBadgeContainer.mouseChildren = false;
+    progressBadgeContainer.alpha = 0;
+    progressBadgeContainer.scaleX = progressBadgeContainer.scaleY = 0.82;
+    container.parent.addChild(progressBadgeContainer);
+
+    progressBadgeBackground = new createjs.Shape();
+    progressBadgeContainer.addChild(progressBadgeBackground);
+
+    progressBadgeIcon = new createjs.Shape();
+    progressBadgeContainer.addChild(progressBadgeIcon);
+
+    progressBadgeLabel = new createjs.Text("", "700 30px 'Baloo 2'", "#47184E");
+    progressBadgeLabel.textAlign = "left";
+    progressBadgeLabel.textBaseline = "middle";
+    progressBadgeLabel.shadow = new createjs.Shadow("rgba(12,20,46,0.2)", 0, 4, 12);
+    progressBadgeContainer.addChild(progressBadgeLabel);
+  }
+
+  drawProgressBadgeBackground(progressBadgeBackground.__width || 220);
+  drawProgressBadgeIcon();
+  updateProgressBadge(0, totalQuestions || 0, { immediate: true });
+}
+
+function drawProgressBadgeBackground(width) {
+  if (!progressBadgeBackground) {
+    return;
+  }
+  width = Math.max(220, width || 220);
+  var height = 64;
+  var halfWidth = width / 2;
+  var halfHeight = height / 2;
+
+  var g = progressBadgeBackground.graphics;
+  g.clear();
+  g.setStrokeStyle(4, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(255,238,250,0.92)", "rgba(206,170,255,0.72)"],
+    [0, 1],
+    -halfWidth,
+    -halfHeight,
+    halfWidth,
+    halfHeight
+  );
+  g.beginLinearGradientFill(
+    ["rgba(255,206,226,0.96)", "rgba(188,144,255,0.96)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth, -halfHeight, width, height, 32);
+
+  g.beginLinearGradientFill(
+    ["rgba(255,255,255,0.52)", "rgba(255,255,255,0)"],
+    [0, 1],
+    0,
+    -halfHeight,
+    0,
+    halfHeight
+  );
+  g.drawRoundRect(-halfWidth + 6, -halfHeight + 4, width - 12, height / 2 + 4, 26);
+
+  progressBadgeBackground.__width = width;
+  progressBadgeBackground.__height = height;
+}
+
+function drawProgressBadgeIcon() {
+  if (!progressBadgeIcon) {
+    return;
+  }
+  var g = progressBadgeIcon.graphics;
+  g.clear();
+  g.beginRadialGradientFill(
+    ["rgba(255,255,255,0.92)", "rgba(255,245,210,0.25)"],
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    24
+  );
+  g.drawCircle(0, 0, 24);
+  g.beginLinearGradientFill(
+    ["rgba(255,220,136,1)", "rgba(255,176,108,1)"],
+    [0, 1],
+    -18,
+    -18,
+    18,
+    18
+  );
+  g.drawPolyStar(0, 0, 16, 5, 0.45, -90);
+  g.beginFill("rgba(255,255,255,0.78)");
+  g.drawCircle(0, -6, 4.5);
+  progressBadgeIcon.rotation = -12;
+}
+
+function updateProgressBadge(current, total, options) {
+  if (!progressBadgeContainer) {
+    return;
+  }
+
+  options = options || {};
+  var displayText = current > 0 && total > 0 ? "Question " + current + " of " + total : "Let's Celebrate!";
+  if (progressBadgeLabel) {
+    progressBadgeLabel.text = displayText;
+  }
+
+  var measuredWidth =
+    progressBadgeLabel && typeof progressBadgeLabel.getMeasuredWidth === "function"
+      ? progressBadgeLabel.getMeasuredWidth()
+      : 0;
+  var badgeWidth = Math.max(220, measuredWidth + 150);
+  drawProgressBadgeBackground(badgeWidth);
+  drawProgressBadgeIcon();
+
+  var halfWidth = badgeWidth / 2;
+  var badgeHeight = progressBadgeBackground ? progressBadgeBackground.__height || 64 : 64;
+
+  if (progressBadgeIcon) {
+    progressBadgeIcon.x = -halfWidth + 46;
+    progressBadgeIcon.y = 0;
+  }
+
+  if (progressBadgeLabel) {
+    progressBadgeLabel.x = -halfWidth + 86;
+    progressBadgeLabel.y = 0;
+  }
+
+  var centerX =
+    typeof getCanvasCenterX === "function"
+      ? getCanvasCenterX()
+      : canvas && canvas.width
+      ? canvas.width / 2
+      : 640;
+
+  progressBadgeContainer.x = centerX;
+  progressBadgeContainer.y = QUESTION_CARD_Y - 150;
+
+  if (options.immediate) {
+    progressBadgeContainer.alpha = Math.max(progressBadgeContainer.alpha, options.visible ? 1 : progressBadgeContainer.alpha);
+  } else if (options.animate) {
+    pulseProgressBadge();
+  }
+}
+
+function pulseProgressBadge() {
+  if (!progressBadgeContainer) {
+    return;
+  }
+
+  createjs.Tween.get(progressBadgeContainer, { override: true })
+    .to({ scaleX: 1.05, scaleY: 1.05 }, 160, createjs.Ease.quadOut)
+    .to({ scaleX: 1, scaleY: 1 }, 240, createjs.Ease.quadInOut);
+}
+
+function drawBirthdayChoiceDisabledOverlay(targetShape) {
+  if (!targetShape) {
+    return;
+  }
+  var g = targetShape.graphics;
+  g.clear();
+  var overlayWidth = 148;
+  var overlayHeight = 148;
+  var overlayRadius = 48;
+
+  g.beginLinearGradientFill(
+    ["rgba(82,44,108,0.58)", "rgba(138,70,148,0.58)"],
+    [0, 1],
+    0,
+    -overlayHeight / 2,
+    0,
+    overlayHeight / 2
+  );
+  g.drawRoundRect(-overlayWidth / 2, -overlayHeight / 2, overlayWidth, overlayHeight, overlayRadius);
+
+  g.setStrokeStyle(3, "round", "round");
+  g.beginLinearGradientStroke(
+    ["rgba(255,236,254,0.7)", "rgba(214,174,252,0.5)"],
+    [0, 1],
+    -overlayWidth / 2,
+    -overlayHeight / 2,
+    overlayWidth / 2,
+    overlayHeight / 2
+  );
+  g.drawRoundRect(
+    -overlayWidth / 2 + 5,
+    -overlayHeight / 2 + 5,
+    overlayWidth - 10,
+    overlayHeight - 10,
+    overlayRadius - 8
+  );
+}
+
+function ensureConfettiContainer() {
+  if (!container || !container.parent) {
+    return;
+  }
+  if (!confettiContainer) {
+    confettiContainer = new createjs.Container();
+    confettiContainer.mouseEnabled = false;
+    confettiContainer.mouseChildren = false;
+    container.parent.addChild(confettiContainer);
+  }
+}
+
+function configureConfettiShape(shape, color) {
+  if (!shape) {
+    return;
+  }
+  var g = shape.graphics;
+  g.clear();
+  var style = Math.random();
+  g.beginFill(color);
+  if (style < 0.34) {
+    g.drawCircle(0, 0, 5 + Math.random() * 4);
+  } else if (style < 0.68) {
+    var w = 10 + Math.random() * 6;
+    var h = 6 + Math.random() * 4;
+    g.drawRoundRect(-w / 2, -h / 2, w, h, 2 + Math.random() * 4);
+  } else {
+    g.drawPolyStar(0, 0, 6 + Math.random() * 3, 5, 0.5, Math.random() * 360);
+  }
+}
+
+function releaseConfettiShape(shape) {
+  if (!shape) {
+    return;
+  }
+  createjs.Tween.removeTweens(shape);
+  if (shape.parent) {
+    shape.parent.removeChild(shape);
+  }
+  confettiPool.push(shape);
+}
+
+function launchBirthdayConfetti(originX, originY) {
+  ensureConfettiContainer();
+  if (!confettiContainer) {
+    return;
+  }
+
+  var palette = ["#FF9ACE", "#FFD37D", "#8FE0D0", "#8BB6FF", "#FFB3A1"];
+
+  for (var i = 0; i < 14; i++) {
+    var color = palette[i % palette.length];
+    var confetti = confettiPool.length ? confettiPool.pop() : new createjs.Shape();
+    confetti.mouseEnabled = false;
+    confetti.mouseChildren = false;
+    configureConfettiShape(confetti, color);
+    confetti.x = originX;
+    confetti.y = originY;
+    confetti.alpha = 0.96;
+    confetti.rotation = Math.random() * 360;
+    confetti.scaleX = confetti.scaleY = 0.62 + Math.random() * 0.4;
+    confettiContainer.addChild(confetti);
+
+    var angle = (Math.PI * 2 * i) / 14 + (Math.random() * 0.6 - 0.3);
+    var distance = 110 + Math.random() * 90;
+    var targetX = originX + Math.cos(angle) * distance;
+    var targetY = originY - 20 + Math.sin(angle) * distance * 0.7 + Math.random() * 60;
+
+    createjs.Tween.get(confetti)
+      .to(
+        {
+          x: targetX,
+          y: targetY,
+          alpha: 0,
+          rotation: confetti.rotation + (Math.random() * 240 - 120)
+        },
+        680 + Math.random() * 240,
+        createjs.Ease.quadOut
+      )
+      .call(releaseConfettiShape, null, [confetti]);
+  }
+}
+
+function drawQuestionImageBackdrop() {
+  if (!questionImageBackdrop) {
+    return;
+  }
+  var g = questionImageBackdrop.graphics;
+  g.clear();
+  g.beginRadialGradientFill(
+    ["rgba(255,240,220,0.95)", "rgba(255,240,220,0)"],
+    [0, 1],
+    0,
+    -10,
+    0,
+    0,
+    -10,
+    130
+  );
+  g.drawCircle(0, -10, 130);
+  questionImageBackdrop.alpha = 0.9;
+}
+
+function drawQuestionImageFrame() {
+  if (!questionImageFrame) {
+    return;
+  }
+  var g = questionImageFrame.graphics;
+  g.clear();
+  g.setStrokeStyle(6, "round", "round");
+  g.beginStroke("rgba(255,255,255,0.85)");
+  g.beginRadialGradientFill(
+    ["rgba(255,206,228,0.78)", "rgba(186,146,255,0.42)"],
+    [0, 1],
+    0,
+    0,
+    0,
+    0,
+    0,
+    120
+  );
+  g.drawCircle(0, 0, 120);
+  g.beginRadialGradientFill(
+    ["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"],
+    [0, 1],
+    -40,
+    -54,
+    0,
+    -40,
+    -54,
+    58
+  );
+  g.drawCircle(-40, -54, 58);
+  questionImageFrame.alpha = 0.96;
+}
+
+function stopQuestionImageFloatTween() {
+  if (!questionImageHolder) {
+    return;
+  }
+  createjs.Tween.removeTweens(questionImageHolder);
+}
+
+function startQuestionImageFloatTween() {
+  if (!questionImageHolder) {
+    return;
+  }
+  var baseY = questionImageHolder.__baseY != null ? questionImageHolder.__baseY : questionImageHolder.y;
+  questionImageHolder.__baseY = baseY;
+  createjs.Tween.get(questionImageHolder, { override: true, loop: true })
+    .to({ y: baseY + 10 }, 1600, createjs.Ease.sineInOut)
+    .to({ y: baseY }, 1600, createjs.Ease.sineInOut);
+}
+
 window.onload = function () {
   checkBrowserSupport();
 };
@@ -458,6 +1076,7 @@ function CreateGameElements() {
 
   ensureQuestionCard();
   ensureQuestionImageHolder();
+  applyBirthdayTheme();
 
   for (var i = 0; i < words_arry.length; i++) {
     if (!clueBgArr[i]) {
@@ -508,10 +1127,16 @@ function CreateGameElements() {
     if (!choiceGlowArr[j]) {
       choiceGlowArr[j] = new createjs.Shape();
       choiceGlowArr[j].graphics
-        .beginRadialGradientFill([
-          "rgba(209,178,255,0.6)",
-          "rgba(209,178,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 120)
+        .beginRadialGradientFill(
+          ["rgba(255,196,224,0.66)", "rgba(255,196,224,0)"],
+          [0, 1],
+          0,
+          0,
+          0,
+          0,
+          0,
+          120
+        )
         .drawCircle(0, 0, 120);
       choiceGlowArr[j].alpha = 0;
       choiceGlowArr[j].visible = false;
@@ -533,6 +1158,9 @@ function CreateGameElements() {
       choiceDisabledOverlayArr[j].mouseEnabled = false;
       choiceDisabledOverlayArr[j].mouseChildren = false;
       choiceMcArr[j].addChild(choiceDisabledOverlayArr[j]);
+    }
+    if (choiceDisabledOverlayArr[j]) {
+      drawBirthdayChoiceDisabledOverlay(choiceDisabledOverlayArr[j]);
     }
     if (!choiceArr[j]) {
       choiceArr[j] = buildChoiceLetterDisplay();
@@ -576,6 +1204,29 @@ function ensureQuestionImageHolder() {
     questionImageShadow.alpha = 0.45;
     questionImageHolder.addChild(questionImageShadow);
   }
+  if (!questionImageBackdrop) {
+    questionImageBackdrop = new createjs.Shape();
+    questionImageBackdrop.mouseEnabled = false;
+    questionImageBackdrop.mouseChildren = false;
+    questionImageBackdrop.alpha = 0;
+    questionImageHolder.addChild(questionImageBackdrop);
+  }
+  if (!questionImageContent) {
+    questionImageContent = new createjs.Container();
+    questionImageContent.mouseEnabled = false;
+    questionImageContent.mouseChildren = false;
+    questionImageHolder.addChild(questionImageContent);
+  }
+  if (!questionImageFrame) {
+    questionImageFrame = new createjs.Shape();
+    questionImageFrame.mouseEnabled = false;
+    questionImageFrame.mouseChildren = false;
+    questionImageFrame.alpha = 0;
+    questionImageHolder.addChild(questionImageFrame);
+  }
+
+  drawQuestionImageBackdrop();
+  drawQuestionImageFrame();
 }
 
 function helpDisable() {
@@ -618,6 +1269,8 @@ function pickques() {
     gameQCntTxt.text = quesCnt + "/" + String(totalQuestions);
   }
 
+  updateProgressBadge(quesCnt, totalQuestions, { animate: quesCnt > 1 });
+
   panelVisibleFn();
 
   if (cnt >= questionOrder.length) {
@@ -657,18 +1310,26 @@ function setupQuestionCard(questionIndex) {
   }
 
   if (questionImageHolder) {
-    questionImageHolder.removeAllChildren();
-    if (questionImageShadow) {
-      questionImageHolder.addChild(questionImageShadow);
+    stopQuestionImageFloatTween();
+    drawQuestionImageBackdrop();
+    drawQuestionImageFrame();
+    if (questionImageContent) {
+      questionImageContent.removeAllChildren();
     }
-    if (questionSprite) {
+    if (questionSprite && questionImageContent) {
       questionSprite.gotoAndStop(questionIndex);
       var imageClone = questionSprite.clone();
       imageClone.visible = true;
       imageClone.scaleX = imageClone.scaleY = 0.68;
       imageClone.x = 0;
       imageClone.y = 0;
-      questionImageHolder.addChild(imageClone);
+      questionImageContent.addChild(imageClone);
+    }
+    if (questionImageFrame) {
+      questionImageFrame.alpha = 0.98;
+    }
+    if (questionImageBackdrop) {
+      questionImageBackdrop.alpha = 0.92;
     }
     questionImageHolder.x = 0;
     questionImageHolder.y = -40;
@@ -827,7 +1488,7 @@ function setupChoiceTiles(answerWord) {
     }
 
     if (disabledOverlay) {
-      drawChoiceDisabledOverlay(disabledOverlay);
+      drawBirthdayChoiceDisabledOverlay(disabledOverlay);
       disabledOverlay.visible = false;
       disabledOverlay.alpha = 0;
       disabledOverlay.scaleX = disabledOverlay.scaleY = tileScale * 1.08;
@@ -879,7 +1540,20 @@ function revealRoundElements() {
   if (questionImageHolder) {
     createjs.Tween.get(questionImageHolder, { override: true })
       .wait(revealDelay + 120)
-      .to({ alpha: 1, y: -20 }, 320, createjs.Ease.sineOut);
+      .to({ alpha: 1, y: -20 }, 320, createjs.Ease.sineOut)
+      .call(function () {
+        questionImageHolder.__baseY = -20;
+        startQuestionImageFloatTween();
+      });
+  }
+
+  if (progressBadgeContainer) {
+    progressBadgeContainer.visible = true;
+    if (progressBadgeContainer.alpha < 1) {
+      createjs.Tween.get(progressBadgeContainer, { override: true })
+        .wait(revealDelay + 60)
+        .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 420, createjs.Ease.backOut);
+    }
   }
 
   for (var i = 0; i < cLen; i++) {
@@ -963,6 +1637,9 @@ function answerSelected(e) {
   markChoiceResult(index, isCorrectChoice);
 
   if (isCorrectChoice) {
+    if (clueBgArr[missingIndex]) {
+      launchBirthdayConfetti(clueBgArr[missingIndex].x, clueBgArr[missingIndex].y - 16);
+    }
     revealMissingLetter();
     setTimeout(function () {
       getValidation("correct");
