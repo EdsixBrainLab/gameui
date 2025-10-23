@@ -22,31 +22,61 @@ var introQuestionSpacing = birthdayLayoutConfig.questionRowSpacing || 138;
 var introChoiceSpacing = birthdayLayoutConfig.choiceRowSpacing || 210;
 var introChoiceBaseScale = birthdayLayoutConfig.choiceBaseScale || 0.7;
 var introQuestionImageScale = birthdayLayoutConfig.questionImageScale || 0.76;
-var introComputeRowPositions = birthdayLayoutConfig.computeRowPositions || function(count, spacing, centerX) {
+function introGetCenterX() {
+    if (birthdayLayoutConfig && typeof birthdayLayoutConfig.getStageCenter === "function") {
+        var configCenter = birthdayLayoutConfig.getStageCenter();
+        if (typeof configCenter === "number" && isFinite(configCenter)) {
+            return configCenter;
+        }
+    }
+
+    if (typeof getCanvasCenterX === "function") {
+        var logicalCenter = getCanvasCenterX();
+        if (typeof logicalCenter === "number" && isFinite(logicalCenter)) {
+            return logicalCenter;
+        }
+    }
+
+    if (stage && stage.canvas && typeof stage.canvas.width === "number") {
+        var scaleX = (stage && typeof stage.scaleX === "number" && isFinite(stage.scaleX) && stage.scaleX !== 0)
+            ? stage.scaleX
+            : 1;
+        return (stage.canvas.width / scaleX) / 2;
+    }
+
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.width === "number") {
+        return canvas.width / 2;
+    }
+
+    return 640;
+}
+
+function introComputeRowPositions(count, spacing, centerX) {
+    if (birthdayLayoutConfig && typeof birthdayLayoutConfig.computeRowPositions === "function") {
+        return birthdayLayoutConfig.computeRowPositions(count, spacing, centerX);
+    }
+
     var positions = [];
     var total = parseInt(count, 10);
     if (!total || total <= 0) {
         return positions;
     }
+
     var gap = spacing || 120;
-    var center = (typeof centerX === "number" && isFinite(centerX)) ? centerX : ((stage && stage.canvas) ? stage.canvas.width / 2 : 640);
+    var center = (typeof centerX === "number" && isFinite(centerX)) ? centerX : introGetCenterX();
     if (total === 1) {
         positions.push(center);
         return positions;
     }
+
     var width = gap * (total - 1);
     var startX = center - (width / 2);
     for (var idx = 0; idx < total; idx++) {
         positions.push(startX + (idx * gap));
     }
+
     return positions;
-};
-var introGetCenterX = birthdayLayoutConfig.getStageCenter || function() {
-    if (stage && stage.canvas) {
-        return stage.canvas.width / 2;
-    }
-    return 640;
-};
+}
 var introCreateHolder = birthdayLayoutConfig.createQuestionHolder || function() {
     if (typeof createBirthdayQuestionHolder === "function") {
         return createBirthdayQuestionHolder();
@@ -162,7 +192,15 @@ function commongameintro() {
     }
 
 ////////////////////////////////////////////////////////////////////////////////////
-createjs.Tween.get(introQuestxt).to({ x: 635, y: INTRO_PROMPT_Y-50, visible: true, alpha: 1 }, 1500) .call(handleComplete1_1);
+    var introPromptCenterX = introGetCenterX();
+    createjs.Tween.get(introQuestxt)
+        .to({ x: introPromptCenterX, y: INTRO_PROMPT_Y - 50, visible: true, alpha: 1 }, 1500)
+        .call(function () {
+            if (introQuestxt && introQuestxt.__labelBG && typeof introQuestxt.__labelBG.refresh === "function") {
+                introQuestxt.__labelBG.refresh();
+            }
+            handleComplete1_1();
+        });
 
 }
 function handleComplete1_1() {

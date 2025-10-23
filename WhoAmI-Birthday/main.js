@@ -412,12 +412,27 @@ function animateChoiceOptions(startDelay) {
 }
 
 function getStageCenterX() {
-    if (stage && stage.canvas) {
-        return stage.canvas.width / 2;
+    if (typeof getCanvasCenterX === "function") {
+        var logicalCenter = getCanvasCenterX();
+        if (typeof logicalCenter === "number" && isFinite(logicalCenter)) {
+            return logicalCenter;
+        }
     }
-    if (typeof canvas !== "undefined" && canvas && canvas.width) {
+
+    if (stage && stage.canvas && typeof stage.canvas.width === "number") {
+        var scaleX = (stage && typeof stage.scaleX === "number" && isFinite(stage.scaleX) && stage.scaleX !== 0)
+            ? stage.scaleX
+            : 1;
+        var stageWidth = stage.canvas.width / scaleX;
+        if (typeof stageWidth === "number" && isFinite(stageWidth)) {
+            return stageWidth / 2;
+        }
+    }
+
+    if (typeof canvas !== "undefined" && canvas && typeof canvas.width === "number") {
         return canvas.width / 2;
     }
+
     return 640;
 }
 
@@ -447,6 +462,14 @@ function applyBirthdayLayout(letterCount) {
         layoutRoot.x = stageCenterX;
     }
     var layoutCenterX = layoutRoot ? 0 : stageCenterX;
+
+    if (QusTxtString) {
+        QusTxtString.x = stageCenterX;
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.refresh === "function") {
+            QusTxtString.__labelBG.refresh();
+        }
+    }
+}
 
     if (questionHolderPanel) {
         questionHolderPanel.x = layoutCenterX;
