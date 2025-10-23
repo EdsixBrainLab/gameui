@@ -18,6 +18,9 @@ var introArrow = null;
 var introFinger = null;
 var introTimeline = null;
 
+var INTRO_FALLBACK_PROMPT_TEXT =
+  "Click on the correct letter to complete the name of the items in a birthday party";
+
 var introGlobalScope =
   typeof globalThis !== "undefined"
     ? globalThis
@@ -75,6 +78,96 @@ var introUpdateClue =
         display.text = letter || "";
         display.alpha = letter ? 1 : 0;
       };
+
+function formatIntroTitleText() {
+  var rawTitle =
+    (introGlobalScope &&
+      typeof introGlobalScope.GameNameWithLvl === "string" &&
+      introGlobalScope.GameNameWithLvl) ||
+    (introGlobalScope &&
+      typeof introGlobalScope.GameName === "string" &&
+      introGlobalScope.GameName) ||
+    "Who Am I";
+
+  rawTitle = rawTitle.replace(/[_-]+/g, " ");
+  rawTitle = rawTitle.replace(/([a-z])([A-Z])/g, "$1 $2");
+  rawTitle = rawTitle.replace(/\s+/g, " ").trim();
+
+  return rawTitle.replace(/\b([a-z])/gi, function (match) {
+    return match.toUpperCase();
+  });
+}
+
+function buildFallbackTitleDisplay() {
+  var titleText = new createjs.Text(formatIntroTitleText(), "800 56px 'Baloo 2'", "#FFFFFF");
+  titleText.textAlign = "center";
+  titleText.textBaseline = "middle";
+  titleText.shadow = new createjs.Shadow("rgba(5,12,28,0.45)", 0, 10, 26);
+  titleText.mouseEnabled = false;
+  titleText.mouseChildren = false;
+  return titleText;
+}
+
+function buildFallbackPromptDisplay() {
+  var prompt = new createjs.Text(
+    INTRO_FALLBACK_PROMPT_TEXT,
+    "700 28px 'Baloo 2'",
+    "#EAF2FF"
+  );
+  prompt.textAlign = "center";
+  prompt.textBaseline = "middle";
+  prompt.lineWidth = 960;
+  prompt.lineHeight = 40;
+  prompt.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
+  prompt.mouseEnabled = false;
+  prompt.mouseChildren = false;
+  return prompt;
+}
+
+function buildFallbackArrowSprite() {
+  var arrow = new createjs.Shape();
+  arrow.graphics
+    .beginFill("rgba(255,255,255,0.92)")
+    .moveTo(0, 0)
+    .lineTo(-68, -30)
+    .lineTo(-68, 30)
+    .closePath();
+  arrow.shadow = new createjs.Shadow("rgba(8,18,36,0.22)", 0, 12, 18);
+  arrow.setBounds(-68, -30, 68, 60);
+  arrow.mouseEnabled = false;
+  arrow.mouseChildren = false;
+  return arrow;
+}
+
+function buildFallbackFingerSprite() {
+  var finger = new createjs.Container();
+  var palm = new createjs.Shape();
+  palm.graphics
+    .beginFill("rgba(255,255,255,0.95)")
+    .drawRoundRect(-16, -4, 32, 64, 16);
+  palm.shadow = new createjs.Shadow("rgba(8,18,36,0.18)", 0, 10, 22);
+  var fingertip = new createjs.Shape();
+  fingertip.graphics.beginFill("rgba(255,220,220,0.95)").drawCircle(0, -28, 16);
+  finger.addChild(palm, fingertip);
+  finger.setBounds(-16, -32, 32, 96);
+  finger.mouseEnabled = false;
+  finger.mouseChildren = false;
+  finger.__baseScale = 0.78;
+  finger.__pointerTipBase = { x: 8, y: 42 };
+  finger.__pressDistanceBase = 18;
+  return finger;
+}
+
+function cloneIntroDisplayObject(source, fallbackBuilder) {
+  if (source && typeof source.clone === "function") {
+    try {
+      return source.clone();
+    } catch (err) {
+      // fall back to manual builders when cloning fails
+    }
+  }
+  return typeof fallbackBuilder === "function" ? fallbackBuilder() : null;
+}
 
 function introStartPlaceholderTwinkle(target) {
   if (!target) {
@@ -180,35 +273,56 @@ function buildIntroChoiceTile() {
 
 function commongameintro() {
   var stageRef = container.parent || stage;
+  var canvasCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
 
-  introTitle = Title.clone();
-  introTitle.textAlign = "center";
-  introTitle.textBaseline = "middle";
-  introTitle.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
-  introTitle.y = INTRO_TITLE_Y;
-  stageRef.addChild(introTitle);
+  introTitle = cloneIntroDisplayObject(
+    typeof Title !== "undefined" ? Title : null,
+    buildFallbackTitleDisplay
+  );
+  if (introTitle) {
+    if (introTitle.textAlign != null) {
+      introTitle.textAlign = "center";
+    }
+    if (introTitle.textBaseline != null) {
+      introTitle.textBaseline = "middle";
+    }
+    introTitle.x = canvasCenterX;
+    introTitle.y = INTRO_TITLE_Y;
+    stageRef.addChild(introTitle);
+  }
 
-  introPrompt = QusTxtString.clone();
-  introPrompt.visible = true;
-  introPrompt.alpha = 0;
-  introPrompt.x = introTitle.x;
-  introPrompt.y = (QusTxtString && QusTxtString.y) || INTRO_PROMPT_Y - 55;
-  introPrompt.__labelBG = SAUI_attachQuestionLabelBG(introPrompt, stageRef, {
-    padX: 20,
-    padY: 12,
-    fill: "rgba(0,0,0,0.3)",
-    stroke: "rgba(255,255,255,0.14)",
-    strokeW: 2,
-    maxRadius: 22
-  });
-  stageRef.addChild(introPrompt);
+  introPrompt = cloneIntroDisplayObject(
+    typeof QusTxtString !== "undefined" ? QusTxtString : null,
+    buildFallbackPromptDisplay
+  );
+  if (introPrompt) {
+    introPrompt.visible = true;
+    introPrompt.alpha = 0;
+    introPrompt.x = introTitle ? introTitle.x : canvasCenterX;
+    var basePromptY =
+      typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.y === "number"
+        ? QusTxtString.y
+        : INTRO_PROMPT_Y - 55;
+    introPrompt.y = basePromptY;
+    if (typeof SAUI_attachQuestionLabelBG === "function") {
+      introPrompt.__labelBG = SAUI_attachQuestionLabelBG(introPrompt, stageRef, {
+        padX: 20,
+        padY: 12,
+        fill: "rgba(0,0,0,0.3)",
+        stroke: "rgba(255,255,255,0.14)",
+        strokeW: 2,
+        maxRadius: 22
+      });
+    }
+    stageRef.addChild(introPrompt);
+  }
 
   introQuestionContainer = new createjs.Container();
   introQuestionContainer.visible = false;
   introQuestionContainer.alpha = 0;
   introQuestionContainer.mouseEnabled = false;
   introQuestionContainer.mouseChildren = false;
-  introQuestionContainer.x = introTitle.x;
+  introQuestionContainer.x = introTitle ? introTitle.x : canvasCenterX;
   introQuestionContainer.y = INTRO_QUESTION_Y;
   stageRef.addChild(introQuestionContainer);
 
@@ -276,16 +390,26 @@ function commongameintro() {
     introQuestionImageHolder.addChild(introQuestionImage);
   }
 
-  introArrow = arrow1.clone();
-  introFinger = fingure.clone();
+  introArrow = cloneIntroDisplayObject(
+    typeof arrow1 !== "undefined" ? arrow1 : null,
+    buildFallbackArrowSprite
+  );
+  introFinger = cloneIntroDisplayObject(
+    typeof fingure !== "undefined" ? fingure : null,
+    buildFallbackFingerSprite
+  );
   configureIntroArrowSprite(introArrow);
   configureIntroFingerSprite(introFinger);
-  introArrow.visible = false;
-  introArrow.alpha = 0;
-  introFinger.visible = false;
-  introFinger.alpha = 0;
-  stageRef.addChild(introArrow);
-  stageRef.addChild(introFinger);
+  if (introArrow) {
+    introArrow.visible = false;
+    introArrow.alpha = 0;
+    stageRef.addChild(introArrow);
+  }
+  if (introFinger) {
+    introFinger.visible = false;
+    introFinger.alpha = 0;
+    stageRef.addChild(introFinger);
+  }
 
   var clueLayout = computeRowLayout(introQuestionLetters.length, {
     baseSpacing: 140,
