@@ -469,6 +469,7 @@ function applyBirthdayLayout(letterCount) {
             QusTxtString.__labelBG.refresh();
         }
     }
+}
 
     if (questionHolderPanel) {
         questionHolderPanel.x = layoutCenterX;
