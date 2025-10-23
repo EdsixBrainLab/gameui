@@ -472,3 +472,79 @@ function stopIntro() {
     introFinger.visible = false;
   }
 }
+
+function removeGameIntro() {
+  stopIntro();
+
+  if (introTitle) {
+    if (introTitle.parent) {
+      introTitle.parent.removeChild(introTitle);
+    }
+    introTitle = null;
+  }
+
+  if (introPrompt) {
+    if (introPrompt.__labelBG && typeof introPrompt.__labelBG.destroy === "function") {
+      introPrompt.__labelBG.destroy();
+    }
+    if (introPrompt.parent) {
+      introPrompt.parent.removeChild(introPrompt);
+    }
+    introPrompt = null;
+  }
+
+  if (introQuestionContainer) {
+    introQuestionContainer.removeAllChildren();
+    if (introQuestionContainer.parent) {
+      introQuestionContainer.parent.removeChild(introQuestionContainer);
+    }
+    introQuestionContainer = null;
+  }
+
+  introQuestionImage = null;
+  introQuestionImageHolder = null;
+  introQuestionGlow = null;
+
+  if (introArrow) {
+    if (introArrow.parent) {
+      introArrow.parent.removeChild(introArrow);
+    }
+    introArrow = null;
+  }
+
+  if (introFinger) {
+    if (introFinger.parent) {
+      introFinger.parent.removeChild(introFinger);
+    }
+    introFinger = null;
+  }
+
+  for (var i = 0; i < introClueSlots.length; i++) {
+    var slot = introClueSlots[i];
+    if (!slot) {
+      continue;
+    }
+    if (slot.placeholder) {
+      introStopPlaceholderTwinkle(slot.placeholder);
+    }
+    if (slot.parent) {
+      slot.parent.removeChild(slot);
+    }
+    introClueSlots[i] = null;
+  }
+
+  introClueSlots.length = 0;
+
+  for (var j = 0; j < introChoiceTiles.length; j++) {
+    var tile = introChoiceTiles[j];
+    if (!tile) {
+      continue;
+    }
+    if (tile.parent) {
+      tile.parent.removeChild(tile);
+    }
+    introChoiceTiles[j] = null;
+  }
+
+  introChoiceTiles.length = 0;
+}

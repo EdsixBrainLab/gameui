@@ -127,6 +127,7 @@ var words_arry = [
 ];
 
 var questionOrder = [];
+var qno = [];
 var choicePool = [];
 var answerLetters = [];
 var missingIndex = -1;
@@ -442,6 +443,7 @@ function tick() {
 
 function handleClick() {
   questionOrder = between(0, words_arry.length - 1);
+  qno = questionOrder.slice();
   CreateGameStart();
   if (gameType == 0) {
     CreateGameElements();
@@ -620,6 +622,7 @@ function pickques() {
 
   if (cnt >= questionOrder.length) {
     questionOrder = between(0, words_arry.length - 1);
+    qno = questionOrder.slice();
     cnt = 0;
   }
 
