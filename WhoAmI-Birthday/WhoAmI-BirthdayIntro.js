@@ -9,6 +9,10 @@ var introQuesTextX =0, introQuesTextY = -50;
 var introQuesX = 540, introQuesY =200
 var introArrowX = 765, introArrowY = 520;
 var introfingureX =800, introfingureY = 590;
+var introSampleLetters = ["C", "A", "K", "E"];
+var introSampleBlankIndex = 2;
+var introSampleChoiceLetters = ["L", "M", "K"];
+var introSampleCorrectIndex = 2;
 function commongameintro() {
      introTitle=Title.clone()
     container.parent.addChild(introTitle)
@@ -40,17 +44,16 @@ function commongameintro() {
 //////////////////////////////////////////////////////////////////////////
 
     for (i = 0; i < 4; i++) {
-        introChoiceQues[i] = question1.clone()
+        introChoiceQues[i] = createBirthdayQuestionTile();
+        introChoiceQues[i].scaleX = introChoiceQues[i].scaleY = 1.05;
+        introChoiceQues[i].visible = false;
         container.parent.addChild(introChoiceQues[i])
-        introChoiceQues[i].visible = false       
         introChoiceQues[i].x =455 + (i * 120);
         introChoiceQues[i].y= 490;
-        introChoiceQues[i].gotoAndStop(i);
-        introChoiceQues[i].scaleX = introChoiceQues[i].scaleY = 1.1;
     }
      for (i = 0; i < 3; i++) {
-        introchoiceArr[i] = choice1.clone()
-        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = .8;
+        introchoiceArr[i] = createBirthdayChoiceTile();
+        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = .82;
         introchoiceArr[i].visible = false;
         container.parent.addChild(introchoiceArr[i]);
         introchoiceArr[i].x = 460 + (i * 160);
@@ -77,20 +80,17 @@ function handleComplete2_1() {
     createjs.Tween.removeAllTweens();
     QueschoiceTween()
 }
-function QueschoiceTween() { 
+function QueschoiceTween() {
     var time1=500
  for (i = 0; i <4; i++) {
         introChoiceQues[i].visible = true
         introChoiceQues[i].alpha=0;
-           introChoiceQues[0].gotoAndStop(2);
-        introChoiceQues[1].gotoAndStop(0);
-        introChoiceQues[2].gotoAndStop(26);
-        introChoiceQues[3].gotoAndStop(4);         
+        styleBirthdayQuestionTile(introChoiceQues[i], introSampleLetters[i], i === introSampleBlankIndex);
      if(i==3)
      {
-             
+
         createjs.Tween.get(introChoiceQues[i]).wait(time1)
-            .to({ alpha: 1 }, time1, createjs.Ease.bounceInOut) 
+            .to({ alpha: 1 }, time1, createjs.Ease.bounceInOut)
              
             .call(handleComplete3_1)
     }
@@ -110,12 +110,11 @@ function handleComplete3_1() {
 function choiceTween() {
 var val =500
   for (i = 0; i < 3; i++) {
-        introchoiceArr[i].visible = true;   
+        introchoiceArr[i].visible = true;
          introchoiceArr[i].alpha=0
-    introchoiceArr[i].gotoAndStop(i+11);
-        introchoiceArr[2].gotoAndStop(10);
-        introchoiceArr[i].scaleX=introchoiceArr.scaleY=.65
-        if(i==2)
+        styleBirthdayChoiceTile(introchoiceArr[i], introSampleChoiceLetters[i]);
+        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = .75;
+        if(i==introSampleCorrectIndex)
 {
          createjs.Tween.get(introchoiceArr[i]).wait(val).to({ y: 620,rotation:180, scaleX: .65, scaleY: .65, alpha: .5 }, 200)
         .to({ y: 620,rotation:360, scaleX: .7, scaleY: .7, alpha: 1 }, 200)
@@ -205,14 +204,14 @@ this.onComplete2 = function (e) {
     }
     else {
          console.log("setCallDelay  == stopValue")   
-        introChoiceQues[2].visible = true             
-        introChoiceQues[2].gotoAndStop(10);     
-        createjs.Tween.get(introChoiceQues[2])
+        introChoiceQues[introSampleBlankIndex].visible = true
+        styleBirthdayQuestionTile(introChoiceQues[introSampleBlankIndex], introSampleLetters[introSampleBlankIndex], false);
+        createjs.Tween.get(introChoiceQues[introSampleBlankIndex])
             .to({ alpha: 1 }, 1000)
             .wait(500)
-         createjs.Tween.get(introchoiceArr[2])
+         createjs.Tween.get(introchoiceArr[introSampleCorrectIndex])
             .to({ alpha: 1,scaleX:.9,scaleY:.9}, 1000)
-            .wait(500)   
+            .wait(500)
             .call(setCallDelay)
      }
        // setTimeout(setCallDelay, 1000)
