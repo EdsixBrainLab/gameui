@@ -25,13 +25,14 @@ var quesArr = []
 var answerArr = []
 var decoyArr = []
 var blankIndex = 0;
-var QUESTION_HOLDER_Y = 268;
-var QUESTION_ROW_Y = 492;
-var CHOICE_ROW_Y = 652;
-var QUESTION_ROW_SPACING = 122;
-var CHOICE_ROW_SPACING = 186;
-var CHOICE_TILE_BASE_SCALE = 0.68;
-var QUESTION_IMAGE_BASE_SCALE = 0.72;
+var QUESTION_HOLDER_Y = 256;
+var QUESTION_ROW_Y = 520;
+var CHOICE_ROW_Y = 688;
+var QUESTION_ROW_SPACING = 138;
+var CHOICE_ROW_SPACING = 210;
+var CHOICE_TILE_BASE_SCALE = 0.7;
+var QUESTION_IMAGE_BASE_SCALE = 0.76;
+var layoutRoot;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -173,11 +174,20 @@ function CreateGameElements() {
     container.parent.addChild(QusTxtString);
     QusTxtString.visible = false;
 
+    if (layoutRoot && layoutRoot.parent) {
+        layoutRoot.parent.removeChild(layoutRoot);
+    }
+    layoutRoot = new createjs.Container();
+    layoutRoot.name = "birthdayLayoutRoot";
+    layoutRoot.mouseChildren = true;
+    layoutRoot.mouseEnabled = false;
+    container.parent.addChild(layoutRoot);
+
     questionHolderPanel = createBirthdayQuestionHolder();
     questionHolderPanel.visible = false;
     questionHolderPanel.alpha = 0;
     questionHolderPanel.mouseEnabled = false;
-    container.parent.addChild(questionHolderPanel);
+    layoutRoot.addChild(questionHolderPanel);
 
     if (question) {
         questionHolderPanel.addChild(question);
@@ -195,7 +205,8 @@ function CreateGameElements() {
         choiceArr[i] = createBirthdayChoiceTile();
         choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_TILE_BASE_SCALE;
         choiceArr[i].visible = false;
-        container.parent.addChild(choiceArr[i]);
+        choiceArr[i].baseScale = CHOICE_TILE_BASE_SCALE;
+        layoutRoot.addChild(choiceArr[i]);
         choiceArr[i].x = 0;
         choiceArr[i].y = CHOICE_ROW_Y;
     }
@@ -203,7 +214,8 @@ function CreateGameElements() {
     for (i = 0; i < 10; i++) {
         quesArr[i] = createBirthdayQuestionTile();
         quesArr[i].visible = false;
-        container.parent.addChild(quesArr[i]);
+        quesArr[i].baseScale = 1;
+        layoutRoot.addChild(quesArr[i]);
         quesArr[i].x = 0;
         quesArr[i].y = QUESTION_ROW_Y;
     }
@@ -276,6 +288,9 @@ function pickques() {
         alphabetArr.splice(removeIndex, 1);
     }
     alphabetArr.sort(randomSort)
+    for (i = 0; i < choiceArr.length; i++) {
+        resetBirthdayChoiceTile(choiceArr[i]);
+    }
     for (i = 0; i < alphabetArr.length; i++) {
         if (decoyArr.length >= 2) {
             break;
@@ -285,6 +300,9 @@ function pickques() {
         }
     }
     for (i = 0; i < cLen; i++) {
+        if (quesArr[i]) {
+            createjs.Tween.removeTweens(quesArr[i]);
+        }
         styleBirthdayQuestionTile(quesArr[i], answerArr[i], i === blankIndex);
         quesArr[i].visible = false;
     }
@@ -317,7 +335,7 @@ function pickques() {
 function createTween() {
     applyBirthdayLayout(cLen);
 
-    var stageCenterX = getStageCenterX();
+    var layoutCenterX = layoutRoot ? 0 : getStageCenterX();
     var holderStartY = QUESTION_HOLDER_Y + 22;
     var holderDelay = 280;
 
@@ -325,7 +343,7 @@ function createTween() {
         questionHolderPanel.visible = true;
         questionHolderPanel.alpha = 0;
         questionHolderPanel.scaleX = questionHolderPanel.scaleY = 0.92;
-        questionHolderPanel.x = stageCenterX;
+        questionHolderPanel.x = layoutCenterX;
         questionHolderPanel.y = holderStartY;
         createjs.Tween.get(questionHolderPanel, { override: true })
             .wait(holderDelay)
@@ -371,21 +389,25 @@ function animateChoiceOptions(startDelay) {
         }
         var tile = choiceArr[i];
         var targetY = CHOICE_ROW_Y;
-        var baseScale = CHOICE_TILE_BASE_SCALE;
-        var entryScale = Math.max(baseScale - 0.1, 0.5);
+        var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+        var entryScale = Math.max(baseScale - 0.18, 0.4);
         createjs.Tween.removeTweens(tile);
+        stopBirthdayChoicePulse(tile);
         tile.visible = true;
         tile.alpha = 0;
-        tile.y = targetY + 32;
+        tile.y = targetY + 48;
         tile.scaleX = tile.scaleY = entryScale;
         tile.mouseEnabled = false;
         tile.cursor = "default";
-        createjs.Tween.get(tile, { override: true })
-            .wait(baseDelay + (i * 140))
-            .to({ alpha: 1, y: targetY, scaleX: baseScale + 0.12, scaleY: baseScale + 0.12 }, 340, createjs.Ease.backOut)
-            .to({ scaleX: baseScale, scaleY: baseScale }, 220, createjs.Ease.sineOut)
-            .to({ scaleX: baseScale + 0.06, scaleY: baseScale + 0.06 }, 190, createjs.Ease.sineOut)
-            .to({ scaleX: baseScale, scaleY: baseScale }, 240, createjs.Ease.sineInOut);
+        (function (target, delayIndex, base) {
+            createjs.Tween.get(target, { override: true })
+                .wait(baseDelay + (delayIndex * 160))
+                .to({ alpha: 1, y: targetY, scaleX: base + 0.16, scaleY: base + 0.16 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 240, createjs.Ease.sineOut)
+                .call(function () {
+                    startBirthdayChoicePulse(target, base);
+                });
+        })(tile, i, baseScale);
     }
 }
 
@@ -420,16 +442,21 @@ function computeBirthdayRowPositions(count, spacing, centerX) {
 }
 
 function applyBirthdayLayout(letterCount) {
-    var centerX = getStageCenterX();
+    var stageCenterX = getStageCenterX();
+    if (layoutRoot) {
+        layoutRoot.x = stageCenterX;
+    }
+    var layoutCenterX = layoutRoot ? 0 : stageCenterX;
+
     if (questionHolderPanel) {
-        questionHolderPanel.x = centerX;
+        questionHolderPanel.x = layoutCenterX;
         questionHolderPanel.y = QUESTION_HOLDER_Y;
     }
 
-    var choicePositions = computeBirthdayRowPositions(choiceArr.length, CHOICE_ROW_SPACING, centerX);
+    var choicePositions = computeBirthdayRowPositions(choiceArr.length, CHOICE_ROW_SPACING, layoutCenterX);
     for (var j = 0; j < choiceArr.length; j++) {
         if (choiceArr[j]) {
-            choiceArr[j].x = choicePositions[j] || centerX;
+            choiceArr[j].x = choicePositions[j] || layoutCenterX;
             choiceArr[j].y = CHOICE_ROW_Y;
         }
     }
@@ -438,10 +465,10 @@ function applyBirthdayLayout(letterCount) {
     if (letters <= 0) {
         return;
     }
-    var letterPositions = computeBirthdayRowPositions(letters, QUESTION_ROW_SPACING, centerX);
+    var letterPositions = computeBirthdayRowPositions(letters, QUESTION_ROW_SPACING, layoutCenterX);
     for (var k = 0; k < letters; k++) {
         if (quesArr[k]) {
-            quesArr[k].x = letterPositions[k] || centerX;
+            quesArr[k].x = letterPositions[k] || layoutCenterX;
             quesArr[k].y = QUESTION_ROW_Y;
         }
     }
@@ -486,6 +513,8 @@ if (typeof window !== "undefined") {
     window.WhoAmIBirthdayLayout.createQuestionHolder = createBirthdayQuestionHolder;
     window.WhoAmIBirthdayLayout.choiceBaseScale = CHOICE_TILE_BASE_SCALE;
     window.WhoAmIBirthdayLayout.questionImageScale = QUESTION_IMAGE_BASE_SCALE;
+    window.WhoAmIBirthdayLayout.startChoicePulse = startBirthdayChoicePulse;
+    window.WhoAmIBirthdayLayout.stopChoicePulse = stopBirthdayChoicePulse;
 }
 function AddListenerFn() {
 
@@ -512,8 +541,13 @@ try { ChoiceFX_bindHover(choiceArr); } catch(_e){}
 //===============================================//
 function disablechoices() {
     for (i = 0; i < 3; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
+        stopBirthdayChoicePulse(choiceArr[i]);
         choiceArr[i].removeEventListener("click", answerSelected)
         choiceArr[i].cursor = "default";
+        choiceArr[i].mouseEnabled = false;
         choiceArr[i].visible = false;
     }
     for (i = 0; i < cLen; i++) {
@@ -530,6 +564,7 @@ function answerSelected(e) {
     e.currentTarget.mouseEnabled = false;
     e.currentTarget.alpha = 0.5;
     e.currentTarget.cursor = "default";
+    stopBirthdayChoicePulse(e.currentTarget);
     console.log(ans+"        "+uans)
 
     gameResponseTimerStop();
@@ -560,6 +595,10 @@ function correct() {
 
 function disableMouse() {
     for (i = 0; i < 3; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
+        stopBirthdayChoicePulse(choiceArr[i]);
         choiceArr[i].mouseEnabled = false;
     }
 }
@@ -686,6 +725,44 @@ function styleBirthdayChoiceTile(tile, letter) {
     tile.label.text = letter || "";
     tile.label.color = "#7a3600";
     tile.label.alpha = 1;
+}
+
+function startBirthdayChoicePulse(tile, baseScale) {
+    if (!tile) {
+        return;
+    }
+    var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || CHOICE_TILE_BASE_SCALE);
+    stopBirthdayChoicePulse(tile);
+    tile.scaleX = tile.scaleY = scale;
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
+        .wait(220)
+        .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
+}
+
+function stopBirthdayChoicePulse(tile) {
+    if (!tile) {
+        return;
+    }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (typeof tile.baseScale === "number") {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+}
+
+function resetBirthdayChoiceTile(tile) {
+    if (!tile) {
+        return;
+    }
+    stopBirthdayChoicePulse(tile);
+    createjs.Tween.removeTweens(tile);
+    var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+    tile.scaleX = tile.scaleY = baseScale;
+    tile.alpha = 1;
+    tile.y = CHOICE_ROW_Y;
 }
 
 

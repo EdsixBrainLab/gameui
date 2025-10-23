@@ -13,14 +13,15 @@ var introSampleBlankIndex = 2;
 var introSampleChoiceLetters = ["L", "M", "K"];
 var introSampleCorrectIndex = 2;
 var introQuestionHolder;
+var introLayoutRoot;
 var birthdayLayoutConfig = (typeof window !== "undefined" && window.WhoAmIBirthdayLayout) ? window.WhoAmIBirthdayLayout : {};
-var introQuestionRowY = birthdayLayoutConfig.questionRowY || 492;
-var introChoiceRowY = birthdayLayoutConfig.choiceRowY || 652;
-var introHolderY = birthdayLayoutConfig.questionHolderY || 268;
-var introQuestionSpacing = birthdayLayoutConfig.questionRowSpacing || 122;
-var introChoiceSpacing = birthdayLayoutConfig.choiceRowSpacing || 186;
-var introChoiceBaseScale = birthdayLayoutConfig.choiceBaseScale || 0.68;
-var introQuestionImageScale = birthdayLayoutConfig.questionImageScale || 0.72;
+var introQuestionRowY = birthdayLayoutConfig.questionRowY || 520;
+var introChoiceRowY = birthdayLayoutConfig.choiceRowY || 688;
+var introHolderY = birthdayLayoutConfig.questionHolderY || 256;
+var introQuestionSpacing = birthdayLayoutConfig.questionRowSpacing || 138;
+var introChoiceSpacing = birthdayLayoutConfig.choiceRowSpacing || 210;
+var introChoiceBaseScale = birthdayLayoutConfig.choiceBaseScale || 0.7;
+var introQuestionImageScale = birthdayLayoutConfig.questionImageScale || 0.76;
 var introComputeRowPositions = birthdayLayoutConfig.computeRowPositions || function(count, spacing, centerX) {
     var positions = [];
     var total = parseInt(count, 10);
@@ -56,6 +57,32 @@ var introCreateHolder = birthdayLayoutConfig.createQuestionHolder || function() 
     placeholder.addChild(shape);
     return placeholder;
 };
+var introStartChoicePulse = birthdayLayoutConfig.startChoicePulse || function(tile, baseScale) {
+    if (!tile) {
+        return;
+    }
+    var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || introChoiceBaseScale || 1);
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+    }
+    tile.scaleX = tile.scaleY = scale;
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
+        .wait(220)
+        .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
+};
+var introStopChoicePulse = birthdayLayoutConfig.stopChoicePulse || function(tile) {
+    if (!tile) {
+        return;
+    }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (typeof tile.baseScale === "number") {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+};
 function commongameintro() {
      introTitle=Title.clone()
     container.parent.addChild(introTitle)
@@ -65,15 +92,27 @@ function commongameintro() {
     introTitle.x = 650;
     introTitle.y = INTRO_TITLE_Y;
 
+    if (introLayoutRoot && introLayoutRoot.parent) {
+        introLayoutRoot.parent.removeChild(introLayoutRoot);
+    }
+    introLayoutRoot = new createjs.Container();
+    introLayoutRoot.name = "birthdayIntroLayout";
+    introLayoutRoot.mouseChildren = true;
+    introLayoutRoot.mouseEnabled = false;
+    container.parent.addChild(introLayoutRoot);
+
     var centerX = introGetCenterX();
+    introLayoutRoot.x = centerX;
+    introLayoutRoot.y = 0;
+    var layoutCenterX = introLayoutRoot ? 0 : centerX;
 
     introQuestionHolder = introCreateHolder();
     introQuestionHolder.visible = false;
     introQuestionHolder.alpha = 0;
-    introQuestionHolder.x = centerX;
+    introQuestionHolder.x = layoutCenterX;
     introQuestionHolder.y = introHolderY;
     introQuestionHolder.mouseEnabled = false;
-    container.parent.addChild(introQuestionHolder);
+    introLayoutRoot.addChild(introQuestionHolder);
 
     introQues = question.clone();
     introQuestionHolder.addChild(introQues)
@@ -101,22 +140,24 @@ function commongameintro() {
 
 //////////////////////////////////////////////////////////////////////////
 
-    var introLetterPositions = introComputeRowPositions(introSampleLetters.length, introQuestionSpacing, centerX);
+    var introLetterPositions = introComputeRowPositions(introSampleLetters.length, introQuestionSpacing, layoutCenterX);
     for (i = 0; i < 4; i++) {
         introChoiceQues[i] = createBirthdayQuestionTile();
         introChoiceQues[i].scaleX = introChoiceQues[i].scaleY = 1;
         introChoiceQues[i].visible = false;
-        container.parent.addChild(introChoiceQues[i])
-        introChoiceQues[i].x = introLetterPositions[i] || centerX;
+        introChoiceQues[i].baseScale = 1;
+        introLayoutRoot.addChild(introChoiceQues[i])
+        introChoiceQues[i].x = introLetterPositions[i] || layoutCenterX;
         introChoiceQues[i].y= introQuestionRowY;
     }
-    var introChoicePositions = introComputeRowPositions(introSampleChoiceLetters.length, introChoiceSpacing, centerX);
+    var introChoicePositions = introComputeRowPositions(introSampleChoiceLetters.length, introChoiceSpacing, layoutCenterX);
      for (i = 0; i < 3; i++) {
         introchoiceArr[i] = createBirthdayChoiceTile();
         introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = introChoiceBaseScale;
+        introchoiceArr[i].baseScale = introChoiceBaseScale;
         introchoiceArr[i].visible = false;
-        container.parent.addChild(introchoiceArr[i]);
-        introchoiceArr[i].x = introChoicePositions[i] || centerX;
+        introLayoutRoot.addChild(introchoiceArr[i]);
+        introchoiceArr[i].x = introChoicePositions[i] || layoutCenterX;
         introchoiceArr[i].y = introChoiceRowY;
     }
 
@@ -130,8 +171,12 @@ function handleComplete1_1() {
 }
 function quesTween() {
     var centerX = introGetCenterX();
+    if (introLayoutRoot) {
+        introLayoutRoot.x = centerX;
+    }
+    var layoutCenterX = introLayoutRoot ? 0 : centerX;
     if (introQuestionHolder) {
-        introQuestionHolder.x = centerX;
+        introQuestionHolder.x = layoutCenterX;
         introQuestionHolder.visible = true;
         introQuestionHolder.alpha = 0;
         introQuestionHolder.scaleX = introQuestionHolder.scaleY = 0.94;
@@ -160,7 +205,11 @@ function handleComplete2_1() {
 function QueschoiceTween() {
     var baseDelay = 520;
     var centerX = introGetCenterX();
-    var positions = introComputeRowPositions(introSampleLetters.length, introQuestionSpacing, centerX);
+    if (introLayoutRoot) {
+        introLayoutRoot.x = centerX;
+    }
+    var layoutCenterX = introLayoutRoot ? 0 : centerX;
+    var positions = introComputeRowPositions(introSampleLetters.length, introQuestionSpacing, layoutCenterX);
     for (i = 0; i < introSampleLetters.length; i++) {
         var tile = introChoiceQues[i];
         if (!tile) {
@@ -169,7 +218,7 @@ function QueschoiceTween() {
         tile.visible = true;
         tile.alpha = 0;
         tile.scaleX = tile.scaleY = 0.92;
-        tile.x = positions[i] || centerX;
+        tile.x = positions[i] || layoutCenterX;
         tile.y = introQuestionRowY;
         styleBirthdayQuestionTile(tile, introSampleLetters[i], i === introSampleBlankIndex);
         var tween = createjs.Tween.get(tile, { override: true })
@@ -188,27 +237,37 @@ function handleComplete3_1() {
 function choiceTween() {
     var baseDelay = 520;
     var centerX = introGetCenterX();
-    var positions = introComputeRowPositions(introSampleChoiceLetters.length, introChoiceSpacing, centerX);
+    if (introLayoutRoot) {
+        introLayoutRoot.x = centerX;
+    }
+    var layoutCenterX = introLayoutRoot ? 0 : centerX;
+    var positions = introComputeRowPositions(introSampleChoiceLetters.length, introChoiceSpacing, layoutCenterX);
     for (i = 0; i < introSampleChoiceLetters.length; i++) {
         var tile = introchoiceArr[i];
         if (!tile) {
             continue;
         }
         styleBirthdayChoiceTile(tile, introSampleChoiceLetters[i]);
+        introStopChoicePulse(tile);
         tile.visible = true;
         tile.alpha = 0;
-        tile.scaleX = tile.scaleY = Math.max(introChoiceBaseScale - 0.1, 0.5);
-        tile.x = positions[i] || centerX;
-        tile.y = introChoiceRowY + 28;
-        var tween = createjs.Tween.get(tile, { override: true })
-            .wait(baseDelay + (i * 150))
-            .to({ alpha: 1, y: introChoiceRowY, scaleX: introChoiceBaseScale + 0.12, scaleY: introChoiceBaseScale + 0.12 }, 320, createjs.Ease.backOut)
-            .to({ scaleX: introChoiceBaseScale, scaleY: introChoiceBaseScale }, 220, createjs.Ease.sineOut)
-            .to({ scaleX: introChoiceBaseScale + 0.05, scaleY: introChoiceBaseScale + 0.05 }, 180, createjs.Ease.sineInOut)
-            .to({ scaleX: introChoiceBaseScale, scaleY: introChoiceBaseScale }, 220, createjs.Ease.sineInOut);
-        if (i === introSampleCorrectIndex) {
-            tween.call(handleComplete3_2);
-        }
+        tile.scaleX = tile.scaleY = Math.max(introChoiceBaseScale - 0.18, 0.4);
+        tile.x = positions[i] || layoutCenterX;
+        tile.y = introChoiceRowY + 48;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        (function(target, index) {
+            createjs.Tween.get(target, { override: true })
+                .wait(baseDelay + (index * 160))
+                .to({ alpha: 1, y: introChoiceRowY, scaleX: introChoiceBaseScale + 0.16, scaleY: introChoiceBaseScale + 0.16 }, 340, createjs.Ease.backOut)
+                .to({ scaleX: introChoiceBaseScale, scaleY: introChoiceBaseScale }, 220, createjs.Ease.sineOut)
+                .call(function () {
+                    introStartChoicePulse(target, introChoiceBaseScale);
+                    if (index === introSampleCorrectIndex) {
+                        handleComplete3_2();
+                    }
+                });
+        })(tile, i);
     }
 }
 function handleComplete3_2() {
@@ -288,17 +347,18 @@ this.onComplete2 = function (e) {
         removeGameIntro()
     }
     else {
-         console.log("setCallDelay  == stopValue")   
+         console.log("setCallDelay  == stopValue")
         introChoiceQues[introSampleBlankIndex].visible = true
         styleBirthdayQuestionTile(introChoiceQues[introSampleBlankIndex], introSampleLetters[introSampleBlankIndex], false);
         createjs.Tween.get(introChoiceQues[introSampleBlankIndex])
             .to({ alpha: 1 }, 1000)
             .wait(500)
+        introStopChoicePulse(introchoiceArr[introSampleCorrectIndex]);
          createjs.Tween.get(introchoiceArr[introSampleCorrectIndex])
             .to({ alpha: 1,scaleX:.9,scaleY:.9}, 1000)
             .wait(500)
             .call(setCallDelay)
-     }
+    }
        // setTimeout(setCallDelay, 1000)
    
 }
@@ -324,40 +384,70 @@ function setCallDelay() {
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
 
-    container.parent.removeChild(introArrow)
-    introArrow.visible = false
-    container.parent.removeChild(introfingure)
-    introfingure.visible = false
+    if (introArrow && introArrow.parent) {
+        introArrow.parent.removeChild(introArrow);
+    }
+    if (introArrow) {
+        introArrow.visible = false;
+    }
+    if (introfingure && introfingure.parent) {
+        introfingure.parent.removeChild(introfingure);
+    }
+    if (introfingure) {
+        introfingure.visible = false;
+    }
     if (introQues && introQues.parent) {
         introQues.parent.removeChild(introQues);
     }
+    introQues = null;
     if (introQuestionHolder && introQuestionHolder.parent) {
         introQuestionHolder.parent.removeChild(introQuestionHolder);
     }
     introQuestionHolder = null;
-    introQues = null;
     if (introQuestxt && introQuestxt.__labelBG) {
-  introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
-}
-introQuestxt.visible = false;
-container.parent.removeChild(introQuestxt);
-introQuestxt = null;
+        introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
+    }
+    if (introQuestxt && introQuestxt.parent) {
+        introQuestxt.parent.removeChild(introQuestxt);
+    }
+    if (introQuestxt) {
+        introQuestxt.visible = false;
+    }
+    introQuestxt = null;
     for (i = 0; i < 4; i++) {
-        introChoiceQues[i].visible = false
-        container.parent.removeChild(introChoiceQues[i])
+        if (!introChoiceQues[i]) {
+            continue;
+        }
+        introChoiceQues[i].visible = false;
+        if (introChoiceQues[i].parent) {
+            introChoiceQues[i].parent.removeChild(introChoiceQues[i]);
+        }
     }
-   for (i = 0; i < 3; i++) {
-        introchoiceArr[i].visible = false
-        container.parent.removeChild(introchoiceArr[i])
+    for (i = 0; i < 3; i++) {
+        if (!introchoiceArr[i]) {
+            continue;
+        }
+        introStopChoicePulse(introchoiceArr[i]);
+        introchoiceArr[i].visible = false;
+        introchoiceArr[i].mouseEnabled = false;
+        if (introchoiceArr[i].parent) {
+            introchoiceArr[i].parent.removeChild(introchoiceArr[i]);
+        }
     }
+    if (introLayoutRoot && introLayoutRoot.parent) {
+        introLayoutRoot.parent.removeChild(introLayoutRoot);
+    }
+    introLayoutRoot = null;
     if (highlightTweenArr[0]) {
         highlightTweenArr[0].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[0]);
+        if (highlightTweenArr[0].parent) {
+            highlightTweenArr[0].parent.removeChild(highlightTweenArr[0]);
+        }
     }
     if (highlightTweenArr[1]) {
         highlightTweenArr[1].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[1]);
+        if (highlightTweenArr[1].parent) {
+            highlightTweenArr[1].parent.removeChild(highlightTweenArr[1]);
+        }
     }
-    container.parent.removeChild(introfingure);
-    introfingure.visible = false;
 }
