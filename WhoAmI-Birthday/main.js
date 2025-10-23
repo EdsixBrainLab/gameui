@@ -464,16 +464,30 @@ function enableMouse() {
 }
 
 
+function toFiniteNumber(value, fallback) {
+    var num = Number(value);
+    if (!isFinite(num)) {
+        num = Number(fallback);
+        if (!isFinite(num)) {
+            num = 0;
+        }
+    }
+    return num;
+}
+
 function buildBirthdayTile(options) {
     options = options || {};
     var tile = new createjs.Container();
     tile.mouseChildren = false;
-    var width = options.width || 120;
-    var height = options.height || 120;
-    var radius = options.radius || 28;
+    var width = toFiniteNumber(options.width, 120);
+    var height = toFiniteNumber(options.height, 120);
+    var radius = toFiniteNumber(options.radius, 28);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
     var font = options.font || "700 60px 'Nunito', 'Arial', sans-serif";
     var textColor = options.color || "#452a72";
-    var textOffsetY = options.textOffsetY || 0;
+    var textOffsetY = toFiniteNumber(options.textOffsetY, 0);
 
     var bg = new createjs.Shape();
     tile.addChild(bg);
@@ -496,6 +510,8 @@ function buildBirthdayTile(options) {
 
     return tile;
 }
+
+
 
 function createBirthdayQuestionTile() {
     return buildBirthdayTile({
@@ -525,18 +541,26 @@ function styleBirthdayQuestionTile(tile, letter, isBlank) {
     }
     var g = tile.bg.graphics;
     g.clear();
-    var width = tile.tileWidth || 118;
-    var height = tile.tileHeight || 128;
-    var radius = tile.tileRadius || 32;
+    var width = toFiniteNumber(tile.tileWidth, 118);
+    var height = toFiniteNumber(tile.tileHeight, 128);
+    var radius = toFiniteNumber(tile.tileRadius, 32);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
     var fill = isBlank ? ["#ffe8f5", "#ffd6eb"] : ["#ffffff", "#ffe2f4"];
     var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
-    g.setStrokeStyle(4).beginStroke(stroke).beginLinearGradientFill(fill, 0, 0, 0, height).drawRoundRect(0, 0, width, height, radius);
+    g.setStrokeStyle(4)
+        .beginStroke(stroke)
+        .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
+        .drawRoundRect(0, 0, width, height, radius);
 
-    tile.label.text = isBlank ? "?" : letter;
+    tile.label.text = isBlank ? "?" : (letter || "");
     tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
     tile.label.alpha = isBlank ? 0.65 : 1;
     tile.bg.alpha = isBlank ? 0.85 : 1;
 }
+
+
 
 function styleBirthdayChoiceTile(tile, letter) {
     if (!tile) {
@@ -544,14 +568,22 @@ function styleBirthdayChoiceTile(tile, letter) {
     }
     var g = tile.bg.graphics;
     g.clear();
-    var width = tile.tileWidth || 136;
-    var height = tile.tileHeight || 136;
-    var radius = tile.tileRadius || 38;
-    g.setStrokeStyle(4).beginStroke("#ffb660").beginLinearGradientFill(["#fff4d4", "#ffd78a"], 0, 0, 0, height).drawRoundRect(0, 0, width, height, radius);
-    tile.label.text = letter;
+    var width = toFiniteNumber(tile.tileWidth, 136);
+    var height = toFiniteNumber(tile.tileHeight, 136);
+    var radius = toFiniteNumber(tile.tileRadius, 38);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
+    g.setStrokeStyle(4)
+        .beginStroke("#ffb660")
+        .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
+        .drawRoundRect(0, 0, width, height, radius);
+    tile.label.text = letter || "";
     tile.label.color = "#7a3600";
     tile.label.alpha = 1;
 }
+
+
 
 //===============================================================================================//
 
