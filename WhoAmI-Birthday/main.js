@@ -13,6 +13,7 @@ var txtLabel;
 var clueMcArr = [];
 var clueArr = []
 var clueTxtArr = []
+var repTimeClearInterval = 0
 var cnt = -1,qscnt=-1, ans, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
 var startBtn, introScrn, container, question, questionHolderPanel, circleOutline, chHolderMC, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, btnImages, isCorrect = "";
@@ -538,10 +539,10 @@ if (typeof window !== "undefined") {
     window.WhoAmIBirthdayLayout.stopChoicePulse = stopBirthdayChoicePulse;
 }
 function AddListenerFn() {
-
-    clearTimeout(repTimeClearInterval)
-  
-
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval);
+        repTimeClearInterval = 0;
+    }
 
     for (i = 0; i < 3; i++) {
         choiceArr[i].visible = true
