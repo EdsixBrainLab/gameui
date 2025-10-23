@@ -88,29 +88,27 @@ var introCreateHolder = birthdayLayoutConfig.createQuestionHolder || function() 
     return placeholder;
 };
 var introStartChoicePulse = birthdayLayoutConfig.startChoicePulse || function(tile, baseScale) {
-    if (!tile) {
-        return;
+    if (tile) {
+        var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || introChoiceBaseScale || 1);
+        if (tile.__pulseTween) {
+            tile.__pulseTween.setPaused(true);
+        }
+        tile.scaleX = tile.scaleY = scale;
+        tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
+            .wait(220)
+            .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
+            .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
     }
-    var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || introChoiceBaseScale || 1);
-    if (tile.__pulseTween) {
-        tile.__pulseTween.setPaused(true);
-    }
-    tile.scaleX = tile.scaleY = scale;
-    tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
-        .wait(220)
-        .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
-        .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
 };
 var introStopChoicePulse = birthdayLayoutConfig.stopChoicePulse || function(tile) {
-    if (!tile) {
-        return;
-    }
-    if (tile.__pulseTween) {
-        tile.__pulseTween.setPaused(true);
-        tile.__pulseTween = null;
-    }
-    if (typeof tile.baseScale === "number") {
-        tile.scaleX = tile.scaleY = tile.baseScale;
+    if (tile) {
+        if (tile.__pulseTween) {
+            tile.__pulseTween.setPaused(true);
+            tile.__pulseTween = null;
+        }
+        if (typeof tile.baseScale === "number") {
+            tile.scaleX = tile.scaleY = tile.baseScale;
+        }
     }
 };
 function commongameintro() {

@@ -469,7 +469,6 @@ function applyBirthdayLayout(letterCount) {
             QusTxtString.__labelBG.refresh();
         }
     }
-}
 
     if (questionHolderPanel) {
         questionHolderPanel.x = layoutCenterX;
@@ -485,14 +484,13 @@ function applyBirthdayLayout(letterCount) {
     }
 
     var letters = parseInt(letterCount, 10) || 0;
-    if (letters <= 0) {
-        return;
-    }
-    var letterPositions = computeBirthdayRowPositions(letters, QUESTION_ROW_SPACING, layoutCenterX);
-    for (var k = 0; k < letters; k++) {
-        if (quesArr[k]) {
-            quesArr[k].x = letterPositions[k] || layoutCenterX;
-            quesArr[k].y = QUESTION_ROW_Y;
+    if (letters > 0) {
+        var letterPositions = computeBirthdayRowPositions(letters, QUESTION_ROW_SPACING, layoutCenterX);
+        for (var k = 0; k < letters; k++) {
+            if (quesArr[k]) {
+                quesArr[k].x = letterPositions[k] || layoutCenterX;
+                quesArr[k].y = QUESTION_ROW_Y;
+            }
         }
     }
 }
@@ -703,89 +701,84 @@ function createBirthdayChoiceTile() {
 }
 
 function styleBirthdayQuestionTile(tile, letter, isBlank) {
-    if (!tile) {
-        return;
-    }
-    var g = tile.bg.graphics;
-    g.clear();
-    var width = toFiniteNumber(tile.tileWidth, 118);
-    var height = toFiniteNumber(tile.tileHeight, 128);
-    var radius = toFiniteNumber(tile.tileRadius, 32);
-    if (width <= 0) { width = 1; }
-    if (height <= 0) { height = 1; }
-    if (radius < 0) { radius = 0; }
-    var fill = isBlank ? ["#ffe8f5", "#ffd6eb"] : ["#ffffff", "#ffe2f4"];
-    var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
-    g.setStrokeStyle(4)
-        .beginStroke(stroke)
-        .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
-        .drawRoundRect(0, 0, width, height, radius);
+    if (tile) {
+        var g = tile.bg.graphics;
+        g.clear();
+        var width = toFiniteNumber(tile.tileWidth, 118);
+        var height = toFiniteNumber(tile.tileHeight, 128);
+        var radius = toFiniteNumber(tile.tileRadius, 32);
+        if (width <= 0) { width = 1; }
+        if (height <= 0) { height = 1; }
+        if (radius < 0) { radius = 0; }
+        var fill = isBlank ? ["#ffe8f5", "#ffd6eb"] : ["#ffffff", "#ffe2f4"];
+        var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
+        g.setStrokeStyle(4)
+            .beginStroke(stroke)
+            .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
+            .drawRoundRect(0, 0, width, height, radius);
 
-    tile.label.text = isBlank ? "?" : (letter || "");
-    tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
-    tile.label.alpha = isBlank ? 0.65 : 1;
-    tile.bg.alpha = isBlank ? 0.85 : 1;
+        tile.label.text = isBlank ? "?" : (letter || "");
+        tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
+        tile.label.alpha = isBlank ? 0.65 : 1;
+        tile.bg.alpha = isBlank ? 0.85 : 1;
+    }
 }
 
 
 
 function styleBirthdayChoiceTile(tile, letter) {
-    if (!tile) {
-        return;
+    if (tile) {
+        var g = tile.bg.graphics;
+        g.clear();
+        var width = toFiniteNumber(tile.tileWidth, 136);
+        var height = toFiniteNumber(tile.tileHeight, 136);
+        var radius = toFiniteNumber(tile.tileRadius, 38);
+        if (width <= 0) { width = 1; }
+        if (height <= 0) { height = 1; }
+        if (radius < 0) { radius = 0; }
+        g.setStrokeStyle(4)
+            .beginStroke("#ffb660")
+            .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
+            .drawRoundRect(0, 0, width, height, radius);
+        tile.label.text = letter || "";
+        tile.label.color = "#7a3600";
+        tile.label.alpha = 1;
     }
-    var g = tile.bg.graphics;
-    g.clear();
-    var width = toFiniteNumber(tile.tileWidth, 136);
-    var height = toFiniteNumber(tile.tileHeight, 136);
-    var radius = toFiniteNumber(tile.tileRadius, 38);
-    if (width <= 0) { width = 1; }
-    if (height <= 0) { height = 1; }
-    if (radius < 0) { radius = 0; }
-    g.setStrokeStyle(4)
-        .beginStroke("#ffb660")
-        .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
-        .drawRoundRect(0, 0, width, height, radius);
-    tile.label.text = letter || "";
-    tile.label.color = "#7a3600";
-    tile.label.alpha = 1;
 }
 
 function startBirthdayChoicePulse(tile, baseScale) {
-    if (!tile) {
-        return;
+    if (tile) {
+        var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || CHOICE_TILE_BASE_SCALE);
+        stopBirthdayChoicePulse(tile);
+        tile.scaleX = tile.scaleY = scale;
+        tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
+            .wait(220)
+            .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
+            .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
     }
-    var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || CHOICE_TILE_BASE_SCALE);
-    stopBirthdayChoicePulse(tile);
-    tile.scaleX = tile.scaleY = scale;
-    tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
-        .wait(220)
-        .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
-        .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
 }
 
 function stopBirthdayChoicePulse(tile) {
-    if (!tile) {
-        return;
-    }
-    if (tile.__pulseTween) {
-        tile.__pulseTween.setPaused(true);
-        tile.__pulseTween = null;
-    }
-    if (typeof tile.baseScale === "number") {
-        tile.scaleX = tile.scaleY = tile.baseScale;
+    if (tile) {
+        if (tile.__pulseTween) {
+            tile.__pulseTween.setPaused(true);
+            tile.__pulseTween = null;
+        }
+        if (typeof tile.baseScale === "number") {
+            tile.scaleX = tile.scaleY = tile.baseScale;
+        }
     }
 }
 
 function resetBirthdayChoiceTile(tile) {
-    if (!tile) {
-        return;
+    if (tile) {
+        stopBirthdayChoicePulse(tile);
+        createjs.Tween.removeTweens(tile);
+        var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+        tile.scaleX = tile.scaleY = baseScale;
+        tile.alpha = 1;
+        tile.y = CHOICE_ROW_Y;
     }
-    stopBirthdayChoicePulse(tile);
-    createjs.Tween.removeTweens(tile);
-    var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
-    tile.scaleX = tile.scaleY = baseScale;
-    tile.alpha = 1;
-    tile.y = CHOICE_ROW_Y;
 }
 
 
