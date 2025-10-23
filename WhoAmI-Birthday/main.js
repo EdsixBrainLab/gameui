@@ -657,13 +657,14 @@ function buildBirthdayTile(options) {
     var textOffsetY = toFiniteNumber(options.textOffsetY, 0);
 
     var bg = new createjs.Shape();
+    bg.graphics.drawRoundRect(-width / 2, -height / 2, width, height, radius);
     tile.addChild(bg);
 
     var label = new createjs.Text("", font, textColor);
     label.textAlign = "center";
     label.textBaseline = "middle";
-    label.x = width / 2;
-    label.y = height / 2 + textOffsetY;
+    label.x = 0;
+    label.y = textOffsetY;
     tile.addChild(label);
 
     tile.bg = bg;
@@ -671,8 +672,8 @@ function buildBirthdayTile(options) {
     tile.tileWidth = width;
     tile.tileHeight = height;
     tile.tileRadius = radius;
-    tile.regX = width / 2;
-    tile.regY = height / 2;
+    tile.regX = 0;
+    tile.regY = 0;
     tile.shadow = new createjs.Shadow("rgba(0,0,0,0.18)", 0, 6, 18);
 
     return tile;
@@ -743,8 +744,8 @@ function styleBirthdayQuestionTile(tile, letter, isBlank) {
         var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
         g.setStrokeStyle(4)
             .beginStroke(stroke)
-            .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
-            .drawRoundRect(0, 0, width, height, radius);
+            .beginLinearGradientFill(fill, [0, 1], 0, -height / 2, 0, height / 2)
+            .drawRoundRect(-width / 2, -height / 2, width, height, radius);
 
         tile.label.text = isBlank ? "?" : (letter || "");
         tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
@@ -767,8 +768,8 @@ function styleBirthdayChoiceTile(tile, letter) {
         if (radius < 0) { radius = 0; }
         g.setStrokeStyle(4)
             .beginStroke("#ffb660")
-            .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
-            .drawRoundRect(0, 0, width, height, radius);
+            .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, -height / 2, 0, height / 2)
+            .drawRoundRect(-width / 2, -height / 2, width, height, radius);
         tile.label.text = letter || "";
         tile.label.color = "#7a3600";
         tile.label.alpha = 1;
