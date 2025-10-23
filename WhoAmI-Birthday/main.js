@@ -14,7 +14,7 @@ var clueMcArr = [];
 var clueArr = []
 var clueTxtArr = []
 var cnt = -1,qscnt=-1, ans, uans, interval, delayInterval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 12, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0, correctAnswer = "", lCnt = -1, wrdCnt = -1;
-var startBtn, introScrn, container, question, circleOutline, chHolderMC, choice1, choice2, choice3, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
+var startBtn, introScrn, container, question, circleOutline, chHolderMC, boardMc, helpMc, backGround1, kholderMc, ansPanelMc, clueMc, clueMc1, resultLoading, selectedAnswer = "", cLen = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, btnImages, isCorrect = "";
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd, currTime = 0;
 var tqcnt = 0, aqcnt = 0, ccnt = 0, cqcnt = 0, gscore = 0, gscrper = 0, gtime = 0, rtime = 0, crtime = 0, wrtime = 0;
@@ -22,12 +22,9 @@ var alphabetArr = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "
 var words_arry = ["cake", "chocolate", "balloon", "gift", "cap", "candle", "icecream", "juice", "cupcake", "lollipop"];
 var maxLetterCnt = 10
 var quesArr = []
-var alphabetArr1 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-var maxLetterCnt = 10
 var answerArr = []
-var indexArr1 = []
-var indexArr2 = []
-var indexArr3 = []
+var decoyArr = []
+var blankIndex = 0;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -99,10 +96,8 @@ function init() {
     var success = createManifest();
     if (success == 1) {
         manifest.push(
-            { id: "question", src: gameAssetsPath + "question.png" },
-            { id: "question1", src: gameAssetsPath + "question1.png" },         
-            { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" }
-            
+            { id: "question", src: gameAssetsPath + "question.png" }
+
         )
         preloadAllAssets()
         stage.update();
@@ -133,31 +128,7 @@ function doneLoading1(event) {
         question.visible = false;
 
     }
-    if (id == "question1") {
-        var choiceSpriteSheet = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("question1")],
-            "frames": { "regX": 50, "height": 105, "count": 64, "regY": 50, "width": 102 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-        });
-        question1 = new createjs.Sprite(choiceSpriteSheet);
-        container.parent.addChild(question1);
-        question1.visible = false;
-        }
-    if (id == "choice1") {
-        var choiceSpriteSheet = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("choice1")],
-            "frames": { "regX": 50, "height": 150, "count": 64, "regY": 50, "width": 149 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-        });
 
-        choice1 = new createjs.Sprite(choiceSpriteSheet);
-        container.parent.addChild(choice1);
-        choice1.visible = false;
-
-    }
-  
 
     if (id == "chHolder") {
         chHolderMC = new createjs.Bitmap(preload.getResult('chHolder'));
@@ -200,20 +171,18 @@ function CreateGameElements() {
     question.y = 235;
     question.visible = false;
     question.scaleX = question.scaleY = .8;
-    container.parent.addChild(choice1);
-    choice1.visible = false;
     //maxLetterCnt
     for (i = 0; i < 3; i++) {
-        choiceArr[i] = choice1.clone()
+        choiceArr[i] = createBirthdayChoiceTile();
         choiceArr[i].scaleX = choiceArr[i].scaleY = .65;
         choiceArr[i].visible = false;
         container.parent.addChild(choiceArr[i]);
         choiceArr[i].x = 465 + (i * 160);
         choiceArr[i].y = 620;
     }
- 
+
     for (i = 0; i < 10; i++) {
-        quesArr[i] = question1.clone()
+        quesArr[i] = createBirthdayQuestionTile();
         quesArr[i].visible = false;
         container.parent.addChild(quesArr[i]);
         quesArr[i].x = 105 + (i * 120);
@@ -232,20 +201,24 @@ function CreateGameElements() {
 
 function helpDisable() {
     for (i = 0; i < cLen; i++) {
-        choiceMcArr[i].mouseEnabled = false;
+        if (choiceArr[i]) {
+            choiceArr[i].mouseEnabled = false;
+        }
     }
 }
 
 function helpEnable() {
     for (i = 0; i < cLen; i++) {
-        choiceMcArr[i].mouseEnabled = true;
+        if (choiceArr[i]) {
+            choiceArr[i].mouseEnabled = true;
+        }
     }
 }
 //=================================================================================================================================//
 function pickques() {
     pauseTimer()
     tx = 0;
-    qscnt++;    
+    qscnt++;
     cnt++;
     quesCnt++;
     chpos = [];
@@ -255,45 +228,60 @@ function pickques() {
     lCnt = -1;
     cLen = 0;
     alphabetArr = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+    answerArr = [];
+    decoyArr = [];
     wrdCnt = -1;
     //txtLabel.text = "";
     isCorrect = "";
-	QusTxtString.visible = true;
+        QusTxtString.visible = true;
    panelVisibleFn()
     correctAnswer = words_arry[qno[cnt]];
     question.gotoAndStop(qno[cnt])
     question.visible = false;
     ans = correctAnswer;
-    cLen = ans.length;
+    var uppercaseAnswer = correctAnswer.toUpperCase();
+    cLen = uppercaseAnswer.length;
     for (i = 0; i < cLen; i++) {
-        answerArr[i] = ans.charAt(i);
-        indexArr1[i] = alphabetArr.indexOf(answerArr[i].toUpperCase())
-        indexArr2[i] = alphabetArr1.indexOf(answerArr[i].toUpperCase())
-        alphabetArr.splice(indexArr1[i], 1)
+        answerArr[i] = uppercaseAnswer.charAt(i);
+    }
+    blankIndex = range(0, cLen - 1)
+    var missingLetter = answerArr[blankIndex];
+    var removeIndex = alphabetArr.indexOf(missingLetter);
+    if (removeIndex > -1) {
+        alphabetArr.splice(removeIndex, 1);
     }
     alphabetArr.sort(randomSort)
-    for (i = 0; i < 3; i++) {
-        indexArr3[i] = alphabetArr1.indexOf(alphabetArr[i].toUpperCase())
-    }
-    rand = range(0, cLen - 1)
-    for (i = 0; i < cLen; i++) {
-        quesArr[i].gotoAndStop(indexArr2[i])
-        if (i == rand) {
-            quesArr[i].gotoAndStop(26)
+    for (i = 0; i < alphabetArr.length; i++) {
+        if (decoyArr.length >= 2) {
+            break;
         }
+        if (alphabetArr[i] !== missingLetter && decoyArr.indexOf(alphabetArr[i]) === -1) {
+            decoyArr.push(alphabetArr[i]);
+        }
+    }
+    for (i = 0; i < cLen; i++) {
+        styleBirthdayQuestionTile(quesArr[i], answerArr[i], i === blankIndex);
+        quesArr[i].visible = false;
+    }
+    for (i = cLen; i < quesArr.length; i++) {
         quesArr[i].visible = false;
     }
     rand1 =chposArr[cnt]
+    var decoyIndex = 0;
     for (i = 0; i < 3; i++) {
-        choiceArr[i].gotoAndStop(indexArr3[i])
-        choiceArr[i].name = indexArr3[i]
-        if (i == rand1) {
-            choiceArr[i].gotoAndStop(indexArr2[rand])
-            choiceArr[i].name = indexArr2[rand]
+        var letterChoice = missingLetter;
+        if (i !== rand1) {
+            if (decoyIndex >= decoyArr.length) {
+                decoyIndex = 0;
+            }
+            letterChoice = decoyArr[decoyIndex++];
         }
+        styleBirthdayChoiceTile(choiceArr[i], letterChoice);
+        choiceArr[i].name = letterChoice;
+        choiceArr[i].letter = letterChoice;
         choiceArr[i].visible = false;
     }
-    ans = indexArr2[rand]
+    ans = missingLetter;
     console.log("correct3Answer= " + correctAnswer)
     for (i = 0; i < cLen; i++) {
 
@@ -445,9 +433,9 @@ function answerSelected(e) {
         currentX = e.currentTarget.x - 30
         currentY = e.currentTarget.y - 20
         disableMouse()
-      
-        quesArr[rand].gotoAndStop(indexArr2[rand])
-		try { ChoiceFX_revealPop(quesArr[rand], "pop"); } catch(_e){}
+
+        styleBirthdayQuestionTile(quesArr[blankIndex], ans, false);
+                try { ChoiceFX_revealPop(quesArr[blankIndex], "pop"); } catch(_e){}
         for (i = 0; i < 3; i++) {
             choiceArr[i].removeEventListener("click", answerSelected)
         }
@@ -474,6 +462,127 @@ function disableMouse() {
 function enableMouse() {
 
 }
+
+
+function toFiniteNumber(value, fallback) {
+    var num = Number(value);
+    if (!isFinite(num)) {
+        num = Number(fallback);
+        if (!isFinite(num)) {
+            num = 0;
+        }
+    }
+    return num;
+}
+
+function buildBirthdayTile(options) {
+    options = options || {};
+    var tile = new createjs.Container();
+    tile.mouseChildren = false;
+    var width = toFiniteNumber(options.width, 120);
+    var height = toFiniteNumber(options.height, 120);
+    var radius = toFiniteNumber(options.radius, 28);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
+    var font = options.font || "700 60px 'Nunito', 'Arial', sans-serif";
+    var textColor = options.color || "#452a72";
+    var textOffsetY = toFiniteNumber(options.textOffsetY, 0);
+
+    var bg = new createjs.Shape();
+    tile.addChild(bg);
+
+    var label = new createjs.Text("", font, textColor);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.x = width / 2;
+    label.y = height / 2 + textOffsetY;
+    tile.addChild(label);
+
+    tile.bg = bg;
+    tile.label = label;
+    tile.tileWidth = width;
+    tile.tileHeight = height;
+    tile.tileRadius = radius;
+    tile.regX = width / 2;
+    tile.regY = height / 2;
+    tile.shadow = new createjs.Shadow("rgba(0,0,0,0.18)", 0, 6, 18);
+
+    return tile;
+}
+
+
+
+function createBirthdayQuestionTile() {
+    return buildBirthdayTile({
+        width: 118,
+        height: 128,
+        radius: 32,
+        font: "700 58px 'Nunito', 'Arial', sans-serif",
+        color: "#452a72",
+        textOffsetY: 2
+    });
+}
+
+function createBirthdayChoiceTile() {
+    return buildBirthdayTile({
+        width: 136,
+        height: 136,
+        radius: 38,
+        font: "700 64px 'Nunito', 'Arial', sans-serif",
+        color: "#7a3600",
+        textOffsetY: 3
+    });
+}
+
+function styleBirthdayQuestionTile(tile, letter, isBlank) {
+    if (!tile) {
+        return;
+    }
+    var g = tile.bg.graphics;
+    g.clear();
+    var width = toFiniteNumber(tile.tileWidth, 118);
+    var height = toFiniteNumber(tile.tileHeight, 128);
+    var radius = toFiniteNumber(tile.tileRadius, 32);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
+    var fill = isBlank ? ["#ffe8f5", "#ffd6eb"] : ["#ffffff", "#ffe2f4"];
+    var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
+    g.setStrokeStyle(4)
+        .beginStroke(stroke)
+        .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
+        .drawRoundRect(0, 0, width, height, radius);
+
+    tile.label.text = isBlank ? "?" : (letter || "");
+    tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
+    tile.label.alpha = isBlank ? 0.65 : 1;
+    tile.bg.alpha = isBlank ? 0.85 : 1;
+}
+
+
+
+function styleBirthdayChoiceTile(tile, letter) {
+    if (!tile) {
+        return;
+    }
+    var g = tile.bg.graphics;
+    g.clear();
+    var width = toFiniteNumber(tile.tileWidth, 136);
+    var height = toFiniteNumber(tile.tileHeight, 136);
+    var radius = toFiniteNumber(tile.tileRadius, 38);
+    if (width <= 0) { width = 1; }
+    if (height <= 0) { height = 1; }
+    if (radius < 0) { radius = 0; }
+    g.setStrokeStyle(4)
+        .beginStroke("#ffb660")
+        .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
+        .drawRoundRect(0, 0, width, height, radius);
+    tile.label.text = letter || "";
+    tile.label.color = "#7a3600";
+    tile.label.alpha = 1;
+}
+
 
 
 //===============================================================================================//
