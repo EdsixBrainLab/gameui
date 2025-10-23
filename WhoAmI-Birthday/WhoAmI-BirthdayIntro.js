@@ -5,9 +5,11 @@ var introChoice1TweenArr = []
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
+var introQuestxtX = 640; introQuestxtY = 135;
+
 var introQuesTextX =0, introQuesTextY = -50;
-var introArrowX = 765, introArrowY = 520;
-var introfingureX =800, introfingureY = 590;
+var introArrowX = 835, introArrowY = 520;
+var introfingureX =840, introfingureY = 640;
 var introSampleLetters = ["C", "A", "K", "E"];
 var introSampleBlankIndex = 2;
 var introSampleChoiceLetters = ["L", "M", "K"];
@@ -15,13 +17,13 @@ var introSampleCorrectIndex = 2;
 var introQuestionHolder;
 var introLayoutRoot;
 var birthdayLayoutConfig = (typeof window !== "undefined" && window.WhoAmIBirthdayLayout) ? window.WhoAmIBirthdayLayout : {};
-var introQuestionRowY = birthdayLayoutConfig.questionRowY || 520;
-var introChoiceRowY = birthdayLayoutConfig.choiceRowY || 688;
-var introHolderY = birthdayLayoutConfig.questionHolderY || 256;
+var introQuestionRowY = birthdayLayoutConfig.questionRowY || 500;
+var introChoiceRowY = birthdayLayoutConfig.choiceRowY || 648;
+var introHolderY = birthdayLayoutConfig.questionHolderY || 300;
 var introQuestionSpacing = birthdayLayoutConfig.questionRowSpacing || 138;
-var introChoiceSpacing = birthdayLayoutConfig.choiceRowSpacing || 210;
+var introChoiceSpacing = birthdayLayoutConfig.choiceRowSpacing || 190;
 var introChoiceBaseScale = birthdayLayoutConfig.choiceBaseScale || 0.7;
-var introQuestionImageScale = birthdayLayoutConfig.questionImageScale || 0.76;
+var introQuestionImageScale = birthdayLayoutConfig.questionImageScale || 0.66;
 function introGetCenterX() {
     if (birthdayLayoutConfig && typeof birthdayLayoutConfig.getStageCenter === "function") {
         var configCenter = birthdayLayoutConfig.getStageCenter();
@@ -144,8 +146,8 @@ function commongameintro() {
 
     introQues = question.clone();
     introQuestionHolder.addChild(introQues)
-    introQues.x = 0;
-    introQues.y = -6;
+    introQues.x = -48;
+    introQues.y = -36;
     introQues.visible = false;
     introQues.alpha = 0;
     introQues.gotoAndStop(0);
@@ -154,10 +156,16 @@ function commongameintro() {
     introQues.scaleX = introQues.scaleY = introQuestionImageScale;
     introQues.mouseEnabled = false;
 
-    introQuestxt = QusTxtString.clone();
+     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
-    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, {padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke:"rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22});
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX;
+    introQuestxt.y = introQuestxtY;
 
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     
     introArrow = arrow1.clone();
@@ -190,15 +198,8 @@ function commongameintro() {
     }
 
 ////////////////////////////////////////////////////////////////////////////////////
-    var introPromptCenterX = introGetCenterX();
-    createjs.Tween.get(introQuestxt)
-        .to({ x: introPromptCenterX, y: INTRO_PROMPT_Y - 50, visible: true, alpha: 1 }, 1500)
-        .call(function () {
-            if (introQuestxt && introQuestxt.__labelBG && typeof introQuestxt.__labelBG.refresh === "function") {
-                introQuestxt.__labelBG.refresh();
-            }
-            handleComplete1_1();
-        });
+     introQuestxt.alpha = 0;
+    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
 
 }
 function handleComplete1_1() {

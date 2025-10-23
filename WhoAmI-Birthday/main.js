@@ -26,13 +26,13 @@ var quesArr = []
 var answerArr = []
 var decoyArr = []
 var blankIndex = 0;
-var QUESTION_HOLDER_Y = 256;
-var QUESTION_ROW_Y = 520;
-var CHOICE_ROW_Y = 688;
+var QUESTION_HOLDER_Y = 300;
+var QUESTION_ROW_Y = 500;
+var CHOICE_ROW_Y = 648;
 var QUESTION_ROW_SPACING = 138;
-var CHOICE_ROW_SPACING = 210;
+var CHOICE_ROW_SPACING = 190;
 var CHOICE_TILE_BASE_SCALE = 0.7;
-var QUESTION_IMAGE_BASE_SCALE = 0.76;
+var QUESTION_IMAGE_BASE_SCALE = 0.66;
 var layoutRoot;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
@@ -196,8 +196,8 @@ function CreateGameElements() {
         question.alpha = 0;
         question.regX = 50;
         question.regY = 50;
-        question.x = 0;
-        question.y = -6;
+        question.x = -48;
+        question.y = -36;
         question.scaleX = question.scaleY = QUESTION_IMAGE_BASE_SCALE;
         question.mouseEnabled = false;
     }
@@ -220,6 +220,7 @@ function CreateGameElements() {
         quesArr[i].visible = false;
         quesArr[i].baseScale = 1;
         layoutRoot.addChild(quesArr[i]);
+		quesArr[i].scaleX = quesArr[i].scaleY = .8;
         quesArr[i].x = 0;
         quesArr[i].y = QUESTION_ROW_Y;
     }
@@ -501,9 +502,9 @@ function applyBirthdayLayout(letterCount) {
 
 function createBirthdayQuestionHolder() {
     var holder = new createjs.Container();
-    var width = 420;
-    var height = 240;
-    var radius = 46;
+    var width = 210;
+    var height = 210;
+    var radius = 56;
 
     var shadow = new createjs.Shape();
     shadow.graphics.beginFill("rgba(0,0,0,0.18)").drawRoundRect(-width / 2, -height / 2 + 12, width, height, radius);
@@ -815,6 +816,3 @@ function resetBirthdayChoiceTile(tile) {
 
 
 //===============================================================================================//
-
-
-
