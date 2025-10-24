@@ -34,7 +34,7 @@ var CHOICE_ROW_Y = 648;
 var QUESTION_ROW_SPACING = 138;
 var CHOICE_ROW_SPACING = 190;
 var CHOICE_TILE_BASE_SCALE = 0.7;
-var QUESTION_IMAGE_BASE_SCALE = 0.66;
+var QUESTION_IMAGE_BASE_SCALE = 0.6;
 var layoutRoot;
 var BIRTHDAY_CHOICE_BASE_STYLE = {
     stroke: "#ffb660",
@@ -214,8 +214,8 @@ function CreateGameElements() {
         question.alpha = 0;
         question.regX = 50;
         question.regY = 50;
-        question.x = -48;
-        question.y = -36;
+        question.x = -45;
+        question.y = -40;
         question.scaleX = question.scaleY = QUESTION_IMAGE_BASE_SCALE;
         question.mouseEnabled = false;
     }
@@ -1057,7 +1057,7 @@ function startBirthdayChoicePulse(tile, baseScale) {
 
     if (tile.pulse) {
         var pulseBase = tile.pulse.__baseScale || 1;
-        tile.pulse.visible = true;
+        tile.pulse.visible = false;
         tile.pulse.alpha = 0.62;
         tile.pulse.scaleX = tile.pulse.scaleY = pulseBase;
         tile.pulse.__idleTween = createjs.Tween.get(tile.pulse, { loop: true, override: false })
@@ -1173,7 +1173,7 @@ function emphasizeBirthdayChoice(tile, isHover) {
 
     if (tile.pulse) {
         var pulseBase = tile.pulse.__baseScale || 1;
-        tile.pulse.visible = true;
+        tile.pulse.visible = false;
         createjs.Tween.get(tile.pulse, { override: true })
             .to({
                 alpha: isHover ? 0.9 : 0.62,
