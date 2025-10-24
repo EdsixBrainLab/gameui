@@ -243,6 +243,9 @@ function helpDisable() {
             choiceArr[i].mouseEnabled = false;
         }
     }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = false;
+    }
 }
 
 function helpEnable() {
@@ -250,6 +253,9 @@ function helpEnable() {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = true;
         }
+    }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = true;
     }
 }
 //=================================================================================================================================//
@@ -548,6 +554,10 @@ function AddListenerFn() {
         repTimeClearInterval = 0;
     }
 
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = true;
+    }
+
     for (i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) {
             continue;
@@ -574,6 +584,9 @@ function disablechoices() {
         choiceArr[i].cursor = "default";
         choiceArr[i].mouseEnabled = false;
         choiceArr[i].visible = false;
+    }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = false;
     }
     for (i = 0; i < cLen; i++) {
         quesArr[i].visible = false
