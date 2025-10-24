@@ -187,14 +187,19 @@ function commongameintro() {
         introChoiceQues[i].y= introQuestionRowY;
     }
     var introChoicePositions = introComputeRowPositions(introSampleChoiceLetters.length, introChoiceSpacing, layoutCenterX);
-     for (i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         introchoiceArr[i] = createBirthdayChoiceTile();
-        introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = introChoiceBaseScale;
         introchoiceArr[i].baseScale = introChoiceBaseScale;
+        if (introchoiceArr[i].inner) {
+            introchoiceArr[i].inner.scaleX = introchoiceArr[i].inner.scaleY = introChoiceBaseScale;
+        } else {
+            introchoiceArr[i].scaleX = introchoiceArr[i].scaleY = introChoiceBaseScale;
+        }
         introchoiceArr[i].visible = false;
         introLayoutRoot.addChild(introchoiceArr[i]);
         introchoiceArr[i].x = introChoicePositions[i] || layoutCenterX;
         introchoiceArr[i].y = introChoiceRowY;
+        introchoiceArr[i].__targetY = introChoiceRowY;
     }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -288,16 +293,26 @@ function choiceTween() {
         introStopChoicePulse(tile);
         tile.visible = true;
         tile.alpha = 0;
-        tile.scaleX = tile.scaleY = Math.max(introChoiceBaseScale - 0.18, 0.4);
+        if (tile.inner) {
+            tile.inner.scaleX = tile.inner.scaleY = Math.max(introChoiceBaseScale - 0.18, 0.4);
+        } else {
+            tile.scaleX = tile.scaleY = Math.max(introChoiceBaseScale - 0.18, 0.4);
+        }
         tile.x = positions[i] || layoutCenterX;
         tile.y = introChoiceRowY + 48;
         tile.mouseEnabled = false;
         tile.cursor = "default";
         (function(target, index) {
+            var revealDelay = baseDelay + (index * 160);
             createjs.Tween.get(target, { override: true })
-                .wait(baseDelay + (index * 160))
-                .to({ alpha: 1, y: introChoiceRowY, scaleX: introChoiceBaseScale + 0.16, scaleY: introChoiceBaseScale + 0.16 }, 340, createjs.Ease.backOut)
-                .to({ scaleX: introChoiceBaseScale, scaleY: introChoiceBaseScale }, 220, createjs.Ease.sineOut)
+                .wait(revealDelay)
+                .to({ alpha: 1, y: introChoiceRowY }, 320, createjs.Ease.quadOut);
+
+            var scaleTarget = target.inner || target;
+            createjs.Tween.get(scaleTarget, { override: true })
+                .wait(revealDelay)
+                .to({ scaleX: introChoiceBaseScale + 0.18, scaleY: introChoiceBaseScale + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: introChoiceBaseScale, scaleY: introChoiceBaseScale }, 240, createjs.Ease.sineOut)
                 .call(function () {
                     introStartChoicePulse(target, introChoiceBaseScale);
                     if (index === introSampleCorrectIndex) {

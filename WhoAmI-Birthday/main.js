@@ -2,7 +2,9 @@ var messageField;		//Message display field
 
 var assets = [];
 var choiceArr = [];
-var choiceMcArr = []
+var choiceGlowArr = [];
+var choicePulseArr = [];
+var choiceIdleStateArr = [];
 var textArr = []
 var qno = [];
 var strArr = []
@@ -34,6 +36,22 @@ var CHOICE_ROW_SPACING = 190;
 var CHOICE_TILE_BASE_SCALE = 0.7;
 var QUESTION_IMAGE_BASE_SCALE = 0.66;
 var layoutRoot;
+var BIRTHDAY_CHOICE_BASE_STYLE = {
+    stroke: "#ffb660",
+    fill: ["#fff4d4", "#ffd78a"]
+};
+var BIRTHDAY_CHOICE_HOVER_STYLE = {
+    stroke: "#ff9d42",
+    fill: ["#ffeac0", "#ffc260"]
+};
+var BIRTHDAY_CHOICE_PRESS_STYLE = {
+    stroke: "#ff8628",
+    fill: ["#ffd69a", "#ffb24e"]
+};
+var BIRTHDAY_CHOICE_DISABLED_STYLE = {
+    stroke: "#d3a170",
+    fill: ["#f3e2c2", "#e7c792"]
+};
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 //var alphaarr = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
 var btnX = ["178.3", "288.3", "398.3", "508.3", "618.3", "728.3", "688.3", "288.3", "338.3", "418.3", "498.3", "578.3"];
@@ -203,16 +221,21 @@ function CreateGameElements() {
     }
 
     for (i = 0; i < 3; i++) {
-        choiceArr[i] = createBirthdayChoiceTile();
-        choiceArr[i].scaleX = choiceArr[i].scaleY = CHOICE_TILE_BASE_SCALE;
-        choiceArr[i].visible = false;
-        choiceArr[i].baseScale = CHOICE_TILE_BASE_SCALE;
-        layoutRoot.addChild(choiceArr[i]);
-        choiceArr[i].x = 0;
-        choiceArr[i].y = CHOICE_ROW_Y;
-        bindBirthdayChoiceTile(choiceArr[i]);
-        choiceArr[i].mouseEnabled = false;
-        choiceArr[i].cursor = "default";
+        var choiceTile = createBirthdayChoiceTile();
+        choiceTile.visible = false;
+        choiceTile.alpha = 0;
+        choiceTile.x = 0;
+        choiceTile.y = CHOICE_ROW_Y;
+        choiceTile.__targetY = CHOICE_ROW_Y;
+        choiceTile.__choiceIndex = i;
+        choiceTile.mouseEnabled = false;
+        choiceTile.cursor = "default";
+        layoutRoot.addChild(choiceTile);
+        bindBirthdayChoiceTile(choiceTile, i);
+        choiceArr[i] = choiceTile;
+        choiceGlowArr[i] = choiceTile.glow;
+        choicePulseArr[i] = choiceTile.pulse;
+        resetBirthdayChoiceTile(choiceTile);
     }
 
     for (i = 0; i < 10; i++) {
@@ -243,6 +266,9 @@ function helpDisable() {
             choiceArr[i].mouseEnabled = false;
         }
     }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = false;
+    }
 }
 
 function helpEnable() {
@@ -250,6 +276,9 @@ function helpEnable() {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = true;
         }
+    }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = true;
     }
 }
 //=================================================================================================================================//
@@ -397,21 +426,41 @@ function animateChoiceOptions(startDelay) {
         var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
         var entryScale = Math.max(baseScale - 0.18, 0.4);
         createjs.Tween.removeTweens(tile);
+        if (tile.inner) {
+            createjs.Tween.removeTweens(tile.inner);
+        }
         stopBirthdayChoicePulse(tile);
         tile.visible = true;
         tile.alpha = 0;
         tile.y = targetY + 48;
-        tile.scaleX = tile.scaleY = entryScale;
+        if (tile.inner) {
+            tile.inner.scaleX = tile.inner.scaleY = entryScale;
+        }
         tile.mouseEnabled = false;
         tile.cursor = "default";
         (function (target, delayIndex, base) {
+            var revealDelay = baseDelay + (delayIndex * 160);
             createjs.Tween.get(target, { override: true })
-                .wait(baseDelay + (delayIndex * 160))
-                .to({ alpha: 1, y: targetY, scaleX: base + 0.16, scaleY: base + 0.16 }, 360, createjs.Ease.backOut)
-                .to({ scaleX: base, scaleY: base }, 240, createjs.Ease.sineOut)
-                .call(function () {
-                    startBirthdayChoicePulse(target, base);
-                });
+                .wait(revealDelay)
+                .to({ alpha: 1, y: targetY }, 320, createjs.Ease.quadOut);
+
+            if (target.inner) {
+                createjs.Tween.get(target.inner, { override: true })
+                    .wait(revealDelay)
+                    .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                    .to({ scaleX: base, scaleY: base }, 240, createjs.Ease.sineOut)
+                    .call(function () {
+                        startBirthdayChoicePulse(target, base);
+                    });
+            } else {
+                createjs.Tween.get(target, { override: false })
+                    .wait(revealDelay)
+                    .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                    .to({ scaleX: base, scaleY: base }, 240, createjs.Ease.sineOut)
+                    .call(function () {
+                        startBirthdayChoicePulse(target, base);
+                    });
+            }
         })(tile, i, baseScale);
     }
 }
@@ -485,6 +534,7 @@ function applyBirthdayLayout(letterCount) {
         if (choiceArr[j]) {
             choiceArr[j].x = choicePositions[j] || layoutCenterX;
             choiceArr[j].y = CHOICE_ROW_Y;
+            choiceArr[j].__targetY = CHOICE_ROW_Y;
         }
     }
 
@@ -548,6 +598,10 @@ function AddListenerFn() {
         repTimeClearInterval = 0;
     }
 
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = true;
+    }
+
     for (i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) {
             continue;
@@ -574,6 +628,9 @@ function disablechoices() {
         choiceArr[i].cursor = "default";
         choiceArr[i].mouseEnabled = false;
         choiceArr[i].visible = false;
+    }
+    if (layoutRoot) {
+        layoutRoot.mouseEnabled = false;
     }
     for (i = 0; i < cLen; i++) {
         quesArr[i].visible = false
@@ -646,6 +703,20 @@ function buildBirthdayTile(options) {
     options = options || {};
     var tile = new createjs.Container();
     tile.mouseChildren = false;
+    var inner = new createjs.Container();
+    inner.mouseChildren = false;
+    tile.addChild(inner);
+
+    var glow = new createjs.Shape();
+    glow.visible = false;
+    glow.alpha = 0;
+    inner.addChild(glow);
+
+    var pulse = new createjs.Shape();
+    pulse.visible = false;
+    pulse.alpha = 0;
+    inner.addChild(pulse);
+
     var width = toFiniteNumber(options.width, 120);
     var height = toFiniteNumber(options.height, 120);
     var radius = toFiniteNumber(options.radius, 28);
@@ -657,22 +728,26 @@ function buildBirthdayTile(options) {
     var textOffsetY = toFiniteNumber(options.textOffsetY, 0);
 
     var bg = new createjs.Shape();
-    tile.addChild(bg);
+    bg.graphics.drawRoundRect(-width / 2, -height / 2, width, height, radius);
+    inner.addChild(bg);
 
     var label = new createjs.Text("", font, textColor);
     label.textAlign = "center";
     label.textBaseline = "middle";
-    label.x = width / 2;
-    label.y = height / 2 + textOffsetY;
-    tile.addChild(label);
+    label.x = 0;
+    label.y = textOffsetY;
+    inner.addChild(label);
 
+    tile.inner = inner;
+    tile.glow = glow;
+    tile.pulse = pulse;
     tile.bg = bg;
     tile.label = label;
     tile.tileWidth = width;
     tile.tileHeight = height;
     tile.tileRadius = radius;
-    tile.regX = width / 2;
-    tile.regY = height / 2;
+    tile.regX = 0;
+    tile.regY = 0;
     tile.shadow = new createjs.Shadow("rgba(0,0,0,0.18)", 0, 6, 18);
 
     return tile;
@@ -681,7 +756,7 @@ function buildBirthdayTile(options) {
 
 
 function createBirthdayQuestionTile() {
-    return buildBirthdayTile({
+    var tile = buildBirthdayTile({
         width: 118,
         height: 128,
         radius: 32,
@@ -689,10 +764,16 @@ function createBirthdayQuestionTile() {
         color: "#452a72",
         textOffsetY: 2
     });
+    tile.baseScale = 1;
+    if (tile.inner) {
+        tile.inner.scaleX = tile.inner.scaleY = tile.baseScale;
+    }
+    configureBirthdayChoiceVisuals(tile);
+    return tile;
 }
 
 function createBirthdayChoiceTile() {
-    return buildBirthdayTile({
+    var tile = buildBirthdayTile({
         width: 136,
         height: 136,
         radius: 38,
@@ -700,9 +781,15 @@ function createBirthdayChoiceTile() {
         color: "#7a3600",
         textOffsetY: 3
     });
+    tile.baseScale = CHOICE_TILE_BASE_SCALE;
+    if (tile.inner) {
+        tile.inner.scaleX = tile.inner.scaleY = tile.baseScale;
+    }
+    configureBirthdayChoiceVisuals(tile);
+    return tile;
 }
 
-function bindBirthdayChoiceTile(tile) {
+function bindBirthdayChoiceTile(tile, index) {
     if (!tile || tile.__birthdayChoiceBound) {
         return;
     }
@@ -710,13 +797,12 @@ function bindBirthdayChoiceTile(tile) {
     tile.__birthdayChoiceBound = true;
     tile.mouseChildren = false;
     tile.cursor = "pointer";
+    if (typeof index === "number") {
+        tile.__choiceIndex = index;
+    }
     tile.addEventListener("click", answerSelected);
 
-    if (typeof ChoiceFX_bindHover === "function") {
-        try {
-            ChoiceFX_bindHover([tile]);
-        } catch (_e) { }
-    } else if (!tile.hitArea) {
+    if (!tile.hitArea) {
         var hitWidth = toFiniteNumber(tile.tileWidth, 140);
         var hitHeight = toFiniteNumber(tile.tileHeight, 140);
         var hitRadius = toFiniteNumber(tile.tileRadius, 36);
@@ -725,8 +811,153 @@ function bindBirthdayChoiceTile(tile) {
         tile.hitArea = hit;
     }
 
+    attachBirthdayChoiceInteractions(tile);
+
     tile.mouseEnabled = false;
     tile.cursor = "default";
+}
+
+function getBirthdayChoiceIndex(tile) {
+    if (!tile) {
+        return -1;
+    }
+
+    if (typeof tile.__choiceIndex === "number") {
+        return tile.__choiceIndex;
+    }
+
+    for (var idx = 0; idx < choiceArr.length; idx++) {
+        if (choiceArr[idx] === tile) {
+            tile.__choiceIndex = idx;
+            return idx;
+        }
+    }
+
+    return -1;
+}
+
+function attachBirthdayChoiceInteractions(tile) {
+    if (!tile) {
+        return;
+    }
+
+    detachBirthdayChoiceInteractions(tile);
+
+    tile.__hoverHandler = tile.on("mouseover", function () {
+        var index = getBirthdayChoiceIndex(tile);
+        if (index === -1) {
+            return;
+        }
+        tile.__isHover = true;
+        stopBirthdayChoicePulse(tile);
+        emphasizeBirthdayChoice(tile, true);
+    });
+
+    tile.__outHandler = tile.on("mouseout", function () {
+        var index = getBirthdayChoiceIndex(tile);
+        if (index === -1) {
+            return;
+        }
+        tile.__isHover = false;
+        emphasizeBirthdayChoice(tile, false);
+        startBirthdayChoicePulse(tile, tile.baseScale);
+    });
+
+    tile.__downHandler = tile.on("mousedown", function () {
+        pressBirthdayChoice(tile);
+    });
+
+    tile.__upHandler = tile.on("pressup", function () {
+        releaseBirthdayChoice(tile);
+    });
+}
+
+function detachBirthdayChoiceInteractions(tile) {
+    if (!tile) {
+        return;
+    }
+
+    if (tile.__hoverHandler) {
+        tile.off("mouseover", tile.__hoverHandler);
+        tile.__hoverHandler = null;
+    }
+    if (tile.__outHandler) {
+        tile.off("mouseout", tile.__outHandler);
+        tile.__outHandler = null;
+    }
+    if (tile.__downHandler) {
+        tile.off("mousedown", tile.__downHandler);
+        tile.__downHandler = null;
+    }
+    if (tile.__upHandler) {
+        tile.off("pressup", tile.__upHandler);
+        tile.__upHandler = null;
+    }
+}
+
+function configureBirthdayChoiceVisuals(tile) {
+    if (!tile) {
+        return;
+    }
+
+    var width = toFiniteNumber(tile.tileWidth, 136);
+    var height = toFiniteNumber(tile.tileHeight, 136);
+    var radius = toFiniteNumber(tile.tileRadius, 38);
+
+    drawBirthdayChoiceBackground(tile, BIRTHDAY_CHOICE_BASE_STYLE, width, height, radius);
+
+    if (tile.glow) {
+        var glowRadius = Math.max(width, height) * 0.62;
+        tile.glow.graphics
+            .clear()
+            .beginRadialGradientFill([
+                "rgba(255,217,165,0.45)",
+                "rgba(255,217,165,0)"
+            ], [0, 1], 0, 0, glowRadius * 0.12, 0, 0, glowRadius)
+            .drawCircle(0, 0, glowRadius);
+        tile.glow.alpha = 0;
+        tile.glow.visible = true;
+        tile.glow.__baseAlpha = 0.38;
+    }
+
+    if (tile.pulse) {
+        var pulseRadius = Math.max(width, height) * 0.52;
+        tile.pulse.graphics
+            .clear()
+            .setStrokeStyle(4)
+            .beginStroke("rgba(255,166,66,0.58)")
+            .drawCircle(0, 0, pulseRadius);
+        tile.pulse.alpha = 0;
+        tile.pulse.visible = false;
+        tile.pulse.__baseScale = 1;
+    }
+
+    if (!tile.shadow) {
+        tile.shadow = new createjs.Shadow("rgba(9,18,36,0.26)", 0, 16, 32);
+    }
+}
+
+function drawBirthdayChoiceBackground(tile, palette, width, height, radius) {
+    if (!tile || !tile.bg) {
+        return;
+    }
+
+    var shape = tile.bg;
+    var colors = (palette && palette.fill) || BIRTHDAY_CHOICE_BASE_STYLE.fill;
+    var stroke = (palette && palette.stroke) || BIRTHDAY_CHOICE_BASE_STYLE.stroke;
+    var w = toFiniteNumber(width, tile.tileWidth || 136);
+    var h = toFiniteNumber(height, tile.tileHeight || 136);
+    var r = toFiniteNumber(radius, tile.tileRadius || 36);
+    if (w <= 0) { w = 1; }
+    if (h <= 0) { h = 1; }
+    if (r < 0) { r = 0; }
+
+    shape.graphics
+        .clear()
+        .setStrokeStyle(4)
+        .beginStroke(stroke)
+        .beginLinearGradientFill(colors, [0, 1], 0, -h / 2, 0, h / 2)
+        .drawRoundRect(-w / 2, -h / 2, w, h, r);
 }
 
 function styleBirthdayQuestionTile(tile, letter, isBlank) {
@@ -743,13 +974,21 @@ function styleBirthdayQuestionTile(tile, letter, isBlank) {
         var stroke = isBlank ? "#ff9cc5" : "#ff7aa9";
         g.setStrokeStyle(4)
             .beginStroke(stroke)
-            .beginLinearGradientFill(fill, [0, 1], 0, 0, 0, height)
-            .drawRoundRect(0, 0, width, height, radius);
+            .beginLinearGradientFill(fill, [0, 1], 0, -height / 2, 0, height / 2)
+            .drawRoundRect(-width / 2, -height / 2, width, height, radius);
 
         tile.label.text = isBlank ? "?" : (letter || "");
         tile.label.color = isBlank ? "#ff6f9f" : "#452a72";
         tile.label.alpha = isBlank ? 0.65 : 1;
         tile.bg.alpha = isBlank ? 0.85 : 1;
+        if (tile.glow) {
+            tile.glow.visible = false;
+            tile.glow.alpha = 0;
+        }
+        if (tile.pulse) {
+            tile.pulse.visible = false;
+            tile.pulse.alpha = 0;
+        }
     }
 }
 
@@ -757,59 +996,252 @@ function styleBirthdayQuestionTile(tile, letter, isBlank) {
 
 function styleBirthdayChoiceTile(tile, letter) {
     if (tile) {
-        var g = tile.bg.graphics;
-        g.clear();
         var width = toFiniteNumber(tile.tileWidth, 136);
         var height = toFiniteNumber(tile.tileHeight, 136);
         var radius = toFiniteNumber(tile.tileRadius, 38);
-        if (width <= 0) { width = 1; }
-        if (height <= 0) { height = 1; }
-        if (radius < 0) { radius = 0; }
-        g.setStrokeStyle(4)
-            .beginStroke("#ffb660")
-            .beginLinearGradientFill(["#fff4d4", "#ffd78a"], [0, 1], 0, 0, 0, height)
-            .drawRoundRect(0, 0, width, height, radius);
+        drawBirthdayChoiceBackground(tile, BIRTHDAY_CHOICE_BASE_STYLE, width, height, radius);
         tile.label.text = letter || "";
         tile.label.color = "#7a3600";
         tile.label.alpha = 1;
+        if (tile.glow) {
+            tile.glow.alpha = 0;
+            tile.glow.visible = true;
+        }
+        if (tile.pulse) {
+            tile.pulse.alpha = 0;
+            tile.pulse.visible = false;
+        }
     }
 }
 
 function startBirthdayChoicePulse(tile, baseScale) {
-    if (tile) {
-        var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || CHOICE_TILE_BASE_SCALE);
-        stopBirthdayChoicePulse(tile);
-        tile.scaleX = tile.scaleY = scale;
-        tile.__pulseTween = createjs.Tween.get(tile, { loop: true })
-            .wait(220)
-            .to({ scaleX: scale + 0.06, scaleY: scale + 0.06 }, 420, createjs.Ease.sineInOut)
-            .to({ scaleX: scale, scaleY: scale }, 420, createjs.Ease.sineInOut);
+    if (!tile) {
+        return;
+    }
+
+    var scale = typeof baseScale === "number" ? baseScale : (tile.baseScale || CHOICE_TILE_BASE_SCALE);
+    var inner = tile.inner || tile;
+    var index = getBirthdayChoiceIndex(tile);
+    var staggerIndex = index >= 0 ? index : 0;
+
+    stopBirthdayChoicePulse(tile);
+
+    if (inner) {
+        inner.scaleX = inner.scaleY = scale;
+        inner.__idleTween = createjs.Tween.get(inner, { loop: true, override: false })
+            .wait((staggerIndex % 3) * 80)
+            .to({ scaleX: scale * 1.06, scaleY: scale * 0.96 }, 360, createjs.Ease.sineOut)
+            .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+            .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+    }
+
+    var baseY = typeof tile.__targetY === "number" ? tile.__targetY : tile.y;
+    if (!isNaN(baseY)) {
+        tile.__baseY = baseY;
+        tile.y = baseY;
+        tile.__idleTween = createjs.Tween.get(tile, { loop: true, override: false })
+            .wait((staggerIndex % 3) * 90)
+            .to({ y: baseY - 10 }, 360, createjs.Ease.sineOut)
+            .to({ y: baseY }, 420, createjs.Ease.sineInOut);
+    }
+
+    if (tile.glow) {
+        var glowBase = tile.glow.__baseAlpha != null ? tile.glow.__baseAlpha : 0.38;
+        tile.glow.visible = true;
+        tile.glow.alpha = glowBase;
+        tile.glow.__idleTween = createjs.Tween.get(tile.glow, { loop: true, override: false })
+            .wait((staggerIndex % 3) * 110)
+            .to({ alpha: Math.min(0.64, glowBase + 0.18) }, 360, createjs.Ease.sineInOut)
+            .to({ alpha: glowBase }, 360, createjs.Ease.sineInOut);
+    }
+
+    if (tile.pulse) {
+        var pulseBase = tile.pulse.__baseScale || 1;
+        tile.pulse.visible = true;
+        tile.pulse.alpha = 0.62;
+        tile.pulse.scaleX = tile.pulse.scaleY = pulseBase;
+        tile.pulse.__idleTween = createjs.Tween.get(tile.pulse, { loop: true, override: false })
+            .wait((staggerIndex % 4) * 120)
+            .to({ scaleX: pulseBase * 1.18, scaleY: pulseBase * 1.18, alpha: 0.85 }, 380, createjs.Ease.quadOut)
+            .to({ scaleX: pulseBase * 1.34, scaleY: pulseBase * 1.34, alpha: 0 }, 320, createjs.Ease.quadIn)
+            .call(function () {
+                tile.pulse.alpha = 0.62;
+                tile.pulse.scaleX = tile.pulse.scaleY = pulseBase;
+            });
+    }
+
+    if (index >= 0) {
+        choiceIdleStateArr[index] = true;
     }
 }
 
 function stopBirthdayChoicePulse(tile) {
-    if (tile) {
-        if (tile.__pulseTween) {
-            tile.__pulseTween.setPaused(true);
-            tile.__pulseTween = null;
-        }
-        if (typeof tile.baseScale === "number") {
-            tile.scaleX = tile.scaleY = tile.baseScale;
-        }
+    if (!tile) {
+        return;
+    }
+
+    var index = getBirthdayChoiceIndex(tile);
+    if (index >= 0) {
+        choiceIdleStateArr[index] = false;
+    }
+
+    var inner = tile.inner || tile;
+    if (inner) {
+        createjs.Tween.removeTweens(inner);
+        var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+        inner.scaleX = inner.scaleY = baseScale;
+        inner.__idleTween = null;
+    }
+
+    createjs.Tween.removeTweens(tile);
+    if (typeof tile.__baseY === "number") {
+        tile.y = tile.__baseY;
+    } else if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    tile.__idleTween = null;
+
+    if (tile.glow) {
+        createjs.Tween.removeTweens(tile.glow);
+        tile.glow.alpha = 0;
+        tile.glow.visible = false;
+        tile.glow.__idleTween = null;
+    }
+
+    if (tile.pulse) {
+        createjs.Tween.removeTweens(tile.pulse);
+        tile.pulse.visible = false;
+        tile.pulse.alpha = 0;
+        var pulseBase = tile.pulse.__baseScale || 1;
+        tile.pulse.scaleX = tile.pulse.scaleY = pulseBase;
+        tile.pulse.__idleTween = null;
     }
 }
 
 function resetBirthdayChoiceTile(tile) {
-    if (tile) {
-        stopBirthdayChoicePulse(tile);
-        createjs.Tween.removeTweens(tile);
+    if (!tile) {
+        return;
+    }
+
+    stopBirthdayChoicePulse(tile);
+    createjs.Tween.removeTweens(tile);
+    if (tile.inner) {
+        createjs.Tween.removeTweens(tile.inner);
         var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
-        tile.scaleX = tile.scaleY = baseScale;
-        tile.alpha = 1;
-        tile.y = CHOICE_ROW_Y;
-        tile.visible = false;
-        tile.mouseEnabled = false;
-        tile.cursor = "default";
+        tile.inner.scaleX = tile.inner.scaleY = baseScale;
+    }
+    tile.alpha = 1;
+    tile.y = CHOICE_ROW_Y;
+    tile.visible = false;
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
+    drawBirthdayChoiceBackground(tile, BIRTHDAY_CHOICE_BASE_STYLE);
+    if (tile.glow) {
+        tile.glow.alpha = 0;
+        tile.glow.visible = true;
+    }
+    if (tile.pulse) {
+        tile.pulse.alpha = 0;
+        tile.pulse.visible = false;
+    }
+}
+
+function emphasizeBirthdayChoice(tile, isHover) {
+    if (!tile) {
+        return;
+    }
+
+    var inner = tile.inner || tile;
+    var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+    var targetScale = baseScale * (isHover ? 1.05 : 1);
+    var palette = isHover ? BIRTHDAY_CHOICE_HOVER_STYLE : BIRTHDAY_CHOICE_BASE_STYLE;
+
+    drawBirthdayChoiceBackground(tile, palette);
+
+    if (inner) {
+        createjs.Tween.get(inner, { override: true })
+            .to({ scaleX: targetScale, scaleY: targetScale }, 160, createjs.Ease.quadOut);
+    }
+
+    if (tile.glow) {
+        var glowBase = tile.glow.__baseAlpha != null ? tile.glow.__baseAlpha : 0.38;
+        var targetAlpha = isHover ? Math.min(0.68, glowBase + 0.22) : glowBase;
+        tile.glow.visible = true;
+        createjs.Tween.get(tile.glow, { override: true })
+            .to({ alpha: targetAlpha }, 160, createjs.Ease.quadOut);
+    }
+
+    if (tile.pulse) {
+        var pulseBase = tile.pulse.__baseScale || 1;
+        tile.pulse.visible = true;
+        createjs.Tween.get(tile.pulse, { override: true })
+            .to({
+                alpha: isHover ? 0.9 : 0.62,
+                scaleX: pulseBase * (isHover ? 1.08 : 1),
+                scaleY: pulseBase * (isHover ? 1.08 : 1)
+            }, 180, createjs.Ease.quadOut);
+    }
+}
+
+function pressBirthdayChoice(tile) {
+    if (!tile) {
+        return;
+    }
+
+    var inner = tile.inner || tile;
+    var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+    drawBirthdayChoiceBackground(tile, BIRTHDAY_CHOICE_PRESS_STYLE);
+
+    if (inner) {
+        createjs.Tween.get(inner, { override: true })
+            .to({ scaleX: baseScale * 0.94, scaleY: baseScale * 0.94 }, 90, createjs.Ease.quadOut);
+    }
+
+    if (tile.glow) {
+        createjs.Tween.get(tile.glow, { override: true })
+            .to({ alpha: 0.95 }, 90, createjs.Ease.quadOut);
+    }
+
+    if (tile.pulse) {
+        var pulseBase = tile.pulse.__baseScale || 1;
+        createjs.Tween.get(tile.pulse, { override: true })
+            .to({ alpha: 0.4, scaleX: pulseBase * 0.9, scaleY: pulseBase * 0.9 }, 90, createjs.Ease.quadOut);
+    }
+}
+
+function releaseBirthdayChoice(tile) {
+    if (!tile) {
+        return;
+    }
+
+    var inner = tile.inner || tile;
+    var baseScale = tile.baseScale || CHOICE_TILE_BASE_SCALE;
+    var palette = tile.__isHover ? BIRTHDAY_CHOICE_HOVER_STYLE : BIRTHDAY_CHOICE_BASE_STYLE;
+    var targetScale = baseScale * (tile.__isHover ? 1.05 : 1);
+
+    drawBirthdayChoiceBackground(tile, palette);
+
+    if (inner) {
+        createjs.Tween.get(inner, { override: true })
+            .to({ scaleX: baseScale * 1.04, scaleY: baseScale * 1.04 }, 120, createjs.Ease.quadOut)
+            .to({ scaleX: targetScale, scaleY: targetScale }, 150, createjs.Ease.quadIn);
+    }
+
+    if (tile.glow) {
+        var glowBase = tile.glow.__baseAlpha != null ? tile.glow.__baseAlpha : 0.38;
+        var targetAlpha = tile.__isHover ? Math.min(0.68, glowBase + 0.22) : glowBase;
+        createjs.Tween.get(tile.glow, { override: true })
+            .to({ alpha: targetAlpha }, 180, createjs.Ease.quadOut);
+    }
+
+    if (tile.pulse) {
+        var pulseBase = tile.pulse.__baseScale || 1;
+        createjs.Tween.get(tile.pulse, { override: true })
+            .to({
+                alpha: tile.__isHover ? 0.82 : 0.62,
+                scaleX: pulseBase * (tile.__isHover ? 1.06 : 1),
+                scaleY: pulseBase * (tile.__isHover ? 1.06 : 1)
+            }, 180, createjs.Ease.quadOut);
     }
 }
 
