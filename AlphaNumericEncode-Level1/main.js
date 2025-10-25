@@ -308,6 +308,7 @@ function createChoices() {
 //====================================================================CHOICE ENABLE/DISABLE==============================================================//
 function enablechoices() {
     console.log("entered")
+    stopChoiceAnimations();
     if (qtype[cnt] == 1) {
         for (i = 0; i < 2; i++) {
             choice1Arr[i].visible = false
@@ -315,6 +316,7 @@ function enablechoices() {
             choice1Arr[i].name = qno[chpos[i]]
             choice1Arr[i].x = btnX1[i]
             choice1Arr[i].y = btnY1[i]
+            choice1Arr[i].baseScale = 1.3
 
         }
     } else {
@@ -324,53 +326,33 @@ function enablechoices() {
             choice2Arr[i].name = qno1[chpos[i]]
             choice2Arr[i].x = btnX1[i]
             choice2Arr[i].y = btnY1[i]
+            choice2Arr[i].baseScale = 1.3
         }
     }
     createTween1();
 }
 function createTween1() {
     QusTxtString.visible = true;
-     
 
-  
+
+
     if (qtype[cnt] == 1) {
         question1.visible = true
         question.visible = false
-        question1.alpha = 0
-        createjs.Tween.get(question1).wait(200).to({ alpha: 0, scaleX: 1.45, scaleY: 1.45 }, 500).to({ alpha: 1, scaleX: 1.5, scaleY: 1.5 }, 500)
+        animateQuestionPrompt(question1, 1.5, 200)
 
     } else {
         question.visible = true
         question1.visible = false
-        question.alpha = 0
-        createjs.Tween.get(question).wait(200).to({ alpha: 0, scaleX: 1.45, scaleY: 1.45 }, 500).to({ alpha: 1, scaleX: 1.5, scaleY: 1.5 }, 500)
+        animateQuestionPrompt(question, 1.5, 200)
     }
     if (qtype[cnt] == 1) {
-        choice1Arr[0].y = -200
-        choice1Arr[0].visible = true;
-        choice1Arr[0].alpha = 0
-        createjs.Tween.get(choice1Arr[0]).wait(500).to({ x: choice1Arr[0].x, y: 510, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500)
-
-        choice1Arr[1].y = -200
-        choice1Arr[1].visible = true;
-        choice1Arr[1].alpha = 0
-        createjs.Tween.get(choice1Arr[1]).wait(500).to({ x: choice1Arr[1].x, y: 510, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500)
-
+        animateChoiceEntry(choice1Arr[0], 1.3, 510, 480)
+        animateChoiceEntry(choice1Arr[1], 1.3, 510, 620)
     } else {
         console.log("122222222222222222222222222222222222222222222")
-        choice2Arr[0].y = -200
-        choice2Arr[0].visible = true;
-        choice2Arr[0].alpha = 0
-        choice2Arr[0].scaleX = choice2Arr[0].scaleY = .8
-        createjs.Tween.get(choice2Arr[0]).wait(600).to({ x: choice2Arr[0].x, y: 520, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500)
-
-
-        choice2Arr[1].y = -200
-        choice2Arr[1].visible = true;
-        choice2Arr[1].alpha = 0
-        choice2Arr[1].scaleX = choice2Arr[1].scaleY = .8
-        createjs.Tween.get(choice2Arr[1]).wait(600).to({ x: choice2Arr[1].x, y: 520, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500)
-
+        animateChoiceEntry(choice2Arr[0], 1.3, 520, 520)
+        animateChoiceEntry(choice2Arr[1], 1.3, 520, 660)
     }
     repTimeClearInterval = setTimeout(AddListenerFn, 2500)
 }
@@ -381,12 +363,16 @@ function AddListenerFn() {
     if (qtype[cnt] == 1) {
         for (i = 0; i < 2; i++) {
             choice1Arr[i].addEventListener("click", answerSelected)
+            choice1Arr[i].addEventListener("mouseover", onChoiceHover)
+            choice1Arr[i].addEventListener("mouseout", onChoiceOut)
             choice1Arr[i].mouseEnabled = true
             choice1Arr[i].cursor = "pointer"
         }
     } else {
         for (i = 0; i < 2; i++) {
             choice2Arr[i].addEventListener("click", answerSelected)
+            choice2Arr[i].addEventListener("mouseover", onChoiceHover)
+            choice2Arr[i].addEventListener("mouseout", onChoiceOut)
             choice2Arr[i].mouseEnabled = true
             choice2Arr[i].cursor = "pointer"
         }
@@ -398,12 +384,17 @@ function AddListenerFn() {
 function disablechoices() {
 
     createjs.Tween.removeAllTweens();
+    stopChoiceAnimations();
     QusTxtString.visible = false
     for (i = 0; i < 2; i++) {
         choice1Arr[i].visible = false
         choice2Arr[i].visible = false
         choice1Arr[i].removeEventListener("click", answerSelected)
         choice2Arr[i].removeEventListener("click", answerSelected)
+        choice1Arr[i].removeEventListener("mouseover", onChoiceHover)
+        choice1Arr[i].removeEventListener("mouseout", onChoiceOut)
+        choice2Arr[i].removeEventListener("mouseover", onChoiceHover)
+        choice2Arr[i].removeEventListener("mouseout", onChoiceOut)
         choice1Arr[i].mouseEnabled = false
         choice2Arr[i].mouseEnabled = false
         choice1Arr[i].cursor = "default"
@@ -457,4 +448,82 @@ function disableMouse() {
 
 function enableMouse() {
 
+}
+
+function animateQuestionPrompt(target, baseScale, delay) {
+    if (!target) { return; }
+    target.alpha = 0;
+    target.scaleX = target.scaleY = baseScale * 0.85;
+    target.rotation = 0;
+    createjs.Tween.get(target, { override: true })
+        .wait(delay)
+        .to({ alpha: 1, scaleX: baseScale * 1.05, scaleY: baseScale * 1.05 }, 350, createjs.Ease.quadOut)
+        .to({ scaleX: baseScale, scaleY: baseScale }, 260, createjs.Ease.quadInOut);
+}
+
+function animateChoiceEntry(choiceMc, baseScale, finalY, delay) {
+    if (!choiceMc) { return; }
+    choiceMc.baseScale = baseScale;
+    choiceMc.rotation = 0;
+    choiceMc.y = -220;
+    choiceMc.visible = true;
+    choiceMc.alpha = 0;
+    choiceMc.scaleX = choiceMc.scaleY = baseScale * 0.7;
+    createjs.Tween.get(choiceMc, { override: true })
+        .wait(delay)
+        .to({ alpha: 1, y: finalY + 28, scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 360, createjs.Ease.quadOut)
+        .to({ y: finalY, scaleX: baseScale, scaleY: baseScale }, 280, createjs.Ease.bounceOut)
+        .call(function () {
+            startChoiceIdleAnimation(choiceMc);
+        });
+}
+
+function startChoiceIdleAnimation(choiceMc) {
+    if (!choiceMc) { return; }
+    var baseScale = choiceMc.baseScale || 1;
+    choiceMc.rotation = 0;
+    createjs.Tween.get(choiceMc, { loop: true, override: true })
+        .to({ scaleX: baseScale * 1.05, scaleY: baseScale * 0.94, rotation: 4 }, 300, createjs.Ease.sineInOut)
+        .to({ scaleX: baseScale * 0.96, scaleY: baseScale * 1.04, rotation: -4 }, 340, createjs.Ease.sineInOut)
+        .to({ scaleX: baseScale, scaleY: baseScale, rotation: 0 }, 280, createjs.Ease.sineInOut);
+}
+
+function stopChoiceAnimations() {
+    for (i = 0; i < 2; i++) {
+        if (choice1Arr[i]) {
+            createjs.Tween.removeTweens(choice1Arr[i]);
+            if (choice1Arr[i].baseScale) {
+                choice1Arr[i].scaleX = choice1Arr[i].scaleY = choice1Arr[i].baseScale;
+            }
+            choice1Arr[i].rotation = 0;
+        }
+        if (choice2Arr[i]) {
+            createjs.Tween.removeTweens(choice2Arr[i]);
+            if (choice2Arr[i].baseScale) {
+                choice2Arr[i].scaleX = choice2Arr[i].scaleY = choice2Arr[i].baseScale;
+            }
+            choice2Arr[i].rotation = 0;
+        }
+    }
+}
+
+function onChoiceHover(e) {
+    var target = e.currentTarget;
+    if (!target) { return; }
+    var baseScale = target.baseScale || 1.3;
+    createjs.Tween.removeTweens(target);
+    createjs.Tween.get(target, { override: true })
+        .to({ scaleX: baseScale * 1.12, scaleY: baseScale * 0.9, rotation: 0 }, 180, createjs.Ease.quadOut);
+}
+
+function onChoiceOut(e) {
+    var target = e.currentTarget;
+    if (!target) { return; }
+    var baseScale = target.baseScale || 1.3;
+    createjs.Tween.removeTweens(target);
+    createjs.Tween.get(target, { override: true })
+        .to({ scaleX: baseScale, scaleY: baseScale, rotation: 0 }, 200, createjs.Ease.quadOut)
+        .call(function () {
+            startChoiceIdleAnimation(target);
+        });
 }
