@@ -7,6 +7,7 @@ var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
 var tqcnt = 0, aqcnt = 0, ccnt = 0, cqcnt = 0, gscore = 0, gscrper = 0, gtime = 0, rtime = 0, crtime = 0, wrtime = 0, currTime = 0;
+var repTimeClearInterval = 0;
 var bg
 var BetterLuck, Excellent, Nice, Good, Super, TryAgain;
 var rst1 = 0, crst = 0, wrst = 0, score = 0, puzzle_cycle, timeOver_Status = 0;
@@ -349,17 +350,23 @@ function createTween1() {
         question1.visible = false
         animateQuestionPrompt(question, 1.5, 200)
     }
-    if (qtype[cnt] == 1) {
-        animateChoiceOptions(choice1Arr, 510, 1.3, 440)
-    } else {
-        console.log("122222222222222222222222222222222222222222222")
-        animateChoiceOptions(choice2Arr, 520, 1.3, 520)
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval);
+        repTimeClearInterval = 0;
     }
-    repTimeClearInterval = setTimeout(AddListenerFn, 2500)
+
+    if (qtype[cnt] == 1) {
+        animateChoiceOptions(choice1Arr, 510, 1.3, 440, AddListenerFn)
+    } else {
+        animateChoiceOptions(choice2Arr, 520, 1.3, 520, AddListenerFn)
+    }
 }
 
 function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval)
+        repTimeClearInterval = 0
+    }
     console.log("eventlisterneer")
     if (qtype[cnt] == 1) {
         for (i = 0; i < 2; i++) {
@@ -461,12 +468,16 @@ function animateQuestionPrompt(target, baseScale, delay) {
         .to({ scaleX: baseScale, scaleY: baseScale }, 280, createjs.Ease.quadInOut);
 }
 
-function animateChoiceOptions(choiceArray, finalY, baseScale, startDelay) {
+function animateChoiceOptions(choiceArray, finalY, baseScale, startDelay, onComplete) {
     if (!choiceArray) { return; }
     var revealDelay = startDelay || 0;
+    var pendingTweens = 0;
+    var hasTweens = false;
     for (var idx = 0; idx < choiceArray.length; idx++) {
         var tile = choiceArray[idx];
         if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
         tile.baseScale = baseScale;
         tile.__targetY = finalY;
         tile.__choiceIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
@@ -489,8 +500,15 @@ function animateChoiceOptions(choiceArray, finalY, baseScale, startDelay) {
                 .to({ scaleX: baseScale, scaleY: baseScale }, 240, createjs.Ease.sineOut)
                 .call(function () {
                     startChoicePulse(target, baseScale, finalY, index);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
                 });
         })(tile, idx);
+    }
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
     }
 }
 
