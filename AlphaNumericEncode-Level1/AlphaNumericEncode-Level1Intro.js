@@ -1,464 +1,350 @@
-var alphaNumericIntroRoot;
-var alphaNumericIntroOptions = [];
-var alphaNumericIntroTweens = [];
-var ALPHA_NUMERIC_INTRO_DATA = {
-    prompt: "Tap the matching code to answer the question.",
-    question: "Which code matches the letter shown?",
-    sampleLetter: "G",
-    choices: [
-        { badge: "A", code: "A = 1", description: "Each letter has a number." },
-        { badge: "G", code: "G = 7", description: "Tap the matching code." },
-        { badge: "K", code: "K = 11", description: "Look for the highlighted number." }
-    ],
-    highlightedIndex: 1
-};
-
-function alphaNumericIntroResolvePalette(state) {
-    var sharedPalette =
-        typeof ALPHA_NUMERIC_CHOICE_STATES !== "undefined"
-            ? ALPHA_NUMERIC_CHOICE_STATES
-            : null;
-
-    if (state === "highlight" && sharedPalette && sharedPalette.hover) {
-        return {
-            base: sharedPalette.hover.base,
-            badge: sharedPalette.hover.badge,
-            label: sharedPalette.hover.label,
-            text: sharedPalette.hover.text,
-            badgeLabel: sharedPalette.hover.badgeLabel || "#45319f",
-            halo: sharedPalette.hover.halo != null ? sharedPalette.hover.halo : 0.82,
-            ring: "rgba(255,255,255,0.92)",
-            ringAlpha: 1
-        };
-    }
-
-    if (state === "highlight") {
-        return {
-            base: ["rgba(140,236,255,0.98)", "rgba(86,168,246,0.98)"],
-            badge: ["#ffffff", "#f2f9ff"],
-            label: "rgba(255,255,255,0.94)",
-            text: "#ffffff",
-            badgeLabel: "#2539a2",
-            halo: 0.92,
-            ring: "rgba(255,255,255,0.96)",
-            ringAlpha: 1
-        };
-    }
-
-    if (sharedPalette && sharedPalette[state]) {
-        return sharedPalette[state];
-    }
-
-    var fallback = {
-        idle: {
-            base: ["rgba(110,92,250,0.95)", "rgba(72,54,188,0.96)"],
-            badge: ["#ffffff", "#efe8ff"],
-            label: "rgba(255,255,255,0.78)",
-            text: "#ffffff",
-            badgeLabel: "#45319f",
-            halo: 0.6,
-            ring: "rgba(255,255,255,0.38)",
-            ringAlpha: 0.55
-        },
-        hover: {
-            base: ["#8a74ff", "#5b48d4"],
-            badge: ["#ffffff", "#efe8ff"],
-            label: "rgba(255,255,255,0.9)",
-            text: "#ffffff",
-            badgeLabel: "#45319f",
-            halo: 0.82,
-            ring: "rgba(255,255,255,0.75)",
-            ringAlpha: 0.92
-        },
-        highlight: {
-            base: ["#3ee3b5", "#27b08c"],
-            badge: ["#ffffff", "#d7fff4"],
-            label: "rgba(255,255,255,0.92)",
-            text: "#153c33",
-            badgeLabel: "#15503e",
-            halo: 0.95,
-            ring: "rgba(70,218,184,0.92)",
-            ringAlpha: 1
-        }
-    };
-
-    return fallback[state] || fallback.idle;
-}
-
-function alphaNumericIntroApplyPalette(option, palette) {
-    if (!option || !palette) {
-        return;
-    }
-
-    option.background.graphics
-        .clear()
-        .beginLinearGradientFill(palette.base, [0, 1], -220, -72, 220, 72)
-        .drawRoundRect(-240, -78, 480, 156, 36);
-    option.badgeCircle.graphics
-        .clear()
-        .beginLinearGradientFill(palette.badge, [0, 1], 0, -36, 0, 36)
-        .drawCircle(0, 0, 36);
-    option.optionLabel.color = palette.label;
-    option.optionCode.color = palette.text;
-    option.optionDescription.color = palette.label;
-    option.badgeLabel.color = palette.badgeLabel || "#45319f";
-    option.badgeHalo.alpha = palette.halo != null ? palette.halo : 0.6;
-    if (option.focusRing) {
-        option.focusRing.graphics
-            .clear()
-            .setStrokeStyle(6, "round", "round")
-            .beginStroke(palette.ring || "rgba(255,255,255,0.4)")
-            .drawRoundRect(-248, -86, 496, 172, 44);
-        option.focusRing.alpha = palette.ringAlpha != null ? palette.ringAlpha : 0.55;
-    }
-}
-
-function alphaNumericIntroResetAffordance(option) {
-    if (!option || !option.focusPulse) {
-        return;
-    }
-    createjs.Tween.removeTweens(option.focusPulse);
-    option.focusPulse.visible = false;
-    option.focusPulse.alpha = 0;
-    var baseScale = option.scaleX != null ? option.scaleX : 1;
-    option.focusPulse.scaleX = baseScale;
-    option.focusPulse.scaleY = baseScale;
-    option.__affordanceActive = false;
-}
-
-function alphaNumericIntroTriggerAffordance(option) {
-    if (!option || !option.focusPulse) {
-        return;
-    }
-    alphaNumericIntroResetAffordance(option);
-    option.__affordanceActive = true;
-    option.focusPulse.visible = true;
-    var baseScale = option.scaleX != null ? option.scaleX : 1;
-    option.focusPulse.scaleX = option.focusPulse.scaleY = baseScale;
-    createjs.Tween.get(option.focusPulse, { loop: 2, override: true })
-        .to({ alpha: 0.85, scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 240, createjs.Ease.quadOut)
-        .to({ alpha: 0, scaleX: baseScale * 1.18, scaleY: baseScale * 1.18 }, 240, createjs.Ease.quadIn)
-        .call(function () {
-            if (option && option.focusPulse) {
-                option.focusPulse.visible = false;
-                option.focusPulse.alpha = 0;
-                option.__affordanceActive = false;
-            }
-        });
-}
-
-function alphaNumericIntroComputeLayout(count) {
-    var total = parseInt(count, 10);
-    if (!total || total <= 0) {
-        return [];
-    }
-
-    var centerX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
-    var rows = total <= 3 ? 1 : 2;
-    var perRow = Math.ceil(total / rows);
-    var rowSpacing = 182;
-    var baseY = 470;
-    var offsetY = ((rows - 1) * rowSpacing) / 2;
-    var layoutData = [];
-    var choiceIdx = 0;
-
-    for (var r = 0; r < rows; r++) {
-        if (choiceIdx >= total) {
-            break;
-        }
-
-        var remaining = total - choiceIdx;
-        var rowCount = Math.min(perRow, remaining);
-        var layout =
-            typeof SAUI_computeCenteredRow === "function"
-                ? SAUI_computeCenteredRow(rowCount, {
-                    centerX: centerX,
-                    baseSpacing: 360,
-                    tileSpan: 480,
-                    maxSpan: 980,
-                    minScale: 0.9,
-                    baseScale: 1
-                })
-                : null;
-
-        for (var c = 0; c < rowCount; c++) {
-            var x;
-            if (layout && layout.positions && layout.positions.length) {
-                x = layout.positions[c];
-            } else {
-                var rowWidth = (rowCount - 1) * 360;
-                x = centerX - rowWidth / 2 + c * 360;
-            }
-            layoutData.push({
-                x: x,
-                y: baseY + r * rowSpacing - offsetY,
-                scale: layout && typeof layout.scale === "number" ? layout.scale : 1
-            });
-            choiceIdx++;
-        }
-    }
-
-    return layoutData;
-}
-
-function alphaNumericBuildIntroOption(choice, index) {
-    var wrapper = new createjs.Container();
-    wrapper.cursor = "pointer";
-    wrapper.mouseChildren = false;
-
-    var focusPulse = new createjs.Shape();
-    focusPulse.graphics
-        .beginFill("rgba(255,255,255,0.16)")
-        .drawRoundRect(-254, -92, 508, 184, 48);
-    focusPulse.alpha = 0;
-    focusPulse.visible = false;
-
-    var background = new createjs.Shape();
-    background.graphics
-        .beginLinearGradientFill([
-            "rgba(110,92,250,0.95)",
-            "rgba(72,54,188,0.96)"
-        ], [0, 1], -220, -72, 220, 72)
-        .drawRoundRect(-240, -78, 480, 156, 36);
-
-    var badgeHalo = new createjs.Shape();
-    badgeHalo.graphics
-        .beginRadialGradientFill([
-            "rgba(255,255,255,0.32)",
-            "rgba(255,255,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 64)
-        .drawCircle(0, 0, 64);
-    badgeHalo.alpha = 0.6;
-    badgeHalo.x = -150;
-
-    var badgeCircle = new createjs.Shape();
-    badgeCircle.graphics
-        .beginLinearGradientFill([
-            "#fff",
-            "#e6dcff"
-        ], [0, 1], 0, -36, 0, 36)
-        .drawCircle(0, 0, 36);
-    badgeCircle.x = -150;
-
-    var badgeLabel = new createjs.Text(choice.badge || "", "700 26px Quicksand", "#45319f");
-    badgeLabel.textAlign = "center";
-    badgeLabel.textBaseline = "middle";
-    badgeLabel.x = -150;
-
-    var optionLabel = new createjs.Text("Option " + String.fromCharCode(65 + index), "600 20px Quicksand", "rgba(255,255,255,0.82)");
-    optionLabel.x = -90;
-    optionLabel.y = -42;
-
-    var optionCode = new createjs.Text(choice.code || "", "700 32px Quicksand", "#ffffff");
-    optionCode.x = -90;
-    optionCode.y = -6;
-
-    var optionDescription = new createjs.Text(choice.description || "", "500 22px Quicksand", "rgba(255,255,255,0.78)");
-    optionDescription.x = -90;
-    optionDescription.y = 34;
-
-    var focusRing = new createjs.Shape();
-    focusRing.graphics
-        .setStrokeStyle(6, "round", "round")
-        .beginStroke("rgba(255,255,255,0.38)")
-        .drawRoundRect(-248, -86, 496, 172, 44);
-    focusRing.alpha = 0.55;
-
-    wrapper.addChild(
-        focusPulse,
-        background,
-        badgeHalo,
-        badgeCircle,
-        badgeLabel,
-        optionLabel,
-        optionCode,
-        optionDescription,
-        focusRing
-    );
-
-    wrapper.background = background;
-    wrapper.badgeHalo = badgeHalo;
-    wrapper.badgeCircle = badgeCircle;
-    wrapper.optionLabel = optionLabel;
-    wrapper.optionCode = optionCode;
-    wrapper.optionDescription = optionDescription;
-    wrapper.badgeLabel = badgeLabel;
-    wrapper.focusRing = focusRing;
-    wrapper.focusPulse = focusPulse;
-    wrapper.__baseY = 0;
-    wrapper.__baseIntroState = "idle";
-    wrapper.__currentIntroState = "idle";
-
-    var hitArea = new createjs.Shape();
-    hitArea.graphics.beginFill("#000").drawRoundRect(-260, -96, 520, 192, 48);
-    wrapper.hitArea = hitArea;
-
-    wrapper.on("mouseover", function () {
-        alphaNumericIntroSetState(wrapper, "hover", { updateBase: false });
-        alphaNumericIntroTriggerAffordance(wrapper);
-    });
-    wrapper.on("mouseout", function () {
-        alphaNumericIntroResetAffordance(wrapper);
-        var baseState = wrapper.__baseIntroState || "idle";
-        alphaNumericIntroSetState(wrapper, baseState);
-    });
-
-    return wrapper;
-}
-
-function alphaNumericIntroSetState(option, state, options) {
-    if (!option) {
-        return;
-    }
-
-    var targetState = state || "idle";
-    var shouldUpdateBase = !(options && options.updateBase === false) && targetState !== "hover";
-    if (shouldUpdateBase) {
-        option.__baseIntroState = targetState;
-    }
-    option.__currentIntroState = targetState;
-
-    var palette = alphaNumericIntroResolvePalette(targetState === "hover" ? "hover" : targetState);
-    alphaNumericIntroApplyPalette(option, palette);
-}
-
+var introTitle, introQuestxt, introQues, introArrow, introfingure, introText, introText1, introHolder
+var introchoice1, introchoice2, introchoice3, introchoice4
+var introQuesX = 425, introQuesY = 215;
+var highlightTweenArr = []
+var setIntroCnt = 0
+var removeIntraval = 0
+var introArrowX = 980, introArrowY = 370;
+var introfingureX = 980, introfingureY = 545;
+var introArr = []
+var randIntroArr = [0, 0, 0, 0, 2, 2, 2, 2, 4, 4, 4, 4]
+var count1 = -1;
+var introrand1 = []
+var introrand
+var introArr1 = []
+var val
+var posX = [290, 290]
+var posY = [290, 540]
+var introQuestxtX = 640; introQuestxtY = 130;
+var posX1 =  [280, 955]
+var posY1 =   [545, 545]
+var introChoiceArr = []
 function commongameintro() {
-    if (!container || !container.parent) {
-        return;
+    introTitle = Title.clone();
+    introchoice1 = choice1.clone();
+    introchoice2 = choice2.clone();
+    introHolder = choiceBg.clone();
+    introArrow = arrow1.clone()
+    introfingure = fingure.clone()
+ 
+    container.parent.addChild(introTitle)
+    introTitle.visible = true;
+
+    container.parent.addChild(introHolder)
+    introHolder.visible = false;
+
+introQuestxt = QusTxtString.clone();
+    container.parent.addChild(introQuestxt);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX;
+    introQuestxt.y = introQuestxtY;
+
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
     }
 
-    removeGameIntro();
+    introQues = introchoice2.clone()
+    container.parent.addChild(introQues);
+    introQues.visible = false;
+    introQues.x = 605
+    introQues.y = 250
+    introQues.scaleX = introQues.scaleY = 1.5
 
-    alphaNumericIntroRoot = new createjs.Container();
-    alphaNumericIntroRoot.name = "alphaNumericIntroRoot";
-    container.parent.addChild(alphaNumericIntroRoot);
+    for (i = 0; i < 2; i++) {
+        introArr[i] = introchoice1.clone()
+        container.parent.addChild(introArr[i])
+        introArr[i].visible = false;
+        introArr1[i] = introchoice2.clone()
+        container.parent.addChild(introArr1[i])
+        introArr1[i].visible = false;
+        introArr[i].gotoAndStop(i)
+        introArr1[i].gotoAndStop(i)
+        introArr[i].x = posX[i] 
+        introArr1[i].x = posX[i] + 645
+        introArr[i].y = posY[i]
+        introArr1[i].y = posY[i]
 
-    call_UI_gameQuestion(container, ALPHA_NUMERIC_INTRO_DATA.prompt);
+    }
+    for (i = 0; i < 2; i++) {
+        introChoiceArr[i] = introchoice1.clone()
+        container.parent.addChild(introChoiceArr[i])
+        introChoiceArr[i].visible = false;
+        introChoiceArr[i].gotoAndStop(i)
+        introChoiceArr[i].x = posX1[i]
+        introChoiceArr[i].y = posY1[i]
 
-    var introTitle = Title ? Title.clone() : new createjs.Text("AlphaNumeric Encode", "700 48px Quicksand", "#ffffff");
-    introTitle.textAlign = "center";
-    introTitle.textBaseline = "middle";
-    introTitle.x = 640;
-    introTitle.y = INTRO_TITLE_Y;
-    alphaNumericIntroRoot.addChild(introTitle);
-
-    var questionCard = new createjs.Container();
-    questionCard.x = 640;
-    questionCard.y = 270;
-
-    var cardBackground = new createjs.Shape();
-    cardBackground.graphics
-        .beginLinearGradientFill([
-            "rgba(255,255,255,0.96)",
-            "rgba(236,240,255,0.92)"
-        ], [0, 1], 0, -90, 0, 90)
-        .drawRoundRect(-360, -110, 720, 220, 48);
-
-    var cardGlow = new createjs.Shape();
-    cardGlow.graphics
-        .beginRadialGradientFill([
-            "rgba(121,108,255,0.5)",
-            "rgba(121,108,255,0)"
-        ], [0, 1], 0, 0, 0, 0, 0, 420)
-        .drawCircle(0, 0, 420);
-    cardGlow.alpha = 0.55;
-
-    var questionLabel = new createjs.Text(ALPHA_NUMERIC_INTRO_DATA.question, "700 32px Quicksand", "#2b2961");
-    questionLabel.textAlign = "center";
-    questionLabel.lineWidth = 620;
-    questionLabel.y = -24;
-
-    var letterBadge = new createjs.Text(ALPHA_NUMERIC_INTRO_DATA.sampleLetter || "A", "700 64px Quicksand", "#4f36c2");
-    letterBadge.textAlign = "center";
-    letterBadge.y = 48;
-
-    questionCard.addChild(cardGlow, cardBackground, questionLabel, letterBadge);
-    alphaNumericIntroRoot.addChild(questionCard);
-
-    alphaNumericIntroOptions = [];
-    alphaNumericIntroTweens = [];
-
-    var helperText = new createjs.Text(
-        "Glowing cards are the answer options. Tap the highlighted one to start!",
-        "600 24px Quicksand",
-        "rgba(255,255,255,0.82)"
-    );
-    helperText.textAlign = "center";
-    helperText.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640;
-    helperText.y = 652;
-    helperText.alpha = 0;
-    alphaNumericIntroRoot.addChild(helperText);
-
-    var choices = ALPHA_NUMERIC_INTRO_DATA.choices || [];
-    var layoutData = alphaNumericIntroComputeLayout(choices.length);
-    for (var idx = 0; idx < choices.length; idx++) {
-        var option = alphaNumericBuildIntroOption(choices[idx], idx);
-        var layout = layoutData[idx] || { x: 640, y: 460 + idx * 170, scale: 1 };
-        option.x = layout.x;
-        option.y = layout.y;
-        option.alpha = 0;
-        option.scaleX = option.scaleY = layout.scale * 0.92;
-        alphaNumericIntroRoot.addChild(option);
-        alphaNumericIntroOptions.push(option);
-
-        var tween = createjs.Tween.get(option)
-            .wait(160 + idx * 120)
-            .to({ alpha: 1, scaleX: layout.scale, scaleY: layout.scale }, 360, createjs.Ease.quadOut)
-            .call((function (target) {
-                return function () {
-                    alphaNumericIntroSetState(target, "idle");
-                };
-            })(option));
-        alphaNumericIntroTweens.push(tween);
     }
 
-    createjs.Tween.get(helperText)
-        .wait(choices.length ? 320 + choices.length * 90 : 200)
-        .to({ alpha: 1 }, 320);
+    container.parent.addChild(introImg);
+    introImg.visible = false;
+    introImg.y=200;
+    introImg.x =210;
+    introQuestxt.alpha = 0;
+    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+}
+function handleComplete1_1() {
+    createjs.Tween.removeAllTweens();
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+        quesTween()
+    }
+    // removeGameIntro()
+}
+function quesTween() {
 
-    var highlightIndex = ALPHA_NUMERIC_INTRO_DATA.highlightedIndex;
-    if (typeof highlightIndex === "number" && alphaNumericIntroOptions[highlightIndex]) {
-        var targetOption = alphaNumericIntroOptions[highlightIndex];
-        var targetScale = layoutData[highlightIndex] && layoutData[highlightIndex].scale ? layoutData[highlightIndex].scale : 1;
-        alphaNumericIntroSetState(targetOption, "highlight");
-        var pulse = createjs.Tween.get(targetOption, { loop: true, override: false })
-            .to({ scaleX: targetScale * 1.05, scaleY: targetScale * 1.05 }, 360, createjs.Ease.quadOut)
-            .to({ scaleX: targetScale, scaleY: targetScale }, 340, createjs.Ease.quadIn);
-        alphaNumericIntroTweens.push(pulse);
-        createjs.Tween.get(targetOption)
-            .wait(360 + highlightIndex * 120)
-            .call(function () {
-                alphaNumericIntroTriggerAffordance(targetOption);
-            });
+    introHolder.visible = true;
+    var temp1 = 100
+    for (i = 0; i < 2; i++) {
+        if (stopValue == 0) {
+            removeGameIntro()
+        }
+        else {
+            introArr[i].visible = true;
+            introArr1[i].visible = true;
+            introArr[i].scaleX= introArr[i].scaleY=1.3
+            introArr1[i].scaleX= introArr1[i].scaleY=1.3
+            introArr[i].alpha = 0;
+            introArr1[i].alpha = 0;
+            if (i == 1) {
+              
+                    
+                    createjs.Tween.get(introArr[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 }, 500)
+                    createjs.Tween.get(introArr1[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 }, 500).wait(1000).call(handleComplete2_1);
+    
+                }
+            else {
+                createjs.Tween.get(introArr[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 }, 500)
+                createjs.Tween.get(introArr1[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 }, 500)
+
+            }
+            temp1 += 400;
+        }
+
     }
 
-    stage.update();
+
+}
+function handleComplete2_1() {
+    createjs.Tween.removeAllTweens();
+
+
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+       
+        choiceTween()
+        
+    }
+}
+function choiceTween() { 
+   console.log("choiceTween")
+        container.parent.removeChild(introHolder)
+        introHolder.visible = false;
+        for (i = 0; i < 2; i++) {
+            introArr[i].visible = false;
+            introArr1[i].visible = false;
+    
+        }
+    
+        //SAUIX_setQuestionText("New question goes here", { textAlign: "center" });
+		introQuestxt.text="Select the correct symbol that was associated with the letter/number";
+		if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
+        introQuestxt.visible = true;   
+    
+    
+        introQues.visible = true;
+        introQues.gotoAndStop(1);
+        introQues.scaleX=introQues.scaleY=1.5
+       var  temp2=200;
+        for (i = 0; i < 2; i++) {
+            introChoiceArr[i].visible = true
+            introChoiceArr[i].alpha = 0
+            introChoiceArr[i].y = -200
+
+            if (i == 1) {
+                createjs.Tween.get(introChoiceArr[i]).wait(temp2).to({ x: introChoiceArr[1].x, y: 510, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500).wait(500).call(handleComplete3_1);
+
+            }
+        else {
+            createjs.Tween.get(introChoiceArr[i]).wait(temp2).to({ x: introChoiceArr[0].x, y: 510, scaleX: 1.3, scaleY: 1.3, alpha: 1 }, 500)
+
+        }
+        temp2 += 200;
+        }
+        
+     
+    
+    
+  
+}
+function handleComplete3_1() {
+   
+       createjs.Tween.removeAllTweens();
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+        introCh()
+    }
+}
+function introCh(){
+    introImg.y = 360
+    createjs.Tween.get(introImg).to({ visible : true }).to({ alpha : 0 }).to({alpha : 1 , y : 180 }, 500).wait(3500).call(handleComplete5_1);
+}
+function handleComplete5_1(){
+    createjs.Tween.removeAllTweens();
+    if (stopValue == 0) {
+        console.log("handleComplete1_5  == stopValue")
+        removeGameIntro()
+
+    }
+    else {
+        setArrowTween()
+    }
+}
+function setArrowTween() {
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    }
+    else {
+        container.parent.addChild(introArrow);
+        introArrow.visible = true;
+        introArrow.x = introArrowX;
+        introArrow.y = introArrowY;
+        highlightTweenArr[0] = new createjs.MovieClip()
+        container.parent.addChild(highlightTweenArr[0])
+        highlightTweenArr[0] = createjs.Tween.get(introArrow).to({ y: introArrowY + 10 }, 350).to({ y: introArrowY }, 350).to({ y: introArrowY + 10 }, 350)
+            .to({ y: introArrowY }, 350).to({ y: introArrowY + 10 }, 350).to({ y: introArrowY }, 350).wait(400).call(this.onComplete1)
+
+    }
+
 }
 
+function setFingureTween() {
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    }
+    else {
+
+        container.parent.removeChild(introArrow);
+        introArrow.visible = false;
+        container.parent.addChild(introfingure);
+        introfingure.visible = true;
+        introfingure.x = introfingureX;
+        introfingure.y = introfingureY;
+        highlightTweenArr[1] = new createjs.MovieClip()
+        container.parent.addChild(highlightTweenArr[1])
+        highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).wait(200).call(this.onComplete2)
+
+    }
+}
+this.onComplete1 = function (e) {
+    createjs.Tween.removeAllTweens();
+    // for (i = 0; i < 2; i++) {
+    if (highlightTweenArr[0]) {
+        container.parent.removeChild(highlightTweenArr[0]);
+    }
+    // }
+    container.parent.removeChild(introArrow);
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    } else {
+        setTimeout(setFingureTween, 200)
+    }
+}
+
+this.onComplete2 = function (e) {
+    createjs.Tween.removeAllTweens();
+
+    // // for (i = 0; i < 2; i++) {
+    if (highlightTweenArr[1]) {
+        container.parent.removeChild(highlightTweenArr[1]);
+    }
+    // // }
+    container.parent.removeChild(introfingure);
+    introfingure.visible = false;
+
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    }
+    else {
+        setTimeout(setCallDelay, 500)
+    }
+
+
+}
+function setCallDelay() {
+    clearInterval(removeIntraval)
+    removeIntraval = 0
+    setIntroCnt++
+    removeGameIntro()
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+        commongameintro()
+        if (setIntroCnt > 0) {
+            isVisibleStartBtn()
+        }
+    }
+
+}
 function removeGameIntro() {
-    if (alphaNumericIntroTweens && alphaNumericIntroTweens.length) {
-        for (var i = 0; i < alphaNumericIntroTweens.length; i++) {
-            try {
-                alphaNumericIntroTweens[i].setPaused(true);
-            } catch (err) { }
-        }
-    }
-    alphaNumericIntroTweens = [];
+    console.log("removeGameIntro")
+    createjs.Tween.removeAllTweens();
 
-    if (alphaNumericIntroOptions && alphaNumericIntroOptions.length) {
-        for (var j = 0; j < alphaNumericIntroOptions.length; j++) {
-            var option = alphaNumericIntroOptions[j];
-            if (option) {
-                option.removeAllEventListeners();
-                alphaNumericIntroResetAffordance(option);
-                createjs.Tween.removeTweens(option);
-            }
-        }
-    }
-    alphaNumericIntroOptions = [];
+    container.parent.removeChild(introArrow)
+    introArrow.visible = false
+    container.parent.removeChild(introfingure)
+    introfingure.visible = false
+ 
+    if (introQuestxt && introQuestxt.__labelBG) {
+  introQuestxt.__labelBG.destroy();            // removes bg + ticker listener
+}
+introQuestxt.visible = false;
+container.parent.removeChild(introQuestxt);
+introQuestxt = null;
+    container.parent.removeChild(introQues);
+    introQues.visible = false
+    container.parent.removeChild(introHolder)
+    introHolder.visible = false;
 
-    if (alphaNumericIntroRoot && alphaNumericIntroRoot.parent) {
-        alphaNumericIntroRoot.parent.removeChild(alphaNumericIntroRoot);
+    container.parent.removeChild(introchoice1)
+    introchoice1.visible = false;
+
+    container.parent.removeChild(introchoice2)
+    introchoice2.visible = false;
+    container.parent.removeChild(introImg);
+    introImg.visible = false;
+    if (highlightTweenArr[0]) {
+        highlightTweenArr[0].setPaused(false);
+        container.parent.removeChild(highlightTweenArr[0]);
     }
-    alphaNumericIntroRoot = null;
+    if (highlightTweenArr[1]) {
+        highlightTweenArr[1].setPaused(false);
+        container.parent.removeChild(highlightTweenArr[1]);
+    }
+
+    for (i = 0; i < 2; i++) {
+        container.parent.removeChild(introArr[i])
+        introArr[i].visible = false;
+        container.parent.removeChild(introArr1[i])
+        introArr1[i].visible = false;
+
+    }
+    for (i = 0; i < 2; i++) {
+        container.parent.removeChild(introChoiceArr[i])
+        introChoiceArr[i].visible = false;
+
+    }
 }
