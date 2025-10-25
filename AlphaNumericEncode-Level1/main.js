@@ -308,7 +308,7 @@ function createChoices() {
 //====================================================================CHOICE ENABLE/DISABLE==============================================================//
 function enablechoices() {
     console.log("entered")
-    stopChoiceAnimations();
+    resetChoiceTweens();
     if (qtype[cnt] == 1) {
         for (i = 0; i < 2; i++) {
             choice1Arr[i].visible = false
@@ -317,6 +317,7 @@ function enablechoices() {
             choice1Arr[i].x = btnX1[i]
             choice1Arr[i].y = btnY1[i]
             choice1Arr[i].baseScale = 1.3
+            choice1Arr[i].__choiceIndex = i
 
         }
     } else {
@@ -327,6 +328,7 @@ function enablechoices() {
             choice2Arr[i].x = btnX1[i]
             choice2Arr[i].y = btnY1[i]
             choice2Arr[i].baseScale = 1.3
+            choice2Arr[i].__choiceIndex = i
         }
     }
     createTween1();
@@ -347,12 +349,10 @@ function createTween1() {
         animateQuestionPrompt(question, 1.5, 200)
     }
     if (qtype[cnt] == 1) {
-        animateChoiceEntry(choice1Arr[0], 1.3, 510, 480)
-        animateChoiceEntry(choice1Arr[1], 1.3, 510, 620)
+        animateChoiceOptions(choice1Arr, 510, 1.3, 440)
     } else {
         console.log("122222222222222222222222222222222222222222222")
-        animateChoiceEntry(choice2Arr[0], 1.3, 520, 520)
-        animateChoiceEntry(choice2Arr[1], 1.3, 520, 660)
+        animateChoiceOptions(choice2Arr, 520, 1.3, 520)
     }
     repTimeClearInterval = setTimeout(AddListenerFn, 2500)
 }
@@ -363,16 +363,16 @@ function AddListenerFn() {
     if (qtype[cnt] == 1) {
         for (i = 0; i < 2; i++) {
             choice1Arr[i].addEventListener("click", answerSelected)
-            choice1Arr[i].addEventListener("mouseover", onChoiceHover)
-            choice1Arr[i].addEventListener("mouseout", onChoiceOut)
+            choice1Arr[i].addEventListener("mouseover", handleChoiceOver)
+            choice1Arr[i].addEventListener("mouseout", handleChoiceOut)
             choice1Arr[i].mouseEnabled = true
             choice1Arr[i].cursor = "pointer"
         }
     } else {
         for (i = 0; i < 2; i++) {
             choice2Arr[i].addEventListener("click", answerSelected)
-            choice2Arr[i].addEventListener("mouseover", onChoiceHover)
-            choice2Arr[i].addEventListener("mouseout", onChoiceOut)
+            choice2Arr[i].addEventListener("mouseover", handleChoiceOver)
+            choice2Arr[i].addEventListener("mouseout", handleChoiceOut)
             choice2Arr[i].mouseEnabled = true
             choice2Arr[i].cursor = "pointer"
         }
@@ -384,17 +384,17 @@ function AddListenerFn() {
 function disablechoices() {
 
     createjs.Tween.removeAllTweens();
-    stopChoiceAnimations();
+    resetChoiceTweens();
     QusTxtString.visible = false
     for (i = 0; i < 2; i++) {
         choice1Arr[i].visible = false
         choice2Arr[i].visible = false
         choice1Arr[i].removeEventListener("click", answerSelected)
         choice2Arr[i].removeEventListener("click", answerSelected)
-        choice1Arr[i].removeEventListener("mouseover", onChoiceHover)
-        choice1Arr[i].removeEventListener("mouseout", onChoiceOut)
-        choice2Arr[i].removeEventListener("mouseover", onChoiceHover)
-        choice2Arr[i].removeEventListener("mouseout", onChoiceOut)
+        choice1Arr[i].removeEventListener("mouseover", handleChoiceOver)
+        choice1Arr[i].removeEventListener("mouseout", handleChoiceOut)
+        choice2Arr[i].removeEventListener("mouseover", handleChoiceOver)
+        choice2Arr[i].removeEventListener("mouseout", handleChoiceOut)
         choice1Arr[i].mouseEnabled = false
         choice2Arr[i].mouseEnabled = false
         choice1Arr[i].cursor = "default"
@@ -454,76 +454,114 @@ function animateQuestionPrompt(target, baseScale, delay) {
     if (!target) { return; }
     target.alpha = 0;
     target.scaleX = target.scaleY = baseScale * 0.85;
-    target.rotation = 0;
     createjs.Tween.get(target, { override: true })
         .wait(delay)
-        .to({ alpha: 1, scaleX: baseScale * 1.05, scaleY: baseScale * 1.05 }, 350, createjs.Ease.quadOut)
-        .to({ scaleX: baseScale, scaleY: baseScale }, 260, createjs.Ease.quadInOut);
+        .to({ alpha: 1, scaleX: baseScale * 1.04, scaleY: baseScale * 1.04 }, 360, createjs.Ease.quadOut)
+        .to({ scaleX: baseScale, scaleY: baseScale }, 280, createjs.Ease.quadInOut);
 }
 
-function animateChoiceEntry(choiceMc, baseScale, finalY, delay) {
-    if (!choiceMc) { return; }
-    choiceMc.baseScale = baseScale;
-    choiceMc.rotation = 0;
-    choiceMc.y = -220;
-    choiceMc.visible = true;
-    choiceMc.alpha = 0;
-    choiceMc.scaleX = choiceMc.scaleY = baseScale * 0.7;
-    createjs.Tween.get(choiceMc, { override: true })
-        .wait(delay)
-        .to({ alpha: 1, y: finalY + 28, scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 360, createjs.Ease.quadOut)
-        .to({ y: finalY, scaleX: baseScale, scaleY: baseScale }, 280, createjs.Ease.bounceOut)
-        .call(function () {
-            startChoiceIdleAnimation(choiceMc);
-        });
+function animateChoiceOptions(choiceArray, finalY, baseScale, startDelay) {
+    if (!choiceArray) { return; }
+    var revealDelay = startDelay || 0;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        tile.baseScale = baseScale;
+        tile.__targetY = finalY;
+        tile.__choiceIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        stopChoicePulse(tile);
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.y = finalY + 48;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.4);
+        (function (target, index) {
+            var delay = revealDelay + (index * 160);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: baseScale + 0.18, scaleY: baseScale + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: baseScale, scaleY: baseScale }, 240, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, baseScale, finalY, index);
+                });
+        })(tile, idx);
+    }
 }
 
-function startChoiceIdleAnimation(choiceMc) {
-    if (!choiceMc) { return; }
-    var baseScale = choiceMc.baseScale || 1;
-    choiceMc.rotation = 0;
-    createjs.Tween.get(choiceMc, { loop: true, override: true })
-        .to({ scaleX: baseScale * 1.05, scaleY: baseScale * 0.94, rotation: 4 }, 300, createjs.Ease.sineInOut)
-        .to({ scaleX: baseScale * 0.96, scaleY: baseScale * 1.04, rotation: -4 }, 340, createjs.Ease.sineInOut)
-        .to({ scaleX: baseScale, scaleY: baseScale, rotation: 0 }, 280, createjs.Ease.sineInOut);
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || 1;
+    var baseY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = baseY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = baseY;
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 90)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ y: baseY - 10 }, 360, createjs.Ease.sineOut)
+        .to({ y: baseY }, 420, createjs.Ease.sineInOut);
 }
 
-function stopChoiceAnimations() {
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+}
+
+function resetChoiceTweens() {
     for (i = 0; i < 2; i++) {
         if (choice1Arr[i]) {
-            createjs.Tween.removeTweens(choice1Arr[i]);
-            if (choice1Arr[i].baseScale) {
-                choice1Arr[i].scaleX = choice1Arr[i].scaleY = choice1Arr[i].baseScale;
-            }
-            choice1Arr[i].rotation = 0;
+            stopChoicePulse(choice1Arr[i]);
         }
         if (choice2Arr[i]) {
-            createjs.Tween.removeTweens(choice2Arr[i]);
-            if (choice2Arr[i].baseScale) {
-                choice2Arr[i].scaleX = choice2Arr[i].scaleY = choice2Arr[i].baseScale;
-            }
-            choice2Arr[i].rotation = 0;
+            stopChoicePulse(choice2Arr[i]);
         }
     }
 }
 
-function onChoiceHover(e) {
+function handleChoiceOver(e) {
     var target = e.currentTarget;
     if (!target) { return; }
     var baseScale = target.baseScale || 1.3;
-    createjs.Tween.removeTweens(target);
+    stopChoicePulse(target);
     createjs.Tween.get(target, { override: true })
-        .to({ scaleX: baseScale * 1.12, scaleY: baseScale * 0.9, rotation: 0 }, 180, createjs.Ease.quadOut);
+        .to({ scaleX: baseScale * 1.08, scaleY: baseScale * 1.08 }, 200, createjs.Ease.quadOut);
 }
 
-function onChoiceOut(e) {
+function handleChoiceOut(e) {
     var target = e.currentTarget;
     if (!target) { return; }
     var baseScale = target.baseScale || 1.3;
     createjs.Tween.removeTweens(target);
     createjs.Tween.get(target, { override: true })
-        .to({ scaleX: baseScale, scaleY: baseScale, rotation: 0 }, 200, createjs.Ease.quadOut)
+        .to({ scaleX: baseScale, scaleY: baseScale }, 220, createjs.Ease.quadOut)
         .call(function () {
-            startChoiceIdleAnimation(target);
+            startChoicePulse(target, baseScale, target.__targetY, target.__choiceIndex);
         });
 }
