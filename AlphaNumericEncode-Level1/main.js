@@ -261,7 +261,8 @@ function createTween() {
 
 }
 function createChoices() {
-    createjs.Tween.removeAllTweens();
+    clearChoiceAnimations();
+    resetChoiceTweens();
     clearInterval(clearquesInterval)
     clearquesInterval = 0
 
@@ -383,7 +384,7 @@ function AddListenerFn() {
 }
 function disablechoices() {
 
-    createjs.Tween.removeAllTweens();
+    clearChoiceAnimations();
     resetChoiceTweens();
     QusTxtString.visible = false
     for (i = 0; i < 2; i++) {
@@ -541,6 +542,26 @@ function resetChoiceTweens() {
         }
         if (choice2Arr[i]) {
             stopChoicePulse(choice2Arr[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations() {
+    if (choiceBg) {
+        createjs.Tween.removeTweens(choiceBg);
+    }
+    if (question) {
+        createjs.Tween.removeTweens(question);
+    }
+    if (question1) {
+        createjs.Tween.removeTweens(question1);
+    }
+    for (i = 0; i < 2; i++) {
+        if (choice1Arr[i]) {
+            createjs.Tween.removeTweens(choice1Arr[i]);
+        }
+        if (choice2Arr[i]) {
+            createjs.Tween.removeTweens(choice2Arr[i]);
         }
     }
 }
