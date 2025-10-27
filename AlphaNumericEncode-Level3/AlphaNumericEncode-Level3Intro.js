@@ -21,6 +21,7 @@ var posX1 = [180, 455, 764, 1042]
 var posY1 = [570, 570, 570, 570]
 
 var introChoiceArr = []
+var introQuestxtX = 640, introQuestxtY = 130;
 function commongameintro() {
     introTitle = Title.clone();
     introchoice1 = choice1.clone();
@@ -28,7 +29,7 @@ function commongameintro() {
     introHolder = choiceBg.clone();
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-    introQuestxt = questionText.clone();
+    introQuestxt = QusTxtString.clone();
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
@@ -39,10 +40,15 @@ function commongameintro() {
 
 
     container.parent.addChild(introQuestxt);
-    introQuestxt.visible = false;
-    introQuestxt.x = 360
-    introQuestxt.y = 140
-    introQuestxt.gotoAndStop(0);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX
+    introQuestxt.y = introQuestxtY
+    introQuestxt.text = "Look at the associations below";
+    introQuestxt.textAlign = "center";
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     introQues = introchoice2.clone()
     container.parent.addChild(introQues);
@@ -152,7 +158,10 @@ function choiceTween() {
 
     }
 
-    introQuestxt.gotoAndStop(1)
+    introQuestxt.text = "Select the correct symbol that was associated with the letter/number";
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
     introQuestxt.visible = true;
 
 
@@ -300,8 +309,14 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt) {
+        if (introQuestxt.__labelBG) {
+            introQuestxt.__labelBG.destroy();
+        }
+        container.parent.removeChild(introQuestxt)
+        introQuestxt.visible = false
+        introQuestxt = null;
+    }
     container.parent.removeChild(introQues);
     introQues.visible = false
     container.parent.removeChild(introHolder)
