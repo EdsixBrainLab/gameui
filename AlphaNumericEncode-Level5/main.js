@@ -269,12 +269,16 @@ function pickques() {
         choice2Arr[i].alpha = 0;
         choice1Arr[i].gotoAndStop(qno[i]);
         choice2Arr[i].gotoAndStop(qno1[i]);
+        stopChoicePulse(choice1Arr[i]);
+        stopChoicePulse(choice2Arr[i]);
+        choice1Arr[i].__targetX = undefined;
+        choice1Arr[i].__targetY = undefined;
+        choice2Arr[i].__targetX = undefined;
+        choice2Arr[i].__targetY = undefined;
         choice1Arr[i].x = btnX[i] - 50;
         choice1Arr[i].y = btnY[i];
         choice2Arr[i].x = btnX[i] + 130;
         choice2Arr[i].y = btnY[i];
-        stopChoicePulse(choice1Arr[i]);
-        stopChoicePulse(choice2Arr[i]);
     }
 
     createTween();
