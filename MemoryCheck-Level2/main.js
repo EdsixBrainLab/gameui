@@ -451,6 +451,21 @@ function animateChoiceOptions(choiceArray, onComplete) {
                 });
         })(tile, baseScale, targetY, revealIndex);
     }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
 
     if (!hasTweens && typeof onComplete === "function") {
         onComplete();
