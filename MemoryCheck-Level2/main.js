@@ -452,6 +452,61 @@ function animateChoiceOptions(choiceArray, onComplete) {
                 });
         })(tile, baseScale, targetY, revealIndex);
     }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            stopChoicePulse(choiceArray[i]);
+        }
+    }
+}
 
     if (!hasTweens && typeof onComplete === "function") {
         onComplete();
