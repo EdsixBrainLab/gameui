@@ -23,6 +23,7 @@ var scaleType = 1;
 var lastW, lastH, lastS = 1;
 var borderPadding = 10, barHeight = 20;
 var loadProgressLabel, progresPrecentage, loaderWidth;
+var repTimeClearInterval = 0;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////s
 var currentX, currentY
 var currentObj = []
@@ -339,7 +340,10 @@ function createTween1() {
 }
 
 function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval);
+        repTimeClearInterval = 0;
+    }
     console.log("eventlisterneer")
     if (qtype[cnt] == 1) {
         for (i = 0; i < choiceCnt; i++) {
