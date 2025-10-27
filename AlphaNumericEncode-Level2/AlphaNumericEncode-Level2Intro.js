@@ -18,6 +18,7 @@ var posY = [350, 350, 550]
 
 var posX1 =  [280, 618, 955]
 var posY1 = [545, 545, 545]
+var introQuestxtX = 640; var introQuestxtY = 130;
 var introChoiceArr = []
 function commongameintro() {
     introTitle = Title.clone();
@@ -26,7 +27,6 @@ function commongameintro() {
     introHolder = choiceBg.clone();
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-    introQuestxt = questionText.clone();
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
@@ -35,12 +35,18 @@ function commongameintro() {
     introHolder.visible = false;
 
 
-
+    introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
-    introQuestxt.visible = false;
-    introQuestxt.x = 360
-    introQuestxt.y = 140
-    introQuestxt.gotoAndStop(0);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX;
+    introQuestxt.y = introQuestxtY;
+    introQuestxt.text = "Look at the associations below";
+    introQuestxt.textAlign = "center";
+
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     introQues = introchoice2.clone()
     container.parent.addChild(introQues);
@@ -78,10 +84,6 @@ function commongameintro() {
     introImg.visible = false;
     introImg.y=300;
     introImg.x =210;
-    introQuestxt.visible = true;
-    introQuestxt.alpha = 0;
-
-    introQuestxt.visible = true;
     introQuestxt.alpha = 0;
     createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
 }
@@ -152,8 +154,11 @@ function choiceTween() {
     
         }
     
-        introQuestxt.gotoAndStop(1)
-        introQuestxt.visible = true;   
+        introQuestxt.text = "Select the correct symbol that was associated with the letter/number";
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+            introQuestxt.__labelBG.update();
+        }
+        introQuestxt.visible = true;
     
     
         introQues.visible = true;
@@ -299,8 +304,14 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt) {
+        if (introQuestxt.__labelBG) {
+            introQuestxt.__labelBG.destroy();
+        }
+        container.parent.removeChild(introQuestxt)
+        introQuestxt.visible = false
+        introQuestxt = null;
+    }
     container.parent.removeChild(introQues);
     introQues.visible = false
     container.parent.removeChild(introHolder)
