@@ -2,7 +2,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, cmnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 5, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,quesMarkMc, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -38,6 +38,7 @@ var qtype = []
 qtype = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 var choiceArr1 = []
 var introImg,introImg1
+var QusTxtString;
 //register key functions
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -50,7 +51,8 @@ function init() {
     canvas = document.getElementById("gameCanvas");
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
-    stage.addChild(container)
+    stage.addChild(container);
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -74,9 +76,8 @@ function init() {
         manifest.push(
 
             { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },
-             { id: "questionText", src: questionTextPath+ "MemoryCheck-Level4-QT.png" },
              { id: "introImg", src: gameAssetsPath + "introImg.png" },
-             { id: "introImg1", src: gameAssetsPath + "introholder1.png" } 
+             { id: "introImg1", src: gameAssetsPath + "introholder1.png" }
        
         )
         preloadAllAssets()
@@ -99,17 +100,8 @@ function doneLoading1(event) {
 		container.parent.addChild(introImg1);
 		introImg1.visible = false;
 	}
-    if (id == "questionText") {
-        var quesTextSprisheet = new createjs.SpriteSheet({
-            framerate: 60,
-            "images": [preload.getResult("questionText")],
-            "frames": { "regX": 50, "height": 134, "count": 64, "regY": 50, "width": 650 }
-        });
-
-        questionText = new createjs.Sprite(quesTextSprisheet);
-        container.parent.addChild(questionText);
-        questionText.visible = false;
-
+    if (!QusTxtString) {
+        call_UI_gameQuestion(container, "Remember these objects");
     }
 
     if (id == "choice1") {
@@ -152,9 +144,8 @@ function CreateGameElements() {
     interval = setInterval(countTime, 1000);
 
     //bg.visible = true
-    container.parent.addChild(questionText);
-    questionText.visible = false;
-    questionText.x = 360; questionText.y = 120;
+    container.parent.addChild(QusTxtString);
+    QusTxtString.visible = false;
 
     for (i = 0; i < 5; i++) {
         choiceArr[i] = choice1.clone();
@@ -209,7 +200,7 @@ function pickques() {
 	panelVisibleFn()
     btnx = [100, 940, 510, 100, 940]
     btny = [190, 190, 340, 460, 460]
-    questionText.gotoAndStop(0);
+    SAUIX_setQuestionText("Remember these objects", { textAlign: "center" });
 
     qno1 = between(0, 39);
 
@@ -225,9 +216,9 @@ function pickques() {
 
 }
 function createTween() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    QusTxtString.visible = true;
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
 
     for (i = 0; i < 5; i++) {
         choiceArr[i].visible = true;
@@ -255,7 +246,7 @@ function createChoices() {
     }
     switch (qtype[cnt]) {
         case 1:
-            questionText.gotoAndStop(1);
+            SAUIX_setQuestionText("Which of these was not shown?", { textAlign: "center" });
             for (i = 0; i < 4; i++) {
                 j = i + 1;
                 choiceArr1[i].gotoAndStop(qno1[j]);
@@ -268,7 +259,7 @@ function createChoices() {
             console.log("ans" + ans)
             break;
         case 2:
-            questionText.gotoAndStop(2);
+            SAUIX_setQuestionText("Which of these was shown?", { textAlign: "center" });
             choiceArr1[0].visible = true;
             choiceArr1[1].visible = true;
             choiceArr1[2].visible = true;
@@ -339,9 +330,9 @@ function enablechoices() {
     createTween1();
 }
 function createTween1() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    QusTxtString.visible = true;
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
 
     if (repTimeClearInterval) {
         clearTimeout(repTimeClearInterval);

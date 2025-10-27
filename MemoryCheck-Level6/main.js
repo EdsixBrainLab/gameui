@@ -2,7 +2,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, cmnt = -1, ans, uans, interval, time = 18, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 7, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,   quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,   quesMarkMc, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -32,6 +32,7 @@ var qno1 = []
 var qno=[]
 var qtype = []
 var introImg,introImg1
+var QusTxtString;
 var btnx = [100, 400, 700, 1000, 250, 550, 850]
 var btny = [210, 210, 210, 210, 440, 440, 440]
 var qtype = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
@@ -49,7 +50,8 @@ function init() {
     canvas = document.getElementById("gameCanvas");
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
-    stage.addChild(container)
+    stage.addChild(container);
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -73,8 +75,7 @@ function init() {
         manifest.push(
 
             { id: "choice1", src: gameAssetsPath + "choiceImages1.png" },
-            { id: "questionText", src:questionTextPath + "MemoryCheck-Level6-QT.png" },
-			{ id: "introImg", src: gameAssetsPath + "introImg.png" },
+                        { id: "introImg", src: gameAssetsPath + "introImg.png" },
             { id: "introImg1", src: gameAssetsPath + "introholder1.png" }
         )
         preloadAllAssets()
@@ -102,17 +103,8 @@ function doneLoading1(event) {
 		container.parent.addChild(introImg1);
 		introImg1.visible = false;
 	}
-    if (id == "questionText") {
-        var quesTextSprisheet = new createjs.SpriteSheet({
-            framerate: 60,
-            "images": [preload.getResult("questionText")],
-            "frames": { "regX": 50, "height": 134, "count": 64, "regY": 50, "width": 650 }
-        });
-
-        questionText = new createjs.Sprite(quesTextSprisheet);
-        container.parent.addChild(questionText);
-        questionText.visible = false;
-
+    if (!QusTxtString) {
+        call_UI_gameQuestion(container, "Remember these objects");
     }
 
 
@@ -160,9 +152,8 @@ function handleClick(e) {
 function CreateGameElements() {
     interval = setInterval(countTime, 1000);
     // bg.visible = true
-    container.parent.addChild(questionText);
-    questionText.visible = false;    
-    questionText.x = 365; questionText.y = 120;
+    container.parent.addChild(QusTxtString);
+    QusTxtString.visible = false;
     var btnx = [100, 400, 700, 1000, 250, 550, 850]
     var btny = [230, 230, 230, 230, 470, 470, 470]
     for (i = 0; i < 7; i++) {
@@ -211,7 +202,7 @@ function pickques() {
  
 	panelVisibleFn()
 
-    questionText.gotoAndStop(0);
+    SAUIX_setQuestionText("Remember these objects", { textAlign: "center" });
 
     qno1 = between(0, 39);
 
@@ -227,9 +218,9 @@ function pickques() {
 
 }
 function createTween() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    QusTxtString.visible = true;
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
 
     for (i = 0; i < 7; i++) {
         choiceArr[i].visible = true;
@@ -256,7 +247,7 @@ function createChoices() {
     }
     switch (qtype[cnt]) {
         case 1:
-            questionText.gotoAndStop(1);
+            SAUIX_setQuestionText("Which of these was not shown?", { textAlign: "center" });
             for (i = 0; i < 5; i++) {
                
                 j = i + 2;
@@ -269,7 +260,7 @@ function createChoices() {
             console.log("ans" + ans)
             break;
         case 2:
-            questionText.gotoAndStop(2);
+            SAUIX_setQuestionText("Which of these was shown?", { textAlign: "center" });
             choiceArr[0].visible = true;
             choiceArr[1].visible = true;
             choiceArr[2].visible = true;
@@ -326,9 +317,9 @@ function createChoices() {
 }
 
 function createTween1() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    QusTxtString.visible = true;
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
 
     if (repTimeClearInterval) {
         clearTimeout(repTimeClearInterval);
@@ -374,9 +365,121 @@ function disablechoices() {
 
     }
 
-    questionText.visible = false;   
+    QusTxtString.visible = false;
 }
 
+
+function animateChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopChoicePulse(tile);
+        var baseScale = tile.baseScale || 1;
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 60;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.45);
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 150);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            stopChoicePulse(choiceArray[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            createjs.Tween.removeTweens(choiceArray[i]);
+        }
+    }
+}
 
 function animateChoiceOptions(choiceArray, onComplete) {
     if (!choiceArray) { return; }
