@@ -35,6 +35,8 @@ var introImg,introImg1
 var btnx = [100, 400, 700, 1000, 250, 550, 850]
 var btny = [210, 210, 210, 210, 440, 440, 440]
 var qtype = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+
+var repTimeClearInterval = 0;
 //register key functions
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -286,7 +288,7 @@ function createChoices() {
     console.log("len= " + choiceArr.length)
     chpos = between(0, 4);
     console.log(chpos);
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < 5; i++) {
 
         switch (i) {
             case 0:
@@ -311,6 +313,14 @@ function createChoices() {
                 choiceArr[chpos[i]].y = 440;
                 break;
         }
+        var tile = choiceArr[chpos[i]];
+        if (!tile) {
+            continue;
+        }
+        tile.__targetX = tile.x;
+        tile.__targetY = tile.y;
+        tile.baseScale = tile.baseScale || tile.scaleX || 1;
+        tile.__choiceIndex = i;
     }
     createTween1();
 }
@@ -320,22 +330,23 @@ function createTween1() {
     questionText.alpha = 0;
     createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
 
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].visible = true;
-        choiceArr[i].alpha =0;
-
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval);
+        repTimeClearInterval = 0;
     }
 
-    createjs.Tween.get(choiceArr[0]).wait(200).to({ x: choiceArr[0].x, y: choiceArr[0].y, alpha: 0 }, 500).to({ x: choiceArr[0].x, y: choiceArr[0].y+10, alpha: 0.5 }, 500).to({ x: choiceArr[0].x, y: choiceArr[0].y, alpha: 1 })
-    createjs.Tween.get(choiceArr[1]).wait(300).to({ x: choiceArr[1].x, y: choiceArr[1].y+10, alpha: 0 }, 500).to({ x: choiceArr[1].x, y: choiceArr[1].y, alpha: 0.5 }, 500).to({ x: choiceArr[1].x, y: choiceArr[1].y, alpha: 1 })
-    createjs.Tween.get(choiceArr[2]).wait(600).to({ x: choiceArr[2].x, y: choiceArr[2].y, alpha: 0 }, 500).to({ x: choiceArr[2].x, y: choiceArr[2].y+10, alpha: 0.5 }, 500).to({ x: choiceArr[2].x, y: choiceArr[2].y, alpha: 1 })
-    createjs.Tween.get(choiceArr[3]).wait(800).to({ x: choiceArr[3].x, y: choiceArr[3].y+10, alpha: 0 }, 500).to({ x: choiceArr[3].x, y: choiceArr[3].y, alpha: 0.5 }, 500).to({ x: choiceArr[3].x, y: choiceArr[3].y, alpha: 1 })
-    createjs.Tween.get(choiceArr[4]).wait(1000).to({ x: choiceArr[4].x, y: choiceArr[4].y, alpha: 0 }, 500).to({ x: choiceArr[4].x, y: choiceArr[4].y+10, alpha: 0.5 }, 500).to({ x: choiceArr[4].x, y: choiceArr[4].y, alpha: 1 })
-   
-    repTimeClearInterval = setTimeout(AddListenerFn, 1600)
+    var activeChoices = choiceArr.slice(0, 5);
+
+    animateChoiceOptions(activeChoices, function () {
+        repTimeClearInterval = 0;
+        AddListenerFn();
+    });
 }
 function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
+    if (repTimeClearInterval) {
+        clearTimeout(repTimeClearInterval)
+        repTimeClearInterval = 0;
+    }
     console.log("eventlisterneer")
     for (i = 0; i < 5; i++) {
         choiceArr[i].addEventListener("click", answerSelected);
@@ -350,19 +361,134 @@ function AddListenerFn() {
     restartTimer()
 }
 
-
 function disablechoices() {
+    var activeChoices = choiceArr.slice(0, 5);
+    resetChoiceTweens(activeChoices);
+    clearChoiceAnimations(activeChoices);
     for (i = 0; i < 5; i++) {
         choiceArr[i].visible = false
         // choiceArr[i].alpha = 1
         choiceArr[i].removeEventListener("click", answerSelected);
         choiceArr[i].cursor = "default";
+        choiceArr[i].mouseEnabled = false
 
     }
-   
+
     questionText.visible = false;   
 }
 
+
+function animateChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopChoicePulse(tile);
+        var baseScale = tile.baseScale || 1;
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 60;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.45);
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 150);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            stopChoicePulse(choiceArray[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            createjs.Tween.removeTweens(choiceArray[i]);
+        }
+    }
+}
 
 function answerSelected(e) {
     clk++;
