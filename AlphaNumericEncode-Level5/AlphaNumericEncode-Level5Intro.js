@@ -1,11 +1,12 @@
+
 var introTitle, introQuestxt, introQues, introArrow, introfingure, introText, introText1, introHolder
 var introchoice1, introchoice2, introchoice3, introchoice4
 var introQuesX = 425, introQuesY = 215;
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introArrowX = 425, introArrowY = 300;
-var introfingureX = 445, introfingureY = 410;
+var introArrowX = 450, introArrowY = 300;
+var introfingureX = 445, introfingureY = 430;
 var introArr = []
 var randIntroArr = [0, 0, 0, 0, 2, 2, 2, 2, 4, 4, 4, 4]
 var count1 = -1;

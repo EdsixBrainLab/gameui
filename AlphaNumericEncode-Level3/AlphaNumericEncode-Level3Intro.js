@@ -4,7 +4,7 @@ var introQuesX = 425, introQuesY = 280;
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introArrowX = 455, introArrowY = 430;
+var introArrowX = 480, introArrowY = 430;
 var introfingureX = 480, introfingureY = 560;
 var introArr = []
 var randIntroArr = [0, 0, 0, 0, 2, 2, 2, 2, 4, 4, 4, 4]

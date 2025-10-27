@@ -41,7 +41,7 @@ var btnX = [110, 890, 500, 110, 890]
 var btnY = [300, 300, 450, 603, 603]
 
 var btnX1 = [180, 380, 620, 860, 1060]
-var btnY1 = [420, 540, 630, 540, 420]
+var btnY1 = [420, 540, 600, 540, 420]
 var introImg
 var qtype = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 //register key functions

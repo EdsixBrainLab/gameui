@@ -40,7 +40,7 @@ var choice2Arr = []
 var btnX = [140, 520, 900, 313, 727, 313, 727]
 var btnY = [260, 260, 260, 440, 440, 623, 623]
 var btnX1 = [220, 500, 760, 1020, 360, 630, 890]
-var btnY1 = [470, 470, 470, 470, 630, 630, 630]
+var btnY1 = [470, 470, 470, 470, 600, 600, 600]
 var qtype = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
 var introImg
 var QusTxtString;
@@ -273,9 +273,9 @@ function pickques() {
         choice1Arr[i].__targetY = undefined;
         choice2Arr[i].__targetX = undefined;
         choice2Arr[i].__targetY = undefined;
-        choice1Arr[i].x = btnX[i] - 40
+        choice1Arr[i].x = btnX[i] - 0
         choice1Arr[i].y = btnY[i]
-        choice2Arr[i].x = btnX[i] + 150
+        choice2Arr[i].x = btnX[i] + 200
         choice2Arr[i].y = btnY[i]
     }
     createTween();

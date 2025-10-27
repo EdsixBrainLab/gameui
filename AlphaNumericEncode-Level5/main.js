@@ -41,7 +41,7 @@ var btnX = [200, 577, 960, 375, 785, 585]
 var btnY = [255, 255, 255, 425, 425, 603]
 
 var btnX1 = [180, 432, 824, 1075, 508, 740]
-var btnY1 = [420, 420, 420, 420, 630, 630]
+var btnY1 = [420, 420, 420, 420, 600, 600]
 var introImg
 var qtype = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 var QusTxtString;
@@ -275,9 +275,9 @@ function pickques() {
         choice1Arr[i].__targetY = undefined;
         choice2Arr[i].__targetX = undefined;
         choice2Arr[i].__targetY = undefined;
-        choice1Arr[i].x = btnX[i] - 50;
+        choice1Arr[i].x = btnX[i] - 60;
         choice1Arr[i].y = btnY[i];
-        choice2Arr[i].x = btnX[i] + 130;
+        choice2Arr[i].x = btnX[i] + 135;
         choice2Arr[i].y = btnY[i];
     }
 

@@ -17,7 +17,7 @@ var posX = [140, 520, 900, 313, 727, 313, 727]
 var posY = [260, 260, 260, 440, 440, 623, 623]
 
 var posX1 = [220, 500, 760, 1020, 360, 630, 890]
-var posY1 = [470, 470, 470, 470, 630, 630, 630]
+var posY1 = [470, 470, 470, 470, 600, 600, 600]
 var introChoiceArr = []
 function commongameintro() {
     introTitle = Title.clone();
