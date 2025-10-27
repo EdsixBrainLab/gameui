@@ -41,6 +41,7 @@ var btnx = []
 var btny = []
 
 var btnPadding = 50;
+var repTimeClearInterval = 0;
 
 
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
@@ -272,6 +273,8 @@ function createChoices() {
         choiceArr[i].visible = false;
 
     }
+    resetChoiceTweens();
+    clearChoiceAnimations();
     qnoI[cnt] = qtype[cnt]
     switch (qtype[cnt]) {
         case 1:
@@ -324,6 +327,10 @@ function createChoices() {
                 break;
 
         }
+        choiceArr[chpos[i]].__targetX = choiceArr[chpos[i]].x;
+        choiceArr[chpos[i]].__targetY = choiceArr[chpos[i]].y;
+        choiceArr[chpos[i]].baseScale = 1;
+        choiceArr[chpos[i]].__choiceIndex = i;
     }
     enablechoices();
     createjs.Ticker.addEventListener("tick", tick);
@@ -332,31 +339,37 @@ function createChoices() {
 }
 
 
-function enablechoices() {
-    for (i = 0; i < 3; i++) {
-        choiceArr[i].visible = true;
+  function enablechoices() {
+      for (i = 0; i < 3; i++) {
+          choiceArr[i].visible = false;
+          choiceArr[i].mouseEnabled = false;
+          choiceArr[i].cursor = "default";
+          choiceArr[i].baseScale = choiceArr[i].baseScale || 1;
+          choiceArr[i].__choiceIndex = (typeof choiceArr[i].__choiceIndex === "number") ? choiceArr[i].__choiceIndex : i;
 
-    }
+      }
 
-    createTween1();
-}
-function createTween1() {
-    QusTxtString.visible = true;
-     createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
+      createTween1();
+  }
+  function createTween1() {
+      QusTxtString.visible = true;
+      createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
 
-    for (i = 0; i < 3; i++) {
-        choiceArr[i].visible = true;
-        choiceArr[i].alpha =0;
-        
-    }
-    createjs.Tween.get(choiceArr[1]).wait(200).to({ alpha: 0, scaleX: .95, scaleY: .95 }, 500).to({ alpha: 1, scaleX:1, scaleY: 1 }, 500)
-    createjs.Tween.get(choiceArr[2]).wait(500).to({ alpha: 0, scaleX: .95, scaleY: .95 }, 500).to({ alpha: 1, scaleX:1, scaleY: 1 }, 500)
-    createjs.Tween.get(choiceArr[0]).wait(700).to({ alpha: 0, scaleX: .95, scaleY: .95 }, 500).to({ alpha: 1, scaleX:1, scaleY: 1 }, 500)
+      if (repTimeClearInterval) {
+          clearTimeout(repTimeClearInterval);
+          repTimeClearInterval = 0;
+      }
 
-    repTimeClearInterval = setTimeout(AddListenerFn, 1400)
-}
-function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
+      animateChoiceOptions(choiceArr, function () {
+          repTimeClearInterval = 0;
+          AddListenerFn();
+      });
+  }
+  function AddListenerFn() {
+      if (repTimeClearInterval) {
+          clearTimeout(repTimeClearInterval)
+          repTimeClearInterval = 0;
+      }
     console.log("eventlisterneer")
     for (i = 0; i < 3; i++) {
         choiceArr[i].addEventListener("click", answerSelected);
@@ -371,13 +384,126 @@ function AddListenerFn() {
     restartTimer()
 }
 function disablechoices() {
+    resetChoiceTweens();
+    clearChoiceAnimations();
     for (i = 0; i < 3; i++) {
         choiceArr[i].alpha = 1
         choiceArr[i].removeEventListener("click", answerSelected);
         choiceArr[i].cursor = "default";
         choiceArr[i].visible = false
+        choiceArr[i].mouseEnabled = false
     }
-  
+
+}
+
+function animateChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopChoicePulse(tile);
+        var baseScale = tile.baseScale || 1;
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 60;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.45);
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 150);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens() {
+    for (i = 0; i < 3; i++) {
+        if (choiceArr[i]) {
+            stopChoicePulse(choiceArr[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations() {
+    for (i = 0; i < 3; i++) {
+        if (choiceArr[i]) {
+            createjs.Tween.removeTweens(choiceArr[i]);
+        }
+    }
 }
 
 function onRoll_over(e) {
