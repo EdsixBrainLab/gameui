@@ -26,7 +26,12 @@ function commongameintro() {
     introHolder = choiceBg.clone();
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-    introQuestxt = questionText.clone();
+    if (QusTxtString && typeof QusTxtString.clone === "function") {
+        introQuestxt = QusTxtString.clone();
+    } else {
+        introQuestxt = new createjs.Text("", "bold 46px Arial", "#ffffff");
+        introQuestxt.textAlign = "center";
+    }
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
@@ -34,16 +39,21 @@ function commongameintro() {
     container.parent.addChild(introHolder)
     introHolder.visible = false;
     container.parent.addChild(introQuestxt);
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
     introQuestxt.visible = false;
-    introQuestxt.x = 360
-    introQuestxt.y = 130
-    introQuestxt.gotoAndStop(0);
+    introQuestxt.x = 640;
+    introQuestxt.y = 130;
+    introQuestxt.textAlign = "center";
+    introQuestxt.text = "Look at the associations below";
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     introQues = introchoice2.clone()
     container.parent.addChild(introQues);
     introQues.visible = false;
     introQues.x = 605
-    introQues.y = 250
+    introQues.y = 270
     introQues.scaleX = introQues.scaleY = 1.5
 
     for (i = 0; i < 6; i++) {
@@ -151,7 +161,10 @@ function choiceTween() {
 
         }
 
-        introQuestxt.gotoAndStop(1)
+        introQuestxt.text = "Select the correct symbol that was associated with the letter/number";
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+            introQuestxt.__labelBG.update();
+        }
         introQuestxt.visible = true;
         introQuestxt.alpha = 0;
         createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000)
@@ -301,8 +314,16 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt) {
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+            introQuestxt.__labelBG.destroy();
+        } else if (introQuestxt.__labelBG && introQuestxt.__labelBG.parent) {
+            introQuestxt.__labelBG.parent.removeChild(introQuestxt.__labelBG);
+        }
+        container.parent.removeChild(introQuestxt)
+        introQuestxt.visible = false
+        introQuestxt = null;
+    }
     container.parent.removeChild(introQues);
     introQues.visible = false
     container.parent.removeChild(introHolder)
