@@ -12,6 +12,7 @@ var posY1 = [330,330,330,330]
 var introArr = []
 var introArr1 = []
 var val = [0, 2, 3, 4]
+var introQuestxtX = 640, introQuestxtY = 140;
 
 function animateIntroChoiceOptions(choiceArray, onComplete) {
     if (!choiceArray) { return; }
@@ -127,7 +128,19 @@ function commongameintro() {
     introchoice1 = choice1.clone();
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-    introQuestxt = questionText.clone();
+    introQuestxt = QusTxtString.clone();
+    container.parent.addChild(introQuestxt);
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+        introQuestxt.__labelBG.destroy();
+    }
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    introQuestxt.visible = true;
+    introQuestxt.x = introQuestxtX;
+    introQuestxt.y = introQuestxtY;
+    introQuestxt.alpha = 1;
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
@@ -164,12 +177,12 @@ function commongameintro() {
         introArr1[i].__targetY = introArr1[i].y;
     }
 
-    container.parent.addChild(introQuestxt);
-    introQuestxt.visible = false;
-    introQuestxt.regX = introQuestxt.regY = 50;
-    introQuestxt.x = 410
-    introQuestxt.y = 160
-    introQuestxt.gotoAndStop(0);
+    introQuestxt.visible = true;
+    introQuestxt.alpha = 0;
+    introQuestxt.text = "Remember these objects";
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
     container.parent.addChild(introImg);
     introImg.visible = false;
@@ -178,9 +191,6 @@ function commongameintro() {
     introImg.y = 210;
     introImg.x = 330;
 
-    introQuestxt.visible = true;
-    introQuestxt.alpha = 0;
-    introQuestxt.gotoAndStop(0);
     createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
 }
 function handleComplete1_1() {
@@ -289,7 +299,10 @@ function choiceTween() {
     }
 
     introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(1);
+    introQuestxt.text = "Which of these was not shown?";
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
 
 
     clearIntroChoiceAnimations(introArr1);
@@ -440,8 +453,14 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    if (introQuestxt) {
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+            introQuestxt.__labelBG.destroy();
+        }
+        introQuestxt.visible = false;
+        container.parent.removeChild(introQuestxt)
+        introQuestxt = null;
+    }
 
    
     container.parent.removeChild(introImg);

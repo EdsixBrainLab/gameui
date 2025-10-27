@@ -126,9 +126,7 @@ function doneLoading1(event) {
 		container.parent.addChild(introImg1);
 		introImg1.visible = false;
 	}
-    if (!QusTxtString) {
-        call_UI_gameQuestion(container, "Remember these objects");
-    }
+    call_UI_gameQuestion(container, "Remember these objects");
 
     if (id == "choice1") {
         var spriteSheet1 = new createjs.SpriteSheet({
@@ -152,7 +150,8 @@ function tick(e) {
 
 
 function handleClick(e) {
-    qno=between(0,100)
+    qno = between(0, 100)
+    qtype.sort(randomSort)
     CreateGameStart()
     if (gameType == 0) {
         CreateGameElements()
@@ -451,45 +450,6 @@ function animateChoiceOptions(choiceArray, onComplete) {
                     }
                 });
         })(tile, baseScale, targetY, revealIndex);
-    }
-}
-
-function startChoicePulse(tile, baseScale, targetY, index) {
-    if (!tile) { return; }
-    stopChoicePulse(tile);
-    var scale = baseScale || tile.baseScale || 1;
-    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
-    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
-    tile.baseScale = scale;
-    tile.__targetY = finalY;
-    tile.scaleX = tile.scaleY = scale;
-    tile.y = finalY;
-
-    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
-        .wait((stagger % 2) * 100)
-        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
-        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
-        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
-
-    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
-        .wait((stagger % 2) * 120)
-        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
-        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
-}
-
-function stopChoicePulse(tile) {
-    if (!tile) { return; }
-    if (tile.__pulseTween) {
-        tile.__pulseTween.setPaused(true);
-        tile.__pulseTween = null;
-    }
-    if (tile.__bobTween) {
-        tile.__bobTween.setPaused(true);
-        tile.__bobTween = null;
-    }
-    createjs.Tween.removeTweens(tile);
-    if (tile.baseScale) {
-        tile.scaleX = tile.scaleY = tile.baseScale;
     }
     if (typeof tile.__targetY === "number") {
         tile.y = tile.__targetY;
