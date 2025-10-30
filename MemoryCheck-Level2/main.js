@@ -466,7 +466,7 @@ function resetChoiceTweens(choiceArray) {
             stopChoicePulse(choiceArray[i]);
         }
     }
-}
+
 
     if (!hasTweens && typeof onComplete === "function") {
         onComplete();

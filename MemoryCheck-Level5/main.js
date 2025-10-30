@@ -2,7 +2,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, cmnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 5, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, quesMarkMc, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -43,8 +43,6 @@ var btny = []
 
 var btnPadding = 50;
 
-var repTimeClearInterval = 0;
-
 
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
@@ -57,7 +55,6 @@ var qno1 = []
 var qno2 = []
 var qtype = []
 var introImg,introImg1
-var QusTxtString;
 //register key functions
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -70,8 +67,7 @@ function init() {
     canvas = document.getElementById("gameCanvas");
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
-    stage.addChild(container);
-    call_UI_ambientOverlay(container);
+    stage.addChild(container)
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -95,7 +91,8 @@ function init() {
         manifest.push(
          
             { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },
-                        { id: "introImg", src: gameAssetsPath + "introImg.png" },
+            { id: "questionText", src:questionTextPath + "MemoryCheck-Level5-QT.png" },
+			{ id: "introImg", src: gameAssetsPath + "introImg.png" },
             { id: "introImg1", src: gameAssetsPath + "introholder1.png" }
         )
         preloadAllAssets()
@@ -124,8 +121,17 @@ function doneLoading1(event) {
 		container.parent.addChild(introImg1);
 		introImg1.visible = false;
 	}
-    if (!QusTxtString) {
-        call_UI_gameQuestion(container, "Remember these objects");
+    if (id == "questionText") {
+        var quesTextSprisheet = new createjs.SpriteSheet({
+            framerate: 60,
+            "images": [preload.getResult("questionText")],
+            "frames": { "regX": 50, "height": 134, "count": 64, "regY": 50, "width": 650 }
+        });
+
+        questionText = new createjs.Sprite(quesTextSprisheet);
+        container.parent.addChild(questionText);
+        questionText.visible = false;
+
     }
 
 
@@ -172,8 +178,9 @@ function handleClick(e) {
 function CreateGameElements() {
     interval = setInterval(countTime, 1000);
    // bg.visible = true
-    container.parent.addChild(QusTxtString);
-    QusTxtString.visible = false;
+    container.parent.addChild(questionText);
+    questionText.visible = false;
+    questionText.x = 360; questionText.y = 120;
 
     for (i = 0; i < 6; i++) {
         choiceArr[i] = choice1.clone();
@@ -231,7 +238,7 @@ function pickques() {
   
     btnx = [65, 515, 965, 65, 515, 965]
     btny = [190, 190, 190, 460, 460, 460]
-    SAUIX_setQuestionText("Remember these objects", { textAlign: "center" });
+    questionText.gotoAndStop(0);
 
     qno1 = between(0, 39);
 
@@ -248,9 +255,9 @@ function pickques() {
 
 }
 function createTween() {
-    QusTxtString.visible = true;
-    QusTxtString.alpha = 0;
-    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
+    questionText.visible = true;
+    questionText.alpha = 0;
+    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
 
     for (i = 0; i < 6; i++) {
         choiceArr[i].visible = true;
@@ -277,7 +284,7 @@ function createChoices() {
     }
     switch (qtype[cnt]) {
         case 1:
-            SAUIX_setQuestionText("Which of these was not shown?", { textAlign: "center" });
+            questionText.gotoAndStop(1);
             for (i = 0; i < 5; i++) {
                 j = i + 2;
                 choiceArr1[i].gotoAndStop(qno1[j]);
@@ -289,7 +296,7 @@ function createChoices() {
             console.log("ans" + ans)
             break;
         case 2:
-            SAUIX_setQuestionText("Which of these was shown?", { textAlign: "center" });
+            questionText.gotoAndStop(2);
             choiceArr1[0].visible = true;
             choiceArr1[1].visible = true;
             choiceArr1[2].visible = true;
@@ -333,14 +340,6 @@ function createChoices() {
                 choiceArr1[chpos[i]].y = 460;
                 break;
         }
-        var tile = choiceArr1[chpos[i]];
-        if (!tile) {
-            continue;
-        }
-        tile.__targetX = tile.x;
-        tile.__targetY = tile.y;
-        tile.baseScale = tile.baseScale || tile.scaleX || 1;
-        tile.__choiceIndex = i;
     }
     enablechoices();
     createjs.Ticker.addEventListener("tick", tick);
@@ -351,42 +350,37 @@ function createChoices() {
 function enablechoices() {
     for (i = 0; i < 5; i++) {
         choiceArr1[i].name = "ch" + i;
-        choiceArr1[i].visible = false;
-        choiceArr1[i].mouseEnabled = false;
-        choiceArr1[i].cursor = "default";
-        choiceArr1[i].baseScale = choiceArr1[i].baseScale || choiceArr1[i].scaleX || 1;
-        if (typeof choiceArr1[i].__choiceIndex !== "number") {
-            choiceArr1[i].__choiceIndex = i;
-        }
+        choiceArr1[i].visible = true;
 
     }
     createTween1();
 }
 function createTween1() {
-    QusTxtString.visible = true;
-    QusTxtString.alpha = 0;
-    createjs.Tween.get(QusTxtString).wait(100).to({ alpha: 1 }, 1000)
+    questionText.visible = true;
+    questionText.alpha = 0;
+    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
 
-    if (repTimeClearInterval) {
-        clearTimeout(repTimeClearInterval);
-        repTimeClearInterval = 0;
+    for (i = 0; i < 5; i++) {
+        choiceArr1[i].visible = true;
+        choiceArr1[i].alpha =0;
+        choiceArr1[i].scaleY= choiceArr1[i].scaleX=.8
+
     }
 
-    animateChoiceOptions(choiceArr1, function () {
-        repTimeClearInterval = 0;
-        AddListenerFn();
-    });
+    createjs.Tween.get(choiceArr1[0]).wait(200).to({ x: choiceArr1[0].x, y: choiceArr1[0].y, alpha: 0 }, 500).to({ x: choiceArr1[0].x, y: choiceArr1[0].y+10, alpha: 0.5 }, 500).to({ x: choiceArr1[0].x, y: choiceArr1[0].y, alpha: 1 })
+    createjs.Tween.get(choiceArr1[1]).wait(300).to({ x: choiceArr1[1].x, y: choiceArr1[1].y+10, alpha: 0 }, 500).to({ x: choiceArr1[1].x, y: choiceArr1[1].y, alpha: 0.5 }, 500).to({ x: choiceArr1[1].x, y: choiceArr1[1].y, alpha: 1 })
+    createjs.Tween.get(choiceArr1[2]).wait(600).to({ x: choiceArr1[2].x, y: choiceArr1[2].y, alpha: 0 }, 500).to({ x: choiceArr1[2].x, y: choiceArr1[2].y+10, alpha: 0.5 }, 500).to({ x: choiceArr1[2].x, y: choiceArr1[2].y, alpha: 1 })
+    createjs.Tween.get(choiceArr1[3]).wait(800).to({ x: choiceArr1[3].x, y: choiceArr1[3].y+10, alpha: 0 }, 500).to({ x: choiceArr1[3].x, y: choiceArr1[3].y, alpha: 0.5 }, 500).to({ x: choiceArr1[3].x, y: choiceArr1[3].y, alpha: 1 })
+    createjs.Tween.get(choiceArr1[4]).wait(600).to({ x: choiceArr1[4].x, y: choiceArr1[4].y, alpha: 0 }, 500).to({ x: choiceArr1[4].x, y: choiceArr1[4].y+10, alpha: 0.5 }, 500).to({ x: choiceArr1[4].x, y: choiceArr1[4].y, alpha: 1 })
+   
+    repTimeClearInterval = setTimeout(AddListenerFn, 1600)
 }
 function AddListenerFn() {
-    if (repTimeClearInterval) {
-        clearTimeout(repTimeClearInterval)
-        repTimeClearInterval = 0;
-    }
+    clearTimeout(repTimeClearInterval)
     console.log("eventlisterneer")
     for (i = 0; i < 5; i++) {
         choiceArr1[i].addEventListener("click", answerSelected);
         choiceArr1[i].cursor = "pointer";
-        choiceArr1[i].visible = true;
         choiceArr1[i].mouseEnabled = true
 
     }
@@ -395,127 +389,13 @@ function AddListenerFn() {
     restartTimer()
 }
 function disablechoices() {
-    resetChoiceTweens(choiceArr1);
-    clearChoiceAnimations(choiceArr1);
     for (i = 0; i < 5; i++) {
         choiceArr1[i].alpha = 1
         choiceArr1[i].removeEventListener("click", answerSelected);
         choiceArr1[i].cursor = "default";
         choiceArr1[i].visible = false
-        choiceArr1[i].mouseEnabled = false
     }
-
-}
-function animateChoiceOptions(choiceArray, onComplete) {
-    if (!choiceArray) { return; }
-    var pendingTweens = 0;
-    var hasTweens = false;
-    for (var idx = 0; idx < choiceArray.length; idx++) {
-        var tile = choiceArray[idx];
-        if (!tile) { continue; }
-        hasTweens = true;
-        pendingTweens++;
-        stopChoicePulse(tile);
-        var baseScale = tile.baseScale || 1;
-        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
-        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
-        tile.__targetX = targetX;
-        tile.__targetY = targetY;
-        tile.baseScale = baseScale;
-        tile.visible = true;
-        tile.alpha = 0;
-        tile.mouseEnabled = false;
-        tile.cursor = "default";
-        tile.x = targetX;
-        tile.y = targetY + 60;
-        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.45);
-        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
-        (function (target, base, finalY, order) {
-            var delay = 200 + (order * 150);
-            createjs.Tween.get(target, { override: true })
-                .wait(delay)
-                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
-
-            createjs.Tween.get(target, { override: false })
-                .wait(delay)
-                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
-                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
-                .call(function () {
-                    startChoicePulse(target, base, finalY, order);
-                    pendingTweens = Math.max(0, pendingTweens - 1);
-                    if (!pendingTweens && typeof onComplete === "function") {
-                        onComplete();
-                    }
-                });
-        })(tile, baseScale, targetY, revealIndex);
-    }
-
-    if (!hasTweens && typeof onComplete === "function") {
-        onComplete();
-    }
-}
-
-function startChoicePulse(tile, baseScale, targetY, index) {
-    if (!tile) { return; }
-    stopChoicePulse(tile);
-    var scale = baseScale || tile.baseScale || 1;
-    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
-    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
-    tile.baseScale = scale;
-    tile.__targetY = finalY;
-    tile.scaleX = tile.scaleY = scale;
-    tile.y = finalY;
-
-    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
-        .wait((stagger % 2) * 100)
-        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
-        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
-        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
-
-    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
-        .wait((stagger % 2) * 120)
-        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
-        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
-}
-
-function stopChoicePulse(tile) {
-    if (!tile) { return; }
-    if (tile.__pulseTween) {
-        tile.__pulseTween.setPaused(true);
-        tile.__pulseTween = null;
-    }
-    if (tile.__bobTween) {
-        tile.__bobTween.setPaused(true);
-        tile.__bobTween = null;
-    }
-    createjs.Tween.removeTweens(tile);
-    if (tile.baseScale) {
-        tile.scaleX = tile.scaleY = tile.baseScale;
-    }
-    if (typeof tile.__targetY === "number") {
-        tile.y = tile.__targetY;
-    }
-    if (typeof tile.__targetX === "number") {
-        tile.x = tile.__targetX;
-    }
-}
-
-function resetChoiceTweens(choiceArray) {
-    if (!choiceArray) { return; }
-    for (var i = 0; i < choiceArray.length; i++) {
-        if (choiceArray[i]) {
-            stopChoicePulse(choiceArray[i]);
-        }
-    }
-}
-
-function clearChoiceAnimations(choiceArray) {
-    if (!choiceArray) { return; }
-    for (var i = 0; i < choiceArray.length; i++) {
-        if (choiceArray[i]) {
-            createjs.Tween.removeTweens(choiceArray[i]);
-        }
-    }
+ 
 }
 
 function onRoll_over(e) {

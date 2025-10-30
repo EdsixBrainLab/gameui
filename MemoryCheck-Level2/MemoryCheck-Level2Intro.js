@@ -4,7 +4,7 @@ var introQuesX = 425, introQuesY = 215;
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introArrowX = 1120, introArrowY = 230;
+var introArrowX = 1140, introArrowY = 230;
 var introfingureX = 1140, introfingureY = 410;
 var posX = [60, 474, 890]
 var posX1 =[490,690,890,1090]
@@ -12,7 +12,7 @@ var posY1 = [330,330,330,330]
 var introArr = []
 var introArr1 = []
 var val = [0, 2, 3, 4]
-var introQuestxtX = 640, introQuestxtY = 140;
+var introQuestxtX = 640, introQuestxtY = 130;
 
 function animateIntroChoiceOptions(choiceArray, onComplete) {
     if (!choiceArray) { return; }
