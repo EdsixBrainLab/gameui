@@ -1,62 +1,204 @@
 var introTitle, introQuestxt, introQues, introArrow, introfingure, introText, introText1, introHolder
 var introchoice1, introchoice2, introchoice3, introchoice4
-var introQuesX = 425, introQuesY = 215;
+var introQuestxtX = 640, introQuestxtY = 150;
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introArrowX = 650, introArrowY = 400;
-var introfingureX = 690, introfingureY = 560;
-var posX11 = [70, 370, 670, 970, 220, 520, 820]
-var posY11 = [210, 210, 210, 210, 440, 440, 440]
-var posX12 = [480, 750, 1020, 615, 885]
-var posY12 = [240, 240, 240, 510, 510]
+var introArrowX = 900, introArrowY = 520;
+var introfingureX = 920, introfingureY = 420;
+var posX11 = [200, 400, 600, 800, 280, 480, 680]
+var posY11 = [220, 220, 220, 220, 470, 470, 470]
+var posX12 = [240, 520, 800, 360, 680]
+var posY12 = [330, 330, 330, 520, 520]
 var introArr = []
 var introArr1 = []
 var val = [0, 1, 2, 3, 4, 5, 6]
 var val1 = [4, 0, 2, 7, 3]
+
+function animateIntroChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopIntroChoicePulse(tile);
+
+        var baseScale = (typeof tile.baseScale === "number") ? tile.baseScale : (tile.scaleX || 1);
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+
+        tile.baseScale = baseScale;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.__choiceIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 70;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, baseScale * 0.6);
+
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 150);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startIntroChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, tile.__choiceIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startIntroChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopIntroChoicePulse(tile);
+    var scale = (typeof baseScale === "number") ? baseScale : (tile.baseScale || tile.scaleX || 1);
+    var finalY = (typeof targetY === "number") ? targetY : (tile.__targetY || tile.y);
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__introPulse = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__introBob = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopIntroChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__introPulse) {
+        tile.__introPulse.setPaused(true);
+        tile.__introPulse = null;
+    }
+    if (tile.__introBob) {
+        tile.__introBob.setPaused(true);
+        tile.__introBob = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function clearIntroChoiceAnimations(choiceArray) {
+    if (!choiceArray) { return; }
+    for (var i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            stopIntroChoicePulse(choiceArray[i]);
+        }
+    }
+}
+
+function setIntroQuestionText(copy, options) {
+    if (!introQuestxt) { return; }
+    introQuestxt.visible = true;
+    introQuestxt.text = copy;
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
+    createjs.Tween.removeTweens(introQuestxt);
+    introQuestxt.alpha = 0;
+    var delay = options && typeof options.delay === "number" ? options.delay : 0;
+    var tween = createjs.Tween.get(introQuestxt, { override: true })
+        .wait(delay)
+        .to({ alpha: 1 }, 600, createjs.Ease.sineOut);
+    if (options && typeof options.onComplete === "function") {
+        tween.call(options.onComplete);
+    }
+}
+
 function commongameintro() {
     introTitle = Title.clone();
     introchoice1 = choice1.clone();
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
-    introQuestxt = questionText.clone();
+    introQuestxt = QusTxtString ? QusTxtString.clone() : null;
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
 
     container.parent.addChild(introImg1);
     introImg1.x = 330; introImg1.y = 200
-    introImg1.regX = introImg1.regY = 50    
+    introImg1.regX = introImg1.regY = 50
     introImg1.scaleX = introImg1.scaleY = 1.1
     introImg1.visible = false;
 
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < val.length; i++) {
         introArr[i] = introchoice1.clone();
         container.parent.addChild(introArr[i]);
         introArr[i].visible = false;
         introArr[i].gotoAndStop(val[i]);
         introArr[i].x = posX11[i]
         introArr[i].y = posY11[i]
+        introArr[i].scaleX = introArr[i].scaleY = 0.98;
+        introArr[i].baseScale = introArr[i].scaleX;
+        introArr[i].__targetX = introArr[i].x;
+        introArr[i].__targetY = introArr[i].y;
     }
 
-
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < val1.length; i++) {
         introArr1[i] = choice1.clone();
         container.parent.addChild(introArr1[i]);
         introArr1[i].visible = false;
-        introArr1[i].gotoAndStop(val1[i]);
         introArr1[i].regX = introArr1[i].regY = 50;
-        introArr1[i].scaleX=introArr1[i].scaleY=.8
+        introArr1[i].gotoAndStop(val1[i]);
         introArr1[i].x = posX12[i]
         introArr1[i].y = posY12[i]
+        introArr1[i].baseScale = 0.88;
+        introArr1[i].scaleX = introArr1[i].scaleY = introArr1[i].baseScale;
+        introArr1[i].__targetX = introArr1[i].x;
+        introArr1[i].__targetY = introArr1[i].y;
+        introArr1[i].__choiceIndex = i;
     }
 
-    container.parent.addChild(introQuestxt);
-    introQuestxt.visible = false;
-    introQuestxt.regX = introQuestxt.regY = 50;
-    introQuestxt.x = 410
-    introQuestxt.y = 160
-    introQuestxt.gotoAndStop(0);
+    if (introQuestxt) {
+        container.parent.addChild(introQuestxt);
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+            introQuestxt.__labelBG.destroy();
+        }
+        introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+        introQuestxt.visible = true;
+        introQuestxt.x = introQuestxtX;
+        introQuestxt.y = introQuestxtY;
+        if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+            introQuestxt.__labelBG.update();
+        }
+    }
 
     container.parent.addChild(introImg);
     introImg.visible = false;
@@ -65,10 +207,11 @@ function commongameintro() {
     introImg.y = 200;
     introImg.x = 330;
 
-    introQuestxt.visible = true;
-    introQuestxt.alpha = 0;
-    introQuestxt.gotoAndStop(0);
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    if (introQuestxt) {
+        setIntroQuestionText("Remember these objects", { onComplete: handleComplete1_1 });
+    } else {
+        handleComplete1_1();
+    }
 }
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
@@ -80,22 +223,37 @@ function handleComplete1_1() {
     }
 }
 function quesTween() {
-    var temp1 = 100
-    for (i = 0; i < 7; i++) {
+
+    var pending = 0;
+    for (i = 0; i < introArr.length; i++) {
         introArr[i].visible = true;
         introArr[i].alpha = 0;
-        introArr[i].scaleX = introArr[i].scaleY = .9
-        if (i == 6) {
-            createjs.Tween.get(introArr[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 }).wait(4000).call(handleComplete2_1);
+        introArr[i].x = introArr[i].__targetX;
+        introArr[i].y = introArr[i].__targetY - 260;
+        var baseScale = introArr[i].baseScale || introArr[i].scaleX || 1;
+        introArr[i].scaleX = introArr[i].scaleY = baseScale;
+        pending++;
+        (function (tile, targetY, order, scale) {
+            var delay = 200 + (order * 120);
+            createjs.Tween.get(tile, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: targetY }, 520, createjs.Ease.bounceOut)
+                .call(function () {
+                    pending = Math.max(0, pending - 1);
+                    if (!pending) {
+                        handleComplete2_1();
+                    }
+                });
 
-        }
-        else {
-            createjs.Tween.get(introArr[i]).wait(temp1).to({ alpha: 0 }, 500).to({ alpha: 1 })
-        }
-        temp1 += 200;
+            createjs.Tween.get(tile, { override: false })
+                .wait(delay)
+                .to({ scaleX: scale + 0.08, scaleY: scale + 0.08 }, 320, createjs.Ease.backOut)
+                .to({ scaleX: scale, scaleY: scale }, 260, createjs.Ease.sineOut);
+        })(introArr[i], introArr[i].__targetY, i, baseScale);
     }
-
-
+    if (!pending) {
+        handleComplete2_1();
+    }
 }
 function handleComplete2_1() {
     createjs.Tween.removeAllTweens();
@@ -105,27 +263,20 @@ function handleComplete2_1() {
         removeGameIntro()
     }
     else {
+
         introchoice2()
-       // introRemember()
-        // choiceTween()
 
     }
 }
-function introchoice2(){
-    introImg1.visible =true;
-    for (i = 0; i < 7; i++) {
-        if (i == 6) {
-            createjs.Tween.get(introArr[i]).wait(50).to({scaleX:.7,scaleY:.7, x:600,y:200}, 500).to({ alpha: 1 })
+function introchoice2() {
 
-        }
-        else {
-            createjs.Tween.get(introArr[i]).wait(50).to({scaleX:.7,scaleY:.7, x:600,y:200 },500).to({ alpha: 1 })
-        }
-       
-    }  
-    
-    createjs.Tween.get(introImg1).wait(50).to({ alpha: 1 },200)
-    .call(handleComplete3_1);
+    introImg1.visible = true;
+    for (i = 0; i < introArr.length; i++) {
+        createjs.Tween.get(introArr[i]).wait(50).to({ scaleX: .7, scaleY: .7, x: 600, y: 220 }, 500).to({ alpha: 1 })
+    }
+
+    createjs.Tween.get(introImg1).wait(50).to({ alpha: 1 }, 200)
+        .call(handleComplete3_1);
 }
 function handleComplete3_1() {
     createjs.Tween.removeAllTweens();
@@ -140,14 +291,14 @@ function handleComplete3_1() {
     }
 }
 function introRemember() {
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < introArr.length; i++) {
         introArr[i].visible = false;
     }
     introImg1.visible = false;
     introImg.visible = true;
-    createjs.Tween.get(introImg).to({ alpha: 1, scaleX:1.1, scaleY:1.1 }, 700)
-        .to({ scaleX:1.05, scaleY:1.05 }, 1000).to({ scaleX:1.1, scaleY:1.1 }, 500)
-        .to({ scaleX:1.05, scaleY:1.05 }, 1000).wait(1500).call(handleComplete4_1);
+    createjs.Tween.get(introImg).to({ alpha: 1, scaleX: 1.1, scaleY: 1.1 }, 700)
+        .to({ scaleX: 1.05, scaleY: 1.05 }, 1000).to({ scaleX: 1.1, scaleY: 1.1 }, 500)
+        .to({ scaleX: 1.05, scaleY: 1.05 }, 1000).wait(1500).call(handleComplete4_1);
 
 }
 function handleComplete4_1() {
@@ -161,7 +312,7 @@ function handleComplete4_1() {
     }
 }
 function introCh1() {
-    createjs.Tween.get(introImg).to({ scaleX: .6, scaleY: .6, x: 70, y: 280 }, 500).wait(500).call(handleComplete5_1);
+    createjs.Tween.get(introImg).to({ scaleX: .6, scaleY: .6, x: 70, y: 300 }, 500).wait(500).call(handleComplete5_1);
 }
 function handleComplete5_1() {
     createjs.Tween.removeAllTweens();
@@ -173,23 +324,26 @@ function handleComplete5_1() {
     }
 }
 function choiceTween() {
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(1);
 
-    for (i = 0; i < 5; i++) {
-        introArr1[i].visible = true;
-        introArr1[i].alpha = 0;
-        introArr1[i].scaleY = introArr1[i].scaleX = .8
-
+    for (i = 0; i < introArr.length; i++) {
+        introArr[i].visible = false;
     }
 
-    createjs.Tween.get(introArr1[0]).wait(200).to({ x: introArr1[0].x, y: introArr1[0].y, alpha: 0 }, 500).to({ x: introArr1[0].x, y: introArr1[0].y + 10, alpha: 0.5 }, 500).to({ x: introArr1[0].x, y: introArr1[0].y, alpha: 1 })
-    createjs.Tween.get(introArr1[1]).wait(400).to({ x: introArr1[1].x, y: introArr1[1].y + 10, alpha: 0 }, 500).to({ x: introArr1[1].x, y: introArr1[1].y, alpha: 0.5 }, 500).to({ x: introArr1[1].x, y: introArr1[1].y, alpha: 1 })
-    createjs.Tween.get(introArr1[2]).wait(800).to({ x: introArr1[2].x, y: introArr1[2].y, alpha: 0 }, 500).to({ x: introArr1[2].x, y: introArr1[2].y + 10, alpha: 0.5 }, 500).to({ x: introArr1[2].x, y: introArr1[2].y, alpha: 1 })
-    createjs.Tween.get(introArr1[3]).wait(1000).to({ x: introArr1[3].x, y: introArr1[3].y + 10, alpha: 0 }, 500).to({ x: introArr1[3].x, y: introArr1[3].y, alpha: 0.5 }, 500).to({ x: introArr1[3].x, y: introArr1[3].y, alpha: 1 })
-    createjs.Tween.get(introArr1[4]).wait(1200).to({ x: introArr1[4].x, y: introArr1[4].y, alpha: 0 }, 500).to({ x: introArr1[4].x, y: introArr1[4].y + 10, alpha: 0.5 }, 500).to({ x: introArr1[4].x, y: introArr1[4].y, alpha: 1 }).call(handleComplete6_1);
+    setIntroQuestionText("Which of these was not shown?", { delay: 0 });
 
+    clearIntroChoiceAnimations(introArr1);
+    for (i = 0; i < introArr1.length; i++) {
+        introArr1[i].visible = false;
+        introArr1[i].alpha = 0;
+        introArr1[i].mouseEnabled = false;
+        introArr1[i].cursor = "default";
+        introArr1[i].scaleX = introArr1[i].scaleY = introArr1[i].baseScale || introArr1[i].scaleX || 1;
+        introArr1[i].__choiceIndex = i;
+    }
 
+    animateIntroChoiceOptions(introArr1, function () {
+        handleComplete6_1();
+    });
 
 }
 function handleComplete6_1() {
@@ -198,17 +352,23 @@ function handleComplete6_1() {
         removeGameIntro()
     }
     else {
-        // setArrowTween()
         introCh()
     }
 }
 function introCh() {
-    createjs.Tween.get(introQuestxt).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 500)
-        .to({ scaleX: 1, scaleY: 1 }, 500).to({ scaleX: 1.05, scaleY: 1.05 }, 500)
-        .to({ scaleX: 1, scaleY: 1 }, 500)
-    createjs.Tween.get(introArr1[3]).wait(600).to({ alpha: 1, scaleX: .7, scaleY: .7 }, 500)
-        .to({ scaleX: .8, scaleY: .8 }, 500).to({ scaleX: .7, scaleY: .7 }, 500)
-        .to({ scaleX: .8, scaleY: .8 }, 700).wait(2000).call(handleComplete7_1);
+    clearIntroChoiceAnimations(introArr1);
+    if (introQuestxt) {
+        createjs.Tween.get(introQuestxt).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 500)
+            .to({ scaleX: 1, scaleY: 1 }, 500).to({ scaleX: 1.05, scaleY: 1.05 }, 500)
+            .to({ scaleX: 1, scaleY: 1 }, 500)
+    }
+    if (introArr1[4]) {
+        createjs.Tween.get(introArr1[4]).wait(600).to({ alpha: 1, scaleX: .95, scaleY: .95 }, 500)
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 500).to({ scaleX: .95, scaleY: .95 }, 500)
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 700).wait(2000).call(handleComplete7_1);
+    } else {
+        setTimeout(handleComplete7_1, 2000);
+    }
 }
 function handleComplete7_1() {
     createjs.Tween.removeAllTweens();
@@ -239,117 +399,35 @@ function setArrowTween() {
     }
 
 }
-
-function setFingureTween() {
+function onComplete1() {
+    if (stopValue == 0) {
+        console.log("onComplete1 == stopValue")
+        removeGameIntro()
+    }
+    else {
+        setTimeout(fingureVisible, 1000)
+    }
+}
+function fingureVisible() {
     if (stopValue == 0) {
         removeGameIntro()
 
     }
     else {
-
-        container.parent.removeChild(introArrow);
-        introArrow.visible = false;
         container.parent.addChild(introfingure);
         introfingure.visible = true;
         introfingure.x = introfingureX;
         introfingure.y = introfingureY;
-        highlightTweenArr[1] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[1])
-        highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).wait(200).call(this.onComplete2)
-
+        introfingure.scaleX = introfingure.scaleY = 1.1
+        introfingure.alpha = 0;
+        createjs.Tween.get(introfingure).to({ alpha: 1 }, 300).to({ y: introfingureY + 15 }, 350).to({ y: introfingureY }, 300).wait(2000).call(handleComplete8_1);
     }
 }
-this.onComplete1 = function (e) {
-    createjs.Tween.removeAllTweens();
-    // for (i = 0; i < 2; i++) {
-    if (highlightTweenArr[0]) {
-        container.parent.removeChild(highlightTweenArr[0]);
-    }
-    // }
-    container.parent.removeChild(introArrow);
-    if (stopValue == 0) {
-        removeGameIntro()
-
-    } else {
-        setTimeout(setFingureTween, 200)
-    }
-}
-
-this.onComplete2 = function (e) {
-    createjs.Tween.removeAllTweens();
-
-    // // for (i = 0; i < 2; i++) {
-    if (highlightTweenArr[1]) {
-        container.parent.removeChild(highlightTweenArr[1]);
-    }
-    // // }
-    container.parent.removeChild(introfingure);
-    introfingure.visible = false;
-
-    if (stopValue == 0) {
-        removeGameIntro()
-
-    }
-    else {
-        setTimeout(setCallDelay, 500)
-    }
-
-
-}
-function setCallDelay() {
-    clearInterval(removeIntraval)
-    removeIntraval = 0
-    setIntroCnt++
-    removeGameIntro()
+function handleComplete8_1() {
     if (stopValue == 0) {
         removeGameIntro()
     }
     else {
-        commongameintro()
-        if (setIntroCnt > 0) {
-            isVisibleStartBtn()
-        }
+        removeGameIntro()
     }
-
-}
-function removeGameIntro() {
-    console.log("removeGameIntro")
-    createjs.Tween.removeAllTweens();
-    // container.parent.removeChild(introTitle)
-    // introTitle.visible = false;
-
-    container.parent.removeChild(introArrow)
-    introArrow.visible = false
-    container.parent.removeChild(introfingure)
-    introfingure.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
-
-    container.parent.removeChild(introImg);
-    introImg.visible = false;
-    container.parent.removeChild(introImg1);
-    introImg1.visible = false;
-    container.parent.removeChild(introchoice1)
-    introchoice1.visible = false;
-
-    if (highlightTweenArr[0]) {
-        highlightTweenArr[0].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[0]);
-    }
-    if (highlightTweenArr[1]) {
-        highlightTweenArr[1].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[1]);
-    }
-
-    for (i = 0; i < 7; i++) {
-        container.parent.removeChild(introArr[i]);
-        introArr[i].visible = false;
-    }
-
-
-    for (i = 0; i < 5; i++) {
-        container.parent.removeChild(introArr1[i]);
-        introArr1[i].visible = false;
-    }
-
 }
