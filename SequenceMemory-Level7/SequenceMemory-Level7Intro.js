@@ -1,8 +1,332 @@
-/***************************************************************************/
-/*                                                                         */
-/*  This obfuscated code was created by Javascript Obfuscator Free Version.*/
-/*  Javascript Obfuscator Free Version can be downloaded here              */
-/*  http://javascriptobfuscator.com                                        */
-/*                                                                         */
-/***************************************************************************/
-var _$_c934=["clone","addChild","parent","visible","x","y","gotoAndStop","scaleX","scaleY","alpha","call","to","get","Tween","removeAllTweens","wait","MovieClip","onComplete1","removeChild","onComplete2","setPaused"];var introQues1,introQuestxt,introChoice1,introChoice2,introChoice3,introHolder,introArrow,introfingure,introTitle;var introChoice1TweenArr=[];var highlightTweenArr=[];var TempIntroVal;var setIntroCnt=0;var introquestionInterval;var removeIntraval=0;var introQuestxtX=0;introQuestxtY= 50;var introArrowX=620,introArrowY=450;var introfingureX=650,introfingureY=500;var choiceXArr=[100,320,540,760,980,1080];var choiceXArr1=[741,569,225,913,397,1085];var choiceYArr=[295,295,295,295,295,295];var chGotoArr=[8,23,35,15,0,30];var chGotoArr1=[35,0,23,8,15,30];var introChoiceArr=[],introPosArr=[];var ArrowXArr=[700,530,190,870,360,1040],FingXArr=[720,550,210,890,380,1060];var ArrowYArr=[200,200,200,200,200,200],FingYArr=[340,340,340,340,340,340];var introDummyHolder,introDummyHolder1;function commongameintro(){introTitle= Title[_$_c934[0]]();for(i= 0;i< 6;i++){introChoiceArr[i]= choice1[_$_c934[0]]()};introArrow= arrow1[_$_c934[0]]();introfingure= fingure[_$_c934[0]]();for(i= 0;i< 6;i++){introPosArr[i]= posimg[_$_c934[0]]()};introDummyHolder= holder[_$_c934[0]]();introDummyHolder1= holder1[_$_c934[0]]();container[_$_c934[2]][_$_c934[1]](introTitle);introTitle[_$_c934[3]]= true;introQuestxt= questionText[_$_c934[0]]();container[_$_c934[2]][_$_c934[1]](introQuestxt);introQuestxt[_$_c934[4]]= 365;introQuestxt[_$_c934[5]]= 120;introQuestxt[_$_c934[3]]= true;introQuestxt[_$_c934[6]](0);container[_$_c934[2]][_$_c934[1]](introDummyHolder1);introDummyHolder1[_$_c934[4]]= 305;introDummyHolder1[_$_c934[5]]= 136;introDummyHolder1[_$_c934[7]]= introDummyHolder1[_$_c934[8]]= 1;introDummyHolder1[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[1]](introDummyHolder);introDummyHolder[_$_c934[4]]= 305;introDummyHolder[_$_c934[5]]= 136;introDummyHolder[_$_c934[7]]= introDummyHolder[_$_c934[8]]= 0.65;introDummyHolder[_$_c934[3]]= false;for(i= 0;i< 6;i++){container[_$_c934[2]][_$_c934[1]](introChoiceArr[i]);introChoiceArr[i][_$_c934[7]]= introChoiceArr[i][_$_c934[8]]= 0.85;introChoiceArr[i][_$_c934[4]]= 175+ (i* 170);introChoiceArr[i][_$_c934[5]]= choiceYArr[i];introChoiceArr[i][_$_c934[3]]= false;introChoiceArr[i][_$_c934[6]](chGotoArr[i])};for(i= 0;i< 6;i++){container[_$_c934[2]][_$_c934[1]](introPosArr[i]);introPosArr[i][_$_c934[4]]= choiceXArr1[i];introPosArr[i][_$_c934[5]]= choiceYArr[i]+ 250;introPosArr[i][_$_c934[3]]= false;introPosArr[i][_$_c934[6]](i+ 1)};introQuestxt[_$_c934[9]]= 0;createjs[_$_c934[13]][_$_c934[12]](introQuestxt)[_$_c934[11]]({alpha:1},1000)[_$_c934[10]](handleComplete1_1)}function handleComplete1_1(){createjs[_$_c934[13]][_$_c934[14]]();quesTween()}function quesTween(){var _0x19418=500;for(i= 0;i< 6;i++){introChoiceArr[i][_$_c934[5]]= choiceYArr[i]+ 50- 15;introChoiceArr[i][_$_c934[3]]= true;introChoiceArr[i][_$_c934[9]]= 0;if(i== 5){createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](_0x19418)[_$_c934[11]]({y:choiceYArr[i]+ 50,scaleX:0.85,scaleY:0.85,alpha:1},_0x19418)[_$_c934[15]](500)[_$_c934[10]](handleComplete2_1)}else {createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](_0x19418)[_$_c934[11]]({y:choiceYArr[i]+ 50,scaleX:0.85,scaleY:0.85,alpha:1},_0x19418)};_0x19418= _0x19418+ 150}}function handleComplete2_1(){choiceTween1()}function choiceTween1(){clearInterval(introquestionInterval);for(i= 0;i< 6;i++){introChoiceArr[i][_$_c934[3]]= true;introChoiceArr[i][_$_c934[9]]= 1;if(i< 5){createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](100)[_$_c934[11]]({scaleX:0.90,scaleY:0.90},200)[_$_c934[11]]({scaleX:0.85,scaleY:0.85},200)[_$_c934[11]]({scaleX:0.90,scaleY:0.90},200)[_$_c934[11]]({scaleX:0.85,scaleY:0.85},200)[_$_c934[15]](10)}else {createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](100)[_$_c934[11]]({scaleX:0.90,scaleY:0.90},200)[_$_c934[11]]({scaleX:0.85,scaleY:0.85},200)[_$_c934[11]]({scaleX:0.90,scaleY:0.90},200)[_$_c934[11]]({scaleX:0.85,scaleY:0.85},200)[_$_c934[15]](3000)[_$_c934[10]](handleComplete4A_11)}}}function handleComplete4A_11(){introDummyHolder1[_$_c934[3]]= true;choiceTweenA()}function choiceTweenA(){for(i= 0;i< 6;i++){if(i< 5){createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](500)[_$_c934[11]]({x:600},500)}else {createjs[_$_c934[13]][_$_c934[12]](introChoiceArr[i])[_$_c934[15]](500)[_$_c934[11]]({x:600},500)[_$_c934[10]](handleComplete4B_11)}}}function handleComplete4B_11(){introDummyHolder1[_$_c934[3]]= false;for(i= 0;i< 6;i++){introChoiceArr[i][_$_c934[3]]= false};introDummyHolder[_$_c934[7]]= introDummyHolder[_$_c934[8]]= 1.3;introDummyHolder[_$_c934[4]]= 350;introDummyHolder[_$_c934[5]]= 150;introDummyHolder[_$_c934[3]]= true;choiceTweenB()}function choiceTweenB(){createjs[_$_c934[13]][_$_c934[12]](introDummyHolder)[_$_c934[15]](500)[_$_c934[11]]({x:245,y:130,scaleX:0.55,scaleY:0.55},1000)[_$_c934[10]](handleComplete4_11)}function handleComplete4_11(){choiceTween()}function choiceTween(){introQuestxt[_$_c934[6]](1);for(i= 0;i< 6;i++){introChoiceArr[i][_$_c934[3]]= true;introChoiceArr[i][_$_c934[4]]= 175+ (i* 170);introChoiceArr[i][_$_c934[6]](chGotoArr1[i])};createjs[_$_c934[13]][_$_c934[12]](introDummyHolder)[_$_c934[15]](100)[_$_c934[11]]({scaleX:0.58,scaleY:0.58},200)[_$_c934[11]]({scaleX:0.55,scaleY:0.55},200)[_$_c934[11]]({scaleX:0.58,scaleY:0.58},200)[_$_c934[11]]({scaleX:0.55,scaleY:0.55},200)[_$_c934[15]](500)[_$_c934[10]](handleComplete4_1);TempIntroVal=  -1}function handleComplete4_1(){if(TempIntroVal==  -1){}else {introPosArr[TempIntroVal][_$_c934[3]]= true};setArrowTween()}function setArrowTween(){TempIntroVal++;if(stopValue== 0){removeGameIntro()}else {container[_$_c934[2]][_$_c934[1]](introArrow);introArrow[_$_c934[3]]= true;introfingure[_$_c934[3]]= false;introArrow[_$_c934[4]]= ArrowXArr[TempIntroVal];introArrow[_$_c934[5]]= ArrowYArr[TempIntroVal];highlightTweenArr[0]=  new createjs[_$_c934[16]]();container[_$_c934[2]][_$_c934[1]](highlightTweenArr[0]);highlightTweenArr[0]= createjs[_$_c934[13]][_$_c934[12]](introArrow)[_$_c934[11]]({y:ArrowYArr[TempIntroVal]+ 10},250)[_$_c934[11]]({y:ArrowYArr[TempIntroVal]},250)[_$_c934[11]]({y:ArrowYArr[TempIntroVal]+ 10},250)[_$_c934[11]]({y:ArrowYArr[TempIntroVal]},250)[_$_c934[15]](400)[_$_c934[10]](this[_$_c934[17]])}}function setFingureTween(){if(stopValue== 0){removeGameIntro()}else {container[_$_c934[2]][_$_c934[18]](introArrow);introArrow[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[1]](introfingure);introfingure[_$_c934[3]]= true;introfingure[_$_c934[4]]= FingXArr[TempIntroVal];introfingure[_$_c934[5]]= FingYArr[TempIntroVal];highlightTweenArr[1]=  new createjs[_$_c934[16]]();container[_$_c934[2]][_$_c934[1]](highlightTweenArr[1]);if(TempIntroVal== 5){highlightTweenArr[1]= createjs[_$_c934[13]][_$_c934[12]](introfingure)[_$_c934[11]]({x:FingXArr[TempIntroVal]},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]- 15},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]- 15},300)[_$_c934[15]](200)[_$_c934[10]](this[_$_c934[19]])}else {highlightTweenArr[1]= createjs[_$_c934[13]][_$_c934[12]](introfingure)[_$_c934[11]]({x:FingXArr[TempIntroVal]},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]- 15},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]},300)[_$_c934[11]]({x:FingXArr[TempIntroVal]- 15},300)[_$_c934[15]](200)[_$_c934[10]](handleComplete4_1)}}}this[_$_c934[17]]= function(_0x193B5){createjs[_$_c934[13]][_$_c934[14]]();if(highlightTweenArr[0]){container[_$_c934[2]][_$_c934[18]](highlightTweenArr[0])};container[_$_c934[2]][_$_c934[18]](introArrow);if(stopValue== 0){removeGameIntro()}else {setTimeout(setFingureTween,200)}};this[_$_c934[19]]= function(_0x193B5){createjs[_$_c934[13]][_$_c934[14]]();introPosArr[TempIntroVal][_$_c934[3]]= true;if(highlightTweenArr[1]){container[_$_c934[2]][_$_c934[18]](highlightTweenArr[1])};container[_$_c934[2]][_$_c934[18]](introfingure);introfingure[_$_c934[3]]= false;if(stopValue== 0){removeGameIntro()}else {setTimeout(setCallDelay,500)}};function setCallDelay(){clearInterval(removeIntraval);removeIntraval= 0;setIntroCnt++;removeGameIntro();if(stopValue== 0){removeGameIntro()}else {commongameintro();if(setIntroCnt> 0){isVisibleStartBtn()}}}function removeGameIntro(){createjs[_$_c934[13]][_$_c934[14]]();container[_$_c934[2]][_$_c934[18]](introArrow);introArrow[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[18]](introfingure);introfingure[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[18]](introQuestxt);introQuestxt[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[18]](introDummyHolder);introDummyHolder[_$_c934[3]]= false;container[_$_c934[2]][_$_c934[18]](introDummyHolder1);introDummyHolder1[_$_c934[3]]= false;for(i= 0;i< 6;i++){container[_$_c934[2]][_$_c934[18]](introChoiceArr[i]);introChoiceArr[i][_$_c934[3]]= false};for(i= 0;i< 6;i++){container[_$_c934[2]][_$_c934[1]](introPosArr[i]);introPosArr[i][_$_c934[3]]= false};if(highlightTweenArr[0]){highlightTweenArr[0][_$_c934[20]](false);container[_$_c934[2]][_$_c934[18]](highlightTweenArr[0])};if(highlightTweenArr[1]){highlightTweenArr[1][_$_c934[20]](false);container[_$_c934[2]][_$_c934[18]](highlightTweenArr[1])};container[_$_c934[2]][_$_c934[18]](introfingure);introfingure[_$_c934[3]]= false}
+var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
+var introChoice1TweenArr = []
+var highlightTweenArr = []
+var TempIntroVal;
+var setIntroCnt = 0
+var introquestionInterval
+var removeIntraval = 0
+var introQuestxtX = 0; introQuestxtY = 50;
+var introArrowX = 620, introArrowY = 450;
+var introfingureX = 650, introfingureY = 500;
+var choiceXArr = [100, 320, 540, 760, 980, 1080]
+var choiceXArr1 = [741, 569, 225, 913, 397, 1085]
+var choiceYArr = [295, 295, 295, 295, 295, 295]
+var chGotoArr = [8, 23, 35, 15, 0, 30]
+var chGotoArr1 = [35, 0, 23, 8, 15, 30]
+var introChoiceArr = [], introPosArr = []
+var ArrowXArr = [700, 530, 190, 870, 360, 1040], FingXArr = [720, 550, 210, 890, 380, 1060]
+var ArrowYArr = [200, 200, 200, 200, 200, 200], FingYArr = [340, 340, 340, 340, 340, 340]
+var introDummyHolder, introDummyHolder1;
+
+function setIntroQuestionText(copy) {
+    if (!introQuestxt) { return; }
+    introQuestxt.text = copy;
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
+}
+
+function commongameintro() {
+    introTitle = Title.clone()
+    for (i = 0; i < 6; i++) {
+        introChoiceArr[i] = choice1.clone()
+    }
+    introArrow = arrow1.clone()
+    introfingure = fingure.clone()
+    for (i = 0; i < 6; i++) {
+        introPosArr[i] = posimg.clone()
+    }
+    introDummyHolder = holder.clone()
+    introDummyHolder1 = holder1.clone()
+
+    container.parent.addChild(introTitle)
+    introTitle.visible = true;
+
+
+    introQuestxt = QusTxtString.clone();
+    container.parent.addChild(introQuestxt);
+    introQuestxt.x = QusTxtString.x;
+    introQuestxt.y = QusTxtString.y;
+    introQuestxt.visible = true;
+    introQuestxt.alpha = 1;
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    setIntroQuestionText(SEQUENCE_PROMPT_REMEMBER);
+
+    container.parent.addChild(introDummyHolder1);
+    introDummyHolder1.x = 305; introDummyHolder1.y = 136
+    introDummyHolder1.scaleX = introDummyHolder1.scaleY = 1
+    introDummyHolder1.visible = false;
+
+    container.parent.addChild(introDummyHolder);
+    introDummyHolder.x = 305; introDummyHolder.y = 136
+    introDummyHolder.scaleX = introDummyHolder.scaleY = .65
+    introDummyHolder.visible = false;
+
+    for (i = 0; i < 6; i++) {
+
+        container.parent.addChild(introChoiceArr[i])
+        introChoiceArr[i].scaleX = introChoiceArr[i].scaleY = .85
+        introChoiceArr[i].x = choiceXArr[i]
+        introChoiceArr[i].y = choiceYArr[i] + 50;
+        introChoiceArr[i].visible = false;
+        introChoiceArr[i].gotoAndStop(chGotoArr[i]);
+    }
+    for (i = 0; i < 6; i++) {
+
+        container.parent.addChild(introPosArr[i])
+        introPosArr[i].x = choiceXArr1[i]
+        introPosArr[i].y = choiceYArr[i] + 280;
+        introPosArr[i].visible = false;
+        introPosArr[i].gotoAndStop(i + 1);
+    }
+
+    introQuestxt.alpha = 0;
+    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+
+
+}
+function handleComplete1_1() {
+    createjs.Tween.removeAllTweens();
+    quesTween()
+}
+
+function quesTween() {
+    var tempVal = 500
+    for (i = 0; i < 6; i++) {
+        introChoiceArr[i].y = choiceYArr[i] - 15;
+        introChoiceArr[i].visible = true;
+        introChoiceArr[i].alpha = 0;
+        if (i == 5) {
+            createjs.Tween.get(introChoiceArr[i]).wait(tempVal).to({ y: choiceYArr[i] + 50, scaleX: .85, scaleY: .85, alpha: 1 }, tempVal).wait(500).call(handleComplete2_1);
+        }
+        else {
+            createjs.Tween.get(introChoiceArr[i]).wait(tempVal).to({ y: choiceYArr[i] + 50, scaleX: .85, scaleY: .85, alpha: 1 }, tempVal);
+        }
+
+        tempVal = tempVal + 150
+    }
+
+
+}
+function handleComplete2_1() {
+    choiceTween1();
+}
+function choiceTween1() {
+    clearInterval(introquestionInterval);
+    for (i = 0; i < 6; i++) {
+        introChoiceArr[i].visible = true;
+        introChoiceArr[i].alpha = 1
+        if (i < 5) {
+            createjs.Tween.get(introChoiceArr[i]).wait(100).to({ scaleX: .90, scaleY: .90 }, 200).to({ scaleX: .85, scaleY: .85 }, 200)
+                .to({ scaleX: .90, scaleY: .90 }, 200).to({ scaleX: .85, scaleY: .85 }, 200).wait(10)
+
+        }
+        else {
+            createjs.Tween.get(introChoiceArr[i]).wait(100).to({ scaleX: .90, scaleY: .90 }, 200).to({ scaleX: .85, scaleY: .85 }, 200)
+                .to({ scaleX: .90, scaleY: .90 }, 200).to({ scaleX: .85, scaleY: .85 }, 200).wait(3000).call(handleComplete4A_11);
+        }
+    }
+
+}
+
+
+function handleComplete4A_11() {
+    introDummyHolder1.visible = true
+    choiceTweenA()
+}
+
+function choiceTweenA() {
+
+    for (i = 0; i < 6; i++) {
+        if (i < 5) {
+            createjs.Tween.get(introChoiceArr[i]).wait(500).to({ x: 600 }, 500)
+        }
+        else {
+            createjs.Tween.get(introChoiceArr[i]).wait(500).to({ x: 600 }, 500).call(handleComplete4B_11);
+        }
+    }
+
+}
+function handleComplete4B_11() {
+    introDummyHolder1.visible = false
+    for (i = 0; i < 6; i++) {
+        introChoiceArr[i].visible = false;
+    }
+    introDummyHolder.scaleX = introDummyHolder.scaleY = 1.3
+    introDummyHolder.x = 350; introDummyHolder.y = 150
+    introDummyHolder.visible = true
+    choiceTweenB()
+}
+
+function choiceTweenB() {
+
+    createjs.Tween.get(introDummyHolder).wait(500).to({ x: 170, y: 100, scaleX: .65, scaleY: .65 }, 1000).call(handleComplete4_11);
+
+
+}
+
+function handleComplete4_11() {
+    choiceTween()
+}
+
+function choiceTween() {
+
+    setIntroQuestionText(SEQUENCE_PROMPT_SELECT);
+    for (i = 0; i < 6; i++) {
+        introChoiceArr[i].gotoAndStop(chGotoArr1[i]);
+        introChoiceArr[i].x = 90 + (i * 170)
+        introChoiceArr[i].visible = true
+    }
+
+
+    createjs.Tween.get(introDummyHolder).wait(100).to({ scaleX: .68, scaleY: .68 }, 200).to({ scaleX: .65, scaleY: .65 }, 200)
+        .to({ scaleX: .68, scaleY: .68 }, 200).to({ scaleX: .65, scaleY: .65 }, 200).wait(500).call(handleComplete4_1);
+    TempIntroVal = -1;
+
+
+
+}
+
+
+function handleComplete4_1() {
+    clearInterval(introquestionInterval);
+    if (TempIntroVal == -1) { }
+    else { introPosArr[TempIntroVal].visible = true; }
+    setArrowTween();
+
+}
+function setArrowTween() {
+    TempIntroVal++;
+
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+        container.parent.addChild(introArrow);
+        introArrow.visible = true;
+        introfingure.visible = false;
+        introArrow.x = ArrowXArr[TempIntroVal];
+        introArrow.y = ArrowYArr[TempIntroVal];
+        highlightTweenArr[0] = new createjs.MovieClip()
+        container.parent.addChild(highlightTweenArr[0])
+        highlightTweenArr[0] = createjs.Tween.get(introArrow).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250).to({ y: ArrowYArr[TempIntroVal] }, 250).to({ y: ArrowYArr[TempIntroVal] + 10 }, 250)
+            .to({ y: ArrowYArr[TempIntroVal] }, 250).wait(400).call(this.onComplete1)
+
+    }
+
+}
+
+function setFingureTween() {
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+
+        container.parent.removeChild(introArrow);
+        introArrow.visible = false;
+        container.parent.addChild(introfingure);
+        introfingure.visible = true;
+        introfingure.x = FingXArr[TempIntroVal];
+        introfingure.y = FingYArr[TempIntroVal];
+        highlightTweenArr[1] = new createjs.MovieClip()
+        container.parent.addChild(highlightTweenArr[1])
+
+        if (TempIntroVal == 5) {
+
+            highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300)
+                .to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300).wait(200).call(this.onComplete2)
+        }
+        else {
+            highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300)
+                .to({ x: FingXArr[TempIntroVal] }, 300).to({ x: FingXArr[TempIntroVal] - 15 }, 300).wait(200).call(handleComplete4_1)
+        }
+
+
+    }
+}
+this.onComplete1 = function (e) {
+    createjs.Tween.removeAllTweens();
+
+    if (highlightTweenArr[0]) {
+
+        container.parent.removeChild(highlightTweenArr[0]);
+    }
+
+    container.parent.removeChild(introArrow);
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    } else {
+        setTimeout(setFingureTween, 200)
+    }
+}
+
+this.onComplete2 = function (e) {
+    createjs.Tween.removeAllTweens();
+    introPosArr[TempIntroVal].visible = true;
+    if (highlightTweenArr[1]) {
+        container.parent.removeChild(highlightTweenArr[1]);
+    }
+
+    container.parent.removeChild(introfingure);
+    introfingure.visible = false;
+
+    if (stopValue == 0) {
+        removeGameIntro()
+
+    }
+    else {
+        setTimeout(setCallDelay, 500)
+    }
+
+
+}
+function setCallDelay() {
+    clearInterval(removeIntraval)
+    removeIntraval = 0
+    setIntroCnt++
+    removeGameIntro()
+    if (stopValue == 0) {
+        removeGameIntro()
+    }
+    else {
+        commongameintro()
+        if (setIntroCnt > 0) {
+            isVisibleStartBtn()
+        }
+    }
+
+}
+function removeGameIntro() {
+    createjs.Tween.removeAllTweens();
+    container.parent.removeChild(introArrow)
+    introArrow.visible = false
+    container.parent.removeChild(introfingure)
+    introfingure.visible = false
+
+    container.parent.removeChild(introDummyHolder)
+    introDummyHolder.visible = false
+    container.parent.removeChild(introDummyHolder1)
+    introDummyHolder1.visible = false
+    container.parent.removeChild(introQuestxt)
+    introQuestxt.visible = false
+    for (i = 0; i < 6; i++) {
+        container.parent.removeChild(introChoiceArr[i])
+        introChoiceArr[i].visible = false
+    }
+    for (i = 0; i < 6; i++) {
+        container.parent.addChild(introPosArr[i])
+        introPosArr[i].visible = false
+    }
+
+    if (highlightTweenArr[0]) {
+        highlightTweenArr[0].setPaused(false);
+        container.parent.removeChild(highlightTweenArr[0]);
+    }
+    if (highlightTweenArr[1]) {
+        highlightTweenArr[1].setPaused(false);
+        container.parent.removeChild(highlightTweenArr[1]);
+    }
+    container.parent.removeChild(introfingure);
+    introfingure.visible = false;
+}
