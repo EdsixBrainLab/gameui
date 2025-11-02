@@ -317,6 +317,7 @@ function delayStartQuestion() {
         choiceArr[i].__targetY = choiceArr[i].y;
         choiceArr[i].baseScale = choiceArr[i].baseScale || choiceArr[i].scaleX || 1;
         choiceArr[i].__choiceIndex = i;
+        choiceArr[i].__slotIndex = chpos1[i];
     }
 
     enablechoices();
@@ -355,6 +356,70 @@ function disablechoices() {
     resetChoiceTweens();
     clearChoiceAnimations();
 
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || tile.scaleX || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens() {
+    for (i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            stopChoicePulse(choiceArr[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations() {
+    for (i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            createjs.Tween.removeTweens(choiceArr[i]);
+        }
+    }
 }
 
 function animateChoiceOptions(choiceArray, onComplete) {
@@ -404,6 +469,22 @@ function animateChoiceOptions(choiceArray, onComplete) {
     if (!hasTweens && typeof onComplete === "function") {
         onComplete();
     }
+}
+
+function resolveChoiceSlot(target) {
+    if (!target) { return null; }
+    if (typeof target.__slotIndex === "number") {
+        return target.__slotIndex;
+    }
+    var tolerance = 2;
+    for (var idx = 0; idx < chpos.length; idx++) {
+        var slot = chpos[idx];
+        if (!slot) { continue; }
+        if (Math.abs(target.x - slot.posx) <= tolerance && Math.abs(target.y - slot.posy) <= tolerance) {
+            return idx;
+        }
+    }
+    return null;
 }
 
 function startChoicePulse(tile, baseScale, targetY, index) {
@@ -502,38 +583,11 @@ function answerSelected(e) {
             currentY = e.currentTarget.y - 10
 
             correctCnt++;
-            if (dx == 175 && dy == 295) {
-                posArr[0].visible = true;
-                container.parent.addChild(posArr[0]);
-                posArr[0].gotoAndStop(clk)
-            }
-            else if (dx == 345 && dy == 295) {
-                posArr[1].visible = true;
-                container.parent.addChild(posArr[1]);
-                posArr[1].gotoAndStop(clk)
-
-            }
-            else if (dx == 515 && dy == 295) {
-                posArr[2].visible = true;
-                container.parent.addChild(posArr[2]);
-                posArr[2].gotoAndStop(clk)
-            }
-            else if (dx == 685 && dy == 295) {
-                posArr[3].visible = true;
-                container.parent.addChild(posArr[3]);
-                posArr[3].gotoAndStop(clk)
-            }
-            else if (dx == 855 && dy == 295) {
-                posArr[4].visible = true;
-                container.parent.addChild(posArr[4]);
-                posArr[4].gotoAndStop(clk)
-
-            }
-            else if (dx == 1025 && dy == 295) {
-                posArr[5].visible = true;
-                container.parent.addChild(posArr[5]);
-                posArr[5].gotoAndStop(clk)
-
+            var slotIndex = resolveChoiceSlot(e.currentTarget);
+            if (slotIndex !== null && posArr[slotIndex]) {
+                posArr[slotIndex].visible = true;
+                container.parent.addChild(posArr[slotIndex]);
+                posArr[slotIndex].gotoAndStop(clk);
             }
 
 

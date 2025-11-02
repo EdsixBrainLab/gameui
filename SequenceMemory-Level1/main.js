@@ -311,6 +311,7 @@ function delayStartQuestion() {
         choiceArr[i].__targetY = choiceArr[i].y;
         choiceArr[i].baseScale = choiceArr[i].baseScale || 1;
         choiceArr[i].__choiceIndex = i;
+        choiceArr[i].__slotIndex = chpos1[i];
     }
 
     enablechoices();
@@ -394,6 +395,22 @@ function animateChoiceOptions(choiceArray, onComplete) {
     if (!hasTweens && typeof onComplete === "function") {
         onComplete();
     }
+}
+
+function resolveChoiceSlot(target) {
+    if (!target) { return null; }
+    if (typeof target.__slotIndex === "number") {
+        return target.__slotIndex;
+    }
+    var tolerance = 2;
+    for (var idx = 0; idx < chpos.length; idx++) {
+        var slot = chpos[idx];
+        if (!slot) { continue; }
+        if (Math.abs(target.x - slot.posx) <= tolerance && Math.abs(target.y - slot.posy) <= tolerance) {
+            return idx;
+        }
+    }
+    return null;
 }
 
 function startChoicePulse(tile, baseScale, targetY, index) {
@@ -491,21 +508,11 @@ function answerSelected(e) {
             currentY = e.currentTarget.y - 10
 
             correctCnt++;
-            if (dx == 350 && dy == 295) {
-                posArr[0].visible = true;
-                container.parent.addChild(posArr[0]);
-                posArr[0].gotoAndStop(clk)
-            }
-            else if (dx == 590 && dy == 295) {
-                posArr[1].visible = true;
-                container.parent.addChild(posArr[1]);
-                posArr[1].gotoAndStop(clk)
-
-            }
-            else if (dx == 830 && dy == 295) {
-                posArr[2].visible = true;
-                container.parent.addChild(posArr[2]);
-                posArr[2].gotoAndStop(clk)
+            var slotIndex = resolveChoiceSlot(e.currentTarget);
+            if (slotIndex !== null && posArr[slotIndex]) {
+                posArr[slotIndex].visible = true;
+                container.parent.addChild(posArr[slotIndex]);
+                posArr[slotIndex].gotoAndStop(clk);
             }
 
 
