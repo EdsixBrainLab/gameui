@@ -1,0 +1,43 @@
+﻿{"frames": {
+
+"queimages instance 10000":
+{
+	"frame": {"x":0,"y":0,"w":973,"h":559},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":973,"h":559},
+	"sourceSize": {"w":973,"h":559}
+},
+"queimages instance 10001":
+{
+	"frame": {"x":973,"y":0,"w":973,"h":559},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":973,"h":559},
+	"sourceSize": {"w":973,"h":559}
+},
+"queimages instance 10002":
+{
+	"frame": {"x":0,"y":559,"w":973,"h":559},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":973,"h":559},
+	"sourceSize": {"w":973,"h":559}
+},
+"queimages instance 10003":
+{
+	"frame": {"x":973,"y":559,"w":973,"h":559},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":973,"h":559},
+	"sourceSize": {"w":973,"h":559}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "Question v2.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":2048},
+	"scale": "1"
+}
+}
