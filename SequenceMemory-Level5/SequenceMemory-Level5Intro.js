@@ -17,6 +17,15 @@ var introChoiceArr = [], introPosArr = []
 var ArrowXArr = [100, 780, 610, 270, 950, 440, 1120], FingXArr = [120, 800, 630, 290, 970, 460, 1140]
 var ArrowYArr = [200, 200, 200, 200, 200, 200, 200], FingYArr = [360, 360, 360, 360, 360, 360, 360]
 var introDummyHolder, introDummyHolder1;
+
+function setIntroQuestionText(copy) {
+    if (!introQuestxt) { return; }
+    introQuestxt.text = copy;
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.update === "function") {
+        introQuestxt.__labelBG.update();
+    }
+}
+
 function commongameintro() {
     introTitle = Title.clone()
     for (i = 0; i < 7; i++) {
@@ -34,11 +43,14 @@ function commongameintro() {
     introTitle.visible = true;
 
 
-    introQuestxt = questionText.clone()
+    introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
-    introQuestxt.x = 400; introQuestxt.y = 130
+    introQuestxt.x = QusTxtString.x;
+    introQuestxt.y = QusTxtString.y;
     introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(0);
+    introQuestxt.alpha = 1;
+    introQuestxt.__labelBG = SAUI_attachQuestionLabelBG(introQuestxt, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+    setIntroQuestionText(SEQUENCE_PROMPT_REMEMBER);
 
     container.parent.addChild(introDummyHolder1);
     introDummyHolder1.x = 305; introDummyHolder1.y = 136
@@ -159,7 +171,7 @@ function handleComplete4_11() {
 
 function choiceTween() {
 
-    introQuestxt.gotoAndStop(1);
+    setIntroQuestionText(SEQUENCE_PROMPT_SELECT);
     for (i = 0; i < 7; i++) {
         introChoiceArr[i].gotoAndStop(chGotoArr1[i]);
         introChoiceArr[i].x = 90 + (i * 170)
