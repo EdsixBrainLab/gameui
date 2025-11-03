@@ -12,12 +12,23 @@ var introquestionTextX = 310; introquestionTextY = 130
 var introyesx = 700, introyesy = 630;
 var intronox = 980; intronoy = 630;
 
+function setIntroQuestionText(copy, frameIndex) {
+    if (!introquestionText) { return; }
+    if (typeof introquestionText.text === "string") {
+        introquestionText.text = copy;
+        if (introquestionText.__labelBG && typeof introquestionText.__labelBG.update === "function") {
+            introquestionText.__labelBG.update();
+        }
+    } else if (typeof introquestionText.gotoAndStop === "function") {
+        introquestionText.gotoAndStop(typeof frameIndex === "number" ? frameIndex : 0);
+    }
+}
+
 function commongameintro() {
     introTitle = Title.clone()
     introHolder = qhHolder.clone()
     introquestion = question.clone()
     introArrow = arrow1.clone()
-    introquestionText = questionText.clone()
     introfingure = fingure.clone()
     introYes = yesMc.clone()
     introNo = noMc.clone()
@@ -46,20 +57,41 @@ function commongameintro() {
     introYes.visible = false
     container.parent.addChild(introNo)
     introNo.visible = false
-    container.parent.addChild(introquestionText);
-    introquestionText.visible = true;
- 
-    if(lang=="TamilQuestionText/")
-{
-    introquestionText.x = 340
-    introquestionText.y = 130
+    if (introquestionText && introquestionText.parent) {
+        if (introquestionText.__labelBG && typeof introquestionText.__labelBG.destroy === "function") {
+            introquestionText.__labelBG.destroy();
+            introquestionText.__labelBG = null;
+        }
+        introquestionText.parent.removeChild(introquestionText);
+    }
+    introquestionText = null;
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        introquestionText = QusTxtString.clone();
+        container.parent.addChild(introquestionText);
+        introquestionText.visible = true;
+        introquestionText.alpha = 1;
+        if (typeof SAUI_attachQuestionLabelBG === "function") {
+            introquestionText.__labelBG = SAUI_attachQuestionLabelBG(introquestionText, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+        }
+        introquestionText.x = QusTxtString.x;
+        introquestionText.y = QusTxtString.y;
+    } else if (typeof questionText !== "undefined" && questionText) {
+        introquestionText = questionText.clone();
+        container.parent.addChild(introquestionText);
+        introquestionText.visible = true;
+    }
 
-    
-}
-else{
-    introquestionText.x = introquestionTextX
-    introquestionText.y = introquestionTextY
-}
+    if (introquestionText) {
+        if(lang=="TamilQuestionText/")
+        {
+            introquestionText.x = 340
+            introquestionText.y = 130
+        }
+        else{
+            introquestionText.x = introquestionTextX
+            introquestionText.y = introquestionTextY
+        }
+    }
 
     for (i = 1; i <= 2; i++) {
         container.parent.addChild(introquesArr[i])
@@ -77,9 +109,13 @@ else{
     introquestion.x = introquestionX
     introquestion.y = introquestionY
 
-    introquestionText.alpha = 0;
-    introquestionText.gotoAndStop(0)
-    createjs.Tween.get(introquestionText).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    if (introquestionText) {
+        introquestionText.alpha = 0;
+        setIntroQuestionText(MINDCAPTURE_PROMPT_OBSERVE, 0);
+        createjs.Tween.get(introquestionText).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 
 }
 
@@ -146,10 +182,12 @@ function handleComplete4_1() {
 }
 function choiceTween2() {
     // introHintImg.rotation=340
-    introquestionText.gotoAndStop(1)
-    introquestionText.visible = true;
-    introquestionText.alpha = 0
-    createjs.Tween.get(introquestionText).wait(400).to({ alpha: 1 }, 200);
+    if (introquestionText) {
+        setIntroQuestionText(MINDCAPTURE_PROMPT_DECIDE, 1);
+        introquestionText.visible = true;
+        introquestionText.alpha = 0
+        createjs.Tween.get(introquestionText).wait(400).to({ alpha: 1 }, 200);
+    }
 
     introHintImg2.visible = true;
     introHintImg2.alpha=0
@@ -281,8 +319,14 @@ function removeGameIntro() {
     introHolder.visible = false
     container.parent.removeChild(introquestion)
     introquestion.visible = false
-    container.parent.removeChild(introquestionText)
-    introquestionText.visible = false
+    if (introquestionText) {
+        if (introquestionText.__labelBG && typeof introquestionText.__labelBG.destroy === "function") {
+            introquestionText.__labelBG.destroy();
+        }
+        container.parent.removeChild(introquestionText)
+        introquestionText.visible = false
+        introquestionText.__labelBG = null;
+    }
     container.parent.removeChild(introNo)
     introNo.visible = false
     container.parent.removeChild(introYes)
