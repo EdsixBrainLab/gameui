@@ -26,125 +26,9 @@ var loadProgressLabel, progresPrecentage, loaderWidth;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var tween
 var chpos = 0;
-var question1, question2, queText, introImg, backgroundImage;
-var questionTextLabel;
+var question1, question2, queText, introImg;
 var choiceArr = [];
 var btnY = []
-var qHolderTargetX = 330;
-var qHolderTargetY = 0;
-var questionPrompts = [
-    "Which of these was shown?",
-    "Which of these was not shown?",
-    "Which of these was on the shelf?",
-    "Which of these was on the table?",
-    "Which of these was shown?",
-    "Which of these was not shown?",
-    "Which of these was on the shelf?",
-    "Which of these was on the table?",
-    "Which of these was shown?",
-    "Which of these was not shown?",
-    "Which of these was on the shelf?",
-    "Which of these was on the table?"
-];
-var isEnglishQuestionText = (typeof lang === "string" && lang === "EnglishQuestionText/");
-var questionTextX = 640;
-var questionTextY = 150;
-var questionTextFont = "700 42px 'Baloo 2'";
-var questionTextColor = "#1c1a47";
-var questionTextLineWidth = 720;
-var questionTextLineHeight = 52;
-var questionTextPanelPaddingX = 72;
-var questionTextPanelPaddingY = 34;
-var questionTextPanelColor = "rgba(255,255,255,0.94)";
-var questionTextPanelStroke = "rgba(32,26,76,0.22)";
-
-function getQuestionPrompt(index) {
-    if (!questionPrompts || !questionPrompts.length) {
-        return "";
-    }
-
-    var total = questionPrompts.length;
-    if (index == null || index < 0 || index >= total) {
-        index = index % total;
-        if (index < 0) {
-            index += total;
-        }
-    }
-
-    return questionPrompts[index] || "";
-}
-
-function createQuestionTextDisplay(initialText) {
-    var container = new createjs.Container();
-    var background = new createjs.Shape();
-    var text = new createjs.Text(initialText || "", questionTextFont, questionTextColor);
-
-    text.textAlign = "center";
-    text.textBaseline = "middle";
-    text.lineWidth = questionTextLineWidth;
-    text.lineHeight = questionTextLineHeight;
-    text.x = 0;
-    text.y = 0;
-
-    if (typeof createjs.Shadow === "function") {
-        text.shadow = new createjs.Shadow("rgba(15,12,61,0.25)", 0, 4, 12);
-    }
-
-    container.addChild(background, text);
-    container.visible = false;
-    container.x = questionTextX;
-    container.y = questionTextY;
-    container.__background = background;
-    container.__text = text;
-
-    updateQuestionTextLayout(container);
-
-    return container;
-}
-
-function setQuestionTextValue(display, value) {
-    if (!display || !display.__text) {
-        return;
-    }
-
-    display.__text.text = value != null ? String(value) : "";
-    updateQuestionTextLayout(display);
-}
-
-function updateQuestionTextLayout(display) {
-    if (!display || !display.__text || !display.__background) {
-        return;
-    }
-
-    var text = display.__text;
-    var background = display.__background;
-    var lineHeight = text.lineHeight || (typeof text.getMeasuredLineHeight === "function" ? text.getMeasuredLineHeight() : 60);
-    var lineCount = 1;
-
-    var textValue = typeof text.text === "string" ? text.text : "";
-
-    if (typeof text.text === "string" && text.lineWidth > 0 && typeof text.getMeasuredWidth === "function") {
-        var measuredWidth = text.getMeasuredWidth();
-        if (measuredWidth && text.lineWidth) {
-            lineCount = Math.max(1, Math.ceil(measuredWidth / text.lineWidth));
-        }
-    }
-
-    if (textValue) {
-        var explicitLines = textValue.split(/\n+/).length;
-        lineCount = Math.max(lineCount, explicitLines);
-    }
-
-    var panelWidth = questionTextLineWidth + questionTextPanelPaddingX * 2;
-    var panelHeight = lineHeight * lineCount + questionTextPanelPaddingY * 2;
-
-    background.graphics.clear();
-    background.graphics
-        .setStrokeStyle(4)
-        .beginStroke(questionTextPanelStroke)
-        .beginFill(questionTextPanelColor)
-        .drawRoundRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 28);
-}
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 
@@ -182,7 +66,6 @@ function init() {
     if (success == 1) {
         manifest.push(
 
-            { id: "background", src: gameAssetsPath + "Background.png" },
             { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },
             { id: "choice2", src: gameAssetsPath + "ChoiceImages2.png" },
             { id: "choice3", src: gameAssetsPath + "ChoiceImages3.png" },
@@ -201,17 +84,6 @@ function doneLoading1(event) {
 
     var event = assets[i];
     var id = event.item.id;
-
-    if (id == "background") {
-        backgroundImage = new createjs.Bitmap(preload.getResult('background'));
-        backgroundImage.x = 0;
-        backgroundImage.y = 0;
-        backgroundImage.visible = true;
-        var parent = container && container.parent ? container.parent : stage;
-        if (parent) {
-            parent.addChildAt(backgroundImage, 0);
-        }
-    }
 
     if (id == "introImg") {
 
@@ -279,21 +151,23 @@ function doneLoading1(event) {
         container.parent.addChild(question);
     }
 
-    if (id == "questionText") {
-        if (isEnglishQuestionText) {
-            questionText = createQuestionTextDisplay("");
-            questionTextLabel = questionText.__text;
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-        } else {
-            var frameConfig = { "regX": 50, "height": 77, "count": 0, "regY": 50, "width": 594 };
-            if (lang == "TamilQuestionText/") {
-                frameConfig = { "regX": 50, "height": 75, "count": 0, "regY": 50, "width": 876 };
-            }
+    if (lang == "TamilQuestionText/") {
+        if (id == "questionText") {
             var spriteSheet2 = new createjs.SpriteSheet({
                 framerate: 60,
                 "images": [preload.getResult("questionText")],
-                "frames": frameConfig
+                "frames": { "regX": 50, "height": 75, "count": 0, "regY": 50, "width": 876 }
+            });
+            questionText = new createjs.Sprite(spriteSheet2);
+            container.parent.addChild(questionText);
+            questionText.visible = false;
+        }
+    } else {
+        if (id == "questionText") {
+            var spriteSheet2 = new createjs.SpriteSheet({
+                framerate: 60,
+                "images": [preload.getResult("questionText")],
+                "frames": { "regX": 50, "height": 77, "count": 0, "regY": 50, "width": 594 }
             });
             questionText = new createjs.Sprite(spriteSheet2);
             container.parent.addChild(questionText);
@@ -327,28 +201,13 @@ function handleClick(e) {
 function CreateGameElements() {
     interval = setInterval(countTime, 1000);
 
-    if (backgroundImage) {
-        if (backgroundImage.parent && backgroundImage.parent.getChildIndex) {
-            backgroundImage.parent.addChildAt(backgroundImage, 0);
-        } else if (container && container.parent) {
-            container.parent.addChildAt(backgroundImage, 0);
-        }
-        backgroundImage.visible = true;
-    }
-
     container.parent.addChild(question)
     question.x = 205; question.y = 200;
     question.scaleX = question.scaleY = 1.3;
 
     container.parent.addChild(questionText);
     questionText.visible = false;
-    if (!isEnglishQuestionText) {
-        questionText.x = 400;
-        questionText.y = 120;
-    } else {
-        questionText.x = questionTextX;
-        questionText.y = questionTextY;
-    }
+    questionText.x = 400; questionText.y = 120;
 
     container.parent.addChild(queText);
     queText.visible = false;
@@ -360,8 +219,8 @@ function CreateGameElements() {
 
     container.parent.addChild(qHolderMc)
     qHolderMc.visible = false;
-    qHolderTargetX = qHolderMc.x;
-    qHolderTargetY = qHolderMc.y;
+    qHolderMc.x = qHolderMc.x
+    qHolderMc.y = qHolderMc.y
 
     container.parent.addChild(choice1, choice2, choice3);
     choice1.x = 225; choice1.y = 310;
@@ -437,11 +296,7 @@ function createChoices() {
     question.visible = false;
     queText.visible = false;
     qHolderMc.visible = false;
-    if (isEnglishQuestionText) {
-        setQuestionTextValue(questionText, getQuestionPrompt(qno[cnt]));
-    } else {
-        questionText.gotoAndStop(qno[cnt]);
-    }
+    questionText.gotoAndStop(qno[cnt]);
     questionText.visible = true
 
     for (i = 1; i <= choiceCnt; i++) {
@@ -465,33 +320,23 @@ function createChoices() {
 function createTween1() {
     questionText.visible = true;
     questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 500);
+    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
 
-    if (qHolderMc) {
-        qHolderMc.visible = true;
-        qHolderMc.alpha = 0;
-        qHolderMc.x = 1000;
-        qHolderMc.y = qHolderTargetY;
-        createjs.Tween.get(qHolderMc)
-            .wait(150)
-            .to({ x: qHolderTargetX, alpha: 1 }, 500, createjs.Ease.cubicOut);
-    }
+    qHolderMc.visible = false;
+    qHolderMc.x = 1000;
+    createjs.Tween.get(qHolderMc).wait(200).to({ x: 0 }, 500, createjs.Ease.bounceOut)
 
-    var delay = 200;
+
+    var temp = 500;
     for (i = 1; i <= choiceCnt; i++) {
-        var choiceNode = this["choice" + i];
-        var targetY = btnY[i];
-        choiceNode.visible = true;
-        choiceNode.alpha = 0;
-        choiceNode.y = targetY + 60;
-        createjs.Tween.get(choiceNode)
-            .wait(delay * i)
-            .to({ y: targetY, alpha: 1 }, 450, createjs.Ease.quadOut)
-            .to({ y: targetY + 10 }, 160, createjs.Ease.quadOut)
-            .to({ y: targetY }, 160, createjs.Ease.quadIn);
-    }
+        this["choice" + i].alpha = 1;
+        this["choice" + i].visible = true;
+        this["choice" + i].y = 1000;
 
-    repTimeClearInterval = setTimeout(AddListenerFn, 1400 + delay * choiceCnt)
+        createjs.Tween.get(this["choice" + i]).wait(temp).to({ y: btnY[i] }, 1000, createjs.Ease.bounceOut);
+        temp += 200;
+    }
+    repTimeClearInterval = setTimeout(AddListenerFn, 2000)
 }
 
 function AddListenerFn() {
