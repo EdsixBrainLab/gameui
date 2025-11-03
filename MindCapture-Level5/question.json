@@ -1,0 +1,91 @@
+﻿{"frames": [
+
+{
+	"filename": "mc10000",
+	"frame": {"x":0,"y":0,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10001",
+	"frame": {"x":249,"y":0,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10002",
+	"frame": {"x":498,"y":0,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10003",
+	"frame": {"x":747,"y":0,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10004",
+	"frame": {"x":0,"y":250,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10005",
+	"frame": {"x":249,"y":250,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10006",
+	"frame": {"x":498,"y":250,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10007",
+	"frame": {"x":747,"y":250,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10008",
+	"frame": {"x":0,"y":500,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}
+,{
+	"filename": "mc10009",
+	"frame": {"x":249,"y":500,"w":249,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":249,"h":250},
+	"sourceSize": {"w":249,"h":250}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "question.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":1024},
+	"scale": "1"
+}
+}
