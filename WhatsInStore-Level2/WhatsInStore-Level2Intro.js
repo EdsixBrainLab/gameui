@@ -141,8 +141,9 @@ function introCh() {
     createjs.Tween.get(introQuestxt1).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300)
-    if (introQuestxt1.__labelBG) {
-        createjs.Tween.get(introQuestxt1.__labelBG).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
+    var introBgShape = WISL2_getLabelBGShape(introQuestxt1);
+    if (introBgShape) {
+        createjs.Tween.get(introBgShape).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
             .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
             .to({ scaleX: 1, scaleY: 1 }, 300);
     }
@@ -279,13 +280,13 @@ function removeGameIntro() {
     introQues.visible = false
     container.parent.removeChild(introQuestxt)
     WISL2_setLabelVisibility(introQuestxt, false)
-    if (introQuestxt.__labelBG && introQuestxt.__labelBG.parent) {
-        introQuestxt.__labelBG.parent.removeChild(introQuestxt.__labelBG);
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+        introQuestxt.__labelBG.destroy();
     }
     container.parent.removeChild(introQuestxt1);
     WISL2_setLabelVisibility(introQuestxt1, false);
-    if (introQuestxt1.__labelBG && introQuestxt1.__labelBG.parent) {
-        introQuestxt1.__labelBG.parent.removeChild(introQuestxt1.__labelBG);
+    if (introQuestxt1.__labelBG && typeof introQuestxt1.__labelBG.destroy === "function") {
+        introQuestxt1.__labelBG.destroy();
     }
     container.parent.removeChild(introChoice1, introChoice2, introChoice3);
     introChoice1.visible = introChoice2.visible = introChoice3.visible = false;

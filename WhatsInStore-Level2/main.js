@@ -30,7 +30,7 @@ var question1, question2, queText, introImg;
 var choiceArr = [];
 var btnY = []
 
-var WISL2_PROMPT_FONT = "700 42px 'Baloo 2'";
+var WISL2_PROMPT_FONT = "700 48px 'Baloo 2'";
 var WISL2_PROMPT_COLOR = "#F4FAFF";
 var WISL2_PROMPT_LINE_WIDTH = 720;
 var WISL2_REMEMBER_PROMPT = "Remember these objects";
@@ -65,22 +65,31 @@ function WISL2_buildQuestionLabel(yPos) {
 
 function WISL2_attachLabelBackground(label) {
     if (!label || !container || !container.parent) {
-        return;
+        return null;
     }
     if (label.__labelBG && typeof label.__labelBG.destroy === "function") {
         label.__labelBG.destroy();
     }
-    label.__labelBG = SAUI_attachQuestionLabelBG(label, container.parent, {
-        padX: 28,
-        padY: 16,
-        fill: "rgba(0,0,0,0.35)",
-        stroke: "rgba(255,255,255,0.22)",
+    var helper = SAUI_attachQuestionLabelBG(label, container.parent, {
+        padX: 32,
+        padY: 20,
+        fill: "rgba(41,16,94,0.78)",
+        stroke: "rgba(255,255,255,0.28)",
         strokeW: 2,
-        maxRadius: 26
+        maxRadius: 32
     });
-    if (label.__labelBG && typeof label.__labelBG.update === "function") {
-        label.__labelBG.update();
+    if (helper && typeof helper.refresh === "function") {
+        helper.refresh();
     }
+    label.__labelBG = helper;
+    return helper;
+}
+
+function WISL2_getLabelBGShape(label) {
+    if (!label || !label.__labelBG) {
+        return null;
+    }
+    return label.__labelBG.bg || null;
 }
 
 function WISL2_setLabelVisibility(label, visible) {
@@ -88,8 +97,9 @@ function WISL2_setLabelVisibility(label, visible) {
         return;
     }
     label.visible = !!visible;
-    if (label.__labelBG) {
-        label.__labelBG.visible = !!visible;
+    var bgShape = WISL2_getLabelBGShape(label);
+    if (bgShape) {
+        bgShape.visible = !!visible;
     }
 }
 
@@ -98,8 +108,8 @@ function WISL2_setQuestionLabelText(label, copy) {
         return;
     }
     label.text = copy || "";
-    if (label.__labelBG && typeof label.__labelBG.update === "function") {
-        label.__labelBG.update();
+    if (label.__labelBG && typeof label.__labelBG.refresh === "function") {
+        label.__labelBG.refresh();
     }
 }
 
@@ -366,8 +376,9 @@ function createChoices() {
     WISL2_setQuestionLabelText(questionText, WISL2_getQuestionPrompt(qno[cnt]));
     WISL2_setLabelVisibility(questionText, false);
     questionText.alpha = 0;
-    if (questionText.__labelBG) {
-        questionText.__labelBG.alpha = 0;
+    var questionBgShape = WISL2_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        questionBgShape.alpha = 0;
     }
 
     for (i = 1; i <= choiceCnt; i++) {
@@ -391,12 +402,14 @@ function createChoices() {
 function createTween1() {
     WISL2_setLabelVisibility(questionText, true);
     questionText.alpha = 0;
-    if (questionText.__labelBG) {
-        questionText.__labelBG.alpha = 0;
+    var questionBgShape = WISL2_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        questionBgShape.alpha = 0;
     }
     createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
-    if (questionText.__labelBG) {
-        createjs.Tween.get(questionText.__labelBG).wait(100).to({ alpha: 1 }, 1000);
+    questionBgShape = WISL2_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        createjs.Tween.get(questionBgShape).wait(100).to({ alpha: 1 }, 1000);
     }
 
     qHolderMc.visible = false;

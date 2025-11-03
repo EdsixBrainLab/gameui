@@ -112,12 +112,14 @@ function handleComplete4_1() {
 function choiceTween() {
     WISL3_setLabelVisibility(introQuestxt1, true);
     introQuestxt1.alpha = 0;
-    if (introQuestxt1.__labelBG) {
-        introQuestxt1.__labelBG.alpha = 0;
+    var introBgShape = WISL3_getLabelBGShape(introQuestxt1);
+    if (introBgShape) {
+        introBgShape.alpha = 0;
     }
     createjs.Tween.get(introQuestxt1).wait(100).to({ alpha: 1 }, 1000,createjs.Ease.bounceOut)
-    if (introQuestxt1.__labelBG) {
-        createjs.Tween.get(introQuestxt1.__labelBG).wait(100).to({ alpha: 1 }, 1000, createjs.Ease.bounceOut);
+    introBgShape = WISL3_getLabelBGShape(introQuestxt1);
+    if (introBgShape) {
+        createjs.Tween.get(introBgShape).wait(100).to({ alpha: 1 }, 1000, createjs.Ease.bounceOut);
     }
 
    
@@ -151,8 +153,9 @@ function introCh() {
     createjs.Tween.get(introQuestxt1).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300)
-    if (introQuestxt1.__labelBG) {
-        createjs.Tween.get(introQuestxt1.__labelBG).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
+    introBgShape = WISL3_getLabelBGShape(introQuestxt1);
+    if (introBgShape) {
+        createjs.Tween.get(introBgShape).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
             .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
             .to({ scaleX: 1, scaleY: 1 }, 300);
     }
@@ -292,11 +295,11 @@ function removeGameIntro() {
     WISL3_setLabelVisibility(introQuestxt, false)
     container.parent.removeChild(introQuestxt1);
     WISL3_setLabelVisibility(introQuestxt1, false);
-    if (introQuestxt.__labelBG && introQuestxt.__labelBG.parent) {
-        introQuestxt.__labelBG.parent.removeChild(introQuestxt.__labelBG);
+    if (introQuestxt.__labelBG && typeof introQuestxt.__labelBG.destroy === "function") {
+        introQuestxt.__labelBG.destroy();
     }
-    if (introQuestxt1.__labelBG && introQuestxt1.__labelBG.parent) {
-        introQuestxt1.__labelBG.parent.removeChild(introQuestxt1.__labelBG);
+    if (introQuestxt1.__labelBG && typeof introQuestxt1.__labelBG.destroy === "function") {
+        introQuestxt1.__labelBG.destroy();
     }
     container.parent.removeChild(introImg);
     introImg.visible = false;
