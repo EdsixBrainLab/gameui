@@ -26,10 +26,108 @@ var loadProgressLabel, progresPrecentage, loaderWidth;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var tween
 var chpos = 0;
-var question1, question2, introImg;
+var question1, question2, introImg, questionText1;
 var choiceArr = [];
 var bgtitle
 var btnY = []
+
+var WISL3_PROMPT_FONT = "700 42px 'Baloo 2'";
+var WISL3_PROMPT_COLOR = "#F4FAFF";
+var WISL3_PROMPT_LINE_WIDTH = 760;
+var WISL3_REMEMBER_PROMPT = "Remember these objects";
+var WISL3_INTRO_SAMPLE_PROMPT_INDEX = 3;
+var WISL3_QUESTION_PROMPTS = [
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?"
+];
+
+function WISL3_buildQuestionLabel(yPos) {
+    var label = new createjs.Text("", WISL3_PROMPT_FONT, WISL3_PROMPT_COLOR);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.lineWidth = WISL3_PROMPT_LINE_WIDTH;
+    label.lineHeight = 52;
+    label.x = 640;
+    label.y = yPos || 120;
+    label.visible = false;
+    label.alpha = 1;
+    return label;
+}
+
+function WISL3_attachLabelBackground(label) {
+    if (!label || !container || !container.parent) {
+        return;
+    }
+    if (label.__labelBG && typeof label.__labelBG.destroy === "function") {
+        label.__labelBG.destroy();
+    }
+    label.__labelBG = SAUI_attachQuestionLabelBG(label, container.parent, {
+        padX: 28,
+        padY: 16,
+        fill: "rgba(0,0,0,0.35)",
+        stroke: "rgba(255,255,255,0.22)",
+        strokeW: 2,
+        maxRadius: 26
+    });
+    if (label.__labelBG && typeof label.__labelBG.update === "function") {
+        label.__labelBG.update();
+    }
+}
+
+function WISL3_setLabelVisibility(label, visible) {
+    if (!label) {
+        return;
+    }
+    label.visible = !!visible;
+    if (label.__labelBG) {
+        label.__labelBG.visible = !!visible;
+    }
+}
+
+function WISL3_setQuestionLabelText(label, copy) {
+    if (!label) {
+        return;
+    }
+    label.text = copy || "";
+    if (label.__labelBG && typeof label.__labelBG.update === "function") {
+        label.__labelBG.update();
+    }
+}
+
+function WISL3_getQuestionPrompt(index) {
+    if (index >= 0 && index < WISL3_QUESTION_PROMPTS.length) {
+        return WISL3_QUESTION_PROMPTS[index];
+    }
+    return WISL3_QUESTION_PROMPTS[0] || "";
+}
+
+function WISL3_initializeTextFields() {
+    if (!container || !container.parent) {
+        return;
+    }
+    if (!questionText1) {
+        questionText1 = WISL3_buildQuestionLabel(110);
+        container.parent.addChild(questionText1);
+        WISL3_attachLabelBackground(questionText1);
+    }
+    if (!questionText) {
+        questionText = WISL3_buildQuestionLabel(150);
+        container.parent.addChild(questionText);
+        WISL3_attachLabelBackground(questionText);
+    }
+    WISL3_setLabelVisibility(questionText1, false);
+    WISL3_setLabelVisibility(questionText, false);
+}
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 //register key functions
@@ -51,6 +149,7 @@ function init() {
 
     stage.update();
     stage.enableMouseOver(40);
+    WISL3_initializeTextFields();
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
 
     /*Always specify the following terms as given in manifest array. 
@@ -72,8 +171,6 @@ function init() {
             { id: "choice4", src: gameAssetsPath + "ChoiceImages4.png" },
             { id: "question", src: gameAssetsPath + "question.png" },
 
-            { id: "questionText1", src: questionTextPath + "WhatsInStore-Level3-QT1.png" },
-            { id: "questionText", src: questionTextPath + "WhatsInStore-Level3-QT2.png" },
             { id: "introImg", src: gameAssetsPath + "introImg.png" }
         )
         preloadAllAssets()
@@ -95,13 +192,6 @@ function doneLoading1(event) {
         introImg = new createjs.Bitmap(preload.getResult('introImg'));
         container.parent.addChild(introImg);
         introImg.visible = false;
-    }
-
-    if (id == "questionText1") {
-        questionText1 = new createjs.Bitmap(preload.getResult('questionText1'));
-        container.parent.addChild(questionText1);
-        questionText1.visible = false;
-
     }
 
     if (id == "choice1" || id == "choice2" || id == "choice3" || id == "choice4") {
@@ -162,33 +252,6 @@ function doneLoading1(event) {
 
     }
 
-    if (lang == "TamilQuestionText/") {
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 75, "count": 0, "regY": 50, "width": 876 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-
-        }
-    }else{
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 77, "count": 0, "regY": 50, "width": 594 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-
-        }
-    }
-
-
 }
 
 function tick(e) {
@@ -219,16 +282,16 @@ function CreateGameElements() {
     container.parent.addChild(question)
     question.x = 200; question.y = 185;
 
+    WISL3_initializeTextFields();
     container.parent.addChild(questionText);
-    questionText.visible = false;
-    questionText.x = 400; questionText.y = 120;
+    WISL3_setLabelVisibility(questionText, false);
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = false;
     }
 
-    questionText1.visible = false;
     container.parent.addChild(questionText1);
+    WISL3_setLabelVisibility(questionText1, false);
 
     bgtitle = Title.clone();
     container.parent.addChild(bgtitle);
@@ -279,8 +342,9 @@ function pickques() {
     btnY = []
     panelVisibleFn()
     //=================================================================================================================================//
-    questionText1.visible = true
-    questionText.visible = false
+    WISL3_setQuestionLabelText(questionText1, WISL3_REMEMBER_PROMPT);
+    WISL3_setLabelVisibility(questionText1, true);
+    WISL3_setLabelVisibility(questionText, false);
 
 
     var temp = qno[cnt] % 4
@@ -294,7 +358,7 @@ function pickques() {
 
 }
 function createTween() {
-    questionText1.visible = true;
+    WISL3_setLabelVisibility(questionText1, true);
    /*  questionText1.x = -1000;
     createjs.Tween.get(questionText1).wait(100).to({ x: 0 }, 500, createjs.Ease.bounceOut) */
 
@@ -310,9 +374,13 @@ function createChoices() {
     clearInterval(clearquesInterval)
     clearquesInterval = 0;
     question.visible = false;
-    questionText.visible = true
-    questionText1.visible = false
-    questionText.gotoAndStop(qno[cnt]);
+    WISL3_setLabelVisibility(questionText, false);
+    WISL3_setLabelVisibility(questionText1, false);
+    WISL3_setQuestionLabelText(questionText, WISL3_getQuestionPrompt(qno[cnt]));
+    questionText.alpha = 0;
+    if (questionText.__labelBG) {
+        questionText.__labelBG.alpha = 0;
+    }
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = true;
@@ -333,9 +401,15 @@ function createChoices() {
 }
 
 function createTween1() {
-    questionText.visible = true;
+    WISL3_setLabelVisibility(questionText, true);
     questionText.alpha = 0;
+    if (questionText.__labelBG) {
+        questionText.__labelBG.alpha = 0;
+    }
     createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    if (questionText.__labelBG) {
+        createjs.Tween.get(questionText.__labelBG).wait(100).to({ alpha: 1 }, 1000);
+    }
 
 
 

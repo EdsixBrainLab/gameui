@@ -19,16 +19,20 @@ function commongameintro() {
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
     introQuestxt = queText.clone();
+    introQuestxt.__labelBG = null;
+    WISL2_attachLabelBackground(introQuestxt);
+    WISL2_setQuestionLabelText(introQuestxt, WISL2_REMEMBER_PROMPT);
+
     introQuestxt1 = questionText.clone();
+    introQuestxt1.__labelBG = null;
+    WISL2_attachLabelBackground(introQuestxt1);
+    WISL2_setQuestionLabelText(introQuestxt1, WISL2_getQuestionPrompt(WISL2_INTRO_SAMPLE_PROMPT_INDEX));
 
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
     container.parent.addChild(introQuestxt1);
-    introQuestxt1.visible = false;
-    introQuestxt1.regX = introQuestxt1.regY = 50
-    introQuestxt1.x = 430; introQuestxt1.y = 180;
-    introQuestxt1.gotoAndStop(3)
+    WISL2_setLabelVisibility(introQuestxt1, false);
 
     container.parent.addChild(introHolder)
     introHolder.visible = false;
@@ -56,7 +60,7 @@ function commongameintro() {
     introImg.x = 70;
 
     container.parent.addChild(introQuestxt);
-    introQuestxt.visible = true;
+    WISL2_setLabelVisibility(introQuestxt, true);
     handleComplete1_1();
    /*  introQuestxt.x = -1000;
     createjs.Tween.get(introQuestxt).wait(50).to({ x: 0,y:-20 }, 500, createjs.Ease.bounceOut).call(handleComplete1_1); */
@@ -74,7 +78,7 @@ function quesTween() {
 }
 function handleComplete2_1() {
     createjs.Tween.removeAllTweens();
-    introQuestxt.visible = false;
+    WISL2_setLabelVisibility(introQuestxt, false);
     introQues.visible = false;
 
     if (stopValue == 0) {
@@ -86,7 +90,7 @@ function handleComplete2_1() {
     }
 }
 function introRemember() {
-    introQuestxt1.visible = true
+    WISL2_setLabelVisibility(introQuestxt1, true);
     introImg.y = 0
     createjs.Tween.get(introImg).to({ visible: true }).to({ alpha: 0 }).to({ alpha: 1, y: 280 }, 500).call(handleComplete4_1);
 
@@ -137,6 +141,11 @@ function introCh() {
     createjs.Tween.get(introQuestxt1).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
         .to({ scaleX: 1, scaleY: 1 }, 300)
+    if (introQuestxt1.__labelBG) {
+        createjs.Tween.get(introQuestxt1.__labelBG).to({ alpha: 1, scaleX: 1.05, scaleY: 1.05 }, 300)
+            .to({ scaleX: 1, scaleY: 1 }, 300).to({ scaleX: 1.05, scaleY: 1.05 }, 300)
+            .to({ scaleX: 1, scaleY: 1 }, 300);
+    }
     createjs.Tween.get(introImg).wait(1400).to({ alpha: 1, scaleX: .9, scaleY: .9 }, 500)
         .to({ scaleX: 1, scaleY: 1 }, 500).to({ scaleX: .9, scaleY: .9 }, 500)
         .to({ scaleX: 1, scaleY: 1 }, 700).wait(2000).call(handleComplete6_1);
@@ -269,9 +278,15 @@ function removeGameIntro() {
     container.parent.removeChild(introQues)
     introQues.visible = false
     container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    WISL2_setLabelVisibility(introQuestxt, false)
+    if (introQuestxt.__labelBG && introQuestxt.__labelBG.parent) {
+        introQuestxt.__labelBG.parent.removeChild(introQuestxt.__labelBG);
+    }
     container.parent.removeChild(introQuestxt1);
-    introQuestxt1.visible = false;
+    WISL2_setLabelVisibility(introQuestxt1, false);
+    if (introQuestxt1.__labelBG && introQuestxt1.__labelBG.parent) {
+        introQuestxt1.__labelBG.parent.removeChild(introQuestxt1.__labelBG);
+    }
     container.parent.removeChild(introChoice1, introChoice2, introChoice3);
     introChoice1.visible = introChoice2.visible = introChoice3.visible = false;
     container.parent.removeChild(introHolder)

@@ -29,6 +29,104 @@ var chpos = 0;
 var question1, question2, queText, introImg;
 var choiceArr = [];
 var btnY = []
+
+var WISL2_PROMPT_FONT = "700 42px 'Baloo 2'";
+var WISL2_PROMPT_COLOR = "#F4FAFF";
+var WISL2_PROMPT_LINE_WIDTH = 720;
+var WISL2_REMEMBER_PROMPT = "Remember these objects";
+var WISL2_INTRO_SAMPLE_PROMPT_INDEX = 3;
+var WISL2_QUESTION_PROMPTS = [
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?"
+];
+
+function WISL2_buildQuestionLabel(yPos) {
+    var label = new createjs.Text("", WISL2_PROMPT_FONT, WISL2_PROMPT_COLOR);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.lineWidth = WISL2_PROMPT_LINE_WIDTH;
+    label.lineHeight = 52;
+    label.x = 640;
+    label.y = yPos || 120;
+    label.visible = false;
+    label.alpha = 1;
+    return label;
+}
+
+function WISL2_attachLabelBackground(label) {
+    if (!label || !container || !container.parent) {
+        return;
+    }
+    if (label.__labelBG && typeof label.__labelBG.destroy === "function") {
+        label.__labelBG.destroy();
+    }
+    label.__labelBG = SAUI_attachQuestionLabelBG(label, container.parent, {
+        padX: 28,
+        padY: 16,
+        fill: "rgba(0,0,0,0.35)",
+        stroke: "rgba(255,255,255,0.22)",
+        strokeW: 2,
+        maxRadius: 26
+    });
+    if (label.__labelBG && typeof label.__labelBG.update === "function") {
+        label.__labelBG.update();
+    }
+}
+
+function WISL2_setLabelVisibility(label, visible) {
+    if (!label) {
+        return;
+    }
+    label.visible = !!visible;
+    if (label.__labelBG) {
+        label.__labelBG.visible = !!visible;
+    }
+}
+
+function WISL2_setQuestionLabelText(label, copy) {
+    if (!label) {
+        return;
+    }
+    label.text = copy || "";
+    if (label.__labelBG && typeof label.__labelBG.update === "function") {
+        label.__labelBG.update();
+    }
+}
+
+function WISL2_getQuestionPrompt(index) {
+    if (index >= 0 && index < WISL2_QUESTION_PROMPTS.length) {
+        return WISL2_QUESTION_PROMPTS[index];
+    }
+    return WISL2_QUESTION_PROMPTS[0] || "";
+}
+
+function WISL2_initializeTextFields() {
+    if (!container || !container.parent) {
+        return;
+    }
+    if (!queText) {
+        queText = WISL2_buildQuestionLabel(110);
+        container.parent.addChild(queText);
+        WISL2_attachLabelBackground(queText);
+    }
+    if (!questionText) {
+        questionText = WISL2_buildQuestionLabel(140);
+        container.parent.addChild(questionText);
+        WISL2_attachLabelBackground(questionText);
+    }
+    WISL2_setLabelVisibility(queText, false);
+    WISL2_setLabelVisibility(questionText, false);
+}
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 
@@ -51,6 +149,7 @@ function init() {
 
     stage.update();
     stage.enableMouseOver(40);
+    WISL2_initializeTextFields();
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
 
     /*Always specify the following terms as given in manifest array. 
@@ -71,8 +170,6 @@ function init() {
             { id: "choice3", src: gameAssetsPath + "ChoiceImages3.png" },
             { id: "question", src: gameAssetsPath + "question1.png" },
             { id: "qHolder", src: gameAssetsPath + "chHolder.png" },
-            { id: "questionText", src: questionTextPath + "WhatsInStore-Level2-QT2.png" },
-            { id: "queText", src: questionTextPath + "WhatsInStore-Level2-QT1.png" },
             { id: "introImg", src: gameAssetsPath + "introImg.png" }
         )
         preloadAllAssets()
@@ -96,13 +193,6 @@ function doneLoading1(event) {
         qHolderMc = new createjs.Bitmap(preload.getResult('qHolder'));
         container.parent.addChild(qHolderMc);
         qHolderMc.visible = false;
-
-    }
-
-    if (id == "queText") {
-        queText = new createjs.Bitmap(preload.getResult('queText'));
-        container.parent.addChild(queText);
-        queText.visible = false;
 
     }
 
@@ -151,30 +241,6 @@ function doneLoading1(event) {
         container.parent.addChild(question);
     }
 
-    if (lang == "TamilQuestionText/") {
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 75, "count": 0, "regY": 50, "width": 876 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-        }
-    } else {
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 77, "count": 0, "regY": 50, "width": 594 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-        }
-    }
-
 }
 
 function tick(e) {
@@ -205,12 +271,12 @@ function CreateGameElements() {
     question.x = 205; question.y = 200;
     question.scaleX = question.scaleY = 1.3;
 
+    WISL2_initializeTextFields();
     container.parent.addChild(questionText);
-    questionText.visible = false;
-    questionText.x = 400; questionText.y = 120;
+    WISL2_setLabelVisibility(questionText, false);
 
     container.parent.addChild(queText);
-    queText.visible = false;
+    WISL2_setLabelVisibility(queText, false);
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = false;
@@ -266,8 +332,9 @@ function pickques() {
     btnY = []
     panelVisibleFn()
     //=================================================================================================================================//
-    questionText.visible = false
-    queText.visible = true;
+    WISL2_setLabelVisibility(questionText, false);
+    WISL2_setQuestionLabelText(queText, WISL2_REMEMBER_PROMPT);
+    WISL2_setLabelVisibility(queText, true);
     qHolderMc.visible = false;
 
     var temp = qno[cnt] % 4
@@ -280,7 +347,7 @@ function pickques() {
     createTween();
 }
 function createTween() {
-    queText.visible = true;
+    WISL2_setLabelVisibility(queText, true);
    /*  queText.x = -1000;
     createjs.Tween.get(queText).wait(100).to({ x: 0, y: -20 }, 500, createjs.Ease.bounceOut) */
 
@@ -294,10 +361,14 @@ function createChoices() {
     clearInterval(clearquesInterval)
     clearquesInterval = 0;
     question.visible = false;
-    queText.visible = false;
+    WISL2_setLabelVisibility(queText, false);
     qHolderMc.visible = false;
-    questionText.gotoAndStop(qno[cnt]);
-    questionText.visible = true
+    WISL2_setQuestionLabelText(questionText, WISL2_getQuestionPrompt(qno[cnt]));
+    WISL2_setLabelVisibility(questionText, false);
+    questionText.alpha = 0;
+    if (questionText.__labelBG) {
+        questionText.__labelBG.alpha = 0;
+    }
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = true;
@@ -318,9 +389,15 @@ function createChoices() {
 }
 
 function createTween1() {
-    questionText.visible = true;
+    WISL2_setLabelVisibility(questionText, true);
     questionText.alpha = 0;
+    if (questionText.__labelBG) {
+        questionText.__labelBG.alpha = 0;
+    }
     createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    if (questionText.__labelBG) {
+        createjs.Tween.get(questionText.__labelBG).wait(100).to({ alpha: 1 }, 1000);
+    }
 
     qHolderMc.visible = false;
     qHolderMc.x = 1000;
