@@ -20,12 +20,20 @@ function commongameintro() {
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
     introQuestxt = questionText1.clone();
-    introQuestxt1 = questionText.clone();
+    if (isEnglishQuestionText) {
+        introQuestxt1 = createQuestionTextDisplay(getQuestionPrompt(3));
+    } else {
+        introQuestxt1 = questionText.clone();
+    }
 
     container.parent.addChild(introQuestxt1);
     introQuestxt1.visible = false;
-    introQuestxt1.x = 400; introQuestxt1.y = 120;
-    introQuestxt1.gotoAndStop(3);
+    if (!isEnglishQuestionText) {
+        introQuestxt1.x = 400; introQuestxt1.y = 120;
+        introQuestxt1.gotoAndStop(3);
+    } else {
+        introQuestxt1.alpha = 0;
+    }
 
     container.parent.addChild(introQues)
     introQues.x = 60; introQues.y = 60;
