@@ -29,6 +29,132 @@ var chpos = 0;
 var question1, question2, queText, introImg;
 var choiceArr = [];
 
+var WISL1_PROMPT_FONT = "800 52px 'Baloo 2'";
+var WISL1_PROMPT_COLOR = "#F4FAFF";
+var WISL1_PROMPT_LINE_WIDTH = 720;
+var WISL1_REMEMBER_PROMPT = "Remember these objects";
+var WISL1_INTRO_SAMPLE_PROMPT_INDEX = 3;
+var WISL1_QUESTION_PROMPTS = [
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?",
+    "Which of these was shown?",
+    "Which of these was not shown?",
+    "Which of these was on the Shelf?",
+    "Which of these was on the table?"
+];
+
+function WISL1_buildQuestionLabel(yPos) {
+    var label = new createjs.Text("", WISL1_PROMPT_FONT, WISL1_PROMPT_COLOR);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.lineWidth = WISL1_PROMPT_LINE_WIDTH;
+    label.lineHeight = 60;
+    label.x = 640;
+    label.y = yPos || 120;
+    label.visible = false;
+    label.alpha = 1;
+    label.shadow = new createjs.Shadow("rgba(6,16,38,0.22)", 0, 10, 24);
+    return label;
+}
+
+function WISL1_attachLabelBackground(label) {
+    if (!label || !container || !container.parent) {
+        return null;
+    }
+    if (label.__labelBG && typeof label.__labelBG.destroy === "function") {
+        label.__labelBG.destroy();
+    }
+    var helper = null;
+    if (typeof SAUI_attachGoldenPromptBackground === "function") {
+        helper = SAUI_attachGoldenPromptBackground(label, container.parent, {
+            minWidth: 760,
+            minHeight: 132,
+            horizontalPadding: 240,
+            verticalPadding: 84,
+            multilineExtraPadding: 12,
+            cornerRadius: 78,
+            strokeWidth: 6
+        });
+    }
+    if (!helper) {
+        helper = SAUI_attachQuestionLabelBG(label, container.parent, {
+            padX: 120,
+            padY: 60,
+            fill: "#F6B441",
+            stroke: "#FFF6D2",
+            strokeW: 6,
+            maxRadius: 80
+        });
+        if (helper && helper.bg) {
+            helper.bg.shadow = new createjs.Shadow("rgba(6,16,38,0.28)", 0, 18, 40);
+        }
+    }
+    if (helper && typeof helper.refresh === "function") {
+        helper.refresh();
+    }
+    label.__labelBG = helper;
+    return helper;
+}
+
+function WISL1_getLabelBGShape(label) {
+    if (!label || !label.__labelBG) {
+        return null;
+    }
+    return label.__labelBG.bg || null;
+}
+
+function WISL1_setLabelVisibility(label, visible) {
+    if (!label) {
+        return;
+    }
+    label.visible = !!visible;
+    var bgShape = WISL1_getLabelBGShape(label);
+    if (bgShape) {
+        bgShape.visible = !!visible;
+    }
+}
+
+function WISL1_setQuestionLabelText(label, copy) {
+    if (!label) {
+        return;
+    }
+    label.text = copy || "";
+    if (label.__labelBG && typeof label.__labelBG.refresh === "function") {
+        label.__labelBG.refresh();
+    }
+}
+
+function WISL1_getQuestionPrompt(index) {
+    if (index >= 0 && index < WISL1_QUESTION_PROMPTS.length) {
+        return WISL1_QUESTION_PROMPTS[index];
+    }
+    return WISL1_QUESTION_PROMPTS[0] || "";
+}
+
+function WISL1_initializeTextFields() {
+    if (!container || !container.parent) {
+        return;
+    }
+    if (!queText) {
+        queText = WISL1_buildQuestionLabel(110);
+        container.parent.addChild(queText);
+        WISL1_attachLabelBackground(queText);
+    }
+    if (!questionText) {
+        questionText = WISL1_buildQuestionLabel(140);
+        container.parent.addChild(questionText);
+        WISL1_attachLabelBackground(questionText);
+    }
+    WISL1_setLabelVisibility(queText, false);
+    WISL1_setLabelVisibility(questionText, false);
+}
+
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 var btnY = []
@@ -51,6 +177,7 @@ function init() {
 
     stage.update();
     stage.enableMouseOver(40);
+    WISL1_initializeTextFields();
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
 
     /*Always specify the following terms as given in manifest array. 
@@ -70,8 +197,6 @@ function init() {
             { id: "choice3", src: gameAssetsPath + "ChoiceImages3.png" },
             { id: "question", src: gameAssetsPath + "question1.png" },
             // { id: "qHolder", src: gameAssetsPath + "chHolder.png" },
-            { id: "questionText", src: questionTextPath + "WhatsInStore-Level1-QT2.png" },
-            { id: "queText", src: questionTextPath + "WhatsInStore-Level1-QT1.png" },
             { id: "introImg", src: gameAssetsPath + "introImg.png" }
         )
         preloadAllAssets()
@@ -96,13 +221,6 @@ function doneLoading1(event) {
     // qHolderMc.visible = false;
 
     // }
-
-    if (id == "queText") {
-        queText = new createjs.Bitmap(preload.getResult('queText'));
-        container.parent.addChild(queText);
-        queText.visible = false;
-
-    }
 
     if (id == "choice1" || id == "choice2" || id == "choice3" || id == "choice4") {
         var spriteSheet1 = new createjs.SpriteSheet({
@@ -149,31 +267,6 @@ function doneLoading1(event) {
         container.parent.addChild(question);
     }
 
-    if (lang == "TamilQuestionText/") {
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 75, "count": 0, "regY": 50, "width": 876 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-        }
-    } else {
-        if (id == "questionText") {
-            var spriteSheet2 = new createjs.SpriteSheet({
-                framerate: 60,
-                "images": [preload.getResult("questionText")],
-                "frames": { "regX": 50, "height": 77, "count": 0, "regY": 50, "width": 594 }
-            });
-            questionText = new createjs.Sprite(spriteSheet2);
-            container.parent.addChild(questionText);
-            questionText.visible = false;
-        }
-    }
-
-
 }
 
 function tick(e) {
@@ -205,13 +298,13 @@ function CreateGameElements() {
     question.scaleX = question.scaleY = 1.3;
     question.visible = false
 
+    WISL1_initializeTextFields();
     container.parent.addChild(questionText);
-    questionText.visible = false;
-    questionText.alpha = 1
-    questionText.x = 400; questionText.y = 120;
+    WISL1_setLabelVisibility(questionText, false);
+    questionText.alpha = 1;
 
     container.parent.addChild(queText);
-    queText.visible = false;
+    WISL1_setLabelVisibility(queText, false);
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = false;
@@ -264,8 +357,9 @@ function pickques() {
     btnY = []
     panelVisibleFn()
     //=================================================================================================================================//
-    questionText.visible = false
-    queText.visible = true;
+    WISL1_setLabelVisibility(questionText, false);
+    WISL1_setQuestionLabelText(queText, WISL1_REMEMBER_PROMPT);
+    WISL1_setLabelVisibility(queText, true);
     queText.alpha = 1
 
     // qHolderMc.visible = false;
@@ -281,7 +375,7 @@ function pickques() {
 
 }
 function createTween() {
-    queText.visible = true;
+    WISL1_setLabelVisibility(queText, true);
    
    // queText.x = -1000;
 
@@ -297,10 +391,15 @@ function createChoices() {
     clearInterval(clearquesInterval)
     clearquesInterval = 0;
     question.visible = false;
-    queText.visible = false;
+    WISL1_setLabelVisibility(queText, false);
     // qHolderMc.visible = false;
-    questionText.gotoAndStop(qno[cnt]);
-    questionText.visible = false
+    WISL1_setQuestionLabelText(questionText, WISL1_getQuestionPrompt(qno[cnt]));
+    WISL1_setLabelVisibility(questionText, false);
+    questionText.alpha = 0;
+    var questionBgShape = WISL1_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        questionBgShape.alpha = 0;
+    }
 
     for (i = 1; i <= choiceCnt; i++) {
         this["choice" + i].visible = false;
@@ -320,9 +419,17 @@ function createChoices() {
     createTween1();
 }
 function createTween1() {
-    questionText.visible = true;
-    questionText.alpha = 1;
+    WISL1_setLabelVisibility(questionText, true);
+    questionText.alpha = 0;
+    var questionBgShape = WISL1_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        questionBgShape.alpha = 0;
+    }
     createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 1000)
+    questionBgShape = WISL1_getLabelBGShape(questionText);
+    if (questionBgShape) {
+        createjs.Tween.get(questionBgShape).wait(100).to({ alpha: 1 }, 1000);
+    }
 
     // qHolderMc.visible = true;
     // qHolderMc.x = 1000;
