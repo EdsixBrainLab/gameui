@@ -1,3 +1,9 @@
+if (typeof MINDCAPTURE_PROMPT_OBSERVE === "undefined") {
+    var MINDCAPTURE_PROMPT_OBSERVE = "Observe the objects carefully.";
+}
+if (typeof MINDCAPTURE_PROMPT_DECIDE === "undefined") {
+    var MINDCAPTURE_PROMPT_DECIDE = "Does the highlighted object belong to the group?";
+}
 var introArrow, introquestion, introquestionText, introfingure, introTitle, introHolder, introYes, introNo;
 var introquesArr = []
 var highlightTweenArr = []
@@ -12,12 +18,23 @@ var introquestionTextX = 310, introquestionTextY = 130
 var introyesx = 660, introyesy = 670;
 var intronox = 940; intronoy = 670;
 
+function setIntroQuestionText(copy, frameIndex) {
+    if (!introquestionText) { return; }
+    if (typeof introquestionText.text === "string") {
+        introquestionText.text = copy;
+        if (introquestionText.__labelBG && typeof introquestionText.__labelBG.update === "function") {
+            introquestionText.__labelBG.update();
+        }
+    } else if (typeof introquestionText.gotoAndStop === "function") {
+        introquestionText.gotoAndStop(typeof frameIndex === "number" ? frameIndex : 0);
+    }
+}
+
 function commongameintro() {
     introTitle = Title.clone()
     introHolder = qhHolder.clone()
     introquestion = choice1.clone()
     introArrow = arrow1.clone()
-    introquestionText = questionText.clone()
     introfingure = fingure.clone()
     introYes = yesMc.clone()
     introNo = noMc.clone()
@@ -46,20 +63,43 @@ function commongameintro() {
     introYes.visible = false
     container.parent.addChild(introNo)
     introNo.visible = false
-    container.parent.addChild(introquestionText);
-    introquestionText.visible = true;
-    introquestionText.scaleX = introquestionText.scaleY = 1;
-    if (lang == "TamilQuestionText/") {
-        introquestionText.x = 340
-        introquestionText.y = 130
-    } else if (lang == "ArabicQuestionText/") {
-        introquestionText.scaleX = introquestionText.scaleY = 1.2;
-        introquestionText.x = 363;
-        introquestionText.y = 130;
+    if (introquestionText && introquestionText.parent) {
+        if (introquestionText.__labelBG && typeof introquestionText.__labelBG.destroy === "function") {
+            introquestionText.__labelBG.destroy();
+            introquestionText.__labelBG = null;
+        }
+        introquestionText.parent.removeChild(introquestionText);
     }
-    else {
-        introquestionText.x = introquestionTextX
-        introquestionText.y = introquestionTextY
+    introquestionText = null;
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        introquestionText = QusTxtString.clone();
+        container.parent.addChild(introquestionText);
+        introquestionText.visible = true;
+        introquestionText.alpha = 1;
+        if (typeof SAUI_attachQuestionLabelBG === "function") {
+            introquestionText.__labelBG = SAUI_attachQuestionLabelBG(introquestionText, container.parent, { padX: 20, padY: 12, fill: "rgba(0,0,0,0.3)", stroke: "rgba(255,255,255,0.14)", strokeW: 2, maxRadius: 22 });
+        }
+        introquestionText.x = QusTxtString.x;
+        introquestionText.y = QusTxtString.y;
+    } else if (typeof questionText !== "undefined" && questionText) {
+        introquestionText = questionText.clone();
+        container.parent.addChild(introquestionText);
+        introquestionText.visible = true;
+    }
+    if (introquestionText) {
+        introquestionText.scaleX = introquestionText.scaleY = 1;
+        if (lang == "TamilQuestionText/") {
+            introquestionText.x = 340
+            introquestionText.y = 130
+        } else if (lang == "ArabicQuestionText/") {
+            introquestionText.scaleX = introquestionText.scaleY = 1.2;
+            introquestionText.x = 363;
+            introquestionText.y = 130;
+        }
+        else {
+            introquestionText.x = introquestionTextX
+            introquestionText.y = introquestionTextY
+        }
     }
 
     for (i = 1; i <= 7; i++) {
@@ -87,9 +127,13 @@ function commongameintro() {
     introquestion.gotoAndStop(18)
     introquestion.y = 1300
 
-    introquestionText.alpha = 0;
-    introquestionText.gotoAndStop(0)
-    createjs.Tween.get(introquestionText).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    if (introquestionText) {
+        introquestionText.alpha = 0;
+        setIntroQuestionText(MINDCAPTURE_PROMPT_OBSERVE, 0);
+        createjs.Tween.get(introquestionText).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 
 }
 
@@ -155,10 +199,12 @@ function handleComplete4_1() {
     choiceTween2()
 }
 function choiceTween2() {
-    introquestionText.gotoAndStop(1)
-    introquestionText.visible = true;
-    introquestionText.alpha = 0
-    createjs.Tween.get(introquestionText).wait(400).to({ alpha: 1 }, 200);
+    if (introquestionText) {
+        setIntroQuestionText(MINDCAPTURE_PROMPT_DECIDE, 1);
+        introquestionText.visible = true;
+        introquestionText.alpha = 0
+        createjs.Tween.get(introquestionText).wait(400).to({ alpha: 1 }, 200);
+    }
 
     introHintImg2.visible = true;
     introHintImg2.alpha = 0
