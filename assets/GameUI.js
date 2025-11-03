@@ -4776,6 +4776,227 @@ function SAUI_attachQuestionLabelBG(textObj, parent, opts) {
   };
 }
 
+function SAUI_attachGoldenPromptBackground(textObj, parent, options) {
+  if (!textObj || !parent) {
+    return null;
+  }
+
+  const cfg = Object.assign({
+    minWidth: 760,
+    minHeight: 132,
+    horizontalPadding: 240,
+    verticalPadding: 84,
+    multilineExtraPadding: 12,
+    cornerRadius: 78,
+    strokeWidth: 6,
+    strokeColors: ["#FFF8D8", "#EFAF47"],
+    fillColors: ["#FFF2B8", "#F5B441"],
+    fillTopOffset: 0.2,
+    fillBottomOffset: 0.25,
+    highlightColors: ["rgba(255,255,255,0.7)", "rgba(255,255,255,0)"],
+    highlightTopOffset: 0.55,
+    highlightBottomOffset: 0.55,
+    shadow: { color: "rgba(6,16,38,0.28)", x: 0, y: 18, blur: 40 }
+  }, options || {});
+
+  const bg = new createjs.Shape();
+  bg.mouseEnabled = false;
+  bg.mouseChildren = false;
+  if (cfg.shadow) {
+    const s = cfg.shadow;
+    const color = typeof s === "string" ? s : s.color;
+    const sx = typeof s === "string" ? 0 : (s.x || 0);
+    const sy = typeof s === "string" ? 0 : (s.y || 0);
+    const blur = typeof s === "string" ? 24 : (s.blur != null ? s.blur : 24);
+    bg.shadow = new createjs.Shadow(color || "rgba(6,16,38,0.28)", sx, sy, blur);
+  }
+
+  let targetParent = textObj.parent && textObj.parent instanceof createjs.Container ? textObj.parent : parent;
+  if (!targetParent) {
+    return null;
+  }
+
+  function safeChildIndex(container, child) {
+    if (!container || !child) {
+      return -1;
+    }
+    try {
+      return container.getChildIndex(child);
+    } catch (err) {
+      return -1;
+    }
+  }
+
+  function childCount(container) {
+    if (!container) {
+      return 0;
+    }
+    if (typeof container.getNumChildren === "function") {
+      return container.getNumChildren();
+    }
+    if (typeof container.numChildren === "number") {
+      return container.numChildren;
+    }
+    if (Array.isArray(container.children)) {
+      return container.children.length;
+    }
+    return 0;
+  }
+
+  let insertIndex = safeChildIndex(targetParent, textObj);
+  if (insertIndex < 0) {
+    insertIndex = childCount(targetParent);
+  }
+  targetParent.addChildAt(bg, Math.max(0, insertIndex));
+
+  let lastSnapshot = null;
+
+  function measure() {
+    if (typeof textObj.getMetrics !== "function") {
+      return null;
+    }
+    const metrics = textObj.getMetrics();
+    if (!metrics) {
+      return null;
+    }
+    const scaleX = textObj.scaleX || 1;
+    const scaleY = textObj.scaleY || 1;
+    const width = (metrics.width || textObj.getMeasuredWidth() || 0) * scaleX;
+    let height = metrics.height != null ? metrics.height : 0;
+    if (!height && typeof textObj.getMeasuredLineHeight === "function") {
+      const lineHeight = textObj.lineHeight || textObj.getMeasuredLineHeight();
+      const lineCount = metrics.lines ? metrics.lines.length : 1;
+      height = lineHeight * lineCount;
+    }
+    height *= scaleY;
+    if (!height) {
+      height = (textObj.lineHeight || 60) * scaleY;
+    }
+    return {
+      width,
+      height,
+      lines: metrics.lines || []
+    };
+  }
+
+  function ensureLayer() {
+    let desiredParent = textObj.parent && textObj.parent instanceof createjs.Container ? textObj.parent : targetParent;
+    if (!desiredParent) {
+      desiredParent = parent;
+    }
+    if (!desiredParent) {
+      return false;
+    }
+    if (bg.parent !== desiredParent) {
+      if (bg.parent) {
+        bg.parent.removeChild(bg);
+      }
+      targetParent = desiredParent;
+      let index = safeChildIndex(desiredParent, textObj);
+      if (index < 0) {
+        index = childCount(desiredParent);
+      }
+      desiredParent.addChildAt(bg, Math.max(0, index));
+    }
+    if (textObj.parent === desiredParent) {
+      const textIdx = safeChildIndex(desiredParent, textObj);
+      const bgIdx = safeChildIndex(desiredParent, bg);
+      if (textIdx >= 0 && bgIdx >= textIdx) {
+        desiredParent.setChildIndex(bg, Math.max(0, textIdx));
+      }
+    }
+    return true;
+  }
+
+  function draw(force) {
+    if (!ensureLayer()) {
+      return;
+    }
+    const metrics = measure();
+    if (!metrics) {
+      return;
+    }
+
+    const lineCount = metrics.lines.length || 1;
+    const width = Math.max(metrics.width + cfg.horizontalPadding, cfg.minWidth);
+    const height = Math.max(metrics.height + cfg.verticalPadding + (lineCount > 1 ? cfg.multilineExtraPadding : 0), cfg.minHeight);
+    const radius = Math.min(cfg.cornerRadius, height / 2);
+    const left = textObj.x - width / 2;
+    const top = textObj.y - height / 2;
+    const bottom = top + height;
+
+    const snapshot = {
+      width,
+      height,
+      left,
+      top,
+      text: textObj.text,
+      alpha: textObj.alpha,
+      visible: textObj.visible
+    };
+
+    if (!force && lastSnapshot &&
+        lastSnapshot.width === snapshot.width &&
+        lastSnapshot.height === snapshot.height &&
+        lastSnapshot.left === snapshot.left &&
+        lastSnapshot.top === snapshot.top &&
+        lastSnapshot.text === snapshot.text &&
+        lastSnapshot.alpha === snapshot.alpha &&
+        lastSnapshot.visible === snapshot.visible) {
+      bg.visible = textObj.visible;
+      bg.alpha = textObj.alpha;
+      return;
+    }
+
+    lastSnapshot = snapshot;
+
+    const g = bg.graphics;
+    g.clear();
+    g.setStrokeStyle(cfg.strokeWidth || 6, "round", "round");
+    const strokeColors = cfg.strokeColors || [cfg.strokeColor || "#FFF8D8", cfg.strokeColor2 || "#EFAF47"];
+    g.beginLinearGradientStroke(strokeColors, [0, 1], textObj.x, top, textObj.x, bottom);
+    const fillColors = cfg.fillColors || ["#FFF2B8", "#F5B441"];
+    const fillTop = top - height * (cfg.fillTopOffset != null ? cfg.fillTopOffset : 0.2);
+    const fillBottom = bottom + height * (cfg.fillBottomOffset != null ? cfg.fillBottomOffset : 0.25);
+    g.beginLinearGradientFill(fillColors, [0, 1], textObj.x, fillTop, textObj.x, fillBottom);
+    g.drawRoundRect(left, top, width, height, radius);
+    const highlightColors = cfg.highlightColors || ["rgba(255,255,255,0.7)", "rgba(255,255,255,0)"];
+    const highlightTop = top - height * (cfg.highlightTopOffset != null ? cfg.highlightTopOffset : 0.55);
+    const highlightBottom = top + height * (cfg.highlightBottomOffset != null ? cfg.highlightBottomOffset : 0.55);
+    g.beginLinearGradientFill(highlightColors, [0, 1], textObj.x, highlightTop, textObj.x, highlightBottom);
+    g.drawRoundRect(left, top, width, height, radius);
+
+    bg.visible = textObj.visible;
+    bg.alpha = textObj.alpha;
+  }
+
+  draw(true);
+
+  const tickH = createjs.Ticker.on("tick", () => {
+    if (!bg.parent || !textObj.parent) {
+      ensureLayer();
+      if (!bg.parent || !textObj.parent) {
+        createjs.Ticker.off("tick", tickH);
+        return;
+      }
+    }
+    draw(false);
+  });
+
+  return {
+    bg,
+    refresh: () => { lastSnapshot = null; draw(true); },
+    destroy: () => {
+      if (tickH) {
+        createjs.Ticker.off("tick", tickH);
+      }
+      if (bg.parent) {
+        bg.parent.removeChild(bg);
+      }
+    }
+  };
+}
+
 function SAUI_createCycleRaceSpeechBubble(options) {
   options = options || {};
 
@@ -5966,4 +6187,5 @@ if (globalHelperScope) {
   globalHelperScope.SAUI_markCycleRaceOptionResult = SAUI_markCycleRaceOptionResult;
   globalHelperScope.layoutCycleRaceOptionBubble = layoutCycleRaceOptionBubble;
   globalHelperScope.renderCycleRaceSpeechBubble = renderCycleRaceSpeechBubble;
+  globalHelperScope.SAUI_attachGoldenPromptBackground = SAUI_attachGoldenPromptBackground;
 }

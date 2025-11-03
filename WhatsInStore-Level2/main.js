@@ -30,7 +30,7 @@ var question1, question2, queText, introImg;
 var choiceArr = [];
 var btnY = []
 
-var WISL2_PROMPT_FONT = "700 48px 'Baloo 2'";
+var WISL2_PROMPT_FONT = "800 52px 'Baloo 2'";
 var WISL2_PROMPT_COLOR = "#F4FAFF";
 var WISL2_PROMPT_LINE_WIDTH = 720;
 var WISL2_REMEMBER_PROMPT = "Remember these objects";
@@ -55,11 +55,12 @@ function WISL2_buildQuestionLabel(yPos) {
     label.textAlign = "center";
     label.textBaseline = "middle";
     label.lineWidth = WISL2_PROMPT_LINE_WIDTH;
-    label.lineHeight = 52;
+    label.lineHeight = 60;
     label.x = 640;
     label.y = yPos || 120;
     label.visible = false;
     label.alpha = 1;
+    label.shadow = new createjs.Shadow("rgba(6,16,38,0.22)", 0, 10, 24);
     return label;
 }
 
@@ -70,14 +71,31 @@ function WISL2_attachLabelBackground(label) {
     if (label.__labelBG && typeof label.__labelBG.destroy === "function") {
         label.__labelBG.destroy();
     }
-    var helper = SAUI_attachQuestionLabelBG(label, container.parent, {
-        padX: 32,
-        padY: 20,
-        fill: "rgba(41,16,94,0.78)",
-        stroke: "rgba(255,255,255,0.28)",
-        strokeW: 2,
-        maxRadius: 32
-    });
+    var helper = null;
+    if (typeof SAUI_attachGoldenPromptBackground === "function") {
+        helper = SAUI_attachGoldenPromptBackground(label, container.parent, {
+            minWidth: 760,
+            minHeight: 132,
+            horizontalPadding: 240,
+            verticalPadding: 84,
+            multilineExtraPadding: 12,
+            cornerRadius: 78,
+            strokeWidth: 6
+        });
+    }
+    if (!helper) {
+        helper = SAUI_attachQuestionLabelBG(label, container.parent, {
+            padX: 120,
+            padY: 60,
+            fill: "#F6B441",
+            stroke: "#FFF6D2",
+            strokeW: 6,
+            maxRadius: 80
+        });
+        if (helper && helper.bg) {
+            helper.bg.shadow = new createjs.Shadow("rgba(6,16,38,0.28)", 0, 18, 40);
+        }
+    }
     if (helper && typeof helper.refresh === "function") {
         helper.refresh();
     }
