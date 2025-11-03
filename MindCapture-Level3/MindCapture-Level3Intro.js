@@ -1,4 +1,10 @@
 var introArrow, introquestion, introquestionText, introfingure, introTitle, introHolder, introYes, introNo;
+if (typeof MINDCAPTURE_PROMPT_OBSERVE === "undefined") {
+    var MINDCAPTURE_PROMPT_OBSERVE = "Observe the objects carefully.";
+}
+if (typeof MINDCAPTURE_PROMPT_DECIDE === "undefined") {
+    var MINDCAPTURE_PROMPT_DECIDE = "Does the highlighted object belong to the group?";
+}
 var introquesArr = []
 var highlightTweenArr = []
 var setIntroCnt = 0
