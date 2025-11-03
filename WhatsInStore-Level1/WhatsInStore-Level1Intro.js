@@ -10,6 +10,13 @@ var introArrowX = 537, introArrowY = 300;
 var introfingureX = 580, introfingureY = 448;
 var inc = 0, j = 0
 function commongameintro() {
+    if (backgroundImage) {
+        var parent = container && container.parent ? container.parent : stage;
+        if (parent) {
+            parent.addChildAt(backgroundImage, 0);
+        }
+        backgroundImage.visible = true;
+    }
     introTitle = Title.clone()
    // introHolder = qHolderMc.clone()
     introQues = question.clone()
@@ -20,7 +27,10 @@ function commongameintro() {
     introfingure = fingure.clone()
     introQuestxt = queText.clone();
     if (isEnglishQuestionText) {
-        introQuestxt1 = createQuestionTextDisplay(getQuestionPrompt(3));
+        introQuestxt1 = createQuestionTextDisplay("");
+        setQuestionTextValue(introQuestxt1, getQuestionPrompt(3));
+        introQuestxt1.x = questionTextX;
+        introQuestxt1.y = questionTextY;
     } else {
         introQuestxt1 = questionText.clone();
     }

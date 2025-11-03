@@ -27,6 +27,7 @@ var loadProgressLabel, progresPrecentage, loaderWidth;
 var tween
 var chpos = 0;
 var question1, question2, queText, introImg, backgroundImage;
+var questionTextLabel;
 var choiceArr = [];
 var btnY = []
 var qHolderTargetX = 330;
@@ -52,6 +53,10 @@ var questionTextFont = "700 42px 'Baloo 2'";
 var questionTextColor = "#1c1a47";
 var questionTextLineWidth = 720;
 var questionTextLineHeight = 52;
+var questionTextPanelPaddingX = 72;
+var questionTextPanelPaddingY = 34;
+var questionTextPanelColor = "rgba(255,255,255,0.94)";
+var questionTextPanelStroke = "rgba(32,26,76,0.22)";
 
 function getQuestionPrompt(index) {
     if (!questionPrompts || !questionPrompts.length) {
@@ -70,14 +75,75 @@ function getQuestionPrompt(index) {
 }
 
 function createQuestionTextDisplay(initialText) {
+    var container = new createjs.Container();
+    var background = new createjs.Shape();
     var text = new createjs.Text(initialText || "", questionTextFont, questionTextColor);
+
     text.textAlign = "center";
     text.textBaseline = "middle";
     text.lineWidth = questionTextLineWidth;
     text.lineHeight = questionTextLineHeight;
-    text.x = questionTextX;
-    text.y = questionTextY;
-    return text;
+    text.x = 0;
+    text.y = 0;
+
+    if (typeof createjs.Shadow === "function") {
+        text.shadow = new createjs.Shadow("rgba(15,12,61,0.25)", 0, 4, 12);
+    }
+
+    container.addChild(background, text);
+    container.visible = false;
+    container.x = questionTextX;
+    container.y = questionTextY;
+    container.__background = background;
+    container.__text = text;
+
+    updateQuestionTextLayout(container);
+
+    return container;
+}
+
+function setQuestionTextValue(display, value) {
+    if (!display || !display.__text) {
+        return;
+    }
+
+    display.__text.text = value != null ? String(value) : "";
+    updateQuestionTextLayout(display);
+}
+
+function updateQuestionTextLayout(display) {
+    if (!display || !display.__text || !display.__background) {
+        return;
+    }
+
+    var text = display.__text;
+    var background = display.__background;
+    var lineHeight = text.lineHeight || (typeof text.getMeasuredLineHeight === "function" ? text.getMeasuredLineHeight() : 60);
+    var lineCount = 1;
+
+    var textValue = typeof text.text === "string" ? text.text : "";
+
+    if (typeof text.text === "string" && text.lineWidth > 0 && typeof text.getMeasuredWidth === "function") {
+        var measuredWidth = text.getMeasuredWidth();
+        if (measuredWidth && text.lineWidth) {
+            lineCount = Math.max(1, Math.ceil(measuredWidth / text.lineWidth));
+        }
+    }
+
+    if (textValue) {
+        var explicitLines = textValue.split(/\n+/).length;
+        lineCount = Math.max(lineCount, explicitLines);
+    }
+
+    var panelWidth = questionTextLineWidth + questionTextPanelPaddingX * 2;
+    var panelHeight = lineHeight * lineCount + questionTextPanelPaddingY * 2;
+
+    background.graphics.clear();
+    background.graphics
+        .setStrokeStyle(4)
+        .beginStroke(questionTextPanelStroke)
+        .beginFill(questionTextPanelColor)
+        .drawRoundRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 28);
 }
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
@@ -138,8 +204,13 @@ function doneLoading1(event) {
 
     if (id == "background") {
         backgroundImage = new createjs.Bitmap(preload.getResult('background'));
-        backgroundImage.visible = false;
-        container.parent.addChildAt(backgroundImage, 0);
+        backgroundImage.x = 0;
+        backgroundImage.y = 0;
+        backgroundImage.visible = true;
+        var parent = container && container.parent ? container.parent : stage;
+        if (parent) {
+            parent.addChildAt(backgroundImage, 0);
+        }
     }
 
     if (id == "introImg") {
@@ -211,6 +282,7 @@ function doneLoading1(event) {
     if (id == "questionText") {
         if (isEnglishQuestionText) {
             questionText = createQuestionTextDisplay("");
+            questionTextLabel = questionText.__text;
             container.parent.addChild(questionText);
             questionText.visible = false;
         } else {
@@ -256,7 +328,11 @@ function CreateGameElements() {
     interval = setInterval(countTime, 1000);
 
     if (backgroundImage) {
-        container.parent.addChildAt(backgroundImage, 0);
+        if (backgroundImage.parent && backgroundImage.parent.getChildIndex) {
+            backgroundImage.parent.addChildAt(backgroundImage, 0);
+        } else if (container && container.parent) {
+            container.parent.addChildAt(backgroundImage, 0);
+        }
         backgroundImage.visible = true;
     }
 
@@ -269,6 +345,9 @@ function CreateGameElements() {
     if (!isEnglishQuestionText) {
         questionText.x = 400;
         questionText.y = 120;
+    } else {
+        questionText.x = questionTextX;
+        questionText.y = questionTextY;
     }
 
     container.parent.addChild(queText);
@@ -359,7 +438,7 @@ function createChoices() {
     queText.visible = false;
     qHolderMc.visible = false;
     if (isEnglishQuestionText) {
-        questionText.text = getQuestionPrompt(qno[cnt]);
+        setQuestionTextValue(questionText, getQuestionPrompt(qno[cnt]));
     } else {
         questionText.gotoAndStop(qno[cnt]);
     }
