@@ -2,7 +2,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, ans, uans, interval, time = 230, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 4, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -25,6 +25,8 @@ var currentX, currentY
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var qText;
 var cappos = 0;
+var SPOTME_PROMPT_OBSERVE = "Observe the reference baskets carefully.";
+var SPOTME_PROMPT_SELECT = "Select the basket with the odd object.";
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qnoI = [];
 var qno = [];
@@ -45,6 +47,69 @@ var btnx = [660, 916, 660, 414]
 var btny = [198, 435, 698, 435]
 var btnx2 = [660, 811, 660, 514]
 var btny2 = [270, 435, 598, 435]
+function updateQuestionPrompt(copy, options) {
+    if (!copy && copy !== "") {
+        return;
+    }
+    var appliedOptions = options || { textAlign: "center" };
+    if (typeof SAUIX_setQuestionText === "function") {
+        SAUIX_setQuestionText(copy, appliedOptions);
+    } else if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        QusTxtString.text = copy;
+        if (appliedOptions.textAlign) {
+            QusTxtString.textAlign = appliedOptions.textAlign;
+        }
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.update === "function") {
+            QusTxtString.__labelBG.update();
+        }
+        QusTxtString.visible = true;
+    }
+}
+
+function fadeInQuestionPrompt(copy) {
+    updateQuestionPrompt(copy, { textAlign: "center" });
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        QusTxtString.visible = true;
+        createjs.Tween.get(QusTxtString, { override: true })
+            .set({ alpha: 0 })
+            .wait(150)
+            .to({ alpha: 1 }, 280);
+    }
+}
+
+function hideQuestionPrompt() {
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        QusTxtString.visible = false;
+    }
+}
+
+function startChoiceIdleTween(target, index) {
+    if (!target) {
+        return;
+    }
+    var baseScale = target.__baseScale || target.scaleX || 1;
+    target.__baseScale = baseScale;
+    target.scaleX = baseScale;
+    target.scaleY = baseScale;
+    createjs.Tween.removeTweens(target);
+    target.__idleTween = createjs.Tween.get(target, { loop: true, override: false })
+        .wait((index % 4) * 110)
+        .to({ scaleX: baseScale * 1.06, scaleY: baseScale * 0.96 }, 320, createjs.Ease.sineOut)
+        .to({ scaleX: baseScale * 0.96, scaleY: baseScale * 1.04 }, 340, createjs.Ease.sineInOut)
+        .to({ scaleX: baseScale, scaleY: baseScale }, 300, createjs.Ease.sineInOut);
+}
+
+function stopChoiceIdleTween(target) {
+    if (!target) {
+        return;
+    }
+    createjs.Tween.removeTweens(target);
+    var baseScale = target.__baseScale || 1;
+    target.scaleX = baseScale;
+    target.scaleY = baseScale;
+    target.__idleTween = null;
+}
+
 //register key functions
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -56,6 +121,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
 
     callLoader();
@@ -64,11 +130,12 @@ function init() {
 
     stage.update();
     stage.enableMouseOver(40);
+    call_UI_gameQuestion(container, SPOTME_PROMPT_OBSERVE);
+    hideQuestionPrompt();
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
 
-    /*Always specify the following terms as given in manifest array. 
+    /*Always specify the following terms as given in manifest array.
          1. choice image name as "ChoiceImages1.png"
-         2. question text image name as "questiontext.png"
      */
 
     assetsPath = "assets/";
@@ -81,8 +148,7 @@ function init() {
             { id: "dummy", src: gameAssetsPath + "ChoiceImages1.png" },
             { id: "chHolder", src: gameAssetsPath + "chHolder.png" },
             { id: "question", src: gameAssetsPath + "question.png" },
-            { id: "choice1", src: gameAssetsPath + "Basket.png" },
-            { id: "questionText", src: questionTextPath + "SpotMe-Level3-QT.png" }
+            { id: "choice1", src: gameAssetsPath + "Basket.png" }
         )
         preloadAllAssets()
         stage.update();
@@ -97,20 +163,6 @@ function doneLoading1(event) {
         container.parent.addChild(chHolder);
         chHolder.visible = false;
     }
-    if (id == "questionText") {
-
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("questionText")],
-            "frames": { "regX": 50,  "height": 119, "count": 0, "regY": 50, "width": 602 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-        });
-        //
-        questionText = new createjs.Sprite(spriteSheet1);
-        container.parent.addChild(questionText);
-        questionText.visible = false;
-    }
-
     if (id == "choice1") {
         choice1 = new createjs.Bitmap(preload.getResult('choice1'));
         container.parent.addChild(choice1);
@@ -144,6 +196,11 @@ function doneLoading1(event) {
         container.parent.addChild(question);
 
     };
+
+    if (QusTxtString) {
+        updateQuestionPrompt(SPOTME_PROMPT_OBSERVE);
+        hideQuestionPrompt();
+    }
 }
 
 function tick(e) {
@@ -173,10 +230,7 @@ function CreateGameElements() {
     question.visible = false;
     question.scaleX = question.scaleY = .7;
 
-    questionText.visible = false;
-
-    container.parent.addChild(questionText)
-    questionText.x = 380; questionText.y = 95
+    hideQuestionPrompt();
     for (i = 0; i < 4; i++) {
         dummyArr[i] = dummy.clone()
         dummyArr[i].name = i;
@@ -238,7 +292,7 @@ function pickques() {
     quesCnt++;
     panelVisibleFn()
 
-    questionText.gotoAndStop(0)
+    hideQuestionPrompt();
     qnoI = [1, 0, 2, 3]
     // qnoI = between(0, 3)
    qnoI.sort(randomSort)
@@ -260,9 +314,7 @@ function pickques() {
 }
 
 function CreateTween() {
-    questionText.visible = true;
-    questionText.alpha = 0
-    createjs.Tween.get(questionText).wait(200).to({ alpha: 1 }, 200);
+    fadeInQuestionPrompt(SPOTME_PROMPT_OBSERVE);
 
     chHolder.x = -1700;
     chHolder.visible = true
@@ -293,12 +345,12 @@ function CreateTween() {
 }
 
 function AddListenerFn() {
-    questionText.gotoAndStop(1)
-    createjs.Tween.get(questionText).wait(200).to({ alpha: 1 }, 200);
+    fadeInQuestionPrompt(SPOTME_PROMPT_SELECT);
     for (i = 0; i < 4; i++) {
         dummyArr[i].addEventListener("click", answerSelected)
         dummyArr[i].cursor = "pointer"
         dummyArr[i].mouseEnabled = true
+        startChoiceIdleTween(dummyArr[i], i);
     }
     rst = 0;
     gameResponseTimerStart();
@@ -310,13 +362,12 @@ function enablechoices() {
     gameResponseTimerStart();
     createjs.Ticker.addEventListener("tick", tick);
     stage.update();
-
-  questionText.gotoAndStop(1)
-
+    fadeInQuestionPrompt(SPOTME_PROMPT_SELECT);
     for (i = 0; i < 4; i++) {
         dummyArr[i].addEventListener("click", answerSelected);
         dummyArr[i].mouseEnabled = true;
         dummyArr[i].cursor = "pointer";
+        startChoiceIdleTween(dummyArr[i], i);
     }
 
 }*/
@@ -325,6 +376,7 @@ function disablechoices() {
         dummyArr[i].removeEventListener("click", answerSelected);
         dummyArr[i].mouseEnabled = false;
         dummyArr[i].cursor = "default";
+        stopChoiceIdleTween(dummyArr[i]);
     }
 }
 

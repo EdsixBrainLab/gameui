@@ -13,14 +13,108 @@ var introbtny = [198, 435, 698, 435]
 var introbtnx2 = [640, 790, 640, 510]
 var introbtny2 = [298, 435, 598, 435]
 var color = "black", line1, line2
-var startValX , startValY ,startValX1,startValY1 
+var startValX , startValY ,startValX1,startValY1
+var introPromptLabel;
+
+if (typeof SPOTME_PROMPT_OBSERVE === "undefined") {
+    var SPOTME_PROMPT_OBSERVE = "Observe the reference baskets carefully.";
+}
+if (typeof SPOTME_PROMPT_SELECT === "undefined") {
+    var SPOTME_PROMPT_SELECT = "Select the basket with the odd object.";
+}
+
+function ensureIntroPromptLabel(copy) {
+    if (!container || !container.parent) {
+        return null;
+    }
+
+    if (!introPromptLabel || !introPromptLabel.parent) {
+        var baseX = typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.x === "number"
+            ? QusTxtString.x
+            : (typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640);
+        var baseY = typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.y === "number"
+            ? QusTxtString.y
+            : (typeof INTRO_PROMPT_Y === "number" ? INTRO_PROMPT_Y - 55 : 155);
+
+        if (introPromptLabel && introPromptLabel.__labelBG && typeof introPromptLabel.__labelBG.destroy === "function") {
+            introPromptLabel.__labelBG.destroy();
+        }
+
+        if (typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.clone === "function") {
+            introPromptLabel = QusTxtString.clone();
+        } else {
+            introPromptLabel = new createjs.Text("", "800 60px 'Baloo 2'", "#F4FAFF");
+            introPromptLabel.textAlign = "center";
+            introPromptLabel.textBaseline = "middle";
+            introPromptLabel.lineWidth = 1000;
+            introPromptLabel.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
+        }
+
+        introPromptLabel.x = baseX;
+        introPromptLabel.y = baseY;
+        introPromptLabel.alpha = 1;
+        introPromptLabel.visible = true;
+        container.parent.addChild(introPromptLabel);
+
+        if (typeof SAUI_attachQuestionLabelBG === "function") {
+            introPromptLabel.__labelBG = SAUI_attachQuestionLabelBG(introPromptLabel, container.parent, {
+                padX: 20,
+                padY: 12,
+                fill: "rgba(0,0,0,0.3)",
+                stroke: "rgba(255,255,255,0.14)",
+                strokeW: 2,
+                maxRadius: 22
+            });
+        }
+    }
+
+    if (typeof copy !== "undefined") {
+        updateIntroPromptLabel(copy);
+    }
+
+    return introPromptLabel;
+}
+
+function updateIntroPromptLabel(copy) {
+    if (!introPromptLabel) {
+        return;
+    }
+
+    var textValue = typeof copy === "string" ? copy : copy === "" ? "" : introPromptLabel.text;
+    introPromptLabel.text = textValue || "";
+    introPromptLabel.visible = !!textValue;
+
+    if (introPromptLabel.__labelBG && typeof introPromptLabel.__labelBG.update === "function") {
+        introPromptLabel.__labelBG.update();
+    }
+}
+
+function disposeIntroPromptLabel() {
+    if (!introPromptLabel) {
+        return;
+    }
+
+    if (introPromptLabel.__labelBG) {
+        if (typeof introPromptLabel.__labelBG.destroy === "function") {
+            introPromptLabel.__labelBG.destroy();
+        } else if (introPromptLabel.__labelBG.parent) {
+            introPromptLabel.__labelBG.parent.removeChild(introPromptLabel.__labelBG);
+        }
+        introPromptLabel.__labelBG = null;
+    }
+
+    if (introPromptLabel.parent) {
+        introPromptLabel.parent.removeChild(introPromptLabel);
+    }
+
+    introPromptLabel = null;
+}
 function commongameintro() {
     startValX = 640, startValY = 295
     startValX1 = 640, startValY1 = 575
     introArrow = arrow1.clone();
     introfingure = fingure.clone();
     introTitle = Title.clone();
-    introQuestionText = questionText.clone();
     introHolder = chHolder.clone();
     introquestion = question.clone()
     for (i = 0; i < 2; i++) {
@@ -35,10 +129,11 @@ function commongameintro() {
     container.parent.addChild(introHolder)
     introHolder.visible = false
     introHolder.y = 35;
-    container.parent.addChild(introQuestionText)
-    introQuestionText.visible = true
-    introQuestionText.x = 380
-    introQuestionText.y = 90
+    ensureIntroPromptLabel(SPOTME_PROMPT_OBSERVE);
+    if (introPromptLabel) {
+        introPromptLabel.alpha = 0;
+        introPromptLabel.visible = true;
+    }
 
 
     /////////////////////////////////////////////////////choice//////////////////////  
@@ -76,8 +171,15 @@ function commongameintro() {
     line2.visible=true
     /////////////////////////////////////////////////////questiontext and holder anim////////////////////// 
 
-    introQuestionText.alpha = 0
-    createjs.Tween.get(introQuestionText).wait(500).to({ alpha: 1 }, 500, createjs.Ease.bounceOut).call(handleComplete1_1)
+    if (introPromptLabel) {
+        updateIntroPromptLabel(SPOTME_PROMPT_OBSERVE);
+        createjs.Tween.get(introPromptLabel)
+            .wait(500)
+            .to({ alpha: 1 }, 500, createjs.Ease.bounceOut)
+            .call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 }
 
 function handleComplete1_1() {
@@ -148,8 +250,15 @@ function handleComplete3_1() {
     }
 }
 function questionTextTween() {
-    introQuestionText.gotoAndStop(1)
-    createjs.Tween.get(introQuestionText).wait(200).to({ alpha: 1 }, 200).call(handleComplete4_1);
+    ensureIntroPromptLabel(SPOTME_PROMPT_SELECT);
+    if (introPromptLabel) {
+        introPromptLabel.alpha = 0;
+        updateIntroPromptLabel(SPOTME_PROMPT_SELECT);
+        introPromptLabel.visible = true;
+        createjs.Tween.get(introPromptLabel).wait(200).to({ alpha: 1 }, 200).call(handleComplete4_1);
+    } else {
+        handleComplete4_1();
+    }
 }
 
 // function handleComplete4_1() {
@@ -322,8 +431,7 @@ function removeGameIntro() {
     introHolder.visible = false
     container.parent.removeChild(introquestion)
     introquestion.visible = false
-    container.parent.removeChild(introQuestionText)
-    introQuestionText.visible = false
+    disposeIntroPromptLabel()
     container.parent.removeChild(line1)
     container.parent.removeChild(line2)
     line1.visible=false
