@@ -366,6 +366,8 @@ function AddListenerFn() {
 
     for (i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) { continue; }
+        choiceArr[i].mouseEnabled = true;
+        choiceArr[i].cursor = "pointer";
         choiceArr[i].addEventListener("click", answerSelected);
     }
 
