@@ -16,6 +16,87 @@ var color = "black", line1
 var startValX = 640, startValY = 315
 var startValX1 = 780, startValY1 = 595
 var introPromptLabel;
+var SPOTME_INTRO_BOARD_SCALE = typeof SPOTME_BOARD_SCALE === "number" ? SPOTME_BOARD_SCALE : 0.86;
+var SPOTME_INTRO_REFERENCE_SCALE = typeof SPOTME_REFERENCE_SCALE === "number" ? SPOTME_REFERENCE_SCALE : 0.86;
+var SPOTME_INTRO_CHOICE_SCALE = typeof SPOTME_CHOICE_SCALE === "number" ? SPOTME_CHOICE_SCALE : 0.86;
+var SPOTME_INTRO_QUESTION_SCALE = typeof SPOTME_QUESTION_SCALE === "number" ? SPOTME_QUESTION_SCALE : 0.64;
+var SPOTME_INTRO_BOARD_POS = typeof SPOTME_BOARD_BASE_POS === "object" && SPOTME_BOARD_BASE_POS
+    ? { x: SPOTME_BOARD_BASE_POS.x, y: SPOTME_BOARD_BASE_POS.y }
+    : { x: -9, y: 10 };
+
+function introResolveDisplaySize(target) {
+    if (!target) {
+        return { width: 0, height: 0 };
+    }
+
+    if (typeof target.getBounds === "function") {
+        var bounds = target.getBounds();
+        if (bounds) {
+            return { width: bounds.width || 0, height: bounds.height || 0 };
+        }
+    }
+
+    if (target.image) {
+        return {
+            width: target.image.width || 0,
+            height: target.image.height || 0
+        };
+    }
+
+    if (target.spriteSheet) {
+        if (typeof target.spriteSheet.getFrame === "function") {
+            var frame = target.spriteSheet.getFrame(target.currentFrame || 0);
+            if (frame && frame.rect) {
+                return { width: frame.rect.width || 0, height: frame.rect.height || 0 };
+            }
+        }
+
+        if (typeof target.spriteSheet.getFrameBounds === "function") {
+            var rect = target.spriteSheet.getFrameBounds(target.currentFrame || 0);
+            if (rect) {
+                return { width: rect.width || 0, height: rect.height || 0 };
+            }
+        }
+
+        if (target.spriteSheet._frameWidth || target.spriteSheet._frameHeight) {
+            return {
+                width: target.spriteSheet._frameWidth || 0,
+                height: target.spriteSheet._frameHeight || 0
+            };
+        }
+    }
+
+    return { width: 0, height: 0 };
+}
+
+function introApplyScaleMeta(target, scale) {
+    if (!target) {
+        return;
+    }
+
+    var appliedScale = typeof scale === "number" ? scale : 1;
+    target.scaleX = target.scaleY = appliedScale;
+    var size = introResolveDisplaySize(target);
+    target.__introOffsetX = size.width * (1 - appliedScale) / 2;
+    target.__introOffsetY = size.height * (1 - appliedScale) / 2;
+}
+
+function introGetScaledPosition(target, x, y) {
+    return {
+        x: x + (target && target.__introOffsetX ? target.__introOffsetX : 0),
+        y: y + (target && target.__introOffsetY ? target.__introOffsetY : 0)
+    };
+}
+
+function introSetScaledXY(target, x, y) {
+    if (!target) {
+        return;
+    }
+
+    var pos = introGetScaledPosition(target, x, y);
+    target.x = pos.x;
+    target.y = pos.y;
+}
 
 if (typeof SPOTME_PROMPT_OBSERVE === "undefined") {
     var SPOTME_PROMPT_OBSERVE = "Observe the reference baskets carefully.";
@@ -129,17 +210,18 @@ function commongameintro() {
     introTitle.visible = true
     container.parent.addChild(introHolder)
     introHolder.visible = false
-    introHolder.y = 35;
+    introApplyScaleMeta(introHolder, SPOTME_INTRO_BOARD_SCALE);
+    introSetScaledXY(introHolder, SPOTME_INTRO_BOARD_POS.x, SPOTME_INTRO_BOARD_POS.y);
     ensureIntroPromptLabel(SPOTME_PROMPT_OBSERVE);
     if (introPromptLabel) {
         introPromptLabel.alpha = 0;
         introPromptLabel.visible = true;
     }
 
-    /////////////////////////////////////////////////////choice//////////////////////  
+    /////////////////////////////////////////////////////choice//////////////////////
     for (i = 0; i < 3; i++) {
-        introchoiceArr[i].x = introbtnx2[i];
-        introchoiceArr[i].y = introbtny2[i];
+        introApplyScaleMeta(introchoiceArr[i], SPOTME_INTRO_CHOICE_SCALE);
+        introSetScaledXY(introchoiceArr[i], introbtnx2[i], introbtny2[i]);
         container.parent.addChild(introchoiceArr[i]);
         introchoiceArr[i].visible = false;
         introchoiceArr[i].gotoAndStop(i)
@@ -148,15 +230,14 @@ function commongameintro() {
     container.parent.addChild(introquestion)
     introquestion.visible = false
     introquestion.gotoAndStop(6)
-    introquestion.x = 640
-    introquestion.y = 165
-    introquestion.scaleX = introquestion.scaleY = .7
+    introApplyScaleMeta(introquestion, SPOTME_INTRO_QUESTION_SCALE);
+    introSetScaledXY(introquestion, 640, 165);
 
     for (i = 0; i < 3; i++) {
         container.parent.addChild(introquesArr[i]);
         introquesArr[i].visible = false;
-        introquesArr[i].x = introsX[i];
-        introquesArr[i].y = introsY[i];
+        introApplyScaleMeta(introquesArr[i], SPOTME_INTRO_REFERENCE_SCALE);
+        introSetScaledXY(introquesArr[i], introsX[i], introsY[i]);
     }
     ////////////////////////////////////////////////Line///////////////////////////////////////// 
     line1 = new createjs.Shape();
@@ -181,28 +262,39 @@ function handleComplete1_1() {
     quesTween()
 }
 function quesTween() {
-    introHolder.x = -1700;
+    introSetScaledXY(introHolder, SPOTME_INTRO_BOARD_POS.x - 1700, SPOTME_INTRO_BOARD_POS.y);
     introHolder.visible = true
+    var boardTarget = introGetScaledPosition(introHolder, SPOTME_INTRO_BOARD_POS.x, SPOTME_INTRO_BOARD_POS.y);
     createjs.Tween.get(introHolder).
-        to({ x: -9, y: 10 }, 500, createjs.Ease.bounceIn);
+        to({ x: boardTarget.x, y: boardTarget.y }, 500, createjs.Ease.bounceIn);
 
     var introtempVal2 = 500
     var introRand = [2, 1, 0]
     for (i = 0; i < 3; i++) {
         introquesArr[introRand[i]].visible = true;
         introquesArr[introRand[i]].alpha = 0
-        createjs.Tween.get(introquesArr[introRand[i]]).wait(introtempVal2).to({ alpha: 1 }, introtempVal2);
+        var introReferenceTarget = introGetScaledPosition(introquesArr[introRand[i]], introsX[introRand[i]], introsY[introRand[i]]);
+        createjs.Tween.get(introquesArr[introRand[i]]).set({ x: introReferenceTarget.x, y: introReferenceTarget.y })
+            .wait(introtempVal2).to({ alpha: 1 }, introtempVal2);
         introtempVal2 += 200;
     }
     introquestion.visible = true
     introquestion.alpha = 0
-    createjs.Tween.get(introquestion).wait(2500).to({ y: introquestion.y, alpha: 1 }, 500).to({ y: introquestion.y + 95 }, 1000, createjs.Ease.bounceOut).wait(500).call(handleComplete2_1);
+    var introQuestionTarget = introGetScaledPosition(introquestion, 640, 165);
+    createjs.Tween.get(introquestion)
+        .set({ x: introQuestionTarget.x, y: introQuestionTarget.y })
+        .wait(2500).to({ alpha: 1 }, 500)
+        .to({ y: introQuestionTarget.y + 95 }, 1000, createjs.Ease.bounceOut)
+        .wait(500).call(handleComplete2_1);
 
     var introtempVal1 = 1000;
     for (i = 0; i < 3; i++) {
         introchoiceArr[introRand[i]].visible = true
         introchoiceArr[introRand[i]].alpha = 0
-        createjs.Tween.get(introchoiceArr[introRand[i]]).wait(introtempVal1).to({ x: introbtnx[introRand[i]], y: introbtny[introRand[i]], alpha: 1 }, 500, createjs.Ease.bounceOut).wait(500);
+        var introChoiceTarget = introGetScaledPosition(introchoiceArr[introRand[i]], introbtnx[introRand[i]], introbtny[introRand[i]]);
+        createjs.Tween.get(introchoiceArr[introRand[i]]).wait(introtempVal1)
+            .to({ x: introChoiceTarget.x, y: introChoiceTarget.y, alpha: 1 }, 500, createjs.Ease.bounceOut)
+            .wait(500);
         introtempVal1 += 200;
     }
 }
@@ -221,18 +313,24 @@ function introPosChange() {
         removeGameIntro()
     } else {
         createjs.Ticker.addEventListener("tick", lineTween);
-        createjs.Tween.get(introquesArr[0]).to({ x: introsX[1], y: introsY[1] }, 600).wait(600);
-        createjs.Tween.get(introquesArr[1]).to({ x: introsX[2], y: introsY[2] }, 600).wait(600);
-        createjs.Tween.get(introquesArr[2]).to({ x: introsX[0], y: introsY[0] }, 600).wait(900).call(introPosChange1);
+        var firstTarget = introGetScaledPosition(introquesArr[0], introsX[1], introsY[1]);
+        createjs.Tween.get(introquesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 600).wait(600);
+        var secondTarget = introGetScaledPosition(introquesArr[1], introsX[2], introsY[2]);
+        createjs.Tween.get(introquesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 600).wait(600);
+        var thirdTarget = introGetScaledPosition(introquesArr[2], introsX[0], introsY[0]);
+        createjs.Tween.get(introquesArr[2]).to({ x: thirdTarget.x, y: thirdTarget.y }, 600).wait(900).call(introPosChange1);
     }
 }
 function introPosChange1() {
     if (stopValue == 0) {
         removeGameIntro()
     } else {
-        createjs.Tween.get(introquesArr[0]).to({ x: introsX[2], y: introsY[2] }, 800).wait(800);
-        createjs.Tween.get(introquesArr[1]).to({ x: introsX[1], y: introsY[1] }, 800).wait(800);
-        createjs.Tween.get(introquesArr[2]).to({ x: introsX[0], y: introsY[0] }, 800).wait(800).call(handleComplete3_1);
+        var firstTarget = introGetScaledPosition(introquesArr[0], introsX[2], introsY[2]);
+        createjs.Tween.get(introquesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 800).wait(800);
+        var secondTarget = introGetScaledPosition(introquesArr[1], introsX[1], introsY[1]);
+        createjs.Tween.get(introquesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 800).wait(800);
+        var thirdTarget = introGetScaledPosition(introquesArr[2], introsX[0], introsY[0]);
+        createjs.Tween.get(introquesArr[2]).to({ x: thirdTarget.x, y: thirdTarget.y }, 800).wait(800).call(handleComplete3_1);
     }
 }
 function handleComplete3_1() {
@@ -307,8 +405,9 @@ function handleComplete4_1() {
 }
 function setArrowTween() {
     introquestion.visible = true
-    introquestion.x = 420
-    introquestion.y =630
+    var introQuestionSelectTarget = introGetScaledPosition(introquestion, 420, 630);
+    introquestion.x = introQuestionSelectTarget.x;
+    introquestion.y = introQuestionSelectTarget.y;
     if (stopValue == 0) {
         removeGameIntro()
 

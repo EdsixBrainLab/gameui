@@ -32,6 +32,8 @@ var SPOTME_REFERENCE_SCALE = 0.86;
 var SPOTME_CHOICE_SCALE = 0.86;
 var SPOTME_QUESTION_SCALE = 0.64;
 var SPOTME_BOARD_BASE_POS = { x: 0, y: 28 };
+var SPOTME_BASKET_HIT_ALPHA = 0.01;
+var SPOTME_BASKET_HIT_SCALE = 1.05;
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qnoI = [];
 var qno = [];
@@ -44,6 +46,7 @@ var sX1 = [640, 795, 640, 500];
 var sY1 = [205, 365, 525, 365];
 var choiceChange = []
 var dummyArr = []
+var basketHotspots = [];
 var spriteChange = []
 var shuffleArr1 = []
 var shuffleArr2 = []
@@ -113,6 +116,81 @@ function stopChoiceIdleTween(target) {
     target.scaleX = baseScale;
     target.scaleY = baseScale;
     target.__idleTween = null;
+}
+
+function getBasketReferenceSize() {
+    if (choice1) {
+        return resolveDisplaySize(choice1);
+    }
+    return { width: 0, height: 0 };
+}
+
+function ensureBasketHotspot(index) {
+    if (typeof index === "undefined" || index === null || !container || !container.parent) {
+        return null;
+    }
+
+    if (!basketHotspots[index]) {
+        var hotspot = new createjs.Shape();
+        var refSize = getBasketReferenceSize();
+        var width = (refSize.width || 180) * SPOTME_REFERENCE_SCALE * SPOTME_BASKET_HIT_SCALE;
+        var height = (refSize.height || 150) * SPOTME_REFERENCE_SCALE * SPOTME_BASKET_HIT_SCALE;
+        hotspot.graphics.beginFill("#000").drawEllipse(0, 0, width, height);
+        hotspot.alpha = 0;
+        hotspot.visible = false;
+        hotspot.regX = 0;
+        hotspot.regY = 0;
+        hotspot.name = index;
+        hotspot.mouseEnabled = false;
+        hotspot.cursor = "default";
+        hotspot.__baseAlpha = SPOTME_BASKET_HIT_ALPHA;
+        basketHotspots[index] = hotspot;
+        container.parent.addChild(hotspot);
+    }
+
+    return basketHotspots[index];
+}
+
+function hideBasketHotspot(hotspot) {
+    if (!hotspot) {
+        return;
+    }
+    createjs.Tween.removeTweens(hotspot);
+    hotspot.visible = false;
+    hotspot.alpha = 0;
+    hotspot.mouseEnabled = false;
+    hotspot.cursor = "default";
+    hotspot.removeEventListener("click", answerSelected);
+}
+
+function setBasketHotspotPosition(index, x, y) {
+    var hotspot = ensureBasketHotspot(index);
+    if (!hotspot) {
+        return null;
+    }
+    var target = dummyArr[index] || dummy;
+    var offsetX = target && typeof target.__scaleOffsetX === "number" ? target.__scaleOffsetX : 0;
+    var offsetY = target && typeof target.__scaleOffsetY === "number" ? target.__scaleOffsetY : 0;
+    hotspot.x = x + offsetX;
+    hotspot.y = y + offsetY;
+    return hotspot;
+}
+
+function tweenBasketHotspot(index, wait, targetBaseX, targetBaseY) {
+    var hotspot = ensureBasketHotspot(index);
+    if (!hotspot) {
+        return;
+    }
+    var target = dummyArr[index] || dummy;
+    var offsetX = target && typeof target.__scaleOffsetX === "number" ? target.__scaleOffsetX : 0;
+    var offsetY = target && typeof target.__scaleOffsetY === "number" ? target.__scaleOffsetY : 0;
+    hotspot.visible = true;
+    hotspot.alpha = 0;
+    hotspot.mouseEnabled = false;
+    hotspot.cursor = "default";
+    createjs.Tween.get(hotspot, { override: true })
+        .wait(wait)
+        .to({ x: targetBaseX + offsetX, y: targetBaseY + offsetY, alpha: hotspot.__baseAlpha || SPOTME_BASKET_HIT_ALPHA }, 500, createjs.Ease.bounceOut);
 }
 
 function resolveDisplaySize(target) {
@@ -319,6 +397,7 @@ function CreateGameElements() {
         container.parent.addChild(dummyArr[i]);
         dummyArr[i].visible = false;
         dummyArr[i].gotoAndStop(i)
+        hideBasketHotspot(setBasketHotspotPosition(i, btnx[i], btny[i]));
     }
     container.parent.addChild(question)
     for (i = 0; i < 4; i++) {
@@ -386,6 +465,7 @@ function pickques() {
     //
     for (i = 0; i < 4; i++) {
         setScaledXY(dummyArr[i], btnx2[i], btny2[i])
+        hideBasketHotspot(setBasketHotspotPosition(i, btnx2[i], btny2[i]));
     }
     CreateTween();
 }
@@ -422,6 +502,8 @@ function CreateTween() {
         dummyArr[rand[i]].alpha = 0;
         var choiceTarget = getScaledPosition(dummyArr[rand[i]], btnx[rand[i]], btny[rand[i]]);
         createjs.Tween.get(dummyArr[rand[i]]).wait(tempVal1).to({ x: choiceTarget.x, y: choiceTarget.y, alpha: 1 }, 500, createjs.Ease.bounceOut).wait(500);
+        setBasketHotspotPosition(rand[i], btnx2[rand[i]], btny2[rand[i]]);
+        tweenBasketHotspot(rand[i], tempVal1, btnx[rand[i]], btny[rand[i]]);
         tempVal1 += 200;
     }
 
@@ -434,6 +516,14 @@ function AddListenerFn() {
         dummyArr[i].cursor = "pointer"
         dummyArr[i].mouseEnabled = true
         startChoiceIdleTween(dummyArr[i], i);
+        var hotspot = ensureBasketHotspot(i);
+        if (hotspot) {
+            hotspot.alpha = hotspot.__baseAlpha || SPOTME_BASKET_HIT_ALPHA;
+            hotspot.visible = true;
+            hotspot.mouseEnabled = true;
+            hotspot.cursor = "pointer";
+            hotspot.addEventListener("click", answerSelected);
+        }
     }
     rst = 0;
     gameResponseTimerStart();
@@ -460,6 +550,7 @@ function disablechoices() {
         dummyArr[i].mouseEnabled = false;
         dummyArr[i].cursor = "default";
         stopChoiceIdleTween(dummyArr[i]);
+        hideBasketHotspot(basketHotspots[i]);
     }
 }
 
