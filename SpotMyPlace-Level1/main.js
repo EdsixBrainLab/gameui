@@ -241,7 +241,11 @@ function CreateGameElements() {
         choiceMcArr[i].addChild(Choice[i], choiceArr[i])
         choiceMcArr[i].visible = true;
         Choice[i].visible = false;
+        Choice[i].name = "";
+        Choice[i].__choiceIndex = i;
+        Choice[i].__image = choiceArr[i];
         choiceArr[i].visible = false;
+        choiceArr[i].alpha = 0;
         choiceArr[i].mouseEnabled = false;
     }
 
@@ -261,6 +265,9 @@ function helpDisable() {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = false;
         }
+        if (Choice[i]) {
+            Choice[i].mouseEnabled = false;
+        }
     }
 }
 
@@ -268,6 +275,9 @@ function helpEnable() {
     for (i = 0; i < 6; i++) {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = true;
+        }
+        if (Choice[i]) {
+            Choice[i].mouseEnabled = true;
         }
     }
 }
@@ -296,6 +306,8 @@ function pickques() {
         choiceArr[i].visible = false;
         Choice[i].visible = false;
         Choice[i].alpha = 1;
+        Choice[i].name = choiceArr[i].name;
+        Choice[i].__image = choiceArr[i];
         choiceArr[i].mouseEnabled = false;
         Choice[i].mouseEnabled = false;
         Choice[i].cursor = "default";
@@ -346,13 +358,14 @@ function displayflower() {
 
 function enablechoices() {
     for (i = 0; i < 6; i++) {
-        if (!choiceArr[i]) { continue; }
+        if (!choiceArr[i] || !Choice[i]) { continue; }
         Choice[i].visible = true;
         Choice[i].alpha = 1;
         Choice[i].mouseEnabled = false;
         Choice[i].cursor = "default";
+        Choice[i].__choiceIndex = i;
         choiceArr[i].visible = true;
-        choiceArr[i].alpha = 1;
+        choiceArr[i].alpha = 0;
         choiceArr[i].mouseEnabled = false;
         choiceArr[i].cursor = "default";
         choiceArr[i].__choiceIndex = i;
@@ -368,16 +381,16 @@ function revealChoices() {
     createjs.Tween.get(question).wait(600)
         .to({ alpha: 1 }, 600)
 
-    animateChoiceOptions(choiceArr, AddListenerFn);
+    animateChoiceOptions(Choice, AddListenerFn);
 
 }
 function AddListenerFn() {
 
     for (i = 0; i < 6; i++) {
-        if (!choiceArr[i]) { continue; }
-        choiceArr[i].mouseEnabled = true;
-        choiceArr[i].cursor = "pointer";
-        choiceArr[i].addEventListener("click", answerSelected);
+        if (!Choice[i]) { continue; }
+        Choice[i].mouseEnabled = true;
+        Choice[i].cursor = "pointer";
+        Choice[i].addEventListener("click", answerSelected);
     }
     rst = 0;
     gameResponseTimerStart();
@@ -388,11 +401,17 @@ function AddListenerFn() {
 function disableChoices() {
 
     for (i = 0; i < 6; i++) {
-        if (!choiceArr[i]) { continue; }
-        choiceArr[i].removeEventListener("click", answerSelected);
-        choiceArr[i].visible = false;
-        choiceArr[i].cursor = "default";
-        choiceArr[i].mouseEnabled = false;
+        if (Choice[i]) {
+            Choice[i].removeEventListener("click", answerSelected);
+            Choice[i].visible = false;
+            Choice[i].cursor = "default";
+            Choice[i].mouseEnabled = false;
+        }
+        if (choiceArr[i]) {
+            choiceArr[i].visible = false;
+            choiceArr[i].cursor = "default";
+            choiceArr[i].mouseEnabled = false;
+        }
     }
 
     question.visible = false;
@@ -495,6 +514,11 @@ function stopChoicePulse(tile) {
 }
 
 function resetChoiceTweens() {
+    for (i = 0; i < Choice.length; i++) {
+        if (Choice[i]) {
+            stopChoicePulse(Choice[i]);
+        }
+    }
     for (i = 0; i < choiceArr.length; i++) {
         if (choiceArr[i]) {
             stopChoicePulse(choiceArr[i]);
@@ -503,6 +527,11 @@ function resetChoiceTweens() {
 }
 
 function clearChoiceAnimations() {
+    for (i = 0; i < Choice.length; i++) {
+        if (Choice[i]) {
+            createjs.Tween.removeTweens(Choice[i]);
+        }
+    }
     for (i = 0; i < choiceArr.length; i++) {
         if (choiceArr[i]) {
             createjs.Tween.removeTweens(choiceArr[i]);
@@ -522,13 +551,19 @@ function onRoll_out(e) {
 
 function answerSelected(e) {
     e.preventDefault();
-    uans = e.currentTarget.name;
+    var target = e.currentTarget;
+    var revealTile = target.__image || null;
+    if (revealTile) {
+        revealTile.alpha = 1;
+        revealTile.visible = true;
+    }
+    uans = target.name;
     console.log("answer" + uans);
     console.log(ans + " =correct= " + uans)
     gameResponseTimerStop();
     if (ans == uans) {
 
-        e.currentTarget.visible = true;
+        target.visible = true;
         disableMouse()
 
         correct()
@@ -549,6 +584,9 @@ function disableMouse() {
     for (i = 0; i < 6; i++) {
         if (choiceArr[i]) {
             choiceArr[i].mouseEnabled = false
+        }
+        if (Choice[i]) {
+            Choice[i].mouseEnabled = false;
         }
     }
 }

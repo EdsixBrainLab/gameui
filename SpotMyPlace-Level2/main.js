@@ -32,6 +32,7 @@ var answer
 var btny = [40, 153, 265, 377, 490]
 
 var quesArr = []
+var choiceCoverArr = []
 var SPOTMYPLACE_PROMPT_OBSERVE = "Observe the places carefully.";
 var SPOTMYPLACE_PROMPT_SELECT = "Which place did you see?";
 var btnx1 = [50, 317, 585, 50, 317, 585, 50, 317, 585]
@@ -209,14 +210,22 @@ function CreateGameElements() {
 
     for (i = 0; i < 9; i++) {
         quesArr[i] = choice1.clone()
+        choiceCoverArr[i] = choice1.clone()
+        choiceCoverArr[i].gotoAndStop(25)
+        container.parent.addChild(choiceCoverArr[i])
         container.parent.addChild(quesArr[i])
         quesArr[i].visible = false;
-        quesArr[i].x = btnx1[i]
-        quesArr[i].y = btny1[i]
+        choiceCoverArr[i].visible = false;
+        quesArr[i].x = choiceCoverArr[i].x = btnx1[i]
+        quesArr[i].y = choiceCoverArr[i].y = btny1[i]
         quesArr[i].name = i
+        choiceCoverArr[i].name = i
         quesArr[i].scaleX = quesArr[i].scaleY = .9
+        choiceCoverArr[i].scaleX = choiceCoverArr[i].scaleY = .9
         quesArr[i].mouseEnabled = false;
+        choiceCoverArr[i].mouseEnabled = false;
         quesArr[i].cursor = "default";
+        choiceCoverArr[i].cursor = "default";
     }
 
     question = answerImg.clone()
@@ -241,6 +250,9 @@ function helpDisable() {
         if (quesArr[i]) {
             quesArr[i].mouseEnabled = false;
         }
+        if (choiceCoverArr[i]) {
+            choiceCoverArr[i].mouseEnabled = false;
+        }
     }
 }
 
@@ -248,6 +260,9 @@ function helpEnable() {
     for (i = 0; i < 9; i++) {
         if (quesArr[i]) {
             quesArr[i].mouseEnabled = true;
+        }
+        if (choiceCoverArr[i]) {
+            choiceCoverArr[i].mouseEnabled = true;
         }
     }
 }
@@ -281,6 +296,15 @@ function pickques() {
         quesArr[i].visible = false
         quesArr[i].mouseEnabled = false
         quesArr[i].alpha = 1
+        if (choiceCoverArr[i]) {
+            choiceCoverArr[i].gotoAndStop(25);
+            choiceCoverArr[i].visible = false;
+            choiceCoverArr[i].alpha = 1;
+            choiceCoverArr[i].mouseEnabled = false;
+            choiceCoverArr[i].cursor = "default";
+            choiceCoverArr[i].name = quesArr[i].name;
+            choiceCoverArr[i].__image = quesArr[i];
+        }
 
     }
 
@@ -295,6 +319,9 @@ function pickques() {
 function showflowers() {
     cnt1++;
     quesArr[cnt1].visible = true;
+    if (choiceCoverArr[cnt1]) {
+        choiceCoverArr[cnt1].visible = false;
+    }
 
     setTimeout(creatDelayfn, 500)
 }
@@ -319,8 +346,16 @@ function questiondisplay() {
             question.visible = false
         }
         else {
-            quesArr[i].gotoAndStop(25)
             quesArr[i].visible = true
+            quesArr[i].alpha = 0
+            if (choiceCoverArr[i]) {
+                choiceCoverArr[i].gotoAndStop(25);
+                choiceCoverArr[i].visible = true;
+                choiceCoverArr[i].alpha = 1;
+                choiceCoverArr[i].mouseEnabled = false;
+                choiceCoverArr[i].cursor = "default";
+                choiceCoverArr[i].__choiceIndex = i;
+            }
         }
     }
     ans = qnoI1
@@ -331,9 +366,15 @@ function questiondisplay() {
 //====================================================================CHOICE ENABLE/DISABLE==============================================================//
 function enablechoices() {
     for (i = 0; i < 9; i++) {
-        if (!quesArr[i]) { continue; }
+        if (!quesArr[i] || !choiceCoverArr[i]) { continue; }
+        choiceCoverArr[i].visible = true;
+        choiceCoverArr[i].alpha = 1;
+        choiceCoverArr[i].mouseEnabled = false;
+        choiceCoverArr[i].cursor = "default";
+        choiceCoverArr[i].__choiceIndex = i;
+        choiceCoverArr[i].__image = quesArr[i];
         quesArr[i].visible = true;
-        quesArr[i].alpha = 1;
+        quesArr[i].alpha = 0;
         quesArr[i].mouseEnabled = false;
         quesArr[i].cursor = "default";
         quesArr[i].__choiceIndex = i;
@@ -348,16 +389,16 @@ function revealChoices() {
     createjs.Tween.get(question).wait(600)
         .to({ alpha: 1 }, 600)
 
-    animateChoiceOptions(quesArr, AddListenerFn);
+    animateChoiceOptions(choiceCoverArr, AddListenerFn);
 
 }
 function AddListenerFn() {
 
     for (i = 0; i < 9; i++) {
-        if (!quesArr[i]) { continue; }
-        quesArr[i].mouseEnabled = true;
-        quesArr[i].cursor = "pointer";
-        quesArr[i].addEventListener("click", answerSelected)
+        if (!choiceCoverArr[i]) { continue; }
+        choiceCoverArr[i].mouseEnabled = true;
+        choiceCoverArr[i].cursor = "pointer";
+        choiceCoverArr[i].addEventListener("click", answerSelected)
     }
     rst = 0;
     gameResponseTimerStart();
@@ -367,11 +408,17 @@ function AddListenerFn() {
 
 function disablechoices() {
     for (i = 0; i < 9; i++) {
-        if (!quesArr[i]) { continue; }
-        quesArr[i].removeEventListener("click", answerSelected)
-        quesArr[i].visible = false;
-        quesArr[i].cursor = "default";
-        quesArr[i].mouseEnabled = false
+        if (choiceCoverArr[i]) {
+            choiceCoverArr[i].removeEventListener("click", answerSelected)
+            choiceCoverArr[i].visible = false;
+            choiceCoverArr[i].cursor = "default";
+            choiceCoverArr[i].mouseEnabled = false
+        }
+        if (quesArr[i]) {
+            quesArr[i].visible = false;
+            quesArr[i].cursor = "default";
+            quesArr[i].mouseEnabled = false
+        }
     }
     question.visible = false
 
@@ -475,6 +522,11 @@ function stopChoicePulse(tile) {
 }
 
 function resetChoiceTweens() {
+    for (i = 0; i < choiceCoverArr.length; i++) {
+        if (choiceCoverArr[i]) {
+            stopChoicePulse(choiceCoverArr[i]);
+        }
+    }
     for (i = 0; i < quesArr.length; i++) {
         if (quesArr[i]) {
             stopChoicePulse(quesArr[i]);
@@ -483,6 +535,11 @@ function resetChoiceTweens() {
 }
 
 function clearChoiceAnimations() {
+    for (i = 0; i < choiceCoverArr.length; i++) {
+        if (choiceCoverArr[i]) {
+            createjs.Tween.removeTweens(choiceCoverArr[i]);
+        }
+    }
     for (i = 0; i < quesArr.length; i++) {
         if (quesArr[i]) {
             createjs.Tween.removeTweens(quesArr[i]);
@@ -502,13 +559,19 @@ function onRoll_out(e) {
 function answerSelected(e) {
 
     e.preventDefault();
-    uans = e.currentTarget.name;
+    var target = e.currentTarget;
+    var revealTile = target.__image || null;
+    if (revealTile) {
+        revealTile.alpha = 1;
+        revealTile.visible = true;
+    }
+    uans = target.name;
 
     gameResponseTimerStop();
     // pauseTimer();
     if (ans == uans) {
 
-        e.currentTarget.visible = true;
+        target.visible = true;
         disableMouse()
 
         correct()
@@ -529,6 +592,9 @@ function disableMouse() {
     for (i = 0; i < 9; i++) {
 
         quesArr[i].mouseEnabled = false
+        if (choiceCoverArr[i]) {
+            choiceCoverArr[i].mouseEnabled = false;
+        }
     }
 }
 
