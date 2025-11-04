@@ -14,6 +14,182 @@ var introbtnx2 = [661, 875, 800, 531, 441]
 var introbtny2 = [260, 430, 650, 650, 430]
 var color = "black", line1
 var startValX, startValY, startValX1, startValY1, startValX2, startValY2
+var introPromptLabel;
+var SPOTME_INTRO_BOARD_SCALE = typeof SPOTME_BOARD_SCALE === "number" ? SPOTME_BOARD_SCALE : 0.86;
+var SPOTME_INTRO_REFERENCE_SCALE = typeof SPOTME_REFERENCE_SCALE === "number" ? SPOTME_REFERENCE_SCALE : 0.86;
+var SPOTME_INTRO_CHOICE_SCALE = typeof SPOTME_CHOICE_SCALE === "number" ? SPOTME_CHOICE_SCALE : 0.86;
+var SPOTME_INTRO_QUESTION_SCALE = typeof SPOTME_QUESTION_SCALE === "number" ? SPOTME_QUESTION_SCALE : 0.64;
+var SPOTME_INTRO_BOARD_POS = typeof SPOTME_BOARD_BASE_POS === "object" && SPOTME_BOARD_BASE_POS
+    ? { x: SPOTME_BOARD_BASE_POS.x, y: SPOTME_BOARD_BASE_POS.y }
+    : { x: 0, y: 35 };
+
+function introResolveDisplaySize(target) {
+    if (!target) {
+        return { width: 0, height: 0 };
+    }
+
+    if (typeof target.getBounds === "function") {
+        var bounds = target.getBounds();
+        if (bounds) {
+            return { width: bounds.width || 0, height: bounds.height || 0 };
+        }
+    }
+
+    if (target.image) {
+        return {
+            width: target.image.width || 0,
+            height: target.image.height || 0
+        };
+    }
+
+    if (target.spriteSheet) {
+        if (typeof target.spriteSheet.getFrame === "function") {
+            var frame = target.spriteSheet.getFrame(target.currentFrame || 0);
+            if (frame && frame.rect) {
+                return { width: frame.rect.width || 0, height: frame.rect.height || 0 };
+            }
+        }
+
+        if (typeof target.spriteSheet.getFrameBounds === "function") {
+            var rect = target.spriteSheet.getFrameBounds(target.currentFrame || 0);
+            if (rect) {
+                return { width: rect.width || 0, height: rect.height || 0 };
+            }
+        }
+
+        if (target.spriteSheet._frameWidth || target.spriteSheet._frameHeight) {
+            return {
+                width: target.spriteSheet._frameWidth || 0,
+                height: target.spriteSheet._frameHeight || 0
+            };
+        }
+    }
+
+    return { width: 0, height: 0 };
+}
+
+function introApplyScaleMeta(target, scale) {
+    if (!target) {
+        return;
+    }
+
+    var appliedScale = typeof scale === "number" ? scale : 1;
+    target.scaleX = target.scaleY = appliedScale;
+    var size = introResolveDisplaySize(target);
+    target.__introOffsetX = size.width * (1 - appliedScale) / 2;
+    target.__introOffsetY = size.height * (1 - appliedScale) / 2;
+}
+
+function introGetScaledPosition(target, x, y) {
+    return {
+        x: x + (target && target.__introOffsetX ? target.__introOffsetX : 0),
+        y: y + (target && target.__introOffsetY ? target.__introOffsetY : 0)
+    };
+}
+
+function introSetScaledXY(target, x, y) {
+    if (!target) {
+        return;
+    }
+
+    var pos = introGetScaledPosition(target, x, y);
+    target.x = pos.x;
+    target.y = pos.y;
+}
+
+if (typeof SPOTME_PROMPT_OBSERVE === "undefined") {
+    var SPOTME_PROMPT_OBSERVE = "Observe the reference baskets carefully.";
+}
+if (typeof SPOTME_PROMPT_SELECT === "undefined") {
+    var SPOTME_PROMPT_SELECT = "Select the basket with the odd object.";
+}
+
+function ensureIntroPromptLabel(copy) {
+    if (!container || !container.parent) {
+        return null;
+    }
+
+    if (!introPromptLabel || !introPromptLabel.parent) {
+        var baseX = typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.x === "number"
+            ? QusTxtString.x
+            : (typeof getCanvasCenterX === "function" ? getCanvasCenterX() : 640);
+        var baseY = typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.y === "number"
+            ? QusTxtString.y
+            : (typeof INTRO_PROMPT_Y === "number" ? INTRO_PROMPT_Y - 55 : 155);
+
+        if (introPromptLabel && introPromptLabel.__labelBG && typeof introPromptLabel.__labelBG.destroy === "function") {
+            introPromptLabel.__labelBG.destroy();
+        }
+
+        if (typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.clone === "function") {
+            introPromptLabel = QusTxtString.clone();
+        } else {
+            introPromptLabel = new createjs.Text("", "800 60px 'Baloo 2'", "#F4FAFF");
+            introPromptLabel.textAlign = "center";
+            introPromptLabel.textBaseline = "middle";
+            introPromptLabel.lineWidth = 1000;
+            introPromptLabel.shadow = new createjs.Shadow("rgba(5,12,28,0.5)", 0, 10, 26);
+        }
+
+        introPromptLabel.x = baseX;
+        introPromptLabel.y = baseY;
+        introPromptLabel.alpha = 1;
+        introPromptLabel.visible = true;
+        container.parent.addChild(introPromptLabel);
+
+        if (typeof SAUI_attachQuestionLabelBG === "function") {
+            introPromptLabel.__labelBG = SAUI_attachQuestionLabelBG(introPromptLabel, container.parent, {
+                padX: 20,
+                padY: 12,
+                fill: "rgba(0,0,0,0.3)",
+                stroke: "rgba(255,255,255,0.14)",
+                strokeW: 2,
+                maxRadius: 22
+            });
+        }
+    }
+
+    if (typeof copy !== "undefined") {
+        updateIntroPromptLabel(copy);
+    }
+
+    return introPromptLabel;
+}
+
+function updateIntroPromptLabel(copy) {
+    if (!introPromptLabel) {
+        return;
+    }
+
+    var textValue = typeof copy === "string" ? copy : copy === "" ? "" : introPromptLabel.text;
+    introPromptLabel.text = textValue || "";
+    introPromptLabel.visible = !!textValue;
+
+    if (introPromptLabel.__labelBG && typeof introPromptLabel.__labelBG.update === "function") {
+        introPromptLabel.__labelBG.update();
+    }
+}
+
+function disposeIntroPromptLabel() {
+    if (!introPromptLabel) {
+        return;
+    }
+
+    if (introPromptLabel.__labelBG) {
+        if (typeof introPromptLabel.__labelBG.destroy === "function") {
+            introPromptLabel.__labelBG.destroy();
+        } else if (introPromptLabel.__labelBG.parent) {
+            introPromptLabel.__labelBG.parent.removeChild(introPromptLabel.__labelBG);
+        }
+        introPromptLabel.__labelBG = null;
+    }
+
+    if (introPromptLabel.parent) {
+        introPromptLabel.parent.removeChild(introPromptLabel);
+    }
+
+    introPromptLabel = null;
+}
 function commongameintro() {
     startValX = 480, startValY = 400
     startValX1 = 640, startValY1 = 340
@@ -21,7 +197,6 @@ function commongameintro() {
     introArrow = arrow1.clone();
     introfingure = fingure.clone();
     introTitle = Title.clone();
-    introQuestionText = questionText.clone();
     introHolder = chHolder.clone();
     introquestion = question.clone()
     for (i = 0; i < 5; i++) {
@@ -33,16 +208,18 @@ function commongameintro() {
     introTitle.visible = true
     container.parent.addChild(introHolder)
     introHolder.visible = false
-    container.parent.addChild(introQuestionText)
-    introQuestionText.visible = true
-    introQuestionText.x = 380
-    introQuestionText.y = 100
+    introApplyScaleMeta(introHolder, SPOTME_INTRO_BOARD_SCALE);
+    introSetScaledXY(introHolder, SPOTME_INTRO_BOARD_POS.x, SPOTME_INTRO_BOARD_POS.y);
+    ensureIntroPromptLabel(SPOTME_PROMPT_OBSERVE);
+    if (introPromptLabel) {
+        introPromptLabel.alpha = 0;
+        introPromptLabel.visible = true;
+    }
 
-
-    /////////////////////////////////////////////////////choice//////////////////////  
+    /////////////////////////////////////////////////////choice//////////////////////
     for (i = 0; i < 5; i++) {
-        introchoiceArr[i].x = introbtnx2[i];
-        introchoiceArr[i].y = introbtny2[i];
+        introApplyScaleMeta(introchoiceArr[i], SPOTME_INTRO_CHOICE_SCALE);
+        introSetScaledXY(introchoiceArr[i], introbtnx2[i], introbtny2[i]);
         container.parent.addChild(introchoiceArr[i]);
         introchoiceArr[i].visible = false;
         introchoiceArr[i].gotoAndStop(i)
@@ -51,56 +228,72 @@ function commongameintro() {
     container.parent.addChild(introquestion)
     introquestion.visible = false
     introquestion.gotoAndStop(19)
-    introquestion.x = 465
-    introquestion.y = 330
-    introquestion.scaleX = introquestion.scaleY = .7
+    introApplyScaleMeta(introquestion, SPOTME_INTRO_QUESTION_SCALE);
+    introSetScaledXY(introquestion, 465, 330);
 
     for (i = 0; i < 5; i++) {
         container.parent.addChild(introquesArr[i]);
         introquesArr[i].visible = false;
-        introquesArr[i].x = introsX[i];
-        introquesArr[i].y = introsY[i];
-        introquesArr[i].scaleX = introquesArr[i].scaleY = .8
+        introApplyScaleMeta(introquesArr[i], SPOTME_INTRO_REFERENCE_SCALE);
+        introSetScaledXY(introquesArr[i], introsX[i], introsY[i]);
     }
-    ////////////////////////////////////////////////Line///////////////////////////////////////// 
+    ////////////////////////////////////////////////Line/////////////////////////////////////////
     line1 = new createjs.Shape();
     container.parent.addChild(line1)
     line1.graphics.setStrokeStyle(5);
     line1.graphics.beginStroke(color);
     line1.visible = true
-    /////////////////////////////////////////////////////questiontext and holder anim////////////////////// 
-    introQuestionText.alpha = 0
-    createjs.Tween.get(introQuestionText).wait(500).to({ alpha: 1 }, 500, createjs.Ease.bounceOut).call(handleComplete1_1)
+    /////////////////////////////////////////////////////questiontext and holder anim//////////////////////
+    if (introPromptLabel) {
+        updateIntroPromptLabel(SPOTME_PROMPT_OBSERVE);
+        createjs.Tween.get(introPromptLabel)
+            .wait(500)
+            .to({ alpha: 1 }, 500, createjs.Ease.bounceOut)
+            .call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 }
 
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
     quesTween()
 }
-function quesTween() {   // 
-    introHolder.x = -1700;
+function quesTween() {   //
+    introSetScaledXY(introHolder, SPOTME_INTRO_BOARD_POS.x - 1700, SPOTME_INTRO_BOARD_POS.y);
     introHolder.visible = true
+    var boardTarget = introGetScaledPosition(introHolder, SPOTME_INTRO_BOARD_POS.x, SPOTME_INTRO_BOARD_POS.y);
     createjs.Tween.get(introHolder).
-        to({ x: 0, y: introHolder.y }, 500, createjs.Ease.bounceIn);
+        to({ x: boardTarget.x, y: boardTarget.y }, 500, createjs.Ease.bounceIn);
 
     var introtempVal2 = 500
     var introRand = [3, 1, 2, 4, 0]
     for (i = 0; i < 5; i++) {
         introquesArr[introRand[i]].visible = true;
         introquesArr[introRand[i]].alpha = 0
-        createjs.Tween.get(introquesArr[introRand[i]]).wait(introtempVal2).to({ alpha: 1 }, introtempVal2);
+        var introReferenceTarget = introGetScaledPosition(introquesArr[introRand[i]], introsX[introRand[i]], introsY[introRand[i]]);
+        createjs.Tween.get(introquesArr[introRand[i]]).set({ x: introReferenceTarget.x, y: introReferenceTarget.y })
+            .wait(introtempVal2).to({ alpha: 1 }, introtempVal2);
         introtempVal2 += 200;
     }
 
     introquestion.visible = true
     introquestion.alpha = 0
-    createjs.Tween.get(introquestion).wait(3000).to({ y: introquestion.y, alpha: 1 }, 500).to({ y: introquestion.y + 83 }, 1000, createjs.Ease.bounceOut).wait(500).call(handleComplete2_1);
+    var introQuestionTarget = introGetScaledPosition(introquestion, 465, 330);
+    createjs.Tween.get(introquestion)
+        .set({ x: introQuestionTarget.x, y: introQuestionTarget.y })
+        .wait(2500).to({ alpha: 1 }, 500)
+        .to({ y: introQuestionTarget.y + 73 }, 1000, createjs.Ease.bounceOut)
+        .wait(500).call(handleComplete2_1);
 
-    var introtempVal1 = 1500;
+    var introtempVal1 = 1400;
     for (i = 0; i < 5; i++) {
         introchoiceArr[introRand[i]].visible = true
         introchoiceArr[introRand[i]].alpha = 0
-        createjs.Tween.get(introchoiceArr[introRand[i]]).wait(introtempVal1).to({ x: introbtnx[introRand[i]], y: introbtny[introRand[i]], alpha: 1 }, 500, createjs.Ease.bounceOut).wait(500);
+        var introChoiceTarget = introGetScaledPosition(introchoiceArr[introRand[i]], introbtnx[introRand[i]], introbtny[introRand[i]]);
+        createjs.Tween.get(introchoiceArr[introRand[i]]).wait(introtempVal1)
+            .to({ x: introChoiceTarget.x, y: introChoiceTarget.y, alpha: 1 }, 500, createjs.Ease.bounceOut)
+            .wait(500);
         introtempVal1 += 200;
     }
 }
@@ -118,19 +311,32 @@ function introPosChange() {
         removeGameIntro()
     } else {
         createjs.Ticker.addEventListener("tick", lineTween);
-        createjs.Tween.get(introquesArr[0]).to({ x: introsX[2], y: introsY[2] }, 500).wait(500);
-        createjs.Tween.get(introquesArr[1]).to({ x: introsX[1], y: introsY[1] }, 500).wait(500);
-        createjs.Tween.get(introquesArr[2]).to({ x: introsX[3], y: introsY[3] }, 500).wait(500);
-        createjs.Tween.get(introquesArr[3]).to({ x: introsX[4], y: introsY[4] }, 500).wait(500);
-        createjs.Tween.get(introquesArr[4]).to({ x: introsX[0], y: introsY[0] }, 500).wait(500).call(introPosChange1);
+        var firstTarget = introGetScaledPosition(introquesArr[0], introsX[2], introsY[2]);
+        createjs.Tween.get(introquesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 500).wait(500);
+        var secondTarget = introGetScaledPosition(introquesArr[1], introsX[1], introsY[1]);
+        createjs.Tween.get(introquesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 500).wait(500);
+        var thirdTarget = introGetScaledPosition(introquesArr[2], introsX[4], introsY[4]);
+        createjs.Tween.get(introquesArr[2]).to({ x: thirdTarget.x, y: thirdTarget.y }, 500).wait(500);
+        var fourthTarget = introGetScaledPosition(introquesArr[3], introsX[0], introsY[0]);
+        createjs.Tween.get(introquesArr[3]).to({ x: fourthTarget.x, y: fourthTarget.y }, 500).wait(500);
+        var fifthTarget = introGetScaledPosition(introquesArr[4], introsX[3], introsY[3]);
+        createjs.Tween.get(introquesArr[4]).to({ x: fifthTarget.x, y: fifthTarget.y }, 500).wait(500).call(introPosChange1);
     }
 }
 function introPosChange1() {
     if (stopValue == 0) {
         removeGameIntro()
     } else {
-        createjs.Tween.get(introquesArr[0]).to({ x: introsX[0], y: introsY[0] }, 600).wait(600);
-        createjs.Tween.get(introquesArr[4]).to({ x: introsX[2], y: introsY[2] }, 600).wait(600).call(introPosChange2);
+        var firstTarget = introGetScaledPosition(introquesArr[0], introsX[0], introsY[0]);
+        createjs.Tween.get(introquesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 600).wait(600);
+        var secondTarget = introGetScaledPosition(introquesArr[1], introsX[1], introsY[1]);
+        createjs.Tween.get(introquesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 600).wait(600);
+        var thirdTarget = introGetScaledPosition(introquesArr[2], introsX[2], introsY[2]);
+        createjs.Tween.get(introquesArr[2]).to({ x: thirdTarget.x, y: thirdTarget.y }, 600).wait(600);
+        var fourthTarget = introGetScaledPosition(introquesArr[3], introsX[4], introsY[4]);
+        createjs.Tween.get(introquesArr[3]).to({ x: fourthTarget.x, y: fourthTarget.y }, 600).wait(600);
+        var fifthTarget = introGetScaledPosition(introquesArr[4], introsX[3], introsY[3]);
+        createjs.Tween.get(introquesArr[4]).to({ x: fifthTarget.x, y: fifthTarget.y }, 600).wait(600).call(introPosChange2);
     }
 }
 
@@ -138,11 +344,16 @@ function introPosChange2() {
     if (stopValue == 0) {
         removeGameIntro()
     } else {
-        createjs.Tween.get(introquesArr[0]).to({ x: introsX[0], y: introsY[0] }, 500).wait(400);
-        createjs.Tween.get(introquesArr[1]).to({ x: introsX[4], y: introsY[4] }, 500).wait(400);
-        createjs.Tween.get(introquesArr[2]).to({ x: introsX[1], y: introsY[1] }, 500).wait(400);
-        createjs.Tween.get(introquesArr[3]).to({ x: introsX[2], y: introsY[2] }, 500).wait(400);
-        createjs.Tween.get(introquesArr[4]).to({ x: introsX[3], y: introsY[3] }, 500).wait(400).call(handleComplete3_1);
+        var firstTarget = introGetScaledPosition(introquesArr[0], introsX[0], introsY[0]);
+        createjs.Tween.get(introquesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 500).wait(400);
+        var secondTarget = introGetScaledPosition(introquesArr[1], introsX[4], introsY[4]);
+        createjs.Tween.get(introquesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 500).wait(400);
+        var thirdTarget = introGetScaledPosition(introquesArr[2], introsX[1], introsY[1]);
+        createjs.Tween.get(introquesArr[2]).to({ x: thirdTarget.x, y: thirdTarget.y }, 500).wait(400);
+        var fourthTarget = introGetScaledPosition(introquesArr[3], introsX[2], introsY[2]);
+        createjs.Tween.get(introquesArr[3]).to({ x: fourthTarget.x, y: fourthTarget.y }, 500).wait(400);
+        var fifthTarget = introGetScaledPosition(introquesArr[4], introsX[3], introsY[3]);
+        createjs.Tween.get(introquesArr[4]).to({ x: fifthTarget.x, y: fifthTarget.y }, 500).wait(400).call(handleComplete3_1);
     }
 }
 function handleComplete3_1() {
@@ -154,8 +365,15 @@ function handleComplete3_1() {
     }
 }
 function questionTextTween() {
-    introQuestionText.gotoAndStop(1)
-    createjs.Tween.get(introQuestionText).wait(200).to({ alpha: 1 }, 200).call(handleComplete4_1);
+    ensureIntroPromptLabel(SPOTME_PROMPT_SELECT);
+    if (introPromptLabel) {
+        introPromptLabel.alpha = 0;
+        updateIntroPromptLabel(SPOTME_PROMPT_SELECT);
+        introPromptLabel.visible = true;
+        createjs.Tween.get(introPromptLabel).wait(200).to({ alpha: 1 }, 200).call(handleComplete4_1);
+    } else {
+        handleComplete4_1();
+    }
 }
 function handleComplete4_1() {
     if (stopValue == 0) {
@@ -198,18 +416,16 @@ function lineTween() {
                         line1.graphics.beginStroke(color);
                         line1.visible = true
                         line1.graphics.moveTo(startValX1, startValY1);
-                        startValX1 += 5;
+                        line1.graphics.lineTo(startValX1, startValY1);
                         startValY1 += 10;
                         line1.graphics.lineTo(startValX1, startValY1);
                         line1.graphics.endStroke();
-
                     }
-
                 } else {
                     line1.graphics.beginStroke(color);
                     line1.visible = true
                     line1.graphics.moveTo(startValX, startValY);
-                    startValY -= 3.5;
+                    startValY -= 5;
                     startValX += 10;
                     line1.graphics.lineTo(startValX, startValY);
                     line1.graphics.endStroke();
@@ -222,8 +438,9 @@ function lineTween() {
 }
 function setArrowTween() {
     introquestion.visible = true
-    introquestion.x = 523
-    introquestion.y = 615
+    var introQuestionSelectTarget = introGetScaledPosition(introquestion, 795, 440);
+    introquestion.x = introQuestionSelectTarget.x;
+    introquestion.y = introQuestionSelectTarget.y;
     if (stopValue == 0) {
         removeGameIntro()
 
@@ -340,8 +557,7 @@ function removeGameIntro() {
     introHolder.visible = false
     container.parent.removeChild(introquestion)
     introquestion.visible = false
-    container.parent.removeChild(introQuestionText)
-    introQuestionText.visible = false
+    disposeIntroPromptLabel()
     container.parent.removeChild(line1)
     line1.visible = false
     for (i = 0; i < 5; i++) {
