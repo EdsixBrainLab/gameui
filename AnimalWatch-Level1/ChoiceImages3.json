@@ -1,0 +1,91 @@
+﻿{"frames": [
+
+{
+	"filename": "ch03n instance 10000",
+	"frame": {"x":0,"y":0,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10001",
+	"frame": {"x":255,"y":0,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10002",
+	"frame": {"x":510,"y":0,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10003",
+	"frame": {"x":765,"y":0,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10004",
+	"frame": {"x":0,"y":256,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10005",
+	"frame": {"x":255,"y":256,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10006",
+	"frame": {"x":510,"y":256,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10007",
+	"frame": {"x":765,"y":256,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10008",
+	"frame": {"x":0,"y":512,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}
+,{
+	"filename": "ch03n instance 10009",
+	"frame": {"x":255,"y":512,"w":255,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":255,"h":256},
+	"sourceSize": {"w":255,"h":256}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "ChoiceImages3.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":1024},
+	"scale": "1"
+}
+}

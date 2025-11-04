@@ -1,0 +1,91 @@
+﻿{"frames": [
+
+{
+	"filename": "anidisplay instance 10000",
+	"frame": {"x":0,"y":0,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10001",
+	"frame": {"x":1014,"y":0,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10002",
+	"frame": {"x":0,"y":401,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10003",
+	"frame": {"x":1014,"y":401,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10004",
+	"frame": {"x":0,"y":802,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10005",
+	"frame": {"x":1014,"y":802,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10006",
+	"frame": {"x":0,"y":1203,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10007",
+	"frame": {"x":1014,"y":1203,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10008",
+	"frame": {"x":0,"y":1604,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}
+,{
+	"filename": "anidisplay instance 10009",
+	"frame": {"x":1014,"y":1604,"w":1014,"h":401},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1014,"h":401},
+	"sourceSize": {"w":1014,"h":401}
+}],
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "question.png",
+	"format": "RGBA8888",
+	"size": {"w":2048,"h":2048},
+	"scale": "1"
+}
+}
