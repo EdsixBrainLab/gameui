@@ -1,9 +1,8 @@
-var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
+var introQues1, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
 var introChoice1TweenArr = []
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introQuestxtX = 410; introQuestxtY = 120;
 var introQues1X = 100, introQues1Y = 300
 var introChoice1X = 170, introChoice1Y = -550;
 var introChoice2X = 565, introChoice2Y = -550;
@@ -18,7 +17,6 @@ function commongameintro() {
     introChoice1 = choice1.clone()
     introChoice2 = choice2.clone()
     introChoice3 = choice3.clone()
-    introQuestxt = questiontext.clone();
     introDummyHolder = holder.clone()
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
@@ -26,13 +24,7 @@ function commongameintro() {
     container.parent.addChild(introTitle)
     introTitle.visible = true;
 
-    container.parent.addChild(introQuestxt)
-    introQuestxt.x = introQuestxtX;
-    introQuestxt.y = introQuestxtY;
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(0);
-
-
+    showQuestionPrompt(ANIMALWATCH_PROMPT_OBSERVE, { duration: 1000, onComplete: handleComplete1_1 });
     container.parent.addChild(introQues1)
     introQues1.x = introQues1X;
     introQues1.y = introQues1Y;
@@ -62,10 +54,6 @@ function commongameintro() {
     introChoice3.y = introChoice3Y;
     introChoice3.gotoAndStop(0)
 
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
-
-
 }
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
@@ -83,15 +71,11 @@ function quesTween() {
 
 }
 function handleComplete2_1() {
-    introQuestxt.visible = false;
     introQues1.visible = false;
     choiceTween()
 }
 function choiceTween() {
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(1)
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000);
+    showQuestionPrompt(getScenarioQuestionText(0), { duration: 1000 });
     var tempVal = 1500
     for (i = 3; i >= 1; i--) {
         this["introChoice" + i].visible = true;
@@ -235,8 +219,6 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(introQues1)
     introQues1.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
     container.parent.removeChild(introChoice1)
     introChoice1.visible = false
     container.parent.removeChild(introChoice2)
@@ -245,6 +227,7 @@ function removeGameIntro() {
     introChoice3.visible = false
     container.parent.removeChild(introDummyHolder)
     introDummyHolder.visible = false
+    hideQuestionPrompt();
     // container.parent.removeChild(introHolder)
     // introHolder.visible = false;
     if (highlightTweenArr[0]) {
