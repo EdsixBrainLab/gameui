@@ -27,6 +27,11 @@ var qText;
 var cappos = 0;
 var SPOTME_PROMPT_OBSERVE = "Observe the reference baskets carefully.";
 var SPOTME_PROMPT_SELECT = "Select the basket with the odd object.";
+var SPOTME_BOARD_SCALE = 0.86;
+var SPOTME_REFERENCE_SCALE = 0.86;
+var SPOTME_CHOICE_SCALE = 0.86;
+var SPOTME_QUESTION_SCALE = 0.64;
+var SPOTME_BOARD_BASE_POS = { x: 0, y: 35 };
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 var choiceChange1 = []
@@ -112,6 +117,78 @@ function stopChoiceIdleTween(target) {
     target.__idleTween = null;
 }
 
+function resolveDisplaySize(target) {
+    if (!target) {
+        return { width: 0, height: 0 };
+    }
+    if (typeof target.getBounds === "function") {
+        var bounds = target.getBounds();
+        if (bounds) {
+            return { width: bounds.width || 0, height: bounds.height || 0 };
+        }
+    }
+    if (target.image) {
+        return {
+            width: (target.image.width || 0),
+            height: (target.image.height || 0)
+        };
+    }
+    if (target.spriteSheet && typeof target.spriteSheet.getFrame === "function") {
+        var frame = target.spriteSheet.getFrame(target.currentFrame || 0);
+        if (frame && frame.rect) {
+            return { width: frame.rect.width || 0, height: frame.rect.height || 0 };
+        }
+    }
+    if (target.spriteSheet && typeof target.spriteSheet.getFrameBounds === "function") {
+        var rect = target.spriteSheet.getFrameBounds(target.currentFrame || 0);
+        if (rect) {
+            return { width: rect.width || 0, height: rect.height || 0 };
+        }
+    }
+    if (target.spriteSheet && target.spriteSheet._frameWidth && target.spriteSheet._frameHeight) {
+        return {
+            width: target.spriteSheet._frameWidth || 0,
+            height: target.spriteSheet._frameHeight || 0
+        };
+    }
+    return { width: 0, height: 0 };
+}
+
+function applyScaleMeta(target, scale) {
+    if (!target) {
+        return;
+    }
+    var appliedScale = typeof scale === "number" ? scale : 1;
+    target.scaleX = target.scaleY = appliedScale;
+    var size = resolveDisplaySize(target);
+    target.__scaleOffsetX = size.width * (1 - appliedScale) / 2;
+    target.__scaleOffsetY = size.height * (1 - appliedScale) / 2;
+    target.__baseScale = appliedScale;
+}
+
+function getScaledOffsetX(target) {
+    return target && target.__scaleOffsetX ? target.__scaleOffsetX : 0;
+}
+
+function getScaledOffsetY(target) {
+    return target && target.__scaleOffsetY ? target.__scaleOffsetY : 0;
+}
+
+function setScaledXY(target, x, y) {
+    if (!target) {
+        return;
+    }
+    target.x = x + getScaledOffsetX(target);
+    target.y = y + getScaledOffsetY(target);
+}
+
+function getScaledPosition(target, x, y) {
+    return {
+        x: x + getScaledOffsetX(target),
+        y: y + getScaledOffsetY(target)
+    };
+}
+
 //register key functions
 ///////////////////////////////////////////////////////////////////
 window.onload = function (e) {
@@ -165,12 +242,14 @@ function doneLoading1(event) {
         chHolder = new createjs.Bitmap(preload.getResult('chHolder'));
         container.parent.addChild(chHolder);
         chHolder.visible = false;
+        applyScaleMeta(chHolder, SPOTME_BOARD_SCALE);
 
     }
     if (id == "choice1") {
         choice1 = new createjs.Bitmap(preload.getResult('choice1'));
         container.parent.addChild(choice1);
         choice1.visible = false;
+        applyScaleMeta(choice1, SPOTME_REFERENCE_SCALE);
     }
     if (id == "dummy") {
 
@@ -184,6 +263,7 @@ function doneLoading1(event) {
         dummy = new createjs.Sprite(spriteSheet1);
         container.parent.addChild(dummy);
         dummy.visible = false;
+        applyScaleMeta(dummy, SPOTME_CHOICE_SCALE);
     }
     if (id == "question") {
         var spriteSheet1 = new createjs.SpriteSheet({
@@ -196,6 +276,7 @@ function doneLoading1(event) {
         question = new createjs.Sprite(spriteSheet1);
         question.visible = false;
         container.parent.addChild(question);
+        applyScaleMeta(question, SPOTME_QUESTION_SCALE);
 
     };
 
@@ -230,15 +311,14 @@ function CreateGameElements() {
 
     choice1.visible = false;
     question.visible = false;
-    question.scaleX = question.scaleY = .7;
 
     hideQuestionPrompt();
 
     for (i = 0; i < 4; i++) {
         dummyArr[i] = dummy.clone()
         dummyArr[i].name = i;
-        dummyArr[i].x = btnx[i];
-        dummyArr[i].y = btny[i];
+        applyScaleMeta(dummyArr[i], SPOTME_CHOICE_SCALE);
+        setScaledXY(dummyArr[i], btnx[i], btny[i]);
         container.parent.addChild(dummyArr[i]);
         dummyArr[i].visible = false;
         dummyArr[i].gotoAndStop(i)
@@ -249,14 +329,14 @@ function CreateGameElements() {
         quesArr[i] = choice1.clone();
         container.parent.addChild(quesArr[i]);
         quesArr[i].visible = false;
-        quesArr[i].x = sX[i];
-        quesArr[i].y = sY[i];
+        applyScaleMeta(quesArr[i], SPOTME_REFERENCE_SCALE);
+        setScaledXY(quesArr[i], sX[i], sY[i]);
         // quesArr[i].gotoAndStop(83);
     }
 
 
+    setScaledXY(chHolder, SPOTME_BOARD_BASE_POS.x, SPOTME_BOARD_BASE_POS.y);
     chHolder.visible = false;
-    chHolder.y = 35;
     qno2 = between(0, 32);
     if (isQuestionAllVariations) {
         // createGameWiseQuestions()
@@ -306,19 +386,16 @@ function pickques() {
     }
 
     for (i = 0; i < 2; i++) {
-        quesArr[i].x = sX[choiceChange1[i]];
-        quesArr[i].y = sY[choiceChange1[i]];
+        setScaledXY(quesArr[i], sX[choiceChange1[i]], sY[choiceChange1[i]]);
         quesArr[i].visible = false;
     }
     question.gotoAndStop(qno2[cnt]);
-    question.x = sX1[choiceChange1[0]];
-    question.y = sY1[choiceChange1[0]];
+    setScaledXY(question, sX1[choiceChange1[0]], sY1[choiceChange1[0]]);
     question.visible = false;
     //
 
     for (i = 0; i < 4; i++) {
-        dummyArr[i].x = btnx2[i]
-        dummyArr[i].y = btny2[i]
+        setScaledXY(dummyArr[i], btnx2[i], btny2[i])
     }
     qno[cnt] = choiceChange[cnt];
 
@@ -328,30 +405,36 @@ function pickques() {
 function CreateTween() {
     fadeInQuestionPrompt(SPOTME_PROMPT_OBSERVE);
 
-    chHolder.x = -1700;
-    chHolder.visible = true
-    createjs.Tween.get(chHolder).wait(200).
-        to({ x: 0, y: chHolder.y }, 500, createjs.Ease.bounceIn);
+    setScaledXY(chHolder, SPOTME_BOARD_BASE_POS.x - 1700, SPOTME_BOARD_BASE_POS.y);
+    chHolder.visible = true;
+    var boardTarget = getScaledPosition(chHolder, SPOTME_BOARD_BASE_POS.x, SPOTME_BOARD_BASE_POS.y);
+    createjs.Tween.get(chHolder).wait(200)
+        .to(boardTarget, 500, createjs.Ease.bounceIn);
 
-    var tempVal2 = 500
-    var rand = between(0, 1)
+    var tempVal2 = 500;
+    var rand = between(0, 1);
     for (i = 0; i < 2; i++) {
         quesArr[rand[i]].visible = true;
-        quesArr[rand[i]].alpha = 0
+        quesArr[rand[i]].alpha = 0;
         createjs.Tween.get(quesArr[rand[i]]).wait(tempVal2).to({ alpha: 1 }, tempVal2);
         tempVal2 += 200;
     }
 
-    question.visible = true
-    question.alpha = 0
-    createjs.Tween.get(question).wait(3000).to({ y: sY1[choiceChange1[0]], alpha: 1 }, 500).to({ y: sY1[choiceChange1[0]] + 80 }, 1000, createjs.Ease.bounceOut).wait(500).call(changechoice1);
+    question.visible = true;
+    question.alpha = 0;
+    var questionAnchor = getScaledPosition(question, sX1[choiceChange1[0]], sY1[choiceChange1[0]]);
+    createjs.Tween.get(question).wait(3000)
+        .to({ x: questionAnchor.x, y: questionAnchor.y, alpha: 1 }, 500)
+        .to({ y: questionAnchor.y + 80 }, 1000, createjs.Ease.bounceOut)
+        .wait(500).call(changechoice1);
 
     var tempVal1 = 1400;
-    var rand1 = between(0, 3)
+    var rand1 = between(0, 3);
     for (i = 0; i < 4; i++) {
-        dummyArr[rand1[i]].visible = true
-        dummyArr[rand1[i]].alpha = 0
-        createjs.Tween.get(dummyArr[rand1[i]]).wait(tempVal1).to({ x: btnx[rand1[i]], y: btny[rand1[i]], alpha: 1 }, 500, createjs.Ease.bounceOut).wait(500);
+        dummyArr[rand1[i]].visible = true;
+        dummyArr[rand1[i]].alpha = 0;
+        var choiceTarget = getScaledPosition(dummyArr[rand1[i]], btnx[rand1[i]], btny[rand1[i]]);
+        createjs.Tween.get(dummyArr[rand1[i]]).wait(tempVal1).to({ x: choiceTarget.x, y: choiceTarget.y, alpha: 1 }, 500, createjs.Ease.bounceOut).wait(500);
         tempVal1 += 200;
     }
 }
@@ -461,12 +544,16 @@ function changechoice1() {
 /////////////////////////////////////////////////////////////////////////
 
 function changeoption11() {
-    createjs.Tween.get(quesArr[0]).to({ x: sX[shuffleArr1[0]], y: sY[shuffleArr1[0]] }, 300).wait(300);
-    createjs.Tween.get(quesArr[1]).to({ x: sX[shuffleArr2[0]], y: sY[shuffleArr2[0]] }, 300).wait(300).call(changeoption12);
+    var firstTarget = getScaledPosition(quesArr[0], sX[shuffleArr1[0]], sY[shuffleArr1[0]]);
+    createjs.Tween.get(quesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 300).wait(300);
+    var secondTarget = getScaledPosition(quesArr[1], sX[shuffleArr2[0]], sY[shuffleArr2[0]]);
+    createjs.Tween.get(quesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 300).wait(300).call(changeoption12);
 }
 function changeoption12() {
-    createjs.Tween.get(quesArr[0]).to({ x: sX[shuffleArr1[1]], y: sY[shuffleArr1[1]] }, 500).wait(400);
-    createjs.Tween.get(quesArr[1]).to({ x: sX[shuffleArr2[1]], y: sY[shuffleArr2[1]] }, 500).wait(400).call(AddListenerFn);
+    var firstTarget = getScaledPosition(quesArr[0], sX[shuffleArr1[1]], sY[shuffleArr1[1]]);
+    createjs.Tween.get(quesArr[0]).to({ x: firstTarget.x, y: firstTarget.y }, 500).wait(400);
+    var secondTarget = getScaledPosition(quesArr[1], sX[shuffleArr2[1]], sY[shuffleArr2[1]]);
+    createjs.Tween.get(quesArr[1]).to({ x: secondTarget.x, y: secondTarget.y }, 500).wait(400).call(AddListenerFn);
 }
 
 ////////////////////////////////////////////////////////////////////////////
