@@ -61,7 +61,7 @@ function commongameintro() {
     introImg.y = 400;
     introImg.x = 650;
 
-    showQuestionPrompt(BALLOON_PROMPT_REMEMBER, { duration: 1000, onComplete: handleComplete1_1 });
+    showQuestionPrompt(getScenarioQuestionText(0), { duration: 1000, onComplete: handleComplete1_1 });
 
 }
 function handleComplete1_1() {
@@ -141,7 +141,7 @@ function createCh() {
             introquesArr[i].visible = false;
         }
         console.log("createCh")
-        showQuestionPrompt(BALLOON_PROMPT_SELECT, { duration: 500 });
+        showQuestionPrompt(getScenarioQuestionText(0), { duration: 500 });
         for (i = 0; i < 3; i++) {
             introchoiceArr[i].visible = true;
             introchoiceArr[i].x = -300;

@@ -127,8 +127,23 @@ var borderPadding = 10, barHeight = 20;
 
 var loadProgressLabel, progresPrecentage, loaderWidth;
 
-var BALLOON_PROMPT_REMEMBER = "Remember the order of the balloons as they float.";
-var BALLOON_PROMPT_SELECT = "Select the balloons in the same order they appeared.";
+var BALLOON_SCENARIO_QUESTIONS = [
+    "Which of these was shown? Ani: Pink rose/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Red rose 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Light Rose 2 / Green Diamond 4 / Blue Gift 4",
+    "Which of these was shown? Ani: Purple rose/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Yellow Gift 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Blue Gift 2 / Green Diamond 4 / Purple Gift 4",
+    "Which of these was shown? Ani: Purple Gift/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Green Diamond 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Red Star 2 / Green Diamond 4 / Purple Gift 4",
+    "Which of these was shown? Ani: Blue Diamond/yellow gift/Red star",
+    "Which of these was not shown? Ani: Purple Rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Yellow Diamond 5 / skyblue gift 3 / pink diamond 2"
+];
 
 ///////////////////////////////////////////////////////////////////
 //register key functions
@@ -214,12 +229,12 @@ function doneLoading1(event) {
         choice1 = new createjs.Sprite(spriteSheet3);
         choice1.visible = false;
         container.parent.addChild(choice1);
-        call_UI_gameQuestion(container, BALLOON_PROMPT_REMEMBER);
+        call_UI_gameQuestion(container, getScenarioQuestionText(0));
         if (QusTxtString) {
             container.parent.addChild(QusTxtString);
             QusTxtString.visible = false;
         }
-        updateQuestionText(BALLOON_PROMPT_REMEMBER);
+        updateQuestionText(getScenarioQuestionText(0));
     }
 
 
@@ -227,6 +242,14 @@ function doneLoading1(event) {
 
 function tick(e) {
     stage.update();
+}
+
+function getScenarioQuestionText(index) {
+    var questionIndex = (typeof index === "number") ? index : 0;
+    if (questionIndex < 0 || questionIndex >= BALLOON_SCENARIO_QUESTIONS.length) {
+        questionIndex = 0;
+    }
+    return BALLOON_SCENARIO_QUESTIONS[questionIndex];
 }
 
 function updateQuestionText(copy) {
@@ -301,7 +324,7 @@ function CreateGameElements() {
         QusTxtString.visible = false;
         QusTxtString.alpha = 0;
     }
-    showQuestionPrompt(BALLOON_PROMPT_REMEMBER, { duration: 500 });
+    hideQuestionPrompt();
 
     for (i = 0; i < choiceCnt; i++) {
         quesArr[i] = question.clone()
@@ -360,7 +383,8 @@ function pickques() {
     //////////////////////////////////////////////////////////////////////////////////////////
     // qno[cnt] = 9;
     console.log(qno[cnt])
-    showQuestionPrompt(BALLOON_PROMPT_REMEMBER, { duration: 300 });
+    var questionText = getScenarioQuestionText(qno[cnt]);
+    showQuestionPrompt(questionText, { duration: 300 });
 
     for (i = 0; i < choiceCnt; i++) {
         pushArr.push(this["questionArr" + qno[cnt]][i])
@@ -463,7 +487,7 @@ function createNewQuestions() {
 
 }
 function createTween() {
-    showQuestionPrompt(BALLOON_PROMPT_SELECT, { duration: 500 });
+    showQuestionPrompt(getScenarioQuestionText(qno[cnt]), { instant: true });
     resetChoiceTweens();
     clearChoiceAnimations();
 

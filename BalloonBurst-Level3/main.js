@@ -125,7 +125,7 @@ var answerArr13 = [14, 13, 9, 11]
 
 //------------------------------------------------------------------------------------------------------------------//
 var cnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 8, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,  quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline,  quesMarkMc, quesHolderMc, resultLoading, preloadMc;
 var mc, mc2, mc3, mc4, mc5, startMc, ch = 0, n = 0, chHolderMc, balloonMc, speed = 15, objCnt = -1, numCnt = 0, clearquesInterval;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -152,6 +152,23 @@ var borderPadding = 10, barHeight = 20;
 
 var loadProgressLabel, progresPrecentage, loaderWidth;
 var introImg
+var BALLOON_SCENARIO_QUESTIONS = [
+    "Which of these was shown? Ani: Pink rose/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Red rose 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Light Rose 2 / Green Diamond 4 / Blue Gift 4",
+    "Which of these was shown? Ani: Purple rose/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Yellow Gift 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Blue Gift 2 / Green Diamond 4 / Purple Gift 4",
+    "Which of these was shown? Ani: Purple Gift/yellow gift/blue diamond",
+    "Which of these was not shown? Ani: purple rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Green Diamond 5 / skyblue gift 3 / pink diamond 2",
+    "Which of these was less in count? Ani: Red Star 2 / Green Diamond 4 / Purple Gift 4",
+    "Which of these was shown? Ani: Blue Diamond/yellow gift/Red star",
+    "Which of these was not shown? Ani: Purple Rose/purple gift/green diamond",
+    "Which of these was more in count? Ani: Yellow Diamond 5 / skyblue gift 3 / pink diamond 2"
+];
 ///////////////////////////////////////////////////////////////////
 //register key functions
 window.onload = function (e) {
@@ -163,6 +180,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -172,9 +190,8 @@ function init() {
     stage.enableMouseOver(40);
     ///////////////////////////////////////////////////////////////=========MANIFEST==========///////////////////////////////////////////////////////////////
 
-    /*Always specify the following terms as given in manifest array. 
+    /*Always specify the following terms as given in manifest array.
          1. choice image name as "ChoiceImages1.png"
-         2. question text image name as "questiontext.png"
      */
 
     assetsPath = "assets/";
@@ -187,10 +204,8 @@ function init() {
            
             { id: "balloon", src: gameAssetsPath + "balloon.png" },
             { id: "question", src: gameAssetsPath + "question.png" },
-            { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },        
-            { id: "questiontext1", src: questionTextPath + "BalloonBurst-Level3-QT1.png" },
-            { id: "questionText", src: questionTextPath + "BalloonBurst-Level3-QT.png" },
-			{ id: "introImg", src: gameAssetsPath + "introImg.png" } 
+            { id: "choice1", src: gameAssetsPath + "ChoiceImages1.png" },
+            { id: "introImg", src: gameAssetsPath + "introImg.png" }
         )
         preloadAllAssets()
         stage.update();
@@ -211,11 +226,6 @@ function doneLoading1(event) {
         container.parent.addChild(balloonMc);
         balloonMc.visible = false;
     }
-    if (id == "questiontext1") {
-        questiontext1 = new createjs.Bitmap(preload.getResult('questiontext1'));
-        container.parent.addChild(questiontext1);
-        questiontext1.visible = false;
-    }
     if (id == "question") {
         var spriteSheet1 = new createjs.SpriteSheet({
             framerate: 30,
@@ -230,20 +240,6 @@ function doneLoading1(event) {
         container.parent.addChild(question);
     };
     //
-
-    if (id == "questionText") {
-        var spriteSheet2 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("questionText")],
-            "frames": { "regX": 50, "height": 84, "count": 0, "regY": 50, "width": 780 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-
-        });
-        questionText = new createjs.Sprite(spriteSheet2);
-        questionText.visible = false;
-        container.parent.addChild(questionText);
-    }
-    //
     if (id == "choice1") {
         var spriteSheet3 = new createjs.SpriteSheet({
             framerate: 30,
@@ -255,13 +251,74 @@ function doneLoading1(event) {
         choice1 = new createjs.Sprite(spriteSheet3);
         choice1.visible = false;
         container.parent.addChild(choice1);
+        call_UI_gameQuestion(container, getScenarioQuestionText(0));
+        if (QusTxtString) {
+            container.parent.addChild(QusTxtString);
+            QusTxtString.visible = false;
+        }
+        updateQuestionText(getScenarioQuestionText(0));
     }
 
-   
+
 }
 
 function tick(e) {
     stage.update();
+}
+
+function getScenarioQuestionText(index) {
+    var questionIndex = (typeof index === "number") ? index : 0;
+    if (questionIndex < 0 || questionIndex >= BALLOON_SCENARIO_QUESTIONS.length) {
+        questionIndex = 0;
+    }
+    return BALLOON_SCENARIO_QUESTIONS[questionIndex];
+}
+
+function updateQuestionText(copy) {
+    if (typeof SAUIX_setQuestionText === "function") {
+        SAUIX_setQuestionText(copy, { textAlign: "center" });
+    } else if (QusTxtString) {
+        QusTxtString.text = copy;
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.update === "function") {
+            QusTxtString.__labelBG.update();
+        }
+    }
+    if (QusTxtString) {
+        QusTxtString.visible = true;
+    }
+}
+
+function showQuestionPrompt(copy, options) {
+    options = options || {};
+    updateQuestionText(copy);
+    var onComplete = typeof options.onComplete === "function" ? options.onComplete : null;
+    if (!QusTxtString) {
+        if (onComplete) { onComplete(); }
+        return;
+    }
+    createjs.Tween.removeTweens(QusTxtString);
+    QusTxtString.visible = true;
+    var instant = !!options.instant;
+    var delay = (typeof options.delay === "number") ? options.delay : 0;
+    var duration = (typeof options.duration === "number") ? options.duration : 400;
+    if (instant || duration <= 0) {
+        QusTxtString.alpha = 1;
+        if (onComplete) { onComplete(); }
+        return;
+    }
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString, { override: true })
+        .wait(delay)
+        .to({ alpha: 1 }, duration)
+        .call(function () {
+            if (onComplete) { onComplete(); }
+        });
+}
+
+function hideQuestionPrompt() {
+    if (!QusTxtString) { return; }
+    createjs.Tween.removeTweens(QusTxtString);
+    QusTxtString.visible = false;
 }
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========//////////////////////////////////////////////////////////////
 function handleClick(e) {
@@ -284,13 +341,12 @@ function CreateGameElements() {
     balloonMc.visible = false;
     balloonMc.y = 650;
     balloonMc.x = 570;
-    
-    questiontext1.visible = false;
-    container.parent.addChild(questiontext1);
-    questiontext1.x = questiontext1.x - 50;
-    questionText.visible = false;
-    container.parent.addChild(questionText);
-    questionText.x = 280; questionText.y = 130;
+    if (QusTxtString) {
+        container.parent.addChild(QusTxtString);
+        QusTxtString.visible = false;
+        QusTxtString.alpha = 0;
+    }
+    hideQuestionPrompt();
 
     for (i = 0; i < choiceCnt; i++) {
         quesArr[i] = question.clone()
@@ -349,9 +405,8 @@ function pickques() {
     panelVisibleFn()
     //////////////////////////////////////////////////////////////////////////////////////////
     // qno[cnt] = 9;
-    questiontext1.visible=true
-    questionText.visible = false;
-    questionText.gotoAndStop(qno[cnt])
+    var questionText = getScenarioQuestionText(qno[cnt]);
+    showQuestionPrompt(questionText, { duration: 300 });
 
     for (i = 0; i < choiceCnt; i++) {
         pushArr.push(this["questionArr" + qno[cnt]][i])
@@ -425,8 +480,6 @@ function onComplete(e) {
 function createNewQuestions() {
     clearInterval(clearquesInterval)
     console.log("createNewQuestions")
-    questiontext1.visible=false
-    questionText.visible = true;
     for (i = 0; i < choiceCnt; i++) {
         chpos1.push({ posx: quesArr[i].x, posy: quesArr[i].y })
         quesArr[i].visible = false;
@@ -444,33 +497,29 @@ function createNewQuestions() {
         btnX[i] = choiceArr[i].x
     }
 
-    for (i = 0; i < 4; i++) {
-        // choiceArr[i].scaleX = choiceArr[i].scaleY = .8
-        // mc1[i] = new createjs.MovieClip()
-        // container.parent.addChild(mc1[i])
-        // mc1[i].timeline.addTween(createjs.Tween.get(choiceArr[i]).to({ scaleX: 0.95, scaleY: 0.95 }, 24).to({ scaleX: 1, scaleY: 1 }, 25).wait(1));
-    }
-
     ans = "ch0";
     createTween()
 
 }
 function createTween() {
-    questionText.visible = true;
-    questionText.alpha = 0;
-    createjs.Tween.get(questionText).wait(100).to({ alpha: 1 }, 500)
+    showQuestionPrompt(getScenarioQuestionText(qno[cnt]), { instant: true });
+    resetChoiceTweens();
+    clearChoiceAnimations();
 
     for (i = 0; i < 4; i++) {
         choiceArr[i].visible = true;
-        choiceArr[i].x = -300;
-        createjs.Tween.get(choiceArr[i]).wait(300).to({ x: btnX[i] }, 500).to({ alpha: 1 })
+        choiceArr[i].alpha = 0;
+        choiceArr[i].mouseEnabled = false;
+        choiceArr[i].cursor = "default";
+        choiceArr[i].__targetX = choiceArr[i].x;
+        choiceArr[i].__targetY = choiceArr[i].y;
+        choiceArr[i].baseScale = choiceArr[i].scaleX || 1;
 
     }
 
-    repTimeClearInterval = setTimeout(AddListenerFn, 1400)
+    animateChoiceOptions(choiceArr, AddListenerFn);
 }
 function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
     console.log("eventlisterneer")
     for (i = 0; i < 4; i++) {
         choiceArr[i].addEventListener("click", answerSelected);
@@ -492,8 +541,10 @@ function disablechoices() {
         // choiceArr[i].removeEventListener("mouseover", onRoll_over);
         // choiceArr[i].removeEventListener("mouseout", onRoll_out)
         choiceArr[i].cursor = "default";
+        choiceArr[i].mouseEnabled = false;
     }
-
+    resetChoiceTweens();
+    clearChoiceAnimations();
 }
 //===================================================================MOUSE ROLL OVER/ROLL OUT==============================================================//
 function onRoll_over(e) {
@@ -539,6 +590,118 @@ function disableMouse() {
     for (i = 0; i < 4; i++) {
         choiceArr[i].mouseEnabled = false
     }
+    resetChoiceTweens();
+    clearChoiceAnimations();
 }
 function enableMouse() {
+}
+
+function animateChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopChoicePulse(tile);
+        var baseScale = tile.baseScale || tile.scaleX || 1;
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 60;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.45);
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 150);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || tile.scaleX || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens() {
+    for (i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            stopChoicePulse(choiceArr[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations() {
+    for (i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            createjs.Tween.removeTweens(choiceArr[i]);
+        }
+    }
 }

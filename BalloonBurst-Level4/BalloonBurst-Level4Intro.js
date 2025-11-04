@@ -1,9 +1,6 @@
-var introTitle,introQuestxt, introQuestxt1, introBalloon,introquestion,introchoice,clr, introArrow, introfingure;
+var introTitle, introBalloon, introquestion, introchoice, clr, introArrow, introfingure;
 var setIntroCnt = 0
 var removeIntraval = 0
-var introQuestxtX = 400, introQuestxtY = 130;
-
-if(lang == "TamilQuestionText/"){introQuestxtX=284;}
 var introBalloonY = 750, introBalloonX = 570;
 var introTween = []
 var introquesArr = []
@@ -19,8 +16,6 @@ var introfingureX = 530, introfingureY = 460;
 function commongameintro() {
     introTitle = Title.clone()
     numCnt1 = 0
-    introQuestxt = questiontext1.clone();
-    introQuestxt1 = questionText.clone();
     introBalloon = balloonMc.clone();
     introquestion=question.clone()
     introchoice = choice1.clone()
@@ -28,15 +23,6 @@ function commongameintro() {
     introfingure = fingure.clone()
     container.parent.addChild(introTitle)
     introTitle.visible = true;
-    container.parent.addChild(introQuestxt);
-    introQuestxt.visible = true;
-
-    container.parent.addChild(introQuestxt1)
-    introQuestxt1.visible = false;
-    introQuestxt1.x = introQuestxtX
-    introQuestxt1.y = introQuestxtY
-    introQuestxt1.gotoAndStop(0);
-
     container.parent.addChild(introBalloon);
     introBalloon.visible = true;
     introBalloon.x = introBalloonX;
@@ -71,8 +57,7 @@ function commongameintro() {
     introImg.y = 400;
     introImg.x = 500;
 
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    showQuestionPrompt(getScenarioQuestionText(0), { duration: 1000, onComplete: handleComplete1_1 });
 
 }
 function handleComplete1_1() {
@@ -146,17 +131,13 @@ function createCh(){
 
     }
     else {
-    introQuestxt.visible=false;
-	
     for (i = 0; i < 4; i++) {
         container.parent.removeChild(introTween[i]);
         introquesArr[i].visible = false;
     }
     console.log("createCh")
-    introQuestxt1.visible = true;
-	container.parent.addChild(introQuestxt1);
-    introQuestxt1.x = introQuestxtX; introQuestxt1.y = 130;
-    introQuestxt1.gotoAndStop(0);
+    hideQuestionPrompt();
+        showQuestionPrompt(getScenarioQuestionText(0), { duration: 500 });
     for (i = 0; i < 4; i++) {
         introchoiceArr[i].visible = true;
         introchoiceArr[i].gotoAndStop(vno[i])
@@ -310,10 +291,6 @@ function removeGameIntro() {
     introquestion.visible = false
     container.parent.removeChild(introchoice)
     introchoice.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false 
-    container.parent.removeChild(introQuestxt1)
-    introQuestxt1.visible = false
     container.parent.removeChild(introBalloon)
     introBalloon.visible = false;
     
