@@ -1,11 +1,10 @@
-var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
+var introQues1, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
 var introChoice1TweenArr = []
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
 var TempIntroVal;
 var introrepTimeClearInterval = 0
-var introQuestxtX = 390; introQuestxtY = 140;
 var introQuesX = 100; introQuesY = 300;
 var introArrowX = 620, introArrowY = 100;
 var introfingureX = 650, introfingureY = 300;
@@ -36,12 +35,6 @@ function commongameintro() {
     introQues.visible = false;
     introQues.x = introQuesX; introQues.y = introQuesY
 
-    introQuestxt = questiontext.clone()
-    container.parent.addChild(introQuestxt);
-    introQuestxt.x = introQuestxtX; introQuestxt.y = introQuestxtY
-    introQuestxt.visible = true;
-
-
     for (i = 0; i < 6; i++) {
         container.parent.addChild(introChoiceHolderArr[i])
         introChoiceHolderArr[i].x = choiceXArr1[i] + 350;
@@ -65,9 +58,7 @@ function commongameintro() {
     introDummyHolder.x = 210
     introDummyHolder.y = 135
 
-    introQuestxt.gotoAndStop(0)
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    showQuestionPrompt(SPOTMYPLACE_PROMPT_OBSERVE, { duration: 1000, onComplete: handleComplete1_1 });
 
 
 }
@@ -123,9 +114,7 @@ function SetIntroQues() {
     for (i = 0; i < 6; i++) {
         introChoiceArr[i].visible = false;
     }
-    introQuestxt.gotoAndStop(1)
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 300)
+    showQuestionPrompt(SPOTMYPLACE_PROMPT_SELECT, { duration: 300 });
     introQues.visible = true
     introQues.alpha = 0;
     createjs.Tween.get(introQues).to({ alpha: 1 }, 300)
@@ -283,8 +272,7 @@ function removeGameIntro() {
     container.parent.removeChild(introfingure)
     introfingure.visible = false
 
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    hideQuestionPrompt();
     container.parent.removeChild(introQues)
     introQues.visible = false
     container.parent.removeChild(introDummyHolder)
