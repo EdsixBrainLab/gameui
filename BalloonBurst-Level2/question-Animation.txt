@@ -1,0 +1,112 @@
+
+1. Which of these was shown? ani: Pink rose/yellow gift/blue diamond
+question:[0,6,12,3,4,5,14,7,8,9]
+
+A.Pink rose  B.Red Rose C.Blue Gift D.Red Gift
+Answer:[0,11,13,3]
+--------------------------------------------------------------------------------------------
+2. Which of these was not shown? Ani :purple rose/purple gift/green diamond
+question:[4,8,10,5,8,9,6,2,1,13]
+
+A.Yellow rose B.purple rose c. purple gift D.Green Diamond
+Answer:[12,8,10,4]
+--------------------------------------------------------------------------------------------
+3. Which of these was more in count? Ani : Redrose 5 / skybluegift 3 / pink diamond 2
+question:[2,2,2,2,2,9,9,9,13,13]
+
+A. red rose B.pink diamond C.Skyblue gift D.red star diamond
+Answer:[2,13,9,11]
+
+-------------------------------------------------------------------------------------------
+4. Which of these was less in count? Ani: LightRose 2 /Green Diamond 4 / Blue Gift 4
+question:[3,3,10,10,10,10,7,7,7,7]
+A. lightRose B.YellowRose C.Bluegift D.Green Diamond 
+Answer:[3,1,7,10]
+
+-------------------------------------------------------------------------------------
+
+5. Which of these was shown? Ani: Purple rose/yellow gift/blue diamond
+question:[4,6,12,1,3,5,9,14,11,10]
+A.Purple rose  B.Red Rose C.Blue Gift D.Red Gift
+Answer:[12,2,7,5]
+-------------------------------------------------------------------------------------
+6. Which of these was not shown? Ani :purple rose/purple gift/green diamond
+question:[4,8,10,5,1,3,7,6,11,14]
+A.Red Gift B.purple rose c. purple gift D.Green Diamond
+Answer:[2,4,8,10]
+-------------------------------------------------------------------------------------
+7. Which of these was more in count? Ani : Yellow Gift 5 / skybluegift 3 / pink diamond 2
+question:[6,6,6,6,6,9,9,9,13,13]
+A. Yellow Gift B.pink diamond C.Skyblue gift D.red star diamond
+Answer:[6,13,9,11]
+-------------------------------------------------------------------------------------
+8. Which of these was less in count? Ani: BlueGift 2 /Green Diamond 4 / Purple Gift 4
+question:[7,7,10,10,10,10,8,8,8,8]
+A. BlueGift B.YellowRose C.Purple gift D.Green Diamond 
+Answer:[7,1,8,10]
+------------------------------------------------------------------------------------
+
+9. Which of these was shown? Ani: Purple Gift/yellow gift/blue diamond
+question:[8,6,12,10,9,7,4,3,1,5]
+A.Purple Gift  B.Red Rose C.Blue Gift D.Red Gift
+Answer:[8,2,0,11]
+------------------------------------------------------------------------------------
+10. Which of these was not shown? Ani :purple rose/purple gift/green diamond
+question:[4,8,10,9,7,3,5,0,1,6]
+A.Skyblue Gift B.purple rose c. purple gift D.Green Diamond
+Answer:[13,4,8,10]
+------------------------------------------------------------------------------------
+11. Which of these was more in count? Ani : Green Diamond 5 / skybluegift 3 / pink diamond 2
+question:[10,10,10,10,10,9,9,9,13,13]
+A. Green Diamond B.pink diamond C.Skyblue gift D.red star diamond
+Answer:[10,13,9,11]
+------------------------------------------------------------------------------------
+12. Which of these was less in count? Ani: RedStar 2 /Green Diamond 4 / Purple Gift 4
+question:[11,11,10,10,10,10,8,8,8,8]
+A. Red Star B.YellowRose C.Purple gift D.Green Diamond 
+Answer:[11,1,8,10]
+-------------------------------------------------------------------------------------
+
+13. Which of these was shown? Ani: Blue Diamond/yellow gift/Red star
+question:[12,6,11,8,7,1,3,5,0,13]
+A.BlueDiamond  B.Red Rose C.Blue Gift D.Red Gift
+Answer:[12,4,9,2]
+-------------------------------------------------------------------------------------
+14. Which of these was not shown? Ani : PurpleRose/purple gift/green diamond
+question:[4,8,10,13,0,5,3,2,14,9]
+A.PinkDiamond B.purple rose c. purple gift D.Green Diamond
+Answer:[11,4,8,10]
+-------------------------------------------------------------------------------------
+15. Which of these was more in count? Ani :YellowDiamond 5 / skybluegift 3 / pink diamond 2
+question:[14,14,14,14,14,9,9,9,13,13]
+A. Yellow Diamond B.pink diamond C.Skyblue gift D.red star diamond
+question:[14,13,9,11]
+-------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

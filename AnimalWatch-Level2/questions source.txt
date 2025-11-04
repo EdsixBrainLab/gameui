@@ -1,0 +1,10 @@
+1. Which of these was shown? - goat
+2. Which of these was not shown? - tortoise
+3. How many frogs were shown? - 3
+4. How many dogs were shown? - 2
+5. How many cats were shown? - 4
+6. How many goats were shown? - 2
+7. How many rabbits were shown? - 3
+8. How many cows were shown? - 2
+9. How many squirrels were shown? - 4
+10.How many tortoises were shown? - 3
