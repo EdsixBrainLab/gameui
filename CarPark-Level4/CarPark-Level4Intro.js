@@ -44,11 +44,27 @@ var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
 
 function commongameintro() {
-	Title.x = 120;
-    Title.y = 320;
+    if (typeof applyTitlePanelPosition === "function") {
+        applyTitlePanelPosition(Title);
+    } else if (typeof CARPARK_TITLE_PANEL_POSITION !== "undefined") {
+        Title.x = CARPARK_TITLE_PANEL_POSITION.x;
+        Title.y = CARPARK_TITLE_PANEL_POSITION.y;
+    } else {
+        Title.x = 120;
+        Title.y = 220;
+    }
     Questxt = 0;
     IntroBackground = holder.clone();
     introTitle = Title.clone();
+    if (typeof applyTitlePanelPosition === "function") {
+        applyTitlePanelPosition(introTitle);
+    } else if (typeof CARPARK_TITLE_PANEL_POSITION !== "undefined") {
+        introTitle.x = CARPARK_TITLE_PANEL_POSITION.x;
+        introTitle.y = CARPARK_TITLE_PANEL_POSITION.y;
+    } else {
+        introTitle.x = Title.x;
+        introTitle.y = Title.y;
+    }
     introQuescar = car1.clone();
     introcolor = q1.clone();
     introQuestionText = questionText.clone();
