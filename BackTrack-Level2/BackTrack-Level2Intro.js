@@ -1,11 +1,10 @@
-var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder1, introHolder2, introDummyHolder, introArrow, introfingure, introTitle;
+var introQues1, introChoice1, introChoice2, introChoice3, introHolder1, introHolder2, introDummyHolder, introArrow, introfingure, introTitle;
 var introChoice1TweenArr = []
 var highlightTweenArr = []
 var TempIntroVal;
 var setIntroCnt = 0
 var introquestionInterval
 var removeIntraval = 0
-var introQuestxtX = 0; introQuestxtY = 50;
 var introArrowX = 521, introArrowY = 182;
 var introfingureX = 540, introfingureY = 400;
 var choiceXArr = [150, 500, 665, 1035]
@@ -33,12 +32,7 @@ function commongameintro() {
     container.parent.addChild(introTitle)
     introTitle.visible = true;
 
-    introQuestxt = qtext.clone()
-    container.parent.addChild(introQuestxt);
-    introQuestxt.x = 390; introQuestxt.y = 125;
-    // introQuestxt.scaleX = introQuestxt.scaleY = .9
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(0);
+    showQuestionPrompt(BACKTRACK_PROMPT_OBSERVE, { duration: 1000 });
 
     container.parent.addChild(introQs1)
     introQs1.visible = true;
@@ -71,12 +65,17 @@ function commongameintro() {
     createjs.Tween.get(introQs1)
         .to({ y: 255, alpha: 1 }, 2000).wait(1000)
 
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 2000).wait(1000).call(handleComplete1_1);
+    if (QusTxtString) {
+        QusTxtString.alpha = 0;
+        createjs.Tween.get(QusTxtString).to({ alpha: 1 }, 2000).wait(1000).call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 
 }
 function handleComplete1_1() {
     createjs.Tween.removeAllTweens();
+    clearIntroChoiceAnimations();
     quesTween()
 }
 
@@ -99,31 +98,88 @@ function handleComplete3_1() {
     choiceTween1()
 }
 function choiceTween1() {
-    introQuestxt.gotoAndStop(1);
-    if (lang == "HindiQuestionText/") {
-        introQuestxt.y = introQuestxt.y + 25;
-    } 
-    introQuestxt.visible = true;
-    introQuestxt.alpha = 0
-    createjs.Tween.get(introQuestxt).wait(600).to({ alpha: 1 }, 600)
+    showQuestionPrompt(BACKTRACK_PROMPT_SELECT, { duration: 600 });
 
-    var introtempVal = 2000
-    for (i = 0; i < 4; i++) {
-        introChoiceArr[i].y = 1200
-        introChoiceArr[i].alpha = 0
-        introChoiceArr[i].visible = true;
-        if (i == 3) {
-            createjs.Tween.get(introChoiceArr[i]).wait(200)
-                .to({ y: 300, alpha: 1 }, introtempVal).wait(introtempVal).call(handleComplete5_1);
-        }
-        else {
-            createjs.Tween.get(introChoiceArr[i]).wait(200)
-                .to({ y: 300, alpha: 1 }, introtempVal).wait(introtempVal)
-        }
+    clearIntroChoiceAnimations();
 
+    for (i = 0; i < introChoiceArr.length; i++) {
+        var tile = introChoiceArr[i];
+        if (!tile) { continue; }
+        var targetX = choiceXArr[i];
+        var targetY = 300;
+        var baseScale = tile.baseScale || tile.scaleX || 1;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.cursor = "default";
+        tile.mouseEnabled = false;
+        tile.baseScale = baseScale;
+        tile.__introIndex = i;
+        tile.__introTargetX = targetX;
+        tile.__introTargetY = targetY;
+        tile.x = targetX;
+        tile.y = targetY + 90;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.5);
     }
 
+    animateIntroChoices(introChoiceArr, handleComplete5_1);
+}
 
+function animateIntroChoices(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        createjs.Tween.removeTweens(tile);
+
+        var baseScale = tile.baseScale || tile.__introBaseScale || tile.scaleX || 1;
+        var targetX = (typeof tile.__introTargetX === "number") ? tile.__introTargetX : tile.x;
+        var targetY = (typeof tile.__introTargetY === "number") ? tile.__introTargetY : tile.y;
+        var order = (typeof tile.__introIndex === "number") ? tile.__introIndex : idx;
+
+        tile.baseScale = baseScale;
+        tile.__introBaseScale = baseScale;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 90;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.5);
+
+        (function (target, finalY, base, revealOrder) {
+            var delay = 200 + (revealOrder * 140);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, targetY, baseScale, order);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function clearIntroChoiceAnimations() {
+    if (!introChoiceArr) { return; }
+    for (var idx = 0; idx < introChoiceArr.length; idx++) {
+        if (introChoiceArr[idx]) {
+            createjs.Tween.removeTweens(introChoiceArr[idx]);
+        }
+    }
 }
 
 function handleComplete5_1() {
@@ -240,6 +296,7 @@ function setCallDelay() {
 }
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
+    clearIntroChoiceAnimations();
     // container.parent.removeChild(introTitle)
     // introTitle.visible = false;
     container.parent.removeChild(introArrow)
@@ -248,8 +305,7 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(introDummyHolder)
     introDummyHolder.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    hideQuestionPrompt();
     container.parent.removeChild(introQs1)
     introQs1.visible = false
     container.parent.removeChild(introQs2)
