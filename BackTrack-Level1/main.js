@@ -337,33 +337,20 @@ function enableChoices() {
 }
 function createTween1() {
 
-     
-console.log("createTween1")
 
-    var tempVal = 2000
+    console.log("createTween1")
+
     for (i = 0; i < 3; i++) {
-        choiceMcArr[i].y = 1200
-        choiceMcArr[i].alpha = 0
-        choiceMcArr[i].visible = true;
-
-        // if (i == 0) {
-        // createjs.Tween.get(choiceMcArr[i]).wait(200)
-        // .to({ y: 291, alpha: 1 }, tempVal).wait(tempVal);//last
-        // }
-        // else if (i == 2) {
-        // createjs.Tween.get(choiceMcArr[i]).wait(200)
-        // .to({ y: 305, alpha: 1 }, tempVal).wait(tempVal);//mid
-        // }
-        // else {
-        // createjs.Tween.get(choiceMcArr[i]).wait(200)
-        // .to({ y: 296, alpha: 1 }, tempVal).wait(tempVal);//1st
-        // }
-        createjs.Tween.get(choiceMcArr[i]).wait(200)
-            .to({ y: choiceMcArrY[i], alpha: 1 }, tempVal).wait(tempVal);
-        var tempVal = 2000
-
+        var tile = choiceMcArr[i];
+        var targetY = choiceMcArrY[i];
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.__choiceIndex = i;
+        tile.__targetX = tile.x;
+        tile.__targetY = targetY;
+        tile.y = targetY;
     }
-animateChoiceOptions(choiceMcArr, AddListenerFn);
+    animateChoiceOptions(choiceMcArr, AddListenerFn);
     //repTimeClearInterval = setTimeout(AddListenerFn, 3500)
 
 
