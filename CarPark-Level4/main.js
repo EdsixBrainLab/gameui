@@ -95,9 +95,32 @@ var dirCar = [
 ]
 
  var QusTxtString;
-var 
+var
   ambientGradientLayer,
   ambientOrbs = [];
+
+// Adjust these coordinates to reposition the title panel specifically for CarPark Level 4.
+var CARPARK_TITLE_PANEL_POSITION = {
+  x: 120,
+  y: 220
+};
+
+function getTitlePanelPosition() {
+  return CARPARK_TITLE_PANEL_POSITION;
+}
+
+function applyTitlePanelPosition(target) {
+  if (!target) {
+    return;
+  }
+
+  var position = getTitlePanelPosition();
+  target.x = position.x;
+  target.y = position.y;
+
+  target.__layoutTargetX = position.x;
+  target.__layoutTargetY = position.y;
+}
   
 //////////////////////////////////////////////////
 //register key functions
@@ -285,7 +308,7 @@ function init() {
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
-	Title.x=650;
+        applyTitlePanelPosition(Title);
     var event = assets[i];
     var id = event.item.id;
 
@@ -428,10 +451,10 @@ const boxX = (canvas.width - boxWidth) / 2;
         buttons.visible = false;
         container.parent.addChild(buttons);
     };
-Title.x = 120;
-    Title.y = 220;
-introTitle = Title.clone();
-introTitle.visible = true;
+    applyTitlePanelPosition(Title);
+    introTitle = Title.clone();
+    applyTitlePanelPosition(introTitle);
+    introTitle.visible = true;
     container.parent.addChild(introTitle)
 
 }
