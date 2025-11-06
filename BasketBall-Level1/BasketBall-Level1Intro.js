@@ -1,10 +1,9 @@
-var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
+var introQues1, introChoice1, introChoice2, introChoice3, introHolder, introArrow, introfingure, introTitle;
 var introChoice1TweenArr = []
 var highlightTweenArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
 var introHolderArr = []
-var introQuestxtX = 636; introQuestxtY = 100;
 var introArrowX = 605, introArrowY = 291;
 var introfingureX = 630, introfingureY = 445;
 var choiceXArr1 = [1070, 627, 50]
@@ -18,7 +17,6 @@ function commongameintro() {
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
 
-    introQuestxt = questionText.clone();
     introHolder = Basket.clone()
     introHolder1 = Basket1.clone()
     introHolder2 = Basket2.clone()
@@ -34,10 +32,7 @@ function commongameintro() {
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
-    container.parent.addChild(introQuestxt);
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(0)
-    introQuestxt.x = 305; introQuestxt.y = 77
+    showQuestionPrompt(getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.OBSERVE), { duration: 1000, onComplete: handleComplete1_1 });
 
     container.parent.addChild(introHolder2)
     introHolder2.visible = false;
@@ -81,8 +76,9 @@ function commongameintro() {
     introDummyHolder.x = 178
     introDummyHolder.y = 145
 
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 1000).call(handleComplete1_1);
+    if (!QusTxtString) {
+        handleComplete1_1();
+    }
 
 
 }
@@ -146,10 +142,7 @@ function handleComplete5_1() {
     for (i = 0; i < 3; i++) {
         introquesArr[i].visible = false;
     }
-    introQuestxt.gotoAndStop(1)
-    if(lang == "HindiQuestionText/"){
-        introQuestxt.y = introQuestxt.y + 30;
-    }
+    showQuestionPrompt(getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.SELECT_FIRST), { duration: 300 });
     choiceTween12()
 }
 function choiceTween12() {
@@ -295,8 +288,7 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(introDummyHolder)
     introDummyHolder.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    hideQuestionPrompt();
 
     for (i = 0; i < 3; i++) {
         container.parent.removeChild(introChoiceArr[i])
