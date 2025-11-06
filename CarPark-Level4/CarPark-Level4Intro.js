@@ -61,12 +61,39 @@ function resolveIntroPromptColorIndex(frameIndex) {
     return frameIndex;
 }
 
+function resolveIntroPromptAnchorTarget(questionType) {
+    if (typeof questionType === "number" && introDirPosQuestionText && introDirPosQuestionText.length) {
+        var dirPosTarget = introDirPosQuestionText[questionType];
+        if (!dirPosTarget && questionType === 1 && introDirPosQuestionText[0]) {
+            dirPosTarget = introDirPosQuestionText[0];
+        }
+
+        if (dirPosTarget && dirPosTarget.parent) {
+            return dirPosTarget;
+        }
+    }
+
+    if (introcolor && introcolor.parent) {
+        return introcolor;
+    }
+
+    if (introQuestionText && introQuestionText.parent) {
+        return introQuestionText;
+    }
+
+    return null;
+}
+
 function queueIntroPromptReveal(questionType, frameIndex) {
     if (!shouldUseCarParkIntroTextPrompt()) {
         return;
     }
 
-    var anchorTarget = introcolor || introQuestionText || null;
+    if (typeof ensureCarParkPromptContainer === "function") {
+        ensureCarParkPromptContainer();
+    }
+
+    var anchorTarget = resolveIntroPromptAnchorTarget(questionType);
     if (anchorTarget) {
         if (typeof setCarParkPromptAnchorFromTarget === "function") {
             setCarParkPromptAnchorFromTarget(anchorTarget);
@@ -81,6 +108,10 @@ function queueIntroPromptReveal(questionType, frameIndex) {
 
     if (typeof updateCarParkPrompt === "function") {
         updateCarParkPrompt(resolveIntroPromptColorIndex(frameIndex), questionType);
+    }
+
+    if (typeof ensureCarParkPromptLayer === "function") {
+        ensureCarParkPromptLayer();
     }
 
     if (typeof revealCarParkPrompt === "function") {
