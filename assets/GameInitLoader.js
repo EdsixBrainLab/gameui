@@ -1693,23 +1693,52 @@ function layoutIntroElements(canvasWidth, canvasHeight) {
             : (Title.getBounds ? (Title.getBounds().height || 0) / 2 : 38);
         var topMargin = stageHeight * baseTopMarginRatio;
         var minimumTop = titleHalfHeight + Math.max(safeMargin * 0.15, 7);
-        Title.x = stageWidth / 2;
-        Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
+
+        var manualPosition = null;
+        if (Title.__manualLayoutPosition && typeof Title.__manualLayoutPosition === "object") {
+            manualPosition = Title.__manualLayoutPosition;
+        }
+
+        if (!manualPosition && typeof window !== "undefined" && window) {
+            if (
+                window.GameNameWithLvl === "CarPark-Level4" &&
+                window.__carParkLevel4TitlePosition &&
+                typeof window.__carParkLevel4TitlePosition.x === "number" &&
+                typeof window.__carParkLevel4TitlePosition.y === "number"
+            ) {
+                manualPosition = window.__carParkLevel4TitlePosition;
+            }
+        }
+
+        if (manualPosition) {
+            Title.x = manualPosition.x;
+            Title.y = manualPosition.y;
+            Title.__layoutTargetX = manualPosition.x;
+            Title.__layoutTargetY = manualPosition.y;
+            Title.__manualLayoutPosition = {
+                x: manualPosition.x,
+                y: manualPosition.y
+            };
+            titleBottomEdge = Title.y + titleHalfHeight;
+        } else {
+            Title.x = stageWidth / 2;
+            Title.y = Math.max(topMargin + titleHalfHeight, minimumTop);
 console.log("topMargin::"+topMargin)
 console.log("titleHalfHeight::"+titleHalfHeight)
 console.log("minimumTop::"+minimumTop)
 
-        var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
-        var titleLift = Math.min(
-            Math.max(Title.y - titleSafeTop, 0),
-            stageHeight * 0.025
-        );
-        if (titleLift > 0) {
-            Title.y -= titleLift;
-        }
-        Title.__layoutTargetY = Title.y;
+            var titleSafeTop = titleHalfHeight + Math.max(safeMargin * 0.1, 36);
+            var titleLift = Math.min(
+                Math.max(Title.y - titleSafeTop, 0),
+                stageHeight * 0.025
+            );
+            if (titleLift > 0) {
+                Title.y -= titleLift;
+            }
+            Title.__layoutTargetY = Title.y;
 
-        titleBottomEdge = Title.y + titleHalfHeight;
+            titleBottomEdge = Title.y + titleHalfHeight;
+        }
     }
 
     if (!titleBottomEdge && typeof Title !== "undefined" && Title) {

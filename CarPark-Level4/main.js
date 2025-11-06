@@ -105,6 +105,10 @@ var CARPARK_TITLE_PANEL_POSITION = {
   y: 220
 };
 
+if (typeof window !== "undefined") {
+  window.__carParkLevel4TitlePosition = CARPARK_TITLE_PANEL_POSITION;
+}
+
 function getTitlePanelPosition() {
   return CARPARK_TITLE_PANEL_POSITION;
 }
@@ -120,6 +124,33 @@ function applyTitlePanelPosition(target) {
 
   target.__layoutTargetX = position.x;
   target.__layoutTargetY = position.y;
+  if (!target.__manualLayoutPosition) {
+    target.__manualLayoutPosition = { x: position.x, y: position.y };
+  } else {
+    target.__manualLayoutPosition.x = position.x;
+    target.__manualLayoutPosition.y = position.y;
+  }
+}
+
+function setCarParkTitlePanelPosition(x, y) {
+  if (typeof x === "number" && !isNaN(x)) {
+    CARPARK_TITLE_PANEL_POSITION.x = x;
+  }
+  if (typeof y === "number" && !isNaN(y)) {
+    CARPARK_TITLE_PANEL_POSITION.y = y;
+  }
+
+  if (typeof window !== "undefined") {
+    window.__carParkLevel4TitlePosition = CARPARK_TITLE_PANEL_POSITION;
+  }
+
+  if (typeof Title !== "undefined" && Title) {
+    applyTitlePanelPosition(Title);
+  }
+
+  if (typeof introTitle !== "undefined" && introTitle) {
+    applyTitlePanelPosition(introTitle);
+  }
 }
   
 //////////////////////////////////////////////////
