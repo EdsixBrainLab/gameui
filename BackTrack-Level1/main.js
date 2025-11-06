@@ -359,6 +359,10 @@ function AddListenerFn() {
 
     //clearTimeout(repTimeClearInterval)
     for (i = 0; i < 3; i++) {
+        var tile = choiceMcArr[i];
+        if (!tile) { continue; }
+        tile.mouseEnabled = true;
+        tile.cursor = "pointer";
         choiceMcArr[i].addEventListener("click", answerSelected);
     }
     rst = 0;
