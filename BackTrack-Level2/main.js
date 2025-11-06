@@ -33,6 +33,8 @@ var chpos = [];
 var choiceMcArr = []
 var btny = [250,265,265,250]
 var intr = 0
+var BACKTRACK_PROMPT_OBSERVE = "Observe and remember the sequence of pictures shown";
+var BACKTRACK_PROMPT_SELECT = "Select the picture that was shown last but one";
 ///////////////////////////////////////////////////////////////////
 //register key functions
 window.onload = function (e) {
@@ -43,7 +45,8 @@ function init() {
     canvas = document.getElementById("gameCanvas");
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
-    stage.addChild(container)
+    stage.addChild(container);
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -66,7 +69,6 @@ function init() {
     if (success == 1) {
         manifest.push(
             { id: "holder", src: gameAssetsPath + "holder.png" },
-            { id: "questiontext", src: questionTextPath + "BackTrack-Level2-QT.png" },
             { id: "question", src: gameAssetsPath + "question.png" }
         )
         preloadAllAssets()
@@ -83,19 +85,6 @@ function doneLoading1(event) {
         container.parent.addChild(holder);
         holder.visible = false;
     }
-    if (id == "questiontext") {
-        var spriteSheet2 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("questiontext")],
-            "frames": { "regX": 50, "height": 107, "count": 0, "regY": 50, "width": 640 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-
-        });
-        qtext = new createjs.Sprite(spriteSheet2);
-        qtext.visible = false;
-        container.parent.addChild(qtext);
-        qtext.x = 390; qtext.y = 125;
-    };
 
 
     if (id == "question") {
@@ -111,11 +100,63 @@ function doneLoading1(event) {
         container.parent.addChild(question);
     };
     //
-
+        call_UI_gameQuestion(container, BACKTRACK_PROMPT_OBSERVE);
 }
 
 function tick(e) {
     stage.update();
+}
+
+function updateQuestionPrompt(copy) {
+    if (typeof SAUIX_setQuestionText === "function") {
+        SAUIX_setQuestionText(copy, { textAlign: "center" });
+    } else if (QusTxtString) {
+        QusTxtString.text = copy;
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.update === "function") {
+            QusTxtString.__labelBG.update();
+        }
+    }
+    if (QusTxtString) {
+        QusTxtString.visible = true;
+    }
+}
+
+function showQuestionPrompt(copy, options) {
+    options = options || {};
+    updateQuestionPrompt(copy);
+    if (!QusTxtString) {
+        if (typeof options.onComplete === "function") {
+            options.onComplete();
+        }
+        return;
+    }
+    createjs.Tween.removeTweens(QusTxtString);
+    var delay = (typeof options.delay === "number") ? options.delay : 0;
+    var duration = (typeof options.duration === "number") ? options.duration : 400;
+    var instant = !!options.instant || duration <= 0;
+    QusTxtString.visible = true;
+    if (instant) {
+        QusTxtString.alpha = 1;
+        if (typeof options.onComplete === "function") {
+            options.onComplete();
+        }
+        return;
+    }
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString, { override: true })
+        .wait(delay)
+        .to({ alpha: 1 }, duration)
+        .call(function () {
+            if (typeof options.onComplete === "function") {
+                options.onComplete();
+            }
+        });
+}
+
+function hideQuestionPrompt() {
+    if (!QusTxtString) { return; }
+    createjs.Tween.removeTweens(QusTxtString);
+    QusTxtString.visible = false;
 }
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========//////////////////////////////////////////////////////////////    
 function handleClick(e) {
@@ -154,13 +195,7 @@ function idle1() {
     panelVisibleFn()
     gameQCntTxt.text = (quesCnt + 1) + "/" + totalQuestions;
 
-    container.parent.addChild(qtext);
-    qtext.gotoAndStop(0);
-    qtext.visible = true;
-   // qtext.x = 390; qtext.y = 100;;
-    qtext.scaleX = qtext.scaleY = 1;
-    qtext.alpha = 0
-    createjs.Tween.get(qtext).wait(600).to({ alpha: 1 }, 600)
+    showQuestionPrompt(BACKTRACK_PROMPT_OBSERVE, { duration: 300 });
     ans = "ch0";
 
     container.parent.addChild(question);
@@ -203,11 +238,6 @@ function pickques() {
     ans = "ch0"
     panelVisibleFn()
 
-    qtext.visible = true;
-    qtext.alpha = 1
-    qtext.gotoAndStop(0);
-   // createjs.Tween.get(qtext).wait(600).to({ alpha: 1 }, 600)
-
     question.gotoAndStop(qno[qcnt]);
     question.y = -1200
     question.alpha = 0
@@ -221,11 +251,7 @@ function createchoices() {
     question.visible = false;
     clearInterval(clearquesInterval);
     pauseTimer()
-    qtext.gotoAndStop(1);
-    if (lang == "HindiQuestionText/") {
-        qtext.y = 150;
-    }
-    qtext.visible = false;
+    showQuestionPrompt(BACKTRACK_PROMPT_SELECT, { duration: 300 });
     for (i = 0; i < 4; i++) {
         choiceMcArr[i] = question.clone();
         choiceMcArr[i].y = btny[i]; //250;
@@ -276,10 +302,6 @@ function enableChoices() {
 
 }
 function createTween1() {
-
-    qtext.visible = true;
-    qtext.alpha = 0
-    createjs.Tween.get(qtext).wait(600).to({ alpha: 1 }, 600)
     for (i = 0; i < 4; i++) {
         var tile = choiceMcArr[i];
         if (!tile) { continue; }
@@ -318,7 +340,7 @@ function disablechoices() {
     }
     resetChoiceTweens();
     clearChoiceAnimations();
-    qtext.visible = false;
+    hideQuestionPrompt();
 }
 
 function onRoll_over(e) {

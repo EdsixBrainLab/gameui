@@ -1,11 +1,10 @@
-var introQues1, introQuestxt, introChoice1, introChoice2, introChoice3, introHolder1, introHolder2, introDummyHolder, introArrow, introfingure, introTitle;
+var introQues1, introChoice1, introChoice2, introChoice3, introHolder1, introHolder2, introDummyHolder, introArrow, introfingure, introTitle;
 var introChoice1TweenArr = []
 var highlightTweenArr = []
 var TempIntroVal;
 var setIntroCnt = 0
 var introquestionInterval
 var removeIntraval = 0
-var introQuestxtX = 0; introQuestxtY = 50;
 var introArrowX = 521, introArrowY = 182;
 var introfingureX = 540, introfingureY = 400;
 var choiceXArr = [150, 500, 665, 1035]
@@ -33,12 +32,7 @@ function commongameintro() {
     container.parent.addChild(introTitle)
     introTitle.visible = true;
 
-    introQuestxt = qtext.clone()
-    container.parent.addChild(introQuestxt);
-    introQuestxt.x = 390; introQuestxt.y = 125;
-    // introQuestxt.scaleX = introQuestxt.scaleY = .9
-    introQuestxt.visible = true;
-    introQuestxt.gotoAndStop(0);
+    showQuestionPrompt(BACKTRACK_PROMPT_OBSERVE, { duration: 1000 });
 
     container.parent.addChild(introQs1)
     introQs1.visible = true;
@@ -71,8 +65,12 @@ function commongameintro() {
     createjs.Tween.get(introQs1)
         .to({ y: 255, alpha: 1 }, 2000).wait(1000)
 
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).to({ alpha: 1 }, 2000).wait(1000).call(handleComplete1_1);
+    if (QusTxtString) {
+        QusTxtString.alpha = 0;
+        createjs.Tween.get(QusTxtString).to({ alpha: 1 }, 2000).wait(1000).call(handleComplete1_1);
+    } else {
+        handleComplete1_1();
+    }
 
 }
 function handleComplete1_1() {
@@ -100,13 +98,7 @@ function handleComplete3_1() {
     choiceTween1()
 }
 function choiceTween1() {
-    introQuestxt.gotoAndStop(1);
-    if (lang == "HindiQuestionText/") {
-        introQuestxt.y = introQuestxt.y + 25;
-    }
-    introQuestxt.visible = true;
-    introQuestxt.alpha = 0;
-    createjs.Tween.get(introQuestxt).wait(600).to({ alpha: 1 }, 600);
+    showQuestionPrompt(BACKTRACK_PROMPT_SELECT, { duration: 600 });
 
     clearIntroChoiceAnimations();
 
@@ -313,8 +305,7 @@ function removeGameIntro() {
     introfingure.visible = false
     container.parent.removeChild(introDummyHolder)
     introDummyHolder.visible = false
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
+    hideQuestionPrompt();
     container.parent.removeChild(introQs1)
     introQs1.visible = false
     container.parent.removeChild(introQs2)
