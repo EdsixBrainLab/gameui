@@ -175,6 +175,8 @@ var QUESTION_CARD_WIDTH = 600;
 var QUESTION_CARD_HEIGHT = 168;
 var QUESTION_CARD_CORNER_RADIUS = 44;
 
+var carParkPromptAnchorOverride = null;
+
 var CHOICE_TILE_BASE_COLORS = ["rgba(28,52,92,0.95)", "rgba(15,32,66,0.95)"];
 var CHOICE_TILE_HOVER_COLORS = ["rgba(70,118,210,0.98)", "rgba(40,72,148,0.98)"];
 var CHOICE_TILE_CORRECT_COLORS = ["rgba(58,196,150,0.98)", "rgba(30,128,96,0.98)"];
@@ -271,6 +273,25 @@ function resolveCarParkPromptAnchor() {
   };
   var defaultRadius = 180;
 
+  if (carParkPromptAnchorOverride) {
+    var overrideAnchor = carParkPromptAnchorOverride.anchor || carParkPromptAnchorOverride;
+    var overrideRadius = carParkPromptAnchorOverride.radius;
+
+    if (
+      overrideAnchor &&
+      typeof overrideAnchor.x === "number" &&
+      typeof overrideAnchor.y === "number"
+    ) {
+      return {
+        anchor: { x: overrideAnchor.x, y: overrideAnchor.y },
+        radius:
+          typeof overrideRadius === "number" && overrideRadius > 0
+            ? overrideRadius
+            : defaultRadius
+      };
+    }
+  }
+
   var candidates = [];
 
   if (typeof q1 !== "undefined" && q1) {
@@ -306,6 +327,63 @@ function resolveCarParkPromptAnchor() {
   }
 
   return { anchor: defaultAnchor, radius: defaultRadius };
+}
+
+function setCarParkPromptAnchorOverride(anchor, radius) {
+  if (!anchor || typeof anchor.x !== "number" || typeof anchor.y !== "number") {
+    carParkPromptAnchorOverride = null;
+
+    if (questionPromptContainer) {
+      positionCarParkPromptContainer();
+      ensureCarParkPromptLayer();
+    }
+
+    return;
+  }
+
+  carParkPromptAnchorOverride = {
+    anchor: { x: anchor.x, y: anchor.y },
+    radius: typeof radius === "number" && radius > 0 ? radius : null
+  };
+
+  if (questionPromptContainer) {
+    positionCarParkPromptContainer();
+    ensureCarParkPromptLayer();
+  }
+}
+
+function clearCarParkPromptAnchorOverride() {
+  carParkPromptAnchorOverride = null;
+
+  if (questionPromptContainer) {
+    positionCarParkPromptContainer();
+    ensureCarParkPromptLayer();
+  }
+}
+
+function setCarParkPromptAnchorFromTarget(target, padding) {
+  if (!target) {
+    return;
+  }
+
+  var info = getDisplayObjectFrameInfo(target);
+  if (!info) {
+    return;
+  }
+
+  var anchor = {
+    x: info.x + info.width / 2,
+    y: info.y + info.height / 2
+  };
+
+  var effectivePadding = typeof padding === "number" ? padding : 12;
+  var radius = Math.min(info.width, info.height) / 2 - effectivePadding;
+
+  if (!(radius > 0)) {
+    radius = null;
+  }
+
+  setCarParkPromptAnchorOverride(anchor, radius);
 }
 
 function updateCarParkPromptMask(radius) {

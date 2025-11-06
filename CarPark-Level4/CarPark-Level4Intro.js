@@ -66,6 +66,15 @@ function queueIntroPromptReveal(questionType, frameIndex) {
         return;
     }
 
+    var anchorTarget = introcolor || introQuestionText || null;
+    if (anchorTarget) {
+        if (typeof setCarParkPromptAnchorFromTarget === "function") {
+            setCarParkPromptAnchorFromTarget(anchorTarget);
+        } else if (typeof setCarParkPromptAnchorOverride === "function") {
+            setCarParkPromptAnchorOverride({ x: anchorTarget.x || 0, y: anchorTarget.y || 0 });
+        }
+    }
+
     if (typeof prepareCarParkPromptForReveal === "function") {
         prepareCarParkPromptForReveal();
     }
@@ -166,6 +175,12 @@ function commongameintro() {
 
         if (typeof hideCarParkPrompt === "function") {
             hideCarParkPrompt();
+        }
+
+        if (typeof setCarParkPromptAnchorFromTarget === "function") {
+            setCarParkPromptAnchorFromTarget(introcolor);
+        } else if (typeof setCarParkPromptAnchorOverride === "function" && introcolor) {
+            setCarParkPromptAnchorOverride({ x: introcolor.x || 0, y: introcolor.y || 0 });
         }
     }
     Questxt = 0;
@@ -908,6 +923,10 @@ function setCallDelay() {
 }
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
+
+    if (shouldUseCarParkIntroTextPrompt() && typeof clearCarParkPromptAnchorOverride === "function") {
+        clearCarParkPromptAnchorOverride();
+    }
 
     if (introTitle) {
         introTitle.visible = false;
