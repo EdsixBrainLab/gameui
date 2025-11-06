@@ -43,12 +43,70 @@ var Questxt;
 var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
 
+function resolveCarParkIntroTitlePosition() {
+    if (typeof getTitlePanelPosition === "function") {
+        var resolved = getTitlePanelPosition();
+        if (resolved && typeof resolved.x === "number" && typeof resolved.y === "number") {
+            return { x: resolved.x, y: resolved.y };
+        }
+    }
+
+    if (typeof CARPARK_TITLE_PANEL_POSITION !== "undefined" && CARPARK_TITLE_PANEL_POSITION) {
+        if (typeof CARPARK_TITLE_PANEL_POSITION.x === "number" && typeof CARPARK_TITLE_PANEL_POSITION.y === "number") {
+            return { x: CARPARK_TITLE_PANEL_POSITION.x, y: CARPARK_TITLE_PANEL_POSITION.y };
+        }
+    }
+
+    if (typeof window !== "undefined" && window.__carParkLevel4TitlePosition) {
+        var introWindowPos = window.__carParkLevel4TitlePosition;
+        if (typeof introWindowPos.x === "number" && typeof introWindowPos.y === "number") {
+            return { x: introWindowPos.x, y: introWindowPos.y };
+        }
+    }
+
+    return { x: 120, y: 320 };
+}
+
+function applyResolvedIntroTitlePosition(target, position) {
+    if (!target || !position) {
+        return;
+    }
+
+    target.x = position.x;
+    target.y = position.y;
+
+    target.__layoutTargetX = position.x;
+    target.__layoutTargetY = position.y;
+
+    if (!target.__manualLayoutPosition) {
+        target.__manualLayoutPosition = { x: position.x, y: position.y };
+    } else {
+        target.__manualLayoutPosition.x = position.x;
+        target.__manualLayoutPosition.y = position.y;
+    }
+}
+
+function ensureIntroTitleLayer(target) {
+    if (!target || !container || !container.parent || typeof container.parent.setChildIndex !== "function") {
+        return;
+    }
+
+    container.parent.setChildIndex(target, container.parent.numChildren - 1);
+}
+
 function commongameintro() {
-	Title.x = 120;
-    Title.y = 320;
+    var introTitlePosition = resolveCarParkIntroTitlePosition();
+
+    if (typeof Title !== "undefined" && Title) {
+        applyResolvedIntroTitlePosition(Title, introTitlePosition);
+    }
     Questxt = 0;
     IntroBackground = holder.clone();
-    introTitle = Title.clone();
+    if (typeof Title !== "undefined" && Title) {
+        introTitle = Title.clone();
+    } else {
+        introTitle = null;
+    }
     introQuescar = car1.clone();
     introcolor = q1.clone();
     introQuestionText = questionText.clone();
@@ -59,8 +117,13 @@ function commongameintro() {
 
     IntroBackground.visible = true;
     container.parent.addChild(IntroBackground)
-    introTitle.visible = true;
-    container.parent.addChild(introTitle)
+    if (introTitle) {
+        applyResolvedIntroTitlePosition(introTitle, introTitlePosition);
+        introTitle.visible = true;
+        introTitle.alpha = 1;
+        container.parent.addChild(introTitle)
+        ensureIntroTitleLayer(introTitle);
+    }
 
     introQuescar.visible = false;
     container.parent.addChild(introQuescar)
@@ -765,8 +828,10 @@ function setCallDelay() {
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
 
-    introTitle.visible = false;
-    container.parent.removeChild(introTitle)
+    if (introTitle) {
+        introTitle.visible = false;
+        container.parent.removeChild(introTitle)
+    }
     
     IntroBackground.visible = false;
     container.parent.removeChild(IntroBackground)
