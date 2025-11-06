@@ -42,6 +42,107 @@ var introQuescarX = 60, introQuescarY = 45 + 110
 var Questxt;
 var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
+var INTRO_DIRECTION_COLOR_FRAME = 4;
+var INTRO_POSITION_COLOR_FRAME = 10;
+
+function shouldUseCarParkIntroTextPrompt() {
+    if (typeof shouldUseCarParkTextPrompt === "function") {
+        return shouldUseCarParkTextPrompt();
+    }
+
+    return true;
+}
+
+function resolveIntroPromptColorIndex(frameIndex) {
+    if (typeof frameIndex !== "number" || isNaN(frameIndex)) {
+        return 0;
+    }
+
+    return frameIndex;
+}
+
+function queueIntroPromptReveal(questionType, frameIndex) {
+    if (!shouldUseCarParkIntroTextPrompt()) {
+        return;
+    }
+
+    if (typeof prepareCarParkPromptForReveal === "function") {
+        prepareCarParkPromptForReveal();
+    }
+
+    if (typeof updateCarParkPrompt === "function") {
+        updateCarParkPrompt(resolveIntroPromptColorIndex(frameIndex), questionType);
+    }
+
+    if (typeof revealCarParkPrompt === "function") {
+        setTimeout(function () {
+            revealCarParkPrompt();
+        }, 260);
+    }
+}
+
+function resolveCarParkIntroTitlePosition() {
+    if (typeof getTitlePanelPosition === "function") {
+        var resolved = getTitlePanelPosition();
+        if (resolved && typeof resolved.x === "number" && typeof resolved.y === "number") {
+            return { x: resolved.x, y: resolved.y };
+        }
+    }
+
+    if (typeof CARPARK_TITLE_PANEL_POSITION !== "undefined" && CARPARK_TITLE_PANEL_POSITION) {
+        if (typeof CARPARK_TITLE_PANEL_POSITION.x === "number" && typeof CARPARK_TITLE_PANEL_POSITION.y === "number") {
+            return { x: CARPARK_TITLE_PANEL_POSITION.x, y: CARPARK_TITLE_PANEL_POSITION.y };
+        }
+    }
+
+    if (typeof window !== "undefined" && window.__carParkLevel4TitlePosition) {
+        var introWindowPos = window.__carParkLevel4TitlePosition;
+        if (typeof introWindowPos.x === "number" && typeof introWindowPos.y === "number") {
+            return { x: introWindowPos.x, y: introWindowPos.y };
+        }
+    }
+
+    return { x: 120, y: 320 };
+}
+
+function applyResolvedIntroTitlePosition(target, position) {
+    if (!target || !position) {
+        return;
+    }
+
+    target.x = position.x;
+    target.y = position.y;
+
+    target.__layoutTargetX = position.x;
+    target.__layoutTargetY = position.y;
+
+    if (!target.__manualLayoutPosition) {
+        target.__manualLayoutPosition = { x: position.x, y: position.y };
+    } else {
+        target.__manualLayoutPosition.x = position.x;
+        target.__manualLayoutPosition.y = position.y;
+    }
+}
+
+function ensureIntroTitleLayer(target) {
+    if (!target || !container || !container.parent || typeof container.parent.setChildIndex !== "function") {
+        return;
+    }
+
+    container.parent.setChildIndex(target, container.parent.numChildren - 1);
+}
+
+function addIntroLayerChild(child) {
+    if (!child || !container || !container.parent || typeof container.parent.addChild !== "function") {
+        return;
+    }
+
+    container.parent.addChild(child);
+
+    if (introTitle && introTitle.parent) {
+        ensureIntroTitleLayer(introTitle);
+    }
+}
 
 function resolveCarParkIntroTitlePosition() {
     if (typeof getTitlePanelPosition === "function") {
@@ -112,6 +213,10 @@ function commongameintro() {
     if (typeof Title !== "undefined" && Title) {
         applyResolvedIntroTitlePosition(Title, introTitlePosition);
     }
+
+    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
+        hideCarParkPrompt();
+    }
     Questxt = 0;
     IntroBackground = holder.clone();
     if (typeof Title !== "undefined" && Title) {
@@ -166,6 +271,10 @@ function commongameintro() {
     addIntroLayerChild(introQuestionText)
     introQuestionText.x = introQuestionTextX;
     introQuestionText.y = introQuestionTextY;
+
+    if (shouldUseCarParkIntroTextPrompt()) {
+        introQuestionText.visible = false;
+    }
 
     if (introTitle) {
         applyResolvedIntroTitlePosition(introTitle, introTitlePosition);
@@ -333,26 +442,29 @@ function handleComplete1_1() {
 
 function quesTween() {
     if (Questxt == 0) {
-        // introQuestionText.gotoAndStop(0)
-        introQuestionText.visible = true;
-        introQuestionText.alpha = 0;
-        createjs.Tween.get(introQuestionText).wait(250)
-            .to({ alpha: 1, x: 0 }, 500)
-            .to({ alpha: 1, x: 0, scaleX: 1, scaleY: 1 }, 500)
+        if (!shouldUseCarParkIntroTextPrompt()) {
+            introQuestionText.visible = true;
+            introQuestionText.alpha = 0;
+            createjs.Tween.get(introQuestionText).wait(250)
+                .to({ alpha: 1, x: 0 }, 500)
+                .to({ alpha: 1, x: 0, scaleX: 1, scaleY: 1 }, 500)
 
-        introDirPosQuestionText[0].visible = true;
-        introDirPosQuestionText[0].alpha = 0;
-        introDirPosQuestionText[0].gotoAndStop(0)
-        introDirPosQuestionText[0].regX = introDirPosQuestionText[0].regY = 100
-        introDirPosQuestionText[0].scaleX = 1; introDirPosQuestionText[0].scaleY = 1
-        ///////////////////////////////////////////////////////////////////
-        introquesArr[0].timeline.addTween(createjs.Tween.get(introDirPosQuestionText[0])
-            .to({ scaleX: .95, scaleY: .95 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
-        ///////////////////////////////////////////////////////////////////////////////////////////////////
-        createjs.Tween.get(introDirPosQuestionText[0]).wait(250)
-            .to({ alpha: 1, scaleY: 1, scaleX: 1 }, 250, createjs.Ease.bounceOut)
-            .to({ alpha: 1, scaleY: .95, scaleX: .95 }, 250, createjs.Ease.bounceOut)
-        ////////////////////////////////////////////////////////////////
+            introDirPosQuestionText[0].visible = true;
+            introDirPosQuestionText[0].alpha = 0;
+            introDirPosQuestionText[0].gotoAndStop(0)
+            introDirPosQuestionText[0].regX = introDirPosQuestionText[0].regY = 100
+            introDirPosQuestionText[0].scaleX = 1; introDirPosQuestionText[0].scaleY = 1
+            introquesArr[0].timeline.addTween(createjs.Tween.get(introDirPosQuestionText[0])
+                .to({ scaleX: .95, scaleY: .95 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
+            createjs.Tween.get(introDirPosQuestionText[0]).wait(250)
+                .to({ alpha: 1, scaleY: 1, scaleX: 1 }, 250, createjs.Ease.bounceOut)
+                .to({ alpha: 1, scaleY: .95, scaleX: .95 }, 250, createjs.Ease.bounceOut)
+        } else {
+            introQuestionText.visible = false;
+            introDirPosQuestionText[0].visible = false;
+            queueIntroPromptReveal(0, INTRO_DIRECTION_COLOR_FRAME);
+        }
+
         introQuescar.visible = true;
         introQuescar.alpha = 0;
         createjs.Tween.get(introQuescar)
@@ -361,33 +473,34 @@ function quesTween() {
             .call(handleComplete2_1);
     }
     else {
-
         for (i = 1; i <= 4; i++) {
             introChoice[i].alpha = 1;
             introChoice[i].visible = true;
         }
-        /////////////////////////////////////////////////////////
-        //  introQuestionText.gotoAndStop(1)
-        introQuestionText.visible = true;
-        introQuestionText.alpha = 0;
-        createjs.Tween.get(introQuestionText).wait(250)
-            .to({ alpha: 1, x: 0 }, 500)
-            .to({ alpha: 1, x: 0, scaleX: 1, scaleY: 1 }, 500)
 
+        if (!shouldUseCarParkIntroTextPrompt()) {
+            introQuestionText.visible = true;
+            introQuestionText.alpha = 0;
+            createjs.Tween.get(introQuestionText).wait(250)
+                .to({ alpha: 1, x: 0 }, 500)
+                .to({ alpha: 1, x: 0, scaleX: 1, scaleY: 1 }, 500)
 
-        introDirPosQuestionText[1].visible = true;
-        introDirPosQuestionText[1].alpha = 0;
-        introDirPosQuestionText[1].gotoAndStop(1)
-        introDirPosQuestionText[1].regX = introDirPosQuestionText[1].regY = 100
-        introDirPosQuestionText[1].scaleX = 1; introDirPosQuestionText[1].scaleY = 1
-        //////////////////////////////////////////
-        introquesArr[1].timeline.addTween(createjs.Tween.get(introDirPosQuestionText[1])
-            .to({ scaleX: .95, scaleY: .95 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
-        ////////////////////////////////////////////////
-        createjs.Tween.get(introDirPosQuestionText[1]).wait(250)
-            .to({ alpha: 1, scaleY: 1, scaleX: 1 }, 250, createjs.Ease.bounceOut)
-            .to({ alpha: 1, scaleY: .95, scaleX: .95 }, 250, createjs.Ease.bounceOut)
-        /////////////////////////////////////////////////////////////
+            introDirPosQuestionText[1].visible = true;
+            introDirPosQuestionText[1].alpha = 0;
+            introDirPosQuestionText[1].gotoAndStop(1)
+            introDirPosQuestionText[1].regX = introDirPosQuestionText[1].regY = 100
+            introDirPosQuestionText[1].scaleX = 1; introDirPosQuestionText[1].scaleY = 1
+            introquesArr[1].timeline.addTween(createjs.Tween.get(introDirPosQuestionText[1])
+                .to({ scaleX: .95, scaleY: .95 }, 19).to({ scaleX: 1, scaleY: 1 }, 20).wait(1));
+            createjs.Tween.get(introDirPosQuestionText[1]).wait(250)
+                .to({ alpha: 1, scaleY: 1, scaleX: 1 }, 250, createjs.Ease.bounceOut)
+                .to({ alpha: 1, scaleY: .95, scaleX: .95 }, 250, createjs.Ease.bounceOut)
+        } else {
+            introQuestionText.visible = false;
+            introDirPosQuestionText[1].visible = false;
+            queueIntroPromptReveal(1, INTRO_POSITION_COLOR_FRAME);
+        }
+
         introQuescar.visible = true;
         introQuescar.alpha = 0;
         createjs.Tween.get(introQuescar)
@@ -795,6 +908,9 @@ this.onComplete2 = function (e) {
 function commongameintro1() {
     createjs.Tween.removeAllTweens();
     Questxt = 1;
+    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
+        hideCarParkPrompt();
+    }
     if (stopValue == 0) {
         console.log("onComplete2  == stopValue")
         removeGameIntro()
@@ -908,4 +1024,8 @@ function removeGameIntro() {
     }
     container.parent.removeChild(introfingure);
     introfingure.visible = false;
+
+    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
+        hideCarParkPrompt();
+    }
 }
