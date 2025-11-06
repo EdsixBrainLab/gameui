@@ -94,6 +94,18 @@ function ensureIntroTitleLayer(target) {
     container.parent.setChildIndex(target, container.parent.numChildren - 1);
 }
 
+function addIntroLayerChild(child) {
+    if (!child || !container || !container.parent || typeof container.parent.addChild !== "function") {
+        return;
+    }
+
+    container.parent.addChild(child);
+
+    if (introTitle && introTitle.parent) {
+        ensureIntroTitleLayer(introTitle);
+    }
+}
+
 function commongameintro() {
     var introTitlePosition = resolveCarParkIntroTitlePosition();
 
@@ -116,26 +128,18 @@ function commongameintro() {
     introfingure1 = fingure.clone()
 
     IntroBackground.visible = true;
-    container.parent.addChild(IntroBackground)
-    if (introTitle) {
-        applyResolvedIntroTitlePosition(introTitle, introTitlePosition);
-        introTitle.visible = true;
-        introTitle.alpha = 1;
-        container.parent.addChild(introTitle)
-        ensureIntroTitleLayer(introTitle);
-    }
-
+    addIntroLayerChild(IntroBackground)
     introQuescar.visible = false;
-    container.parent.addChild(introQuescar)
+    addIntroLayerChild(introQuescar)
     introQuescar.regX = introQuescar.regY = 50
     introQuescar.x = introQuescarX;
     introQuescar.y = introQuescarY;
     introQuescar.scaleX = introQuescar.scaleY = 1
 
     introColorTime = new createjs.MovieClip();
-    container.parent.addChild(introColorTime);
+    addIntroLayerChild(introColorTime);
     introcolor.visible = false;
-    container.parent.addChild(introcolor)
+    addIntroLayerChild(introcolor)
     introcolor.x = introcolorX;
     introcolor.y = introcolorY;
     introColorTime.addChild(introcolor)
@@ -144,7 +148,7 @@ function commongameintro() {
     for (i = 1; i <= 4; i++) {
 
         introChoice[i] = this["choice" + i].clone();
-        container.parent.addChild(introChoice[i])
+        addIntroLayerChild(introChoice[i])
         introChoice[i].scaleX = introChoice[i].scaleY = .6
         introChoice[i].visible = false;
 
@@ -152,23 +156,29 @@ function commongameintro() {
     }
     for (i = 1; i <= 4; i++) {
         introbutton[i] = buttons.clone();
-        container.parent.addChild(introbutton[i]);
+        addIntroLayerChild(introbutton[i]);
         introbutton[i].x = introbuttonbtnX[i]
         introbutton[i].y = 590;
         introbutton[i].scaleX = introbutton[i].scaleY = 0.95;
         introbutton[i].visible = false;
     }
     introQuestionText.visible = false;
-    container.parent.addChild(introQuestionText)
+    addIntroLayerChild(introQuestionText)
     introQuestionText.x = introQuestionTextX;
     introQuestionText.y = introQuestionTextY;
+
+    if (introTitle) {
+        applyResolvedIntroTitlePosition(introTitle, introTitlePosition);
+        introTitle.visible = true;
+        introTitle.alpha = 1;
+    }
 
     for (i = 0; i < 2; i++) {
         ////////////////////in qtxt direction nd position image///////////////////////////
         introquesArr[i] = new createjs.MovieClip();
-        container.parent.addChild(introquesArr[i]);
+        addIntroLayerChild(introquesArr[i]);
         introDirPosQuestionText[i] = DirPosQuestionText.clone();
-        container.parent.addChild(introDirPosQuestionText[i])
+        addIntroLayerChild(introDirPosQuestionText[i])
         introDirPosQuestionText[i].visible = false;
         introDirPosQuestionText[i].x = introDirPosQuestionTextX;
         introDirPosQuestionText[i].y = introDirPosQuestionTextY;
@@ -177,7 +187,7 @@ function commongameintro() {
         ///////////////////////////////////////Round track clueimage///////////////////////////////////////
 
         introDirPosTrack[i] = DirPosTrack.clone();
-        container.parent.addChild(introDirPosTrack[i])
+        addIntroLayerChild(introDirPosTrack[i])
         introDirPosTrack[i].visible = false;
         introDirPosTrack[i].x = introDirPosTrackX[i];
         introDirPosTrack[i].y = introDirPosTrackY[i];
@@ -187,9 +197,9 @@ function commongameintro() {
     for (i = 0; i < 2; i++) {
         ////////////////////ClueDirPosCar///////////////////////////////////
         introDirPosCarTime[i] = new createjs.MovieClip();
-        container.parent.addChild(introDirPosCarTime[i]);
+        addIntroLayerChild(introDirPosCarTime[i]);
         introDirPosCar[i] = DirPosCar.clone();
-        container.parent.addChild(introDirPosCar[i])
+        addIntroLayerChild(introDirPosCar[i])
 
         /////////////////////////////////////////////
         introDirPosCar[i].visible = false;
@@ -199,9 +209,9 @@ function commongameintro() {
         introDirPosCarTime[i].addChild(introDirPosCar[i]);
         ///////////////////////Arrow for Dir & Pos/////////////////////////////
         introDirPosArrowTime[i] = new createjs.MovieClip();
-        container.parent.addChild(introDirPosArrowTime[i]);
+        addIntroLayerChild(introDirPosArrowTime[i]);
         introDirPosArrow[i] = DirPosArrow.clone();
-        container.parent.addChild(introDirPosArrow[i])
+        addIntroLayerChild(introDirPosArrow[i])
         /////////////////////////////////////////////
         introDirPosArrow[i].visible = false;
         introDirPosArrow[i].x = introDirPosArrowX[i];
@@ -209,6 +219,10 @@ function commongameintro() {
         introDirPosArrow[i].gotoAndStop(i)
         introDirPosArrowTime[i].addChild(introDirPosArrow[i]);
 
+    }
+
+    if (introTitle) {
+        addIntroLayerChild(introTitle)
     }
     if(lang == "TamilQuestionText/"  ){
         introcolor.x = 618;
@@ -269,7 +283,7 @@ function carDisplay() {
     else {
         for (i = 1; i <= 4; i++) {
             introChoice[i] = this["choice" + i].clone();
-            container.parent.addChild(introChoice[i])
+            addIntroLayerChild(introChoice[i])
             introChoice[i].alpha = 0;
             introChoice[i].scaleX = introChoice[i].scaleY = .55
             introChoice[i].visible = false;
@@ -572,7 +586,7 @@ function ArrowImageClue() {
             .to({ visible: true, scaleX: 1.15, scaleY: 1.15, alpha: 1 }, 600)
             .to({ visible: true, scaleX: 1, scaleY: 1, alpha: 1 }, 600)
         ChoiceTime = new createjs.MovieClip();
-        container.parent.addChild(ChoiceTime);
+        addIntroLayerChild(ChoiceTime);
         ChoiceTime.timeline.addTween(createjs.Tween.get(introChoice[4])
             .to({ scaleX: .6, scaleY: .6 }, 19).to({ scaleX: .55, scaleY: .55 }, 20).wait(1));
         createjs.Tween.get(introChoice[4])
@@ -600,7 +614,7 @@ function ArrowImageClue() {
             .to({ visible: true, scaleX: 1, scaleY: 1, alpha: 1 }, 600)
         /////////////////////////////////
         ChoiceTime = new createjs.MovieClip();
-        container.parent.addChild(ChoiceTime);
+        addIntroLayerChild(ChoiceTime);
         ChoiceTime.timeline.addTween(createjs.Tween.get(introChoice[1])
             .to({ scaleX: .6, scaleY: .6 }, 19).to({ scaleX: .55, scaleY: .55 }, 20).wait(1));
         ////////////////////////////////////////////////////////////
@@ -665,12 +679,12 @@ function setArrowTween() {
 
     }
     else {
-        container.parent.addChild(introArrow);
+        addIntroLayerChild(introArrow);
         introArrow.visible = true;
         introArrow.x = introArrowX;
         introArrow.y = introArrowY;
         highlightTweenArr[0] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[0])
+        addIntroLayerChild(highlightTweenArr[0])
 
         if (Questxt == 0) {
             highlightTweenArr[0] = createjs.Tween.get(introArrow)
@@ -706,12 +720,12 @@ function setFingureTween() {
 
         container.parent.removeChild(introArrow);
         introArrow.visible = false;
-        container.parent.addChild(introfingure);
+        addIntroLayerChild(introfingure);
         introfingure.visible = true;
         introfingure.x = introfingureX;
         introfingure.y = introfingureY;
         highlightTweenArr[1] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[1])
+        addIntroLayerChild(highlightTweenArr[1])
         if (Questxt == 0) {
             highlightTweenArr[1] = createjs.Tween.get(introfingure)
                 .to({ x: introfingureX }, 350)
