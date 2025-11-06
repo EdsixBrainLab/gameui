@@ -3,7 +3,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 3, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -47,6 +47,71 @@ var pos = []
 var chholderarr = []
 var directionarr = []
 var colorarr = []
+var activeChoiceArray = null
+
+var BASKETBALL_L2_PROMPTS = [];
+var BASKETBALL_L2_PROMPT_INDEXES = {
+    OBSERVE: 0,
+    COLOR_FIRST: 1,
+    COLOR_SECOND: 2,
+    COLOR_THIRD: 3,
+    DIRECTION_GENERIC: 4,
+    BALL_FIRST: 5,
+    BALL_SECOND: 6,
+    BALL_THIRD: 7,
+    DIRECTION_ORANGE: 8,
+    DIRECTION_GREEN: 9,
+    DIRECTION_MAROON: 10,
+    DIRECTION_BLUE: 11,
+    DIRECTION_YELLOW: 12,
+    DIRECTION_GREY: 13,
+    DIRECTION_RED: 14
+};
+
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.OBSERVE] = "Watch the basketballs carefully";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_FIRST] = "Which color ball made the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_SECOND] = "Which color ball moved to the left of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_THIRD] = "Which color ball moved to the right of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC] = "Where did the ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST] = "Which ball moved more than one basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_SECOND] = "Which ball moved to the left of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_THIRD] = "Which ball moved to the right of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_ORANGE] = "Where did the Orange color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREEN] = "Where did the Green color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_MAROON] = "Where did the Maroon color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_BLUE] = "Where did the Blue color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_YELLOW] = "Where did the Yellow color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREY] = "Where did the Grey color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_RED] = "Where did the Red color ball move?";
+
+var BASKETBALL_L2_DIRECTION_PROMPT_INDEX = {
+    "Orange": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_ORANGE,
+    "Green": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREEN,
+    "Maroon": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_MAROON,
+    "Blue": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_BLUE,
+    "Yellow": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_YELLOW,
+    "Grey": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREY,
+    "Red": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_RED
+};
+
+function getBasketballL2Prompt(index, fallback) {
+    var prompt = BASKETBALL_L2_PROMPTS[index];
+    if (typeof prompt === "string" && prompt.length) {
+        return prompt;
+    }
+    if (typeof fallback === "string") {
+        return fallback;
+    }
+    return "";
+}
+
+function getDirectionPrompt(colorName) {
+    var directionIndex = BASKETBALL_L2_DIRECTION_PROMPT_INDEX[colorName];
+    if (typeof directionIndex === "number") {
+        return getBasketballL2Prompt(directionIndex, getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC));
+    }
+    return getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC);
+}
 
 
 
@@ -64,6 +129,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
 
     loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
@@ -99,7 +165,6 @@ function init() {
             { id: "Basket", src: gameAssetsPath + "Basket.png" },
             { id: "Basket1", src: gameAssetsPath + "Basket1.png" },
             { id: "Basket2", src: gameAssetsPath + "Basket2.png" },
-            { id: "questionText", src: questionTextPath + "BasketBall-Level2-QT.png" },
             { id: "direction", src: questionTextPath + "BasketBall-Level2-QT2.png" },
             { id: "color", src: questionTextPath + "BasketBall-Level2-QT1.png" },
            // { id: "chholder", src: gameAssetsPath + "ChoiceHolder.png" },
@@ -110,6 +175,8 @@ function init() {
         preloadAllAssets()
         stage.update();
     }
+
+    call_UI_gameQuestion(container, getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.OBSERVE));
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
@@ -188,21 +255,7 @@ function doneLoading1(event) {
         choice1 = new createjs.Sprite(spriteSheet1);
         container.parent.addChild(choice1);
         choice1.visible = false;
-        //			 
-    }
-
-    if (id == "questionText") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("questionText")],
-            "frames": { "regX": 50, "height": 114, "count": 0, "regY": 50, "width": 756 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-        });
         //
-        questionText = new createjs.Sprite(spriteSheet1);
-        container.parent.addChild(questionText);
-        questionText.visible = false;
-        //			 
     }
 
 
@@ -210,6 +263,58 @@ function doneLoading1(event) {
 
 function tick(e) {
     stage.update();
+}
+
+function updateQuestionPrompt(copy) {
+    if (typeof SAUIX_setQuestionText === "function") {
+        SAUIX_setQuestionText(copy, { textAlign: "center" });
+    } else if (QusTxtString) {
+        QusTxtString.text = copy;
+        if (QusTxtString.__labelBG && typeof QusTxtString.__labelBG.update === "function") {
+            QusTxtString.__labelBG.update();
+        }
+    }
+    if (QusTxtString) {
+        QusTxtString.visible = true;
+    }
+}
+
+function showQuestionPrompt(copy, options) {
+    options = options || {};
+    updateQuestionPrompt(copy);
+    if (!QusTxtString) {
+        if (typeof options.onComplete === "function") {
+            options.onComplete();
+        }
+        return;
+    }
+    createjs.Tween.removeTweens(QusTxtString);
+    var delay = (typeof options.delay === "number") ? options.delay : 0;
+    var duration = (typeof options.duration === "number") ? options.duration : 400;
+    var instant = !!options.instant || duration <= 0;
+    QusTxtString.visible = true;
+    if (instant) {
+        QusTxtString.alpha = 1;
+        if (typeof options.onComplete === "function") {
+            options.onComplete();
+        }
+        return;
+    }
+    QusTxtString.alpha = 0;
+    createjs.Tween.get(QusTxtString, { override: true })
+        .wait(delay)
+        .to({ alpha: 1 }, duration)
+        .call(function () {
+            if (typeof options.onComplete === "function") {
+                options.onComplete();
+            }
+        });
+}
+
+function hideQuestionPrompt() {
+    if (!QusTxtString) { return; }
+    createjs.Tween.removeTweens(QusTxtString);
+    QusTxtString.visible = false;
 }
 /////////////////////////////////////////////////////////////////=======HANDLE CLICK========///////////////////////////////////////////////////////////////////
 function handleClick(e) {
@@ -228,12 +333,6 @@ function handleClick(e) {
 ////////////////////////////////////////////////////////////=======CREATION OF GAME ELEMENTS========///////////////////////////////////////////////////////////////////
 function CreateGameElements() {
     interval = setInterval(countTime, 1000);
-
-    container.parent.addChild(questionText);
-    questionText.visible = false;
-    questionText.x = 305; questionText.y = 75
-
-
 
     // container.parent.addChild(chholder1);
     // chholder1.visible = false;
@@ -265,10 +364,16 @@ function CreateGameElements() {
         container.parent.addChild(directionarr[i]);
         directionarr[i].visible = false;
         directionarr[i].scaleX = directionarr[i].scaleY = 1
+        directionarr[i].__choiceIndex = i;
     }
     directionarr[0].x = 444; directionarr[0].y = 300
     directionarr[1].x = 605; directionarr[1].y = 455
     directionarr[2].x = 763; directionarr[2].y = 300
+    for (i = 0; i < choiceCnt; i++) {
+        directionarr[i].__targetX = directionarr[i].x;
+        directionarr[i].__targetY = directionarr[i].y;
+        directionarr[i].baseScale = directionarr[i].scaleX;
+    }
 
     for (i = 0; i < choiceCnt; i++) {
         colorarr[i] = color.clone()
@@ -276,10 +381,16 @@ function CreateGameElements() {
         colorarr[i].visible = false;
         colorarr[i].scaleX = 1
         colorarr[i].scaleY = 1
+        colorarr[i].__choiceIndex = i;
     }
     colorarr[0].x = 445; colorarr[0].y = 300
     colorarr[1].x = 607; colorarr[1].y = 460
     colorarr[2].x = 762; colorarr[2].y = 300
+    for (i = 0; i < choiceCnt; i++) {
+        colorarr[i].__targetX = colorarr[i].x;
+        colorarr[i].__targetY = colorarr[i].y;
+        colorarr[i].baseScale = colorarr[i].scaleX;
+    }
 
     // for (i = 0; i < choiceCnt; i++) {
         // chholderarr[i] = chholder.clone()
@@ -298,6 +409,10 @@ function CreateGameElements() {
         choiceArr[i].scaleX = 1
         choiceArr[i].scaleY = 1
         choiceArr[i].visible = false;
+        choiceArr[i].__choiceIndex = i;
+        choiceArr[i].__targetX = choiceArr[i].x;
+        choiceArr[i].__targetY = choiceArr[i].y;
+        choiceArr[i].baseScale = choiceArr[i].scaleX;
 
     }
 
@@ -352,9 +467,7 @@ function pickques() {
     qnoI = between(0, 6);
     qno1 = between(0, 2);
 
-    questionText.visible = true;
-    questionText.gotoAndStop(0)
-    questionText.x = 305; questionText.y = 75
+    showQuestionPrompt(getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.OBSERVE), { duration: 200 });
     Basket2.visible = true;
     Basket.visible = true;
     Basket1.visible = false;
@@ -507,59 +620,62 @@ function enablechoices() {
 
     quesArr[a].visible = false;
     clearInterval(clrin3);
-    questionText.visible = true;
-    questionText.x = 305; questionText.y = 75
     Basket.visible = false;
     Basket1.visible = false;
     Basket2.visible = false;
 
+    resetChoiceTweens(choiceArr);
+    resetChoiceTweens(colorarr);
+    resetChoiceTweens(directionarr);
+    clearChoiceAnimations(choiceArr);
+    clearChoiceAnimations(colorarr);
+    clearChoiceAnimations(directionarr);
+
+    hideChoiceArray(choiceArr);
+    hideChoiceArray(colorarr);
+    hideChoiceArray(directionarr);
+
+    var promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST);
+    activeChoiceArray = choiceArr;
+
     if (pos[cnt] == 0) {
-        questionText.gotoAndStop(1)
-       // chholder1.visible = true;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_FIRST);
         rand1 = between(0, 6);
         temp1 = qnoI[temp1];
         var b = rand1.indexOf(temp1);
         rand1.splice(b, 1);
         for (i = 0; i < choiceCnt; i++) {
-
             colorarr[i].visible = true;
             colorarr[i].gotoAndStop(rand1[i])
             colorarr[i].name = i
+            colorarr[i].mouseEnabled = false;
+            colorarr[i].cursor = "default";
         }
         colorarr[choicePos[cnt]].gotoAndStop(temp1);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].mouseEnabled = true;
-            colorarr[i].cursor = "pointer";
-            colorarr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = colorarr;
 
     }
     else if (pos[cnt] == 1) {
-        questionText.gotoAndStop(2)
-        //chholder1.visible = true;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_SECOND);
         rand1 = between(0, 6);
         temp2 = qnoI[temp2];
         var b = rand1.indexOf(temp2);
         rand1.splice(b, 1);
         for (i = 0; i < choiceCnt; i++) {
-
             colorarr[i].visible = true;
             colorarr[i].gotoAndStop(rand1[i])
             colorarr[i].name = i
+            colorarr[i].mouseEnabled = false;
+            colorarr[i].cursor = "default";
         }
         colorarr[choicePos[cnt]].gotoAndStop(temp2);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].mouseEnabled = true;
-            colorarr[i].cursor = "pointer";
-            colorarr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = colorarr;
 
     }
     else if (pos[cnt] == 2) {
-        questionText.gotoAndStop(3)
-        //chholder1.visible = true;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_THIRD);
         rand1 = between(0, 6);
         temp3 = qnoI[temp3];
         var b = rand1.indexOf(temp3);
@@ -568,77 +684,66 @@ function enablechoices() {
             colorarr[i].visible = true;
             colorarr[i].gotoAndStop(rand1[i])
             colorarr[i].name = i
+            colorarr[i].mouseEnabled = false;
+            colorarr[i].cursor = "default";
         }
         colorarr[choicePos[cnt]].gotoAndStop(temp3);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].mouseEnabled = true;
-            colorarr[i].cursor = "pointer";
-            colorarr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = colorarr;
 
     }
     else if (pos[cnt] == 3) {
-        questionText.gotoAndStop(5)
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST);
         rand1 = between(0, 6);
         temp1 = qnoI[temp1];
         var b = rand1.indexOf(temp1);
         rand1.splice(b, 1);
         for (i = 0; i < choiceCnt; i++) {
-           // chholderarr[i].visible = true;
             choiceArr[i].visible = true;
             choiceArr[i].gotoAndStop(rand1[i])
             choiceArr[i].name = i
+            choiceArr[i].mouseEnabled = false;
+            choiceArr[i].cursor = "default";
         }
         choiceArr[choicePos[cnt]].gotoAndStop(temp1);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            choiceArr[i].mouseEnabled = true;
-            choiceArr[i].cursor = "pointer";
-            choiceArr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = choiceArr;
 
     }
     else if (pos[cnt] == 4) {
-        questionText.gotoAndStop(6)
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_SECOND);
         rand1 = between(0, 6);
         temp2 = qnoI[temp2];
         var b = rand1.indexOf(temp2);
         rand1.splice(b, 1);
         for (i = 0; i < choiceCnt; i++) {
-           // chholderarr[i].visible = true;
             choiceArr[i].visible = true;
             choiceArr[i].gotoAndStop(rand1[i])
             choiceArr[i].name = i
+            choiceArr[i].mouseEnabled = false;
+            choiceArr[i].cursor = "default";
         }
         choiceArr[choicePos[cnt]].gotoAndStop(temp2);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            choiceArr[i].mouseEnabled = true;
-            choiceArr[i].cursor = "pointer";
-            choiceArr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = choiceArr;
 
     }
     else if (pos[cnt] == 5) {
-        questionText.gotoAndStop(7)
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_THIRD);
         rand1 = between(0, 6);
         temp3 = qnoI[temp3];
         var b = rand1.indexOf(temp3);
         rand1.splice(b, 1);
         for (i = 0; i < choiceCnt; i++) {
-           // chholderarr[i].visible = true;
             choiceArr[i].visible = true;
             choiceArr[i].gotoAndStop(rand1[i])
             choiceArr[i].name = i
+            choiceArr[i].mouseEnabled = false;
+            choiceArr[i].cursor = "default";
         }
         choiceArr[choicePos[cnt]].gotoAndStop(temp3);
         ans = choicePos[cnt]
-        for (i = 0; i < choiceCnt; i++) {
-            choiceArr[i].mouseEnabled = true;
-            choiceArr[i].cursor = "pointer";
-            choiceArr[i].addEventListener("click", answerSelected)
-        }
+        activeChoiceArray = choiceArr;
 
     }
     else if (pos[cnt] == 6) {
@@ -647,30 +752,15 @@ function enablechoices() {
         qno2 = [0, 1, 2];
         qno2.sort(randomSort)
         str = color[qnoI[qno2[0]]];
-
-        if (str == "Orange")
-            questionText.gotoAndStop(8)
-        else if (str == "Green")
-            questionText.gotoAndStop(9)
-        else if (str == "Maroon")
-            questionText.gotoAndStop(10)
-        else if (str == "Blue")
-            questionText.gotoAndStop(11)
-        else if (str == "Yellow")
-            questionText.gotoAndStop(12)
-        else if (str == "Grey")
-            questionText.gotoAndStop(13)
-        else if (str == "Red")
-            questionText.gotoAndStop(14)
-
-        // questionTextLabel.text = "Where did the " + str + " color ball moves ?"
+        promptCopy = getDirectionPrompt(str);
 
         rand1 = between(0, 2);
-      //  chholder1.visible = true;
         for (i = 0; i < choiceCnt; i++) {
             directionarr[i].visible = true;
             directionarr[i].gotoAndStop(rand1[i])
             directionarr[i].name = rand1[i]
+            directionarr[i].mouseEnabled = false;
+            directionarr[i].cursor = "default";
         }
 
         if (qno2[0] == temp1)
@@ -680,13 +770,25 @@ function enablechoices() {
         else if (qno2[0] == temp3)
             ans = 1
 
+        activeChoiceArray = directionarr;
 
-        for (i = 0; i < choiceCnt; i++) {
-            directionarr[i].mouseEnabled = true;
-            directionarr[i].cursor = "pointer";
-            directionarr[i].addEventListener("click", answerSelected)
-        }
+    }
 
+    showQuestionPrompt(promptCopy, { duration: 300 });
+    animateChoiceOptions(activeChoiceArray, AddListenerFn);
+
+}
+
+function AddListenerFn() {
+
+    var targetArray = activeChoiceArray || choiceArr;
+    if (!targetArray) { return; }
+    for (i = 0; i < targetArray.length; i++) {
+        var tile = targetArray[i];
+        if (!tile || !tile.visible) { continue; }
+        tile.mouseEnabled = true;
+        tile.cursor = "pointer";
+        tile.addEventListener("click", answerSelected);
     }
     rst = 0;
     gameResponseTimerStart();
@@ -694,97 +796,171 @@ function enablechoices() {
 
 }
 
+function hideChoiceArray(choiceArray) {
+    if (!choiceArray) { return; }
+    for (i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            choiceArray[i].visible = false;
+            choiceArray[i].alpha = 1;
+            choiceArray[i].mouseEnabled = false;
+            choiceArray[i].cursor = "default";
+            choiceArray[i].removeEventListener("click", answerSelected);
+        }
+    }
+}
+
+function disableChoiceArray(choiceArray) {
+    if (!choiceArray) { return; }
+    for (i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            choiceArray[i].visible = false;
+            choiceArray[i].mouseEnabled = false;
+            choiceArray[i].cursor = "default";
+            choiceArray[i].alpha = 1;
+            choiceArray[i].removeEventListener("click", answerSelected);
+        }
+    }
+}
+
+function disableChoiceInteractivity(choiceArray) {
+    if (!choiceArray) { return; }
+    for (i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            choiceArray[i].mouseEnabled = false;
+            choiceArray[i].cursor = "default";
+        }
+    }
+}
+
+function animateChoiceOptions(choiceArray, onComplete) {
+    if (!choiceArray) { return; }
+    var pendingTweens = 0;
+    var hasTweens = false;
+    for (var idx = 0; idx < choiceArray.length; idx++) {
+        var tile = choiceArray[idx];
+        if (!tile || !tile.visible) { continue; }
+        hasTweens = true;
+        pendingTweens++;
+        stopChoicePulse(tile);
+        var baseScale = tile.baseScale || tile.scaleX || 1;
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 70;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.18, 0.55);
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+        (function (target, base, finalY, order) {
+            var delay = 200 + (order * 140);
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease.quadOut);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease.backOut)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease.sineOut)
+                .call(function () {
+                    startChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) { return; }
+    stopChoicePulse(tile);
+    var scale = baseScale || tile.baseScale || tile.scaleX || 1;
+    var finalY = (typeof targetY === "number") ? targetY : tile.__targetY || tile.y;
+    var stagger = (typeof index === "number") ? index : (tile.__choiceIndex || 0);
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 100)
+        .to({ scaleX: scale * 1.05, scaleY: scale * 0.95 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale * 0.98, scaleY: scale * 1.02 }, 360, createjs.Ease.sineInOut)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease.sineInOut);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ y: finalY - 8 }, 360, createjs.Ease.sineOut)
+        .to({ y: finalY }, 420, createjs.Ease.sineInOut);
+}
+
+function stopChoicePulse(tile) {
+    if (!tile) { return; }
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+    createjs.Tween.removeTweens(tile);
+    if (tile.baseScale) {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetChoiceTweens(choiceArray) {
+    if (!choiceArray) { return; }
+    for (i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            stopChoicePulse(choiceArray[i]);
+        }
+    }
+}
+
+function clearChoiceAnimations(choiceArray) {
+    if (!choiceArray) { return; }
+    for (i = 0; i < choiceArray.length; i++) {
+        if (choiceArray[i]) {
+            createjs.Tween.removeTweens(choiceArray[i]);
+        }
+    }
+}
+
 
 
 function disablechoices() {
    // chholder.visible = false
-    questionText.visible = false;
+    hideQuestionPrompt();
     Basket.visible = false;
     Basket1.visible = false;
     Basket2.visible = false;
-    if (pos[cnt] == 0) {
-        //chholder1.visible = false;
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].visible = false;
-            colorarr[i].mouseEnabled = false;
-            colorarr[i].cursor = "default";
-            colorarr[i].alpha = 1
-            colorarr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 1) {
-       // chholder1.visible = false;
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].visible = false;
-            colorarr[i].mouseEnabled = false;
-            colorarr[i].cursor = "default";
-            colorarr[i].alpha = 1
-            colorarr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 2) {
-       // chholder1.visible = false;
-        for (i = 0; i < choiceCnt; i++) {
-            colorarr[i].visible = false;
-            colorarr[i].mouseEnabled = false;
-            colorarr[i].cursor = "default";
-            colorarr[i].alpha = 1
-            colorarr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 3) {
-        for (i = 0; i < choiceCnt; i++) {
-           // chholderarr[i].visible = false;
-            choiceArr[i].visible = false;
-            choiceArr[i].mouseEnabled = false;
-            choiceArr[i].cursor = "default";
-            choiceArr[i].alpha = 1
-            choiceArr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 4) {
-        for (i = 0; i < choiceCnt; i++) {
-           // chholderarr[i].visible = false;
-            choiceArr[i].visible = false;
-            choiceArr[i].mouseEnabled = false;
-            choiceArr[i].cursor = "default";
-            choiceArr[i].alpha = 1
-            choiceArr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 5) {
-        for (i = 0; i < choiceCnt; i++) {
-          //  chholderarr[i].visible = false;
-            choiceArr[i].visible = false;
-            choiceArr[i].mouseEnabled = false;
-            choiceArr[i].cursor = "default";
-            choiceArr[i].alpha = 1
-            choiceArr[i].removeEventListener("click", answerSelected)
-
-        }
-    }
-    else if (pos[cnt] == 6) {
-
-
-
-       // chholder1.visible = false;
-        for (i = 0; i < choiceCnt; i++) {
-            directionarr[i].visible = false;
-            directionarr[i].mouseEnabled = false;
-            directionarr[i].cursor = "default";
-            directionarr[i].alpha = 1
-            directionarr[i].removeEventListener("click", answerSelected)
-
-        }
-
-    }
-
-
+    disableChoiceArray(choiceArr);
+    disableChoiceArray(colorarr);
+    disableChoiceArray(directionarr);
+    resetChoiceTweens(choiceArr);
+    resetChoiceTweens(colorarr);
+    resetChoiceTweens(directionarr);
+    clearChoiceAnimations(choiceArr);
+    clearChoiceAnimations(colorarr);
+    clearChoiceAnimations(directionarr);
 }
 //===================================================================MOUSE ROLL OVER/ROLL OUT==============================================================//
 function onRoll_over(e) {
@@ -809,9 +985,9 @@ function answerSelected(e) {
     if (ans == uans) {
 
         e.currentTarget.removeEventListener("click", answerSelected)
-        for (i = 0; i < choiceCnt; i++) {
-            choiceArr[i].mouseEnabled = false;
-        }
+        disableChoiceInteractivity(choiceArr);
+        disableChoiceInteractivity(colorarr);
+        disableChoiceInteractivity(directionarr);
 
         setTimeout(correct, 200)
 
