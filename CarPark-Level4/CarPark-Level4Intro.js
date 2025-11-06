@@ -139,6 +139,10 @@ function addIntroLayerChild(child) {
 
     container.parent.addChild(child);
 
+    if (typeof ensureCarParkPromptLayer === "function") {
+        ensureCarParkPromptLayer();
+    }
+
     if (introTitle && introTitle.parent) {
         ensureIntroTitleLayer(introTitle);
     }
@@ -151,8 +155,18 @@ function commongameintro() {
         applyResolvedIntroTitlePosition(Title, introTitlePosition);
     }
 
-    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
-        hideCarParkPrompt();
+    if (shouldUseCarParkIntroTextPrompt()) {
+        if (typeof ensureCarParkPromptContainer === "function") {
+            ensureCarParkPromptContainer();
+        }
+
+        if (typeof ensureCarParkPromptLayer === "function") {
+            ensureCarParkPromptLayer();
+        }
+
+        if (typeof hideCarParkPrompt === "function") {
+            hideCarParkPrompt();
+        }
     }
     Questxt = 0;
     IntroBackground = holder.clone();

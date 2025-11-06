@@ -610,6 +610,52 @@ function ensureCarParkPromptContainer() {
   if (!questionPromptContainer.parent) {
     container.parent.addChild(questionPromptContainer);
   }
+
+  ensureCarParkPromptLayer();
+}
+
+function ensureCarParkPromptLayer() {
+  if (!questionPromptContainer || !questionPromptContainer.parent) {
+    return;
+  }
+
+  var parent = questionPromptContainer.parent;
+  if (typeof parent.getChildIndex !== "function" || typeof parent.setChildIndex !== "function") {
+    return;
+  }
+
+  var currentIndex = parent.getChildIndex(questionPromptContainer);
+  var targetIndex = parent.numChildren - 1;
+
+  if (currentIndex !== targetIndex) {
+    parent.setChildIndex(questionPromptContainer, targetIndex);
+  }
+
+  ensureCarParkTitleLayer();
+}
+
+function ensureCarParkTitleLayer() {
+  var titleTarget = null;
+
+  if (typeof introTitle !== "undefined" && introTitle && introTitle.parent) {
+    titleTarget = introTitle;
+  } else if (typeof Title !== "undefined" && Title && Title.parent) {
+    titleTarget = Title;
+  }
+
+  if (!titleTarget) {
+    return;
+  }
+
+  var parent = titleTarget.parent;
+  if (!parent || typeof parent.getChildIndex !== "function" || typeof parent.setChildIndex !== "function") {
+    return;
+  }
+
+  var topIndex = parent.numChildren - 1;
+  if (parent.getChildIndex(titleTarget) !== topIndex) {
+    parent.setChildIndex(titleTarget, topIndex);
+  }
 }
 
 function prepareCarParkPromptForReveal() {
@@ -625,6 +671,8 @@ function prepareCarParkPromptForReveal() {
 
   questionPromptContainer.visible = false;
   questionPromptContainer.alpha = 0;
+
+  ensureCarParkPromptLayer();
 
   if (questionPromptFocus) {
     questionPromptFocus.scaleX = questionPromptFocus.scaleY = 1;
@@ -686,6 +734,8 @@ function updateCarParkPrompt(colorIndex, questionType) {
   positionCarParkPromptContainer();
 
   layoutCarParkPromptParts();
+
+  ensureCarParkPromptLayer();
 }
 
 function revealCarParkPrompt() {
@@ -694,6 +744,7 @@ function revealCarParkPrompt() {
   }
 
   positionCarParkPromptContainer();
+  ensureCarParkPromptLayer();
   questionPromptContainer.visible = true;
   questionPromptContainer.alpha = 0;
 
