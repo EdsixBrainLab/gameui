@@ -49,20 +49,68 @@ var directionarr = []
 var colorarr = []
 var activeChoiceArray = null
 
-var BASKETBALL_L2_PROMPT_OBSERVE = "Watch the balls carefully";
-var BASKETBALL_L2_PROMPT_COLOR_FIRST = "Which color ball went into the basket first?";
-var BASKETBALL_L2_PROMPT_COLOR_SECOND = "Which color ball went into the basket second?";
-var BASKETBALL_L2_PROMPT_COLOR_THIRD = "Which color ball went into the basket third?";
-var BASKETBALL_L2_PROMPT_BALL_FIRST = "Which ball went into the basket first?";
-var BASKETBALL_L2_PROMPT_BALL_SECOND = "Which ball went into the basket second?";
-var BASKETBALL_L2_PROMPT_BALL_THIRD = "Which ball went into the basket third?";
-var BASKETBALL_L2_PROMPT_DIRECTION_GENERIC = "Which direction did the ball move?";
+var BASKETBALL_L2_PROMPTS = [];
+var BASKETBALL_L2_PROMPT_INDEXES = {
+    OBSERVE: 0,
+    COLOR_FIRST: 1,
+    COLOR_SECOND: 2,
+    COLOR_THIRD: 3,
+    DIRECTION_GENERIC: 4,
+    BALL_FIRST: 5,
+    BALL_SECOND: 6,
+    BALL_THIRD: 7,
+    DIRECTION_ORANGE: 8,
+    DIRECTION_GREEN: 9,
+    DIRECTION_MAROON: 10,
+    DIRECTION_BLUE: 11,
+    DIRECTION_YELLOW: 12,
+    DIRECTION_GREY: 13,
+    DIRECTION_RED: 14
+};
+
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.OBSERVE] = "Watch the basketballs carefully";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_FIRST] = "Which color ball made the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_SECOND] = "Which color ball moved to the left of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.COLOR_THIRD] = "Which color ball moved to the right of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC] = "Where did the ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST] = "Which ball moved more than one basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_SECOND] = "Which ball moved to the left of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.BALL_THIRD] = "Which ball moved to the right of the basket?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_ORANGE] = "Where did the Orange color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREEN] = "Where did the Green color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_MAROON] = "Where did the Maroon color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_BLUE] = "Where did the Blue color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_YELLOW] = "Where did the Yellow color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREY] = "Where did the Grey color ball move?";
+BASKETBALL_L2_PROMPTS[BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_RED] = "Where did the Red color ball move?";
+
+var BASKETBALL_L2_DIRECTION_PROMPT_INDEX = {
+    "Orange": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_ORANGE,
+    "Green": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREEN,
+    "Maroon": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_MAROON,
+    "Blue": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_BLUE,
+    "Yellow": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_YELLOW,
+    "Grey": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GREY,
+    "Red": BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_RED
+};
+
+function getBasketballL2Prompt(index, fallback) {
+    var prompt = BASKETBALL_L2_PROMPTS[index];
+    if (typeof prompt === "string" && prompt.length) {
+        return prompt;
+    }
+    if (typeof fallback === "string") {
+        return fallback;
+    }
+    return "";
+}
 
 function getDirectionPrompt(colorName) {
-    if (!colorName) {
-        return BASKETBALL_L2_PROMPT_DIRECTION_GENERIC;
+    var directionIndex = BASKETBALL_L2_DIRECTION_PROMPT_INDEX[colorName];
+    if (typeof directionIndex === "number") {
+        return getBasketballL2Prompt(directionIndex, getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC));
     }
-    return "Which direction did the " + colorName.toLowerCase() + " ball move?";
+    return getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC);
 }
 
 
@@ -128,7 +176,7 @@ function init() {
         stage.update();
     }
 
-    call_UI_gameQuestion(container, BASKETBALL_L2_PROMPT_OBSERVE);
+    call_UI_gameQuestion(container, getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.OBSERVE));
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
@@ -419,7 +467,7 @@ function pickques() {
     qnoI = between(0, 6);
     qno1 = between(0, 2);
 
-    showQuestionPrompt(BASKETBALL_L2_PROMPT_OBSERVE, { duration: 200 });
+    showQuestionPrompt(getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.OBSERVE), { duration: 200 });
     Basket2.visible = true;
     Basket.visible = true;
     Basket1.visible = false;
@@ -587,11 +635,11 @@ function enablechoices() {
     hideChoiceArray(colorarr);
     hideChoiceArray(directionarr);
 
-    var promptCopy = BASKETBALL_L2_PROMPT_BALL_FIRST;
+    var promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST);
     activeChoiceArray = choiceArr;
 
     if (pos[cnt] == 0) {
-        promptCopy = BASKETBALL_L2_PROMPT_COLOR_FIRST;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_FIRST);
         rand1 = between(0, 6);
         temp1 = qnoI[temp1];
         var b = rand1.indexOf(temp1);
@@ -609,7 +657,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 1) {
-        promptCopy = BASKETBALL_L2_PROMPT_COLOR_SECOND;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_SECOND);
         rand1 = between(0, 6);
         temp2 = qnoI[temp2];
         var b = rand1.indexOf(temp2);
@@ -627,7 +675,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 2) {
-        promptCopy = BASKETBALL_L2_PROMPT_COLOR_THIRD;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.COLOR_THIRD);
         rand1 = between(0, 6);
         temp3 = qnoI[temp3];
         var b = rand1.indexOf(temp3);
@@ -645,7 +693,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 3) {
-        promptCopy = BASKETBALL_L2_PROMPT_BALL_FIRST;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_FIRST);
         rand1 = between(0, 6);
         temp1 = qnoI[temp1];
         var b = rand1.indexOf(temp1);
@@ -663,7 +711,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 4) {
-        promptCopy = BASKETBALL_L2_PROMPT_BALL_SECOND;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_SECOND);
         rand1 = between(0, 6);
         temp2 = qnoI[temp2];
         var b = rand1.indexOf(temp2);
@@ -681,7 +729,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 5) {
-        promptCopy = BASKETBALL_L2_PROMPT_BALL_THIRD;
+        promptCopy = getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.BALL_THIRD);
         rand1 = between(0, 6);
         temp3 = qnoI[temp3];
         var b = rand1.indexOf(temp3);

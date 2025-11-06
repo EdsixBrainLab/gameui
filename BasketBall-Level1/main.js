@@ -49,10 +49,18 @@ var directionarr = []
 var colorarr = []
 var activeChoiceArray = null
 
-var BASKETBALL_PROMPT_OBSERVE = "Watch the balls carefully";
-var BASKETBALL_PROMPT_SELECT_FIRST = "Which ball went into the basket first?";
-var BASKETBALL_PROMPT_SELECT_SECOND = "Which ball went into the basket second?";
-var BASKETBALL_PROMPT_SELECT_THIRD = "Which ball went into the basket third?";
+var BASKETBALL_L1_PROMPTS = [];
+var BASKETBALL_L1_PROMPT_INDEXES = {
+    OBSERVE: 0,
+    SELECT_FIRST: 5,
+    SELECT_SECOND: 6,
+    SELECT_THIRD: 7
+};
+
+BASKETBALL_L1_PROMPTS[BASKETBALL_L1_PROMPT_INDEXES.OBSERVE] = "Watch the basketballs carefully";
+BASKETBALL_L1_PROMPTS[BASKETBALL_L1_PROMPT_INDEXES.SELECT_FIRST] = "Which ball moved more than one basket?";
+BASKETBALL_L1_PROMPTS[BASKETBALL_L1_PROMPT_INDEXES.SELECT_SECOND] = "Which ball moved to the left of the basket?";
+BASKETBALL_L1_PROMPTS[BASKETBALL_L1_PROMPT_INDEXES.SELECT_THIRD] = "Which ball moved to the right of the basket?";
 
 
 
@@ -117,7 +125,7 @@ function init() {
         stage.update();
     }
 
-    call_UI_gameQuestion(container, BASKETBALL_PROMPT_OBSERVE);
+    call_UI_gameQuestion(container, getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.OBSERVE));
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
@@ -204,6 +212,17 @@ function doneLoading1(event) {
 
 function tick(e) {
     stage.update();
+}
+
+function getBasketballL1Prompt(index, fallback) {
+    var prompt = BASKETBALL_L1_PROMPTS[index];
+    if (typeof prompt === "string" && prompt.length) {
+        return prompt;
+    }
+    if (typeof fallback === "string") {
+        return fallback;
+    }
+    return "";
 }
 
 function updateQuestionPrompt(copy) {
@@ -408,7 +427,7 @@ function pickques() {
 
     qnoI = between(0, 6);
     qno1 = between(0, 2);
-    showQuestionPrompt(BASKETBALL_PROMPT_OBSERVE, { duration: 200 });
+    showQuestionPrompt(getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.OBSERVE), { duration: 200 });
     Basket2.visible = true;
     Basket.visible = true;
     Basket1.visible = false;
@@ -576,11 +595,11 @@ function enablechoices() {
     hideChoiceArray(colorarr);
     hideChoiceArray(directionarr);
 
-    var promptCopy = BASKETBALL_PROMPT_SELECT_FIRST;
+    var promptCopy = getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.SELECT_FIRST);
     activeChoiceArray = choiceArr;
 
     if (pos[cnt] == 0) {
-        promptCopy = BASKETBALL_PROMPT_SELECT_FIRST;
+        promptCopy = getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.SELECT_FIRST);
         rand1 = between(0, 6);
         temp1 = qnoI[temp1];
         var b = rand1.indexOf(temp1);
@@ -597,7 +616,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 1) {
-        promptCopy = BASKETBALL_PROMPT_SELECT_SECOND;
+        promptCopy = getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.SELECT_SECOND);
         rand1 = between(0, 6);
         temp2 = qnoI[temp2];
         var b = rand1.indexOf(temp2);
@@ -614,7 +633,7 @@ function enablechoices() {
 
     }
     else if (pos[cnt] == 2) {
-        promptCopy = BASKETBALL_PROMPT_SELECT_THIRD;
+        promptCopy = getBasketballL1Prompt(BASKETBALL_L1_PROMPT_INDEXES.SELECT_THIRD);
         rand1 = between(0, 6);
         temp3 = qnoI[temp3];
         var b = rand1.indexOf(temp3);

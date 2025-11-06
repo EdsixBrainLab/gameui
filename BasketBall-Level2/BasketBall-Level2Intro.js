@@ -33,7 +33,7 @@ function commongameintro() {
 
     container.parent.addChild(introTitle)
     introTitle.visible = true;
-    showQuestionPrompt(BASKETBALL_L2_PROMPT_OBSERVE, { duration: 1000, onComplete: handleComplete1_1 });
+    showQuestionPrompt(getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.OBSERVE), { duration: 1000, onComplete: handleComplete1_1 });
 
 
     container.parent.addChild(introHolder2)
@@ -145,7 +145,7 @@ function handleComplete5_1() {
     for (i = 0; i < 3; i++) {
         introquesArr[i].visible = false;
     }
-    showQuestionPrompt(BASKETBALL_L2_PROMPT_DIRECTION_GENERIC, { duration: 300 });
+    showQuestionPrompt(getBasketballL2Prompt(BASKETBALL_L2_PROMPT_INDEXES.DIRECTION_GENERIC), { duration: 300 });
     choiceTween12()
 }
 function choiceTween12() {
