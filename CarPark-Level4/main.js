@@ -12,6 +12,13 @@ var cnt = -1,
     rst = 0,
     responseTime = 0;
 var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, helpMc, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var questionPromptContainer,
+  questionPromptPrefix,
+  questionPromptFocus,
+  questionPromptFocusHighlight,
+  questionPromptMiddle,
+  questionPromptColor,
+  questionPromptSuffix;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -95,9 +102,63 @@ var dirCar = [
 ]
 
  var QusTxtString;
-var 
+var
   ambientGradientLayer,
   ambientOrbs = [];
+
+// Adjust these coordinates to reposition the title panel specifically for CarPark Level 4.
+var CARPARK_TITLE_PANEL_POSITION = {
+  x: 120,
+  y: 220
+};
+
+if (typeof window !== "undefined") {
+  window.__carParkLevel4TitlePosition = CARPARK_TITLE_PANEL_POSITION;
+}
+
+function getTitlePanelPosition() {
+  return CARPARK_TITLE_PANEL_POSITION;
+}
+
+function applyTitlePanelPosition(target) {
+  if (!target) {
+    return;
+  }
+
+  var position = getTitlePanelPosition();
+  target.x = position.x;
+  target.y = position.y;
+
+  target.__layoutTargetX = position.x;
+  target.__layoutTargetY = position.y;
+  if (!target.__manualLayoutPosition) {
+    target.__manualLayoutPosition = { x: position.x, y: position.y };
+  } else {
+    target.__manualLayoutPosition.x = position.x;
+    target.__manualLayoutPosition.y = position.y;
+  }
+}
+
+function setCarParkTitlePanelPosition(x, y) {
+  if (typeof x === "number" && !isNaN(x)) {
+    CARPARK_TITLE_PANEL_POSITION.x = x;
+  }
+  if (typeof y === "number" && !isNaN(y)) {
+    CARPARK_TITLE_PANEL_POSITION.y = y;
+  }
+
+  if (typeof window !== "undefined") {
+    window.__carParkLevel4TitlePosition = CARPARK_TITLE_PANEL_POSITION;
+  }
+
+  if (typeof Title !== "undefined" && Title) {
+    applyTitlePanelPosition(Title);
+  }
+
+  if (typeof introTitle !== "undefined" && introTitle) {
+    applyTitlePanelPosition(introTitle);
+  }
+}
   
 //////////////////////////////////////////////////
 //register key functions
@@ -118,6 +179,314 @@ var CLUE_SLOT_BASE_COLORS = ["rgba(32,58,104,0.92)", "rgba(19,36,74,0.92)"];
 var CLUE_SLOT_HIGHLIGHT_COLORS = ["rgba(89,156,255,0.9)", "rgba(44,92,178,0.9)"];
 var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"];
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
+
+var CAR_PARK_PROMPT_COLOR_DATA = [
+  { name: "RED", fill: "#FF4D5D" },
+  { name: "YELLOW", fill: "#FFC531" },
+  { name: "BLUE", fill: "#3E82FF" },
+  { name: "GREEN", fill: "#32C46C" }
+];
+
+function shouldUseCarParkTextPrompt() {
+  if (typeof lang === "undefined" || lang === null) {
+    return true;
+  }
+
+  var normalized = String(lang).toLowerCase();
+  normalized = normalized.replace(/\\+/g, "/");
+
+  if (
+    !normalized ||
+    normalized === "englishquestiontext/" ||
+    normalized === "englishquestiontext"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function getCarParkPromptColorData(index) {
+  if (typeof index !== "number") {
+    return CAR_PARK_PROMPT_COLOR_DATA[0];
+  }
+
+  var normalized = index % CAR_PARK_PROMPT_COLOR_DATA.length;
+  if (normalized < 0) {
+    normalized += CAR_PARK_PROMPT_COLOR_DATA.length;
+  }
+
+  return CAR_PARK_PROMPT_COLOR_DATA[normalized] || CAR_PARK_PROMPT_COLOR_DATA[0];
+}
+
+function positionCarParkPromptContainer() {
+  if (!questionPromptContainer || !canvas) {
+    return;
+  }
+
+  questionPromptContainer.x = canvas.width / 2;
+  questionPromptContainer.y = 340;
+
+  questionPromptContainer.__layoutTargetX = questionPromptContainer.x;
+  questionPromptContainer.__layoutTargetY = questionPromptContainer.y;
+  if (!questionPromptContainer.__manualLayoutPosition) {
+    questionPromptContainer.__manualLayoutPosition = {
+      x: questionPromptContainer.x,
+      y: questionPromptContainer.y
+    };
+  } else {
+    questionPromptContainer.__manualLayoutPosition.x = questionPromptContainer.x;
+    questionPromptContainer.__manualLayoutPosition.y = questionPromptContainer.y;
+  }
+}
+
+function layoutCarParkPromptParts() {
+  if (!questionPromptContainer) {
+    return;
+  }
+
+  var parts = [
+    questionPromptPrefix,
+    questionPromptFocus,
+    questionPromptMiddle,
+    questionPromptColor,
+    questionPromptSuffix
+  ];
+
+  var totalWidth = 0;
+  var focusWidth = 0;
+  var focusHeight = 0;
+
+  if (questionPromptFocus) {
+    if (typeof questionPromptFocus.getMeasuredWidth === "function") {
+      focusWidth = questionPromptFocus.getMeasuredWidth();
+    }
+
+    if (typeof questionPromptFocus.getMeasuredHeight === "function") {
+      focusHeight = questionPromptFocus.getMeasuredHeight();
+    } else if (typeof questionPromptFocus.getMeasuredLineHeight === "function") {
+      focusHeight = questionPromptFocus.getMeasuredLineHeight();
+    }
+
+    if (!focusHeight) {
+      focusHeight = 56;
+    }
+  }
+
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i];
+    if (!part) {
+      continue;
+    }
+
+    var measuredWidth = part.getMeasuredWidth ? part.getMeasuredWidth() : 0;
+    totalWidth += measuredWidth;
+  }
+
+  var startX = -totalWidth / 2;
+  var currentX = startX;
+
+  for (var j = 0; j < parts.length; j++) {
+    var currentPart = parts[j];
+    if (!currentPart) {
+      continue;
+    }
+
+    var width = currentPart.getMeasuredWidth ? currentPart.getMeasuredWidth() : 0;
+    currentPart.x = currentX;
+    currentPart.y = 0;
+    currentX += width;
+  }
+
+  if (questionPromptFocusHighlight && questionPromptFocus) {
+    var paddingX = 22;
+    var paddingY = 14;
+    var highlightWidth = focusWidth + paddingX * 2;
+    var highlightHeight = focusHeight + paddingY * 2;
+    var highlightFill = questionPromptFocusHighlight.__fillColor || "rgba(255,188,120,0.22)";
+
+    questionPromptFocusHighlight.graphics
+      .clear()
+      .beginFill(highlightFill)
+      .drawRoundRect(0, -highlightHeight / 2, highlightWidth, highlightHeight, 28);
+
+    questionPromptFocusHighlight.x = questionPromptFocus.x - paddingX;
+    questionPromptFocusHighlight.y = questionPromptFocus.y;
+  }
+}
+
+function ensureCarParkPromptContainer() {
+  if (!shouldUseCarParkTextPrompt() || !container || !container.parent) {
+    return;
+  }
+
+  if (!questionPromptContainer) {
+    questionPromptContainer = new createjs.Container();
+    questionPromptContainer.visible = false;
+    questionPromptContainer.alpha = 0;
+    questionPromptContainer.mouseEnabled = false;
+    questionPromptContainer.mouseChildren = false;
+
+    questionPromptPrefix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptPrefix.textAlign = "left";
+    questionPromptPrefix.textBaseline = "middle";
+    questionPromptPrefix.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
+    questionPromptContainer.addChild(questionPromptPrefix);
+
+    questionPromptFocusHighlight = new createjs.Shape();
+    questionPromptContainer.addChild(questionPromptFocusHighlight);
+
+    questionPromptFocus = new createjs.Text("", "800 54px 'Baloo 2'", "#FFB347");
+    questionPromptFocus.textAlign = "left";
+    questionPromptFocus.textBaseline = "middle";
+    questionPromptFocus.shadow = new createjs.Shadow("rgba(8,24,44,0.3)", 0, 10, 22);
+    questionPromptContainer.addChild(questionPromptFocus);
+
+    questionPromptMiddle = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptMiddle.textAlign = "left";
+    questionPromptMiddle.textBaseline = "middle";
+    questionPromptMiddle.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
+    questionPromptContainer.addChild(questionPromptMiddle);
+
+    questionPromptColor = new createjs.Text("", "800 52px 'Baloo 2'", "#3E82FF");
+    questionPromptColor.textAlign = "left";
+    questionPromptColor.textBaseline = "middle";
+    questionPromptColor.shadow = new createjs.Shadow("rgba(8,24,44,0.32)", 0, 10, 24);
+    questionPromptContainer.addChild(questionPromptColor);
+
+    questionPromptSuffix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptSuffix.textAlign = "left";
+    questionPromptSuffix.textBaseline = "middle";
+    questionPromptSuffix.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
+    questionPromptContainer.addChild(questionPromptSuffix);
+  }
+
+  positionCarParkPromptContainer();
+
+  if (!questionPromptContainer.parent) {
+    container.parent.addChild(questionPromptContainer);
+  }
+}
+
+function prepareCarParkPromptForReveal() {
+  if (!shouldUseCarParkTextPrompt()) {
+    return;
+  }
+
+  ensureCarParkPromptContainer();
+
+  if (!questionPromptContainer) {
+    return;
+  }
+
+  questionPromptContainer.visible = false;
+  questionPromptContainer.alpha = 0;
+
+  if (questionPromptFocus) {
+    questionPromptFocus.scaleX = questionPromptFocus.scaleY = 1;
+  }
+
+  if (questionPromptFocusHighlight) {
+    questionPromptFocusHighlight.scaleX = questionPromptFocusHighlight.scaleY = 1;
+  }
+
+  if (questionPromptColor) {
+    questionPromptColor.scaleX = questionPromptColor.scaleY = 1;
+  }
+}
+
+function updateCarParkPrompt(colorIndex, questionType) {
+  if (!shouldUseCarParkTextPrompt()) {
+    return;
+  }
+
+  ensureCarParkPromptContainer();
+
+  if (!questionPromptContainer) {
+    return;
+  }
+
+  var colorData = getCarParkPromptColorData(colorIndex);
+  var isPositionPrompt = questionType === 1;
+  var focusWord = isPositionPrompt ? "position" : "direction";
+  var colorLabel = colorData && colorData.name ? colorData.name.toLowerCase() : "";
+
+  if (questionPromptPrefix) {
+    questionPromptPrefix.text = "What is the ";
+  }
+
+  if (questionPromptFocus) {
+    questionPromptFocus.text = focusWord;
+    questionPromptFocus.color = isPositionPrompt ? "#FF9D40" : "#FFB347";
+  }
+
+  if (questionPromptFocusHighlight) {
+    questionPromptFocusHighlight.__fillColor = isPositionPrompt
+      ? "rgba(255,170,102,0.24)"
+      : "rgba(255,188,120,0.22)";
+  }
+
+  if (questionPromptMiddle) {
+    questionPromptMiddle.text = " of the ";
+  }
+
+  if (questionPromptColor) {
+    questionPromptColor.text = colorLabel;
+    questionPromptColor.color = colorData.fill || "#3E82FF";
+  }
+
+  if (questionPromptSuffix) {
+    questionPromptSuffix.text = " car?";
+  }
+
+  layoutCarParkPromptParts();
+
+  positionCarParkPromptContainer();
+}
+
+function revealCarParkPrompt() {
+  if (!shouldUseCarParkTextPrompt() || !questionPromptContainer) {
+    return;
+  }
+
+  positionCarParkPromptContainer();
+  questionPromptContainer.visible = true;
+  questionPromptContainer.alpha = 0;
+
+  createjs.Tween.get(questionPromptContainer)
+    .to({ alpha: 1 }, 220, createjs.Ease.quadOut);
+
+  if (questionPromptFocus) {
+    questionPromptFocus.scaleX = questionPromptFocus.scaleY = 1;
+    createjs.Tween.get(questionPromptFocus)
+      .to({ scaleX: 1.1, scaleY: 1.1 }, 220, createjs.Ease.quadOut)
+      .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.sineInOut);
+  }
+
+  if (questionPromptFocusHighlight) {
+    questionPromptFocusHighlight.scaleX = questionPromptFocusHighlight.scaleY = 1;
+    createjs.Tween.get(questionPromptFocusHighlight)
+      .to({ scaleX: 1.08, scaleY: 1.08 }, 220, createjs.Ease.quadOut)
+      .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.sineInOut);
+  }
+
+  if (questionPromptColor) {
+    questionPromptColor.scaleX = questionPromptColor.scaleY = 1;
+    createjs.Tween.get(questionPromptColor)
+      .wait(120)
+      .to({ scaleX: 1.08, scaleY: 1.08 }, 200, createjs.Ease.quadOut)
+      .to({ scaleX: 1, scaleY: 1 }, 180, createjs.Ease.sineInOut);
+  }
+}
+
+function hideCarParkPrompt() {
+  if (!questionPromptContainer) {
+    return;
+  }
+
+  questionPromptContainer.visible = false;
+  questionPromptContainer.alpha = 0;
+}
 
  
 
@@ -285,7 +654,7 @@ function init() {
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
-	Title.x=650;
+        applyTitlePanelPosition(Title);
     var event = assets[i];
     var id = event.item.id;
 
@@ -428,10 +797,10 @@ const boxX = (canvas.width - boxWidth) / 2;
         buttons.visible = false;
         container.parent.addChild(buttons);
     };
-Title.x = 120;
-    Title.y = 220;
-introTitle = Title.clone();
-introTitle.visible = true;
+    applyTitlePanelPosition(Title);
+    introTitle = Title.clone();
+    applyTitlePanelPosition(introTitle);
+    introTitle.visible = true;
     container.parent.addChild(introTitle)
 
 }
@@ -606,6 +975,23 @@ function CreateGameElements() {
     DirPosQuestionText.x = 598, DirPosQuestionText.y = 341
     questionText.visible = false;
 
+    ensureCarParkPromptContainer();
+    if (shouldUseCarParkTextPrompt()) {
+        hideCarParkPrompt();
+        if (questionText) {
+            questionText.visible = false;
+        }
+        if (DirPosQuestionText) {
+            DirPosQuestionText.visible = false;
+        }
+        if (q1) {
+            q1.visible = false;
+        }
+        if (car1) {
+            car1.visible = false;
+        }
+    }
+
     container.parent.addChild(car1);
     car1.visible = false;
     car1.x = 12;
@@ -733,6 +1119,11 @@ function pickques() {
     quesCnt++;
     getCarrArr = []
     panelVisibleFn()
+    if (shouldUseCarParkTextPrompt()) {
+        prepareCarParkPromptForReveal();
+    } else {
+        hideCarParkPrompt();
+    }
     //////////////////////////////////////////////////////////////////////////////////////////  
     var qno1 = between(1, 4);
     carsdisp = between(1, 4);
@@ -753,7 +1144,14 @@ function pickques() {
     var tempval = ccarArr[qno[cnt]].indexOf(setCarColorArr[1])
     var tempAns = carsdisp[tempval + 1];
     q1.gotoAndStop(setCarColorArr[1])
-    q1.visible = true;
+    if (shouldUseCarParkTextPrompt()) {
+        q1.visible = false;
+    } else {
+        q1.visible = true;
+    }
+    if (shouldUseCarParkTextPrompt()) {
+        updateCarParkPrompt(setCarColorArr[1], caseArr[qno[cnt]]);
+    }
     if (caseArr[qno[cnt]] == 0) {
         DirPosQuestionText.gotoAndStop(0);
         if (directionArr[setCarColorArr[1]] == "down") {
@@ -813,35 +1211,51 @@ function CreateTween() {
         .to({ visible: true, alpha: 1, scaleX: .55, scaleY: .55 }, 500, createjs.Ease.bounceInOut);
     /////////////////////////////////////////////////////////////////////
 
-    questionText.visible = true;
-    questionText.alpha = 0
-    createjs.Tween.get(questionText).wait(1000)
-        .to({ alpha: 1 }, 200);
-    DirPosQuestionText.visible = true;
-    DirPosQuestionText.alpha = 0
-    createjs.Tween.get(DirPosQuestionText).wait(1000)
-        .to({ alpha: 1, scaleX: .95, scaleY: .95 }, 100).to({ alpha: 1, scaleX: 1, scaleY: 1 }, 100);
-    // q1.visible = true;
-    // q1.alpha = 0
-    // createjs.Tween.get(q1).wait(1500)
-    //     .to({ alpha: 1, scaleX: .7, scaleY: .7 }, 100)
-    //     .to({  scaleX: .75, scaleY: .75 }, 100)
-    car1.visible = true;
-    car1.alpha = 0
-    createjs.Tween.get(car1).wait(1000)
-        .to({ alpha: 1 }, 200);
-    createjs.Tween.get(DirPosQuestionText).wait(1500)
-        .to({ scaleX: .95, scaleY: .95 }, 200)
-        .to({ scaleX: 1, scaleY: 1 }, 200)
-        .to({ scaleX: .95, scaleY: .95 }, 200)
-        .to({ scaleX: 1, scaleY: 1 }, 200);
-    q1.visible = true;
-    q1.alpha = 0
-    createjs.Tween.get(q1).wait(1500)
-        .to({ alpha: 1, scaleX: .7, scaleY: .7 }, 200)
-        .to({ scaleX: .75, scaleY: .75 }, 200)
-        .to({ scaleX: .7, scaleY: .7 }, 200)
-        .to({ scaleX: .75, scaleY: .75 }, 200)
+    if (shouldUseCarParkTextPrompt()) {
+        revealCarParkPrompt();
+        if (questionText) {
+            questionText.visible = false;
+        }
+        if (DirPosQuestionText) {
+            DirPosQuestionText.visible = false;
+        }
+        if (car1) {
+            car1.visible = false;
+        }
+        if (q1) {
+            q1.visible = false;
+        }
+    } else {
+        questionText.visible = true;
+        questionText.alpha = 0
+        createjs.Tween.get(questionText).wait(1000)
+            .to({ alpha: 1 }, 200);
+        DirPosQuestionText.visible = true;
+        DirPosQuestionText.alpha = 0
+        createjs.Tween.get(DirPosQuestionText).wait(1000)
+            .to({ alpha: 1, scaleX: .95, scaleY: .95 }, 100).to({ alpha: 1, scaleX: 1, scaleY: 1 }, 100);
+        // q1.visible = true;
+        // q1.alpha = 0
+        // createjs.Tween.get(q1).wait(1500)
+        //     .to({ alpha: 1, scaleX: .7, scaleY: .7 }, 100)
+        //     .to({  scaleX: .75, scaleY: .75 }, 100)
+        car1.visible = true;
+        car1.alpha = 0
+        createjs.Tween.get(car1).wait(1000)
+            .to({ alpha: 1 }, 200);
+        createjs.Tween.get(DirPosQuestionText).wait(1500)
+            .to({ scaleX: .95, scaleY: .95 }, 200)
+            .to({ scaleX: 1, scaleY: 1 }, 200)
+            .to({ scaleX: .95, scaleY: .95 }, 200)
+            .to({ scaleX: 1, scaleY: 1 }, 200);
+        q1.visible = true;
+        q1.alpha = 0
+        createjs.Tween.get(q1).wait(1500)
+            .to({ alpha: 1, scaleX: .7, scaleY: .7 }, 200)
+            .to({ scaleX: .75, scaleY: .75 }, 200)
+            .to({ scaleX: .7, scaleY: .7 }, 200)
+            .to({ scaleX: .75, scaleY: .75 }, 200);
+    }
 
     /////////////////button Tween////////////////////////////
     for (i = 1; i <= 4; i++) {
