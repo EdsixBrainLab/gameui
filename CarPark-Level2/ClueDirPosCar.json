@@ -1,0 +1,27 @@
+﻿{"frames": {
+
+"Symbol 6 copy instance 10000":
+{
+	"frame": {"x":0,"y":0,"w":79,"h":49},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":79,"h":49},
+	"sourceSize": {"w":79,"h":49}
+},
+"Symbol 6 copy instance 10001":
+{
+	"frame": {"x":0,"y":49,"w":79,"h":49},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":79,"h":49},
+	"sourceSize": {"w":79,"h":49}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "19.2.1.408",
+	"image": "carss 1.png",
+	"format": "RGBA8888",
+	"size": {"w":128,"h":128},
+	"scale": "1"
+}
+}
