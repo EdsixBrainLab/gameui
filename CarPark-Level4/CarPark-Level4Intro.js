@@ -662,9 +662,10 @@ function queueIntroPromptReveal(questionType, frameIndex) {
 
         if (typeof revealCarParkPrompt === "function") {
             clearIntroPromptRevealTimers();
-            scheduleCarParkIntroPromptReveal(function () {
-                revealCarParkPrompt();
-            }, 260);
+            revealCarParkPrompt();
+        } else if (questionPromptContainer) {
+            questionPromptContainer.visible = true;
+            questionPromptContainer.alpha = 1;
         }
     });
 }
