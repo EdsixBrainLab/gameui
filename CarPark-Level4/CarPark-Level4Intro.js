@@ -44,6 +44,133 @@ var INTRO_TITLE_Y = 96;
 var INTRO_PROMPT_Y = 224;
 var INTRO_DIRECTION_COLOR_FRAME = 4;
 var INTRO_POSITION_COLOR_FRAME = 10;
+var carParkIntroPromptActive = false;
+var introPromptHelperWaiters = [];
+var introPromptRevealTimers = [];
+
+function areCarParkPromptHelpersReady() {
+    return (
+        typeof ensureCarParkPromptContainer === "function" &&
+        typeof prepareCarParkPromptForReveal === "function" &&
+        typeof updateCarParkPrompt === "function" &&
+        typeof revealCarParkPrompt === "function" &&
+        typeof ensureCarParkPromptLayer === "function"
+    );
+}
+
+function releaseIntroPromptWaiter(id) {
+    if (!introPromptHelperWaiters || !introPromptHelperWaiters.length) {
+        return;
+    }
+
+    var next = [];
+    for (var i = 0; i < introPromptHelperWaiters.length; i++) {
+        if (introPromptHelperWaiters[i] !== id) {
+            next.push(introPromptHelperWaiters[i]);
+        }
+    }
+
+    introPromptHelperWaiters = next;
+}
+
+function releaseIntroPromptRevealTimer(id) {
+    if (!introPromptRevealTimers || !introPromptRevealTimers.length) {
+        return;
+    }
+
+    var next = [];
+    for (var i = 0; i < introPromptRevealTimers.length; i++) {
+        if (introPromptRevealTimers[i] !== id) {
+            next.push(introPromptRevealTimers[i]);
+        }
+    }
+
+    introPromptRevealTimers = next;
+}
+
+function clearIntroPromptHelperWaiters() {
+    if (!introPromptHelperWaiters || !introPromptHelperWaiters.length) {
+        return;
+    }
+
+    for (var i = 0; i < introPromptHelperWaiters.length; i++) {
+        clearInterval(introPromptHelperWaiters[i]);
+    }
+
+    introPromptHelperWaiters.length = 0;
+}
+
+function clearIntroPromptRevealTimers() {
+    if (!introPromptRevealTimers || !introPromptRevealTimers.length) {
+        return;
+    }
+
+    for (var i = 0; i < introPromptRevealTimers.length; i++) {
+        clearTimeout(introPromptRevealTimers[i]);
+    }
+
+    introPromptRevealTimers.length = 0;
+}
+
+function cancelCarParkIntroPromptSchedulers() {
+    clearIntroPromptHelperWaiters();
+    clearIntroPromptRevealTimers();
+}
+
+function runWhenCarParkPromptReady(handler) {
+    if (!shouldUseCarParkIntroTextPrompt() || typeof handler !== "function") {
+        return false;
+    }
+
+    if (areCarParkPromptHelpersReady()) {
+        handler();
+        return true;
+    }
+
+    var attempts = 0;
+    var maxAttempts = 180;
+    var waitInterval = setInterval(function () {
+        if (!shouldUseCarParkIntroTextPrompt()) {
+            clearInterval(waitInterval);
+            releaseIntroPromptWaiter(waitInterval);
+            return;
+        }
+
+        if (areCarParkPromptHelpersReady()) {
+            clearInterval(waitInterval);
+            releaseIntroPromptWaiter(waitInterval);
+            handler();
+            return;
+        }
+
+        attempts++;
+        if (attempts >= maxAttempts) {
+            clearInterval(waitInterval);
+            releaseIntroPromptWaiter(waitInterval);
+        }
+    }, 16);
+
+    introPromptHelperWaiters.push(waitInterval);
+    return false;
+}
+
+function scheduleCarParkIntroPromptReveal(callback, delay) {
+    if (typeof callback !== "function") {
+        return null;
+    }
+
+    var timeoutId = setTimeout(function () {
+        releaseIntroPromptRevealTimer(timeoutId);
+        if (!carParkIntroPromptActive || !shouldUseCarParkIntroTextPrompt()) {
+            return;
+        }
+
+        callback();
+    }, typeof delay === "number" ? delay : 0);
+
+    introPromptRevealTimers.push(timeoutId);
+    return timeoutId;
+}
 
 function shouldUseCarParkIntroTextPrompt() {
     if (typeof shouldUseCarParkTextPrompt === "function") {
@@ -89,36 +216,43 @@ function queueIntroPromptReveal(questionType, frameIndex) {
         return;
     }
 
-    if (typeof ensureCarParkPromptContainer === "function") {
-        ensureCarParkPromptContainer();
-    }
-
-    var anchorTarget = resolveIntroPromptAnchorTarget(questionType);
-    if (anchorTarget) {
-        if (typeof setCarParkPromptAnchorFromTarget === "function") {
-            setCarParkPromptAnchorFromTarget(anchorTarget);
-        } else if (typeof setCarParkPromptAnchorOverride === "function") {
-            setCarParkPromptAnchorOverride({ x: anchorTarget.x || 0, y: anchorTarget.y || 0 });
+    runWhenCarParkPromptReady(function () {
+        if (!carParkIntroPromptActive) {
+            return;
         }
-    }
 
-    if (typeof prepareCarParkPromptForReveal === "function") {
-        prepareCarParkPromptForReveal();
-    }
+        if (typeof ensureCarParkPromptContainer === "function") {
+            ensureCarParkPromptContainer();
+        }
 
-    if (typeof updateCarParkPrompt === "function") {
-        updateCarParkPrompt(resolveIntroPromptColorIndex(frameIndex), questionType);
-    }
+        var anchorTarget = resolveIntroPromptAnchorTarget(questionType);
+        if (anchorTarget) {
+            if (typeof setCarParkPromptAnchorFromTarget === "function") {
+                setCarParkPromptAnchorFromTarget(anchorTarget);
+            } else if (typeof setCarParkPromptAnchorOverride === "function") {
+                setCarParkPromptAnchorOverride({ x: anchorTarget.x || 0, y: anchorTarget.y || 0 });
+            }
+        }
 
-    if (typeof ensureCarParkPromptLayer === "function") {
-        ensureCarParkPromptLayer();
-    }
+        if (typeof prepareCarParkPromptForReveal === "function") {
+            prepareCarParkPromptForReveal();
+        }
 
-    if (typeof revealCarParkPrompt === "function") {
-        setTimeout(function () {
-            revealCarParkPrompt();
-        }, 260);
-    }
+        if (typeof updateCarParkPrompt === "function") {
+            updateCarParkPrompt(resolveIntroPromptColorIndex(frameIndex), questionType);
+        }
+
+        if (typeof ensureCarParkPromptLayer === "function") {
+            ensureCarParkPromptLayer();
+        }
+
+        if (typeof revealCarParkPrompt === "function") {
+            clearIntroPromptRevealTimers();
+            scheduleCarParkIntroPromptReveal(function () {
+                revealCarParkPrompt();
+            }, 260);
+        }
+    });
 }
 
 function resolveCarParkIntroTitlePosition() {
@@ -189,30 +323,13 @@ function addIntroLayerChild(child) {
 }
 
 function commongameintro() {
+    cancelCarParkIntroPromptSchedulers();
+    carParkIntroPromptActive = shouldUseCarParkIntroTextPrompt();
+
     var introTitlePosition = resolveCarParkIntroTitlePosition();
 
     if (typeof Title !== "undefined" && Title) {
         applyResolvedIntroTitlePosition(Title, introTitlePosition);
-    }
-
-    if (shouldUseCarParkIntroTextPrompt()) {
-        if (typeof ensureCarParkPromptContainer === "function") {
-            ensureCarParkPromptContainer();
-        }
-
-        if (typeof ensureCarParkPromptLayer === "function") {
-            ensureCarParkPromptLayer();
-        }
-
-        if (typeof hideCarParkPrompt === "function") {
-            hideCarParkPrompt();
-        }
-
-        if (typeof setCarParkPromptAnchorFromTarget === "function") {
-            setCarParkPromptAnchorFromTarget(introcolor);
-        } else if (typeof setCarParkPromptAnchorOverride === "function" && introcolor) {
-            setCarParkPromptAnchorOverride({ x: introcolor.x || 0, y: introcolor.y || 0 });
-        }
     }
     Questxt = 0;
     IntroBackground = holder.clone();
@@ -372,9 +489,36 @@ function commongameintro() {
 //             }
 //         }   		
 		
-	else{
+        else{
         introcolor.x = introcolorX;
         introcolor.y = introcolorY;
+    }
+    if (shouldUseCarParkIntroTextPrompt()) {
+        runWhenCarParkPromptReady(function () {
+            if (!carParkIntroPromptActive) {
+                return;
+            }
+
+            if (typeof ensureCarParkPromptContainer === "function") {
+                ensureCarParkPromptContainer();
+            }
+
+            if (introcolor) {
+                if (typeof setCarParkPromptAnchorFromTarget === "function") {
+                    setCarParkPromptAnchorFromTarget(introcolor);
+                } else if (typeof setCarParkPromptAnchorOverride === "function") {
+                    setCarParkPromptAnchorOverride({ x: introcolor.x || 0, y: introcolor.y || 0 });
+                }
+            }
+
+            if (typeof hideCarParkPrompt === "function") {
+                hideCarParkPrompt();
+            }
+
+            if (typeof ensureCarParkPromptLayer === "function") {
+                ensureCarParkPromptLayer();
+            }
+        });
     }
     carDisplay();
 }
@@ -905,8 +1049,13 @@ this.onComplete2 = function (e) {
 function commongameintro1() {
     createjs.Tween.removeAllTweens();
     Questxt = 1;
-    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
-        hideCarParkPrompt();
+    if (shouldUseCarParkIntroTextPrompt()) {
+        clearIntroPromptRevealTimers();
+        runWhenCarParkPromptReady(function () {
+            if (typeof hideCarParkPrompt === "function") {
+                hideCarParkPrompt();
+            }
+        });
     }
     if (stopValue == 0) {
         console.log("onComplete2  == stopValue")
@@ -954,9 +1103,19 @@ function setCallDelay() {
 }
 function removeGameIntro() {
     createjs.Tween.removeAllTweens();
+    cancelCarParkIntroPromptSchedulers();
+    carParkIntroPromptActive = false;
 
-    if (shouldUseCarParkIntroTextPrompt() && typeof clearCarParkPromptAnchorOverride === "function") {
-        clearCarParkPromptAnchorOverride();
+    if (shouldUseCarParkIntroTextPrompt()) {
+        runWhenCarParkPromptReady(function () {
+            if (typeof clearCarParkPromptAnchorOverride === "function") {
+                clearCarParkPromptAnchorOverride();
+            }
+
+            if (typeof hideCarParkPrompt === "function") {
+                hideCarParkPrompt();
+            }
+        });
     }
 
     if (introTitle) {
@@ -1026,7 +1185,4 @@ function removeGameIntro() {
     container.parent.removeChild(introfingure);
     introfingure.visible = false;
 
-    if (shouldUseCarParkIntroTextPrompt() && typeof hideCarParkPrompt === "function") {
-        hideCarParkPrompt();
-    }
 }
