@@ -65,6 +65,7 @@ var borderPadding = 10,
 var loadProgressLabel, progresPrecentage, loaderWidth;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var buttons, bt1, bt2, bt3, bt4, bg1
+var carParkChoiceButtons = [];
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 var posArr = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
@@ -1460,6 +1461,7 @@ function CreateGameElements() {
     bt3.name = "up";
     bt4.gotoAndStop(2);
     bt4.name = "down";
+    carParkChoiceButtons = [bt1, bt2, bt3, bt4];
     container.parent.addChild(choice1, choice2, choice3, choice4)
     console.log("isQuestionAllVariations= " + isQuestionAllVariations)
     if (isQuestionAllVariations) {
@@ -1572,7 +1574,208 @@ function pickques() {
 
 
 
+function prepareCarParkChoiceButtonsForAnimation(choiceArray) {
+    var source = choiceArray || carParkChoiceButtons;
+    if (!source || !source.length) {
+        return [];
+    }
+
+    var prepared = [];
+    for (var idx = 0; idx < source.length; idx++) {
+        var btn = source[idx];
+        if (!btn) {
+            continue;
+        }
+
+        stopCarParkChoicePulse(btn);
+        if (typeof createjs !== "undefined" && createjs.Tween) {
+            createjs.Tween.removeTweens(btn);
+        }
+
+        btn.baseScale = (typeof btn.baseScale === "number") ? btn.baseScale : (btn.scaleX || 1);
+        btn.__targetX = (typeof btn.__targetX === "number") ? btn.__targetX : btn.x;
+        btn.__targetY = (typeof btn.__targetY === "number") ? btn.__targetY : btn.y;
+        btn.__choiceIndex = (typeof btn.__choiceIndex === "number") ? btn.__choiceIndex : idx;
+        btn.visible = true;
+        btn.alpha = 0;
+        btn.mouseEnabled = false;
+        btn.cursor = "default";
+        prepared.push(btn);
+    }
+
+    return prepared;
+}
+
+function animateCarParkChoiceOptions(choiceArray, onComplete) {
+    var buttons = prepareCarParkChoiceButtonsForAnimation(choiceArray);
+    if (!buttons.length) {
+        if (typeof onComplete === "function") {
+            onComplete();
+        }
+        return;
+    }
+
+    var pendingTweens = 0;
+    var hasTweens = false;
+
+    for (var idx = 0; idx < buttons.length; idx++) {
+        var tile = buttons[idx];
+        if (!tile) {
+            continue;
+        }
+
+        hasTweens = true;
+        pendingTweens++;
+
+        var baseScale = (typeof tile.baseScale === "number") ? tile.baseScale : (tile.scaleX || 1);
+        var targetX = (typeof tile.__targetX === "number") ? tile.__targetX : tile.x;
+        var targetY = (typeof tile.__targetY === "number") ? tile.__targetY : tile.y;
+        var revealIndex = (typeof tile.__choiceIndex === "number") ? tile.__choiceIndex : idx;
+
+        tile.__targetX = targetX;
+        tile.__targetY = targetY;
+        tile.baseScale = baseScale;
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.mouseEnabled = false;
+        tile.cursor = "default";
+        tile.x = targetX;
+        tile.y = targetY + 70;
+        tile.scaleX = tile.scaleY = Math.max(baseScale - 0.2, 0.45);
+
+        if (typeof createjs === "undefined" || !createjs.Tween) {
+            tile.alpha = 1;
+            tile.y = targetY;
+            tile.scaleX = tile.scaleY = baseScale;
+            startCarParkChoicePulse(tile, baseScale, targetY, revealIndex);
+            pendingTweens = Math.max(0, pendingTweens - 1);
+            continue;
+        }
+
+        (function (target, base, finalY, order) {
+            var delay = 240 + (order * 140);
+
+            createjs.Tween.get(target, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: finalY }, 320, createjs.Ease ? createjs.Ease.quadOut : null);
+
+            createjs.Tween.get(target, { override: false })
+                .wait(delay)
+                .to({ scaleX: base + 0.18, scaleY: base + 0.18 }, 360, createjs.Ease ? createjs.Ease.backOut : null)
+                .to({ scaleX: base, scaleY: base }, 260, createjs.Ease ? createjs.Ease.sineOut : null)
+                .call(function () {
+                    startCarParkChoicePulse(target, base, finalY, order);
+                    pendingTweens = Math.max(0, pendingTweens - 1);
+                    if (!pendingTweens && typeof onComplete === "function") {
+                        onComplete();
+                    }
+                });
+        })(tile, baseScale, targetY, revealIndex);
+    }
+
+    if (!hasTweens && typeof onComplete === "function") {
+        onComplete();
+    }
+}
+
+function startCarParkChoicePulse(tile, baseScale, targetY, index) {
+    if (!tile) {
+        return;
+    }
+
+    stopCarParkChoicePulse(tile);
+
+    var scale = baseScale || tile.baseScale || tile.scaleX || 1;
+    var finalY = (typeof targetY === "number") ? targetY : (typeof tile.__targetY === "number" ? tile.__targetY : tile.y);
+    var stagger = (typeof index === "number") ? index : (typeof tile.__choiceIndex === "number" ? tile.__choiceIndex : 0);
+
+    tile.baseScale = scale;
+    tile.__targetY = finalY;
+    tile.__choiceIndex = stagger;
+    tile.scaleX = tile.scaleY = scale;
+    tile.y = finalY;
+
+    if (typeof createjs === "undefined" || !createjs.Tween) {
+        return;
+    }
+
+    tile.__pulseTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 120)
+        .to({ scaleX: scale * 1.06, scaleY: scale * 0.94 }, 360, createjs.Ease ? createjs.Ease.sineInOut : null)
+        .to({ scaleX: scale * 0.96, scaleY: scale * 1.04 }, 360, createjs.Ease ? createjs.Ease.sineInOut : null)
+        .to({ scaleX: scale, scaleY: scale }, 320, createjs.Ease ? createjs.Ease.sineInOut : null);
+
+    tile.__bobTween = createjs.Tween.get(tile, { loop: true, override: false })
+        .wait((stagger % 2) * 140)
+        .to({ y: finalY - 8 }, 360, createjs.Ease ? createjs.Ease.sineOut : null)
+        .to({ y: finalY }, 420, createjs.Ease ? createjs.Ease.sineInOut : null);
+}
+
+function stopCarParkChoicePulse(tile) {
+    if (!tile) {
+        return;
+    }
+
+    if (tile.__pulseTween) {
+        tile.__pulseTween.setPaused(true);
+        tile.__pulseTween = null;
+    }
+
+    if (tile.__bobTween) {
+        tile.__bobTween.setPaused(true);
+        tile.__bobTween = null;
+    }
+
+    if (typeof createjs !== "undefined" && createjs.Tween) {
+        createjs.Tween.removeTweens(tile);
+    }
+
+    if (typeof tile.baseScale === "number") {
+        tile.scaleX = tile.scaleY = tile.baseScale;
+    }
+
+    if (typeof tile.__targetY === "number") {
+        tile.y = tile.__targetY;
+    }
+
+    if (typeof tile.__targetX === "number") {
+        tile.x = tile.__targetX;
+    }
+}
+
+function resetCarParkChoiceAnimations(choiceArray) {
+    var source = choiceArray || carParkChoiceButtons;
+    if (!source) {
+        return;
+    }
+
+    for (var idx = 0; idx < source.length; idx++) {
+        if (source[idx]) {
+            stopCarParkChoicePulse(source[idx]);
+        }
+    }
+}
+
+function clearCarParkChoiceTweens(choiceArray) {
+    if (typeof createjs === "undefined" || !createjs.Tween) {
+        return;
+    }
+
+    var source = choiceArray || carParkChoiceButtons;
+    if (!source) {
+        return;
+    }
+
+    for (var idx = 0; idx < source.length; idx++) {
+        if (source[idx]) {
+            createjs.Tween.removeTweens(source[idx]);
+        }
+    }
+}
+
 function CreateTween() {
+
+    /////////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////
     createjs.Tween.get(this["choice" + carsdisp[1]]).wait(200)
@@ -1635,29 +1838,17 @@ function CreateTween() {
             .to({ scaleX: .75, scaleY: .75 }, 200);
     }
 
-    /////////////////button Tween////////////////////////////
     for (i = 1; i <= 4; i++) {
-        this["bt" + i].scaleX = this["bt" + i].scaleY = 0.95;
-        this["bt" + i].visible = true;
-        this["bt" + i].alpha = 0;
+        this["bt" + i].baseScale = 1;
+        this["bt" + i].scaleX = this["bt" + i].scaleY = this["bt" + i].baseScale;
+        this["bt" + i].__targetX = this["bt" + i].x;
+        this["bt" + i].__targetY = 565;
+        this["bt" + i].y = 565;
     }
-    createjs.Tween.get(this["bt" + 1]).wait(1500)
-        .to({ y: 450, alpha: 1, scaleX: .95, scaleY: .95 }, 200)
-        .to({ y: 565, alpha: 1, scaleX: 1, scaleY: 1 }, 200);
-    createjs.Tween.get(this["bt" + 2]).wait(1600)
-        .to({ y: 450, alpha: 1, scaleX: .95, scaleY: .95 }, 200)
-        .to({ y: 565, alpha: 1, scaleX: 1, scaleY: 1 }, 200);
-    createjs.Tween.get(this["bt" + 3]).wait(1700)
-        .to({ y: 450, alpha: 1, scaleX: .95, scaleY: .95 }, 200)
-        .to({ y: 565, alpha: 1, scaleX: 1, scaleY: 1 }, 200);
-    createjs.Tween.get(this["bt" + 4]).wait(1800)
-        .to({ y: 450, alpha: 1, scaleX: .95, scaleY: .95 }, 200)
-        .to({ y: 565, alpha: 1, scaleX: 1, scaleY: 1 }, 200);
-    repTimeClearInterval = setTimeout(AddListenerFn, 2500)
+    animateCarParkChoiceOptions(carParkChoiceButtons, AddListenerFn);
 }
 
 function AddListenerFn() {
-    clearTimeout(repTimeClearInterval)
     console.log("eventlisterneer")
     for (i = 1; i <= 4; i++) {
         this["bt" + i].cursor = "pointer";
@@ -1672,6 +1863,8 @@ function AddListenerFn() {
 }
 
 function disablechoices() {
+    resetCarParkChoiceAnimations(carParkChoiceButtons);
+    clearCarParkChoiceTweens(carParkChoiceButtons);
     for (i = 1; i <= 4; i++) {
 
         this["bt" + i].alpha = 0;

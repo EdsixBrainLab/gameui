@@ -47,6 +47,420 @@ var INTRO_POSITION_COLOR_FRAME = 10;
 var carParkIntroPromptActive = false;
 var introPromptHelperWaiters = [];
 var introPromptRevealTimers = [];
+var carParkIntroPromptFallbackReady = false;
+
+if (typeof shouldUseCarParkTextPrompt !== "function") {
+    var shouldUseCarParkTextPrompt = function () {
+        if (typeof lang === "undefined" || lang === null) {
+            return true;
+        }
+
+        var normalized = String(lang).toLowerCase();
+        normalized = normalized.replace(/\\+/g, "/");
+
+        return (
+            !normalized ||
+            normalized === "englishquestiontext/" ||
+            normalized === "englishquestiontext"
+        );
+    };
+}
+
+if (typeof CAR_PARK_PROMPT_COLOR_DATA === "undefined") {
+    var CAR_PARK_PROMPT_COLOR_DATA = [
+        { name: "RED", fill: "#FF4D5D" },
+        { name: "YELLOW", fill: "#FFC531" },
+        { name: "BLUE", fill: "#3E82FF" },
+        { name: "GREEN", fill: "#32C46C" }
+    ];
+}
+
+if (typeof getCarParkPromptColorData !== "function") {
+    var getCarParkPromptColorData = function (index) {
+        if (typeof index !== "number") {
+            return CAR_PARK_PROMPT_COLOR_DATA[0];
+        }
+
+        var normalized = index % CAR_PARK_PROMPT_COLOR_DATA.length;
+        if (normalized < 0) {
+            normalized += CAR_PARK_PROMPT_COLOR_DATA.length;
+        }
+
+        return CAR_PARK_PROMPT_COLOR_DATA[normalized] || CAR_PARK_PROMPT_COLOR_DATA[0];
+    };
+}
+
+if (typeof questionPromptContainer === "undefined") {
+    var questionPromptContainer = null;
+}
+if (typeof questionPromptPrefix === "undefined") {
+    var questionPromptPrefix = null;
+}
+if (typeof questionPromptFocusHighlight === "undefined") {
+    var questionPromptFocusHighlight = null;
+}
+if (typeof questionPromptFocus === "undefined") {
+    var questionPromptFocus = null;
+}
+if (typeof questionPromptMiddle === "undefined") {
+    var questionPromptMiddle = null;
+}
+if (typeof questionPromptColor === "undefined") {
+    var questionPromptColor = null;
+}
+if (typeof questionPromptSuffix === "undefined") {
+    var questionPromptSuffix = null;
+}
+if (typeof questionPromptMask === "undefined") {
+    var questionPromptMask = null;
+}
+if (typeof questionPromptCircleRadius === "undefined") {
+    var questionPromptCircleRadius = 0;
+}
+if (typeof questionPromptContentWidth === "undefined") {
+    var questionPromptContentWidth = 0;
+}
+if (typeof questionPromptContentHeight === "undefined") {
+    var questionPromptContentHeight = 0;
+}
+if (typeof carParkPromptAnchorOverride === "undefined") {
+    var carParkPromptAnchorOverride = null;
+}
+
+var CAR_PARK_INTRO_PROMPT_DEFAULT_POSITION = { x: 780, y: 460 };
+
+function ensureCarParkIntroPromptContainer() {
+    if (typeof createjs === "undefined" || !container || !container.parent) {
+        return null;
+    }
+
+    if (!questionPromptContainer) {
+        questionPromptContainer = new createjs.Container();
+        questionPromptContainer.visible = false;
+        questionPromptContainer.alpha = 0;
+        questionPromptContainer.mouseEnabled = false;
+        questionPromptContainer.mouseChildren = false;
+
+        questionPromptPrefix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+        questionPromptPrefix.textAlign = "left";
+        questionPromptPrefix.textBaseline = "middle";
+        questionPromptContainer.addChild(questionPromptPrefix);
+
+        questionPromptFocusHighlight = new createjs.Shape();
+        questionPromptFocusHighlight.visible = false;
+        questionPromptContainer.addChild(questionPromptFocusHighlight);
+
+        questionPromptFocus = new createjs.Text("", "800 54px 'Baloo 2'", "#FFB347");
+        questionPromptFocus.textAlign = "left";
+        questionPromptFocus.textBaseline = "middle";
+        questionPromptContainer.addChild(questionPromptFocus);
+
+        questionPromptMiddle = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+        questionPromptMiddle.textAlign = "left";
+        questionPromptMiddle.textBaseline = "middle";
+        questionPromptContainer.addChild(questionPromptMiddle);
+
+        questionPromptColor = new createjs.Text("", "800 52px 'Baloo 2'", "#3E82FF");
+        questionPromptColor.textAlign = "left";
+        questionPromptColor.textBaseline = "middle";
+        questionPromptContainer.addChild(questionPromptColor);
+
+        questionPromptSuffix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+        questionPromptSuffix.textAlign = "left";
+        questionPromptSuffix.textBaseline = "middle";
+        questionPromptContainer.addChild(questionPromptSuffix);
+    }
+
+    if (!questionPromptContainer.parent) {
+        container.parent.addChild(questionPromptContainer);
+    }
+
+    carParkIntroPromptFallbackReady = true;
+    layoutCarParkPromptParts();
+    positionCarParkPromptContainer();
+    ensureCarParkPromptLayer();
+
+    return questionPromptContainer;
+}
+
+if (typeof layoutCarParkPromptParts !== "function") {
+    var layoutCarParkPromptParts = function () {
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        var parts = [
+            questionPromptPrefix,
+            questionPromptFocus,
+            questionPromptMiddle,
+            questionPromptColor,
+            questionPromptSuffix
+        ];
+        var spacing = 18;
+        var totalWidth = 0;
+        var maxHeight = 0;
+        var widths = [];
+
+        for (var idx = 0; idx < parts.length; idx++) {
+            var part = parts[idx];
+            if (!part) {
+                widths[idx] = 0;
+                continue;
+            }
+
+            var width = Math.max(0, part.getMeasuredWidth());
+            var height = Math.max(0, part.getMeasuredLineHeight ? part.getMeasuredLineHeight() : part.getMeasuredHeight());
+            widths[idx] = width;
+            if (width > 0) {
+                totalWidth += width;
+                if (idx < parts.length - 1) {
+                    totalWidth += spacing;
+                }
+            }
+            if (height > maxHeight) {
+                maxHeight = height;
+            }
+        }
+
+        var startX = -totalWidth / 2;
+        var cursorX = startX;
+
+        for (var i = 0; i < parts.length; i++) {
+            var textPart = parts[i];
+            if (!textPart) {
+                continue;
+            }
+
+            textPart.x = cursorX;
+            textPart.y = 0;
+            cursorX += widths[i] + spacing;
+        }
+
+        if (questionPromptFocusHighlight && questionPromptFocus) {
+            var highlightFill = questionPromptFocusHighlight.__fillColor || "rgba(255,188,120,0.22)";
+            var focusWidth = widths[1] || questionPromptFocus.getMeasuredWidth();
+            var focusHeight = Math.max(
+                56,
+                questionPromptFocus.getMeasuredLineHeight ? questionPromptFocus.getMeasuredLineHeight() : questionPromptFocus.getMeasuredHeight()
+            );
+            var highlightWidth = focusWidth + 48;
+            var highlightHeight = focusHeight + 26;
+            questionPromptFocusHighlight.graphics
+                .clear()
+                .beginFill(highlightFill)
+                .drawRoundRect(-highlightWidth / 2, -highlightHeight / 2, highlightWidth, highlightHeight, highlightHeight / 2);
+
+            var focusLeft = questionPromptFocus.x;
+            questionPromptFocusHighlight.x = focusLeft + focusWidth / 2;
+            questionPromptFocusHighlight.y = 0;
+            questionPromptFocusHighlight.visible = focusWidth > 0;
+        }
+
+        questionPromptContentWidth = totalWidth;
+        questionPromptContentHeight = maxHeight;
+    };
+}
+
+if (typeof positionCarParkPromptContainer !== "function") {
+    var positionCarParkPromptContainer = function () {
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        var anchorTarget = null;
+        if (carParkPromptAnchorOverride && carParkPromptAnchorOverride.anchor) {
+            anchorTarget = carParkPromptAnchorOverride.anchor;
+        }
+
+        var resolvedX = CAR_PARK_INTRO_PROMPT_DEFAULT_POSITION.x;
+        var resolvedY = CAR_PARK_INTRO_PROMPT_DEFAULT_POSITION.y;
+
+        if (anchorTarget) {
+            if (typeof anchorTarget.x === "number") {
+                resolvedX = anchorTarget.x;
+            }
+            if (typeof anchorTarget.y === "number") {
+                resolvedY = anchorTarget.y;
+            }
+        }
+
+        questionPromptContainer.x = resolvedX;
+        questionPromptContainer.y = resolvedY;
+    };
+}
+
+if (typeof ensureCarParkPromptContainer !== "function") {
+    var ensureCarParkPromptContainer = function () {
+        ensureCarParkIntroPromptContainer();
+    };
+}
+
+if (typeof ensureCarParkPromptLayer !== "function") {
+    var ensureCarParkPromptLayer = function () {
+        if (!questionPromptContainer || !questionPromptContainer.parent) {
+            return;
+        }
+
+        var parent = questionPromptContainer.parent;
+        if (typeof parent.setChildIndex !== "function" || typeof parent.getChildIndex !== "function") {
+            return;
+        }
+
+        var targetIndex = parent.numChildren - 1;
+        if (parent.getChildIndex(questionPromptContainer) !== targetIndex) {
+            parent.setChildIndex(questionPromptContainer, targetIndex);
+        }
+    };
+}
+
+if (typeof setCarParkPromptAnchorOverride !== "function") {
+    var setCarParkPromptAnchorOverride = function (anchor, radius) {
+        if (!anchor) {
+            carParkPromptAnchorOverride = null;
+            return;
+        }
+
+        if (typeof anchor.x === "number" && typeof anchor.y === "number") {
+            carParkPromptAnchorOverride = {
+                anchor: { x: anchor.x, y: anchor.y },
+                radius: typeof radius === "number" ? radius : null
+            };
+        } else if (anchor.anchor) {
+            carParkPromptAnchorOverride = {
+                anchor: {
+                    x: anchor.anchor.x || 0,
+                    y: anchor.anchor.y || 0
+                },
+                radius: typeof anchor.radius === "number" ? anchor.radius : null
+            };
+        }
+
+        positionCarParkPromptContainer();
+    };
+}
+
+if (typeof clearCarParkPromptAnchorOverride !== "function") {
+    var clearCarParkPromptAnchorOverride = function () {
+        carParkPromptAnchorOverride = null;
+    };
+}
+
+if (typeof setCarParkPromptAnchorFromTarget !== "function") {
+    var setCarParkPromptAnchorFromTarget = function (target) {
+        if (!target) {
+            return;
+        }
+
+        var anchorPoint = { x: target.x || 0, y: target.y || 0 };
+
+        if (typeof target.localToGlobal === "function") {
+            var regX = typeof target.regX === "number" ? target.regX : 0;
+            var regY = typeof target.regY === "number" ? target.regY : 0;
+            var globalPoint = target.localToGlobal(regX, regY);
+            if (globalPoint) {
+                anchorPoint = { x: globalPoint.x, y: globalPoint.y };
+            }
+        }
+
+        setCarParkPromptAnchorOverride(anchorPoint, null);
+    };
+}
+
+if (typeof prepareCarParkPromptForReveal !== "function") {
+    var prepareCarParkPromptForReveal = function () {
+        ensureCarParkIntroPromptContainer();
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        questionPromptContainer.visible = false;
+        questionPromptContainer.alpha = 0;
+        ensureCarParkPromptLayer();
+    };
+}
+
+if (typeof updateCarParkPrompt !== "function") {
+    var updateCarParkPrompt = function (colorIndex, questionType) {
+        ensureCarParkIntroPromptContainer();
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        var colorData = getCarParkPromptColorData(colorIndex);
+        var isPositionPrompt = questionType === 1;
+
+        if (questionPromptPrefix) {
+            questionPromptPrefix.text = "what is the";
+        }
+
+        if (questionPromptFocus) {
+            questionPromptFocus.text = isPositionPrompt ? "position" : "direction";
+            questionPromptFocus.color = isPositionPrompt ? "#FF9D40" : "#FFB347";
+        }
+
+        if (questionPromptFocusHighlight) {
+            questionPromptFocusHighlight.__fillColor = isPositionPrompt
+                ? "rgba(255,170,102,0.24)"
+                : "rgba(255,188,120,0.22)";
+        }
+
+        if (questionPromptMiddle) {
+            questionPromptMiddle.text = "of the";
+        }
+
+        if (questionPromptColor) {
+            questionPromptColor.text = colorData && colorData.name ? colorData.name.toLowerCase() : "";
+            questionPromptColor.color = colorData && colorData.fill ? colorData.fill : "#3E82FF";
+        }
+
+        if (questionPromptSuffix) {
+            questionPromptSuffix.text = "car?";
+        }
+
+        layoutCarParkPromptParts();
+        positionCarParkPromptContainer();
+        ensureCarParkPromptLayer();
+    };
+}
+
+if (typeof revealCarParkPrompt !== "function") {
+    var revealCarParkPrompt = function () {
+        ensureCarParkIntroPromptContainer();
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        layoutCarParkPromptParts();
+        positionCarParkPromptContainer();
+        ensureCarParkPromptLayer();
+        questionPromptContainer.visible = true;
+        questionPromptContainer.alpha = 0;
+
+        if (typeof createjs !== "undefined" && createjs.Tween) {
+            createjs.Tween.get(questionPromptContainer, { override: true })
+                .to({ alpha: 1 }, 240, createjs.Ease ? createjs.Ease.quadOut : null);
+
+            if (questionPromptFocus && createjs.Tween) {
+                createjs.Tween.get(questionPromptFocus, { override: true })
+                    .to({ scaleX: 1.1, scaleY: 1.1 }, 220, createjs.Ease ? createjs.Ease.quadOut : null)
+                    .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease ? createjs.Ease.sineInOut : null);
+            }
+        } else {
+            questionPromptContainer.alpha = 1;
+        }
+    };
+}
+
+if (typeof hideCarParkPrompt !== "function") {
+    var hideCarParkPrompt = function () {
+        if (!questionPromptContainer) {
+            return;
+        }
+
+        questionPromptContainer.visible = false;
+        questionPromptContainer.alpha = 0;
+    };
+}
 
 function areCarParkPromptHelpersReady() {
     return (
@@ -248,9 +662,10 @@ function queueIntroPromptReveal(questionType, frameIndex) {
 
         if (typeof revealCarParkPrompt === "function") {
             clearIntroPromptRevealTimers();
-            scheduleCarParkIntroPromptReveal(function () {
-                revealCarParkPrompt();
-            }, 260);
+            revealCarParkPrompt();
+        } else if (questionPromptContainer) {
+            questionPromptContainer.visible = true;
+            questionPromptContainer.alpha = 1;
         }
     });
 }
