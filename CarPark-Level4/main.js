@@ -113,8 +113,8 @@ var
 
 // Adjust these coordinates to reposition the title panel specifically for CarPark Level 4.
 var CARPARK_TITLE_PANEL_POSITION = {
-  x: 120,
-  y: 220
+  x: 230,
+  y: 200
 };
 
 if (typeof window !== "undefined") {
@@ -188,10 +188,10 @@ var CLUE_SLOT_SUCCESS_COLORS = ["rgba(72,196,167,0.92)", "rgba(42,128,104,0.92)"
 var CLUE_SLOT_ERROR_COLORS = ["rgba(255,125,141,0.92)", "rgba(158,42,64,0.92)"];
 
 var CAR_PARK_PROMPT_COLOR_DATA = [
-  { name: "RED", fill: "#FF4D5D" },
+  { name: "RED", fill: "#FFC531" },
   { name: "YELLOW", fill: "#FFC531" },
-  { name: "BLUE", fill: "#3E82FF" },
-  { name: "GREEN", fill: "#32C46C" }
+  { name: "BLUE", fill: "#32C46C" },
+  { name: "GREEN", fill: "#3E82FF" }
 ];
 
 function shouldUseCarParkTextPrompt() {
@@ -236,7 +236,7 @@ function getDisplayObjectFrameInfo(target) {
     if (transformed && transformed.width && transformed.height) {
       return {
         x: transformed.x,
-        y: transformed.y,
+        y: transformed.y-100,
         width: transformed.width,
         height: transformed.height
       };
@@ -314,7 +314,7 @@ function resolveCarParkPromptAnchor() {
     }
 
     if (info.width && info.height) {
-      var radius = Math.max(120, Math.min(info.width, info.height) / 2 - 12);
+      var radius = Math.max(150, Math.min(info.width, info.height) / 2 - 12);
       return {
         anchor: {
           x: info.x + info.width / 2,
@@ -421,7 +421,7 @@ function applyCarParkPromptScale(contentWidth, contentHeight) {
   }
 
   var availableRadius = questionPromptCircleRadius;
-  var targetScale = 1;
+  var targetScale = .7;
 
   if (availableRadius && availableRadius > 0 && contentWidth && contentHeight) {
     var padding = 28;
@@ -430,15 +430,17 @@ function applyCarParkPromptScale(contentWidth, contentHeight) {
 
     if (availableWidth > 0 && availableHeight > 0) {
       targetScale = Math.min(1, availableWidth / contentWidth, availableHeight / contentHeight);
+      targetScale = .7;
     }
   }
 
   if (!isFinite(targetScale) || targetScale <= 0) {
-    targetScale = 1;
+    targetScale = .7;
   }
 
   questionPromptContainer.scaleX = questionPromptContainer.scaleY = targetScale;
   questionPromptContainer.__promptScale = targetScale;
+  questionPromptContainer.__promptScale = 0.7;
 }
 
 function positionCarParkPromptContainer() {
@@ -480,20 +482,35 @@ function layoutCarParkPromptParts() {
   var wordSpacing = 14;
   var rowGap = 26;
 
-  var topRow = [questionPromptPrefix, questionPromptFocus];
-  var bottomRow = [questionPromptMiddle, questionPromptColor, questionPromptSuffix];
+  var topRow = [questionPromptPrefix];
+  var topRow1 = [questionPromptFocus];
+  var bottomRow = [questionPromptMiddle];
+  var bottomRow1 = [questionPromptColor];
+  var bottomRow2 = [questionPromptSuffix];
 
   var topMetrics = measureCarParkPromptRow(topRow, wordSpacing);
+  var topMetrics1 = measureCarParkPromptRow(topRow1, wordSpacing);
   var bottomMetrics = measureCarParkPromptRow(bottomRow, wordSpacing);
+  var bottomMetrics1 = measureCarParkPromptRow(bottomRow1, wordSpacing);
+  var bottomMetrics2 = measureCarParkPromptRow(bottomRow2, wordSpacing);
 
   var topHeight = measureCarParkPromptRowHeight(topRow);
+  var topHeight1 = measureCarParkPromptRowHeight(topRow1);
   var bottomHeight = measureCarParkPromptRowHeight(bottomRow);
+  var bottomHeight1 = measureCarParkPromptRowHeight(bottomRow1);
+  var bottomHeight2 = measureCarParkPromptRowHeight(bottomRow2);
 
   var topRowY = -(bottomHeight / 2 + rowGap / 2);
-  var bottomRowY = topHeight / 2 + rowGap / 2;
+  var topRowY1 = topRowY+55;
+  var bottomRowY = topRowY1 +60;
+  var bottomRowY1 = bottomRowY+45;
+  var bottomRowY2 = bottomRowY1+45;
 
   positionCarParkPromptRow(topRow, topMetrics, topRowY, wordSpacing);
+  positionCarParkPromptRow(topRow1, topMetrics1, topRowY1, wordSpacing);
   positionCarParkPromptRow(bottomRow, bottomMetrics, bottomRowY, wordSpacing);
+  positionCarParkPromptRow(bottomRow1, bottomMetrics1, bottomRowY1, wordSpacing);
+  positionCarParkPromptRow(bottomRow2, bottomMetrics2, bottomRowY2, wordSpacing);
 
   var focusWidth = questionPromptFocus && typeof questionPromptFocus.getMeasuredWidth === "function"
     ? questionPromptFocus.getMeasuredWidth()
@@ -650,7 +667,7 @@ function ensureCarParkPromptContainer() {
     questionPromptContainer.mouseEnabled = false;
     questionPromptContainer.mouseChildren = false;
 
-    questionPromptPrefix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptPrefix = new createjs.Text("", "700 40px 'Baloo 2'", "#16335F");
     questionPromptPrefix.textAlign = "left";
     questionPromptPrefix.textBaseline = "middle";
     questionPromptPrefix.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
@@ -659,25 +676,25 @@ function ensureCarParkPromptContainer() {
     questionPromptFocusHighlight = new createjs.Shape();
     questionPromptContainer.addChild(questionPromptFocusHighlight);
 
-    questionPromptFocus = new createjs.Text("", "800 54px 'Baloo 2'", "#FFB347");
+    questionPromptFocus = new createjs.Text("", "800 44px 'Baloo 2'", "#ffffff");
     questionPromptFocus.textAlign = "left";
     questionPromptFocus.textBaseline = "middle";
-    questionPromptFocus.shadow = new createjs.Shadow("rgba(8,24,44,0.3)", 0, 10, 22);
+    questionPromptFocus.shadow = new createjs.Shadow("#16335F", 0, 10, 22);
     questionPromptContainer.addChild(questionPromptFocus);
 
-    questionPromptMiddle = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptMiddle = new createjs.Text("", "700 40px 'Baloo 2'", "#16335F");
     questionPromptMiddle.textAlign = "left";
     questionPromptMiddle.textBaseline = "middle";
     questionPromptMiddle.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
     questionPromptContainer.addChild(questionPromptMiddle);
 
-    questionPromptColor = new createjs.Text("", "800 52px 'Baloo 2'", "#3E82FF");
+    questionPromptColor = new createjs.Text("", "800 42px 'Baloo 2'", "#3E82FF");
     questionPromptColor.textAlign = "left";
     questionPromptColor.textBaseline = "middle";
     questionPromptColor.shadow = new createjs.Shadow("rgba(8,24,44,0.32)", 0, 10, 24);
     questionPromptContainer.addChild(questionPromptColor);
 
-    questionPromptSuffix = new createjs.Text("", "700 50px 'Baloo 2'", "#16335F");
+    questionPromptSuffix = new createjs.Text("", "700 40px 'Baloo 2'", "#16335F");
     questionPromptSuffix.textAlign = "left";
     questionPromptSuffix.textBaseline = "middle";
     questionPromptSuffix.shadow = new createjs.Shadow("rgba(8,24,44,0.35)", 0, 8, 18);
@@ -783,18 +800,18 @@ function updateCarParkPrompt(colorIndex, questionType) {
   var colorLabel = colorData && colorData.name ? colorData.name.toLowerCase() : "";
 
   if (questionPromptPrefix) {
-    questionPromptPrefix.text = "what is the";
+    questionPromptPrefix.text = "What is the";
   }
 
   if (questionPromptFocus) {
     questionPromptFocus.text = focusWord;
-    questionPromptFocus.color = isPositionPrompt ? "#FF9D40" : "#FFB347";
+    questionPromptFocus.color = isPositionPrompt ? "#ffffff" : "#ffffff";
   }
 
   if (questionPromptFocusHighlight) {
     questionPromptFocusHighlight.__fillColor = isPositionPrompt
-      ? "rgba(255,170,102,0.24)"
-      : "rgba(255,188,120,0.22)";
+      ? "blue"
+      : "blue";
   }
 
   if (questionPromptMiddle) {
@@ -888,90 +905,9 @@ function drawClueSlotBackground(targetShape, colors) {
     .drawRoundRect(-42, -50, 100, 100, 20);
 }
 
+ 
 
-function createAmbientBackground() {
-  if (!ambientLayer || !canvas) {
-    return;
-  }
-
-  ambientLayer.removeAllChildren();
-  ambientLayer.mouseEnabled = false;
-  ambientLayer.mouseChildren = false;
-
-  if (!ambientGradientLayer) {
-    ambientGradientLayer = new createjs.Container();
-  } else {
-    ambientGradientLayer.removeAllChildren();
-  }
-
-  ambientLayer.addChild(ambientGradientLayer);
-
-  var gradientShape = new createjs.Shape();
-  gradientShape.graphics
-    .beginLinearGradientFill(
-      ["#0d1b2a", "#1a3a7a", "#0b1425"],
-      [0, 0.65, 1],
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    )
-    .drawRect(0, 0, canvas.width, canvas.height);
-  gradientShape.alpha = 0.92;
-  ambientGradientLayer.addChild(gradientShape);
-
-  ambientOrbs = [];
-  var orbColors = [
-    ["rgba(99, 179, 237, 0.45)", "rgba(99, 179, 237, 0)"],
-    ["rgba(158, 108, 237, 0.4)", "rgba(158, 108, 237, 0)"],
-    ["rgba(109, 226, 183, 0.4)", "rgba(109, 226, 183, 0)"]
-  ];
-
-  for (var i = 0; i < 5; i++) {
-    var orb = new createjs.Shape();
-    var radius = 160 + Math.random() * 140;
-    var palette = orbColors[i % orbColors.length];
-    orb.graphics
-      .beginRadialGradientFill(["rgba(255,255,255,0.2)", palette[0], palette[1]], [0, 0.45, 1], 0, 0, 0, 0, 0, radius)
-      .drawCircle(0, 0, radius);
-    orb.x = Math.random() * canvas.width;
-    orb.y = Math.random() * canvas.height;
-    orb.alpha = 0.55;
-    ambientGradientLayer.addChild(orb);
-    ambientOrbs.push(orb);
-    animateAmbientOrb(orb);
-  }
-
-  var grid = new createjs.Shape();
-  var spacing = 140;
-  grid.graphics.setStrokeStyle(1).beginStroke("rgba(255, 255, 255, 0.06)");
-  for (var x = -spacing; x < canvas.width + spacing; x += spacing) {
-    grid.graphics.moveTo(x, -spacing).lineTo(x + canvas.height + spacing, canvas.height + spacing);
-  }
-  grid.alpha = 0.35;
-  ambientGradientLayer.addChild(grid);
-}
-
-function animateAmbientOrb(orb) {
-  if (!orb) {
-    return;
-  }
-
-  var animate = function () {
-    var targetX = Math.random() * canvas.width;
-    var targetY = Math.random() * canvas.height;
-    var targetAlpha = 0.35 + Math.random() * 0.3;
-    var duration = 6000 + Math.random() * 5000;
-
-    createjs.Tween.get(orb, { override: true })
-      .to({ x: targetX, y: targetY, alpha: targetAlpha }, duration, createjs.Ease.sineInOut)
-      .call(animate);
-  };
-
-  animate();
-}
-
-
+ 
 
 
 function init() {
@@ -981,10 +917,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
-	ambientLayer = new createjs.Container();
-  container.addChild(ambientLayer);
-  overlayLayer = new createjs.Container();
-  stage.addChild(overlayLayer);
+	 
     createjs.Ticker.addEventListener("tick", stage);
 	
 	loaderColor = createjs.Graphics.getRGB(255, 51, 51, 1);
@@ -1017,7 +950,7 @@ function init() {
     if (success == 1) {
         manifest.push({
             id: "choice1", src: gameAssetsPath + "CarQuestionImage.png"
-        },
+        },{ id: "track1", src: gameAssetsPath + "Background.png" },
             { id: "holder", src: gameAssetsPath + "CarIntroHolder.png" },
             { id: "DirPosTrack", src: questionTextPath + "CarPark-Level4-QT5.png" }, { id: "DirPosArrow", src: gameAssetsPath + "ClueDirPosArrow.png" }, { id: "questionText", src: questionTextPath + "CarPark-Level4-QT1.png" }, { id: "car", src: questionTextPath + "CarPark-Level4-QT2.png" }, { id: "Buttons", src: gameAssetsPath + "question.png" }, { id: "question1", src: questionTextPath + "CarPark-Level4-QT4.png" }, { id: "DirPosCar", src: gameAssetsPath + "ClueDirPosCar.png" }, { id: "DirPosQuestionText", src: questionTextPath + "CarPark-Level4-QT3.png" }
 
@@ -1029,9 +962,20 @@ function init() {
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
         applyTitlePanelPosition(Title);
+		
     var event = assets[i];
     var id = event.item.id;
 
+
+if (id == "track1") {
+		track1 = new createjs.Bitmap(preload.getResult('track1'));
+		container.parent.addChild(track1);
+		track1.visible = true;
+		stage.setChildIndex(track1,stage.numChildren - 10);
+		stage.setChildIndex(Title,stage.numChildren - 5);
+	}
+	
+	
 if (id == "QusTxtString") {
 	  
 	  const boxWidth = 400;
@@ -1298,7 +1242,7 @@ function ensureQuestionCard() {
 
     renderQuestionCardBackground();
 
-    question = new createjs.Text("", "800 60px 'Baloo 2'", "#F4FAFF");
+    question = new createjs.Text("", "800 50px 'Baloo 2'", "#F4FAFF");
     question.textAlign = "center";
     question.textBaseline = "middle";
     question.x = 0;

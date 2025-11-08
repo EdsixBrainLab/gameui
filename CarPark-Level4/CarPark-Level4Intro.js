@@ -219,7 +219,7 @@
             }
 
             if (typeof setCarParkPromptAnchorOverride === "function") {
-                setCarParkPromptAnchorOverride({ x: INTRO_PROMPT_POSITION.x, y: INTRO_PROMPT_POSITION.y });
+                setCarParkPromptAnchorOverride({ x: INTRO_PROMPT_POSITION.x+28, y: INTRO_PROMPT_POSITION.y-220 });
             }
 
             if (typeof prepareCarParkPromptForReveal === "function") {
@@ -352,7 +352,7 @@
 
         var background = cloneAsset(typeof holder !== "undefined" ? holder : null);
         if (background) {
-            background.visible = true;
+            background.visible = false;
             parent.addChild(background);
             state.displayObjects.push(background);
         }
@@ -444,7 +444,7 @@
                 } else {
                     removeGameIntro();
                     if (typeof isVisibleStartBtn === "function") {
-                        isVisibleStartBtn();
+                        //isVisibleStartBtn();
                     }
                 }
             }, INTRO_PHASE_TIMEOUT);
@@ -461,7 +461,7 @@
     }
 
     function commongameintro1() {
-        Questxt = 1;
+        Questxt = 0;
         carDisplay();
     }
 
@@ -491,4 +491,3 @@
         window.removeGameIntro = removeGameIntro;
     }
 })();
-
