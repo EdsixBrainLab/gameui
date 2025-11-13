@@ -60,20 +60,63 @@ var introChoice2X = 500, introChoice2Y = 590;
 var introChoice3X = 720, introChoice3Y = 590;
 var introChoice4X = 940, introChoice4Y = 590;
 
+var introChoicePosX = [, introChoice1X, introChoice2X, introChoice3X, introChoice4X];
+var introChoicePosY = [, introChoice1Y, introChoice2Y, introChoice3Y, introChoice4Y];
+
 var introClu1X = 380, introClu1Y = 220;
 var introClu2X = 537, introClu2Y = 220;
 var introClu3X = 691, introClu3Y = 220;
 var introClu4X = 846, introClu4Y = 220;
+
+var introCluePosX = [, introClu1X, introClu2X, introClu3X, introClu4X];
+var introCluePosY = [, introClu1Y, introClu2Y, introClu3Y, introClu4Y];
 var introArrowX = 944, introArrowY = 470;
 var introfingureX = 970, introfingureY = 573;
 
 var ArrowXArr = [, 500, 940, 720, 280], FingXArr = [, 505, 945, 725, 285]
 var ArrowYArr = [, 470, 470, 470, 470], FingYArr = [, 590, 590, 590, 590]
-var introClueArr = [] 
+var introClueArr = []
 var introClueTxtArr = ["", 17, 0, 26, 13]
+var introClueBgArr = []
+var introChoiceBgArr = []
+var introChoiceGlowArr = []
+var introQuestionCard;
+
+function buildIntroChoiceBackground() {
+    var shape = new createjs.Shape();
+    drawChoiceTileBackground(shape);
+    shape.alpha = 0;
+    shape.visible = false;
+    shape.mouseEnabled = false;
+    shape.mouseChildren = false;
+    return shape;
+}
+
+function buildIntroChoiceGlow() {
+    var glow = new createjs.Shape();
+    drawChoiceSpeechWave(glow);
+    glow.alpha = 0;
+    glow.visible = false;
+    glow.mouseEnabled = false;
+    glow.mouseChildren = false;
+    return glow;
+}
+
+function buildIntroClueBackground() {
+    var shape = new createjs.Shape();
+    drawClueSlotBackground(shape);
+    shape.alpha = 0;
+    shape.visible = false;
+    shape.mouseEnabled = false;
+    shape.mouseChildren = false;
+    return shape;
+}
 
 function commongameintro() {
     introClueArr = []
+    introClueBgArr = []
+    introChoiceBgArr = []
+    introChoiceGlowArr = []
     introTitle = Title.clone()
     introClu1 = buildIntroClueLetter()
     introClu2 = buildIntroClueLetter()
@@ -99,69 +142,73 @@ function commongameintro() {
     for (var f = 0; f < introSampleFrames.length; f++) {
         introSampleText += frameIndexToLetter(introSampleFrames[f]) + (f < introSampleFrames.length - 1 ? "  " : "");
     }
-    introQues1 = new createjs.Text(introSampleText, "800 70px 'Baloo 2'", "#F4FAFF");
-    introQues1.textAlign = "center";
-    introQues1.textBaseline = "middle";
-    introQues1.shadow = new createjs.Shadow("rgba(6,16,40,0.46)", 0, 10, 26);
-    container.parent.addChild(introQues1);
-    introQues1.visible = false;
-    introQues1.x = introQues1X;
-    introQues1.y = introQues1Y + 130;
+    call_UI_introQuestionCardContainer(container, introSampleText);
+    introQuestionCard = typeof questionCardContainer_htp !== "undefined" ? questionCardContainer_htp : null;
+    if (introQuestionCard) {
+        introQuestionCard.visible = false;
+        introQuestionCard.alpha = 0;
+    }
+    if (typeof in_introQues1 !== "undefined") {
+        introQues1 = in_introQues1;
+    }
+    if (introQues1) {
+        introQues1.visible = false;
+    }
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
     introQuestxt.visible = true;
 
-    container.parent.addChild(introChoice1)
-    introChoice1.x = introChoice1X;
-    introChoice1.y = introChoice1Y;
+    for (var c = 1; c < 5; c++) {
+        if (!introChoiceGlowArr[c]) {
+            introChoiceGlowArr[c] = buildIntroChoiceGlow();
+            container.parent.addChild(introChoiceGlowArr[c]);
+        }
+        introChoiceGlowArr[c].x = introChoicePosX[c];
+        introChoiceGlowArr[c].y = introChoicePosY[c];
+        introChoiceGlowArr[c].alpha = 0;
+        introChoiceGlowArr[c].visible = false;
 
-    introChoice1.visible = false;
+        if (!introChoiceBgArr[c]) {
+            introChoiceBgArr[c] = buildIntroChoiceBackground();
+            container.parent.addChild(introChoiceBgArr[c]);
+        }
+        introChoiceBgArr[c].x = introChoicePosX[c];
+        introChoiceBgArr[c].y = introChoicePosY[c];
+        introChoiceBgArr[c].alpha = 0;
+        introChoiceBgArr[c].visible = false;
+
+        var choiceLabel = this["introChoice" + c];
+        container.parent.addChild(choiceLabel);
+        choiceLabel.x = introChoicePosX[c];
+        choiceLabel.y = introChoicePosY[c];
+        choiceLabel.visible = false;
+    }
+
     updateIntroChoiceLetter(introChoice1, 13);
-    container.parent.addChild(introChoice2)
-    introChoice2.visible = false;
-    introChoice2.x = introChoice2X;
-    introChoice2.y = introChoice2Y;
-
-    updateIntroChoiceLetter(introChoice2, 17)
-    container.parent.addChild(introChoice3)
-    introChoice3.visible = false;
-    introChoice3.x = introChoice3X;
-    introChoice3.y = introChoice3Y;
-
-    updateIntroChoiceLetter(introChoice3, 0)
-    container.parent.addChild(introChoice4)
-    introChoice4.visible = false;
-    introChoice4.x = introChoice4X;
-    introChoice4.y = introChoice4Y;
-
-    updateIntroChoiceLetter(introChoice4, 8)
+    updateIntroChoiceLetter(introChoice2, 17);
+    updateIntroChoiceLetter(introChoice3, 0);
+    updateIntroChoiceLetter(introChoice4, 8);
 
     cluegotoArr = [, 26, 0, 17, 13]
-    container.parent.addChild(introClu1)
-    introClu1.x = introClu1X;
-    introClu1.y = introClu1Y;
-    introClu1.scaleX = introClu1.scaleY = 1;
-    introClu1.visible = false;
-    updateIntroClueLetter(introClu1, 17);
-    container.parent.addChild(introClu2)
-    introClu2.visible = false;
-    introClu2.x = introClu2X;
-    introClu2.y = introClu2Y;
-    introClu2.scaleX = introClu2.scaleY = 1;
-    updateIntroClueLetter(introClu2, 0)
-    container.parent.addChild(introClu3)
-    introClu3.visible = false;
-    introClu3.x = introClu3X;
-    introClu3.y = introClu3Y;
-    introClu3.scaleX = introClu3.scaleY = 1;
-    updateIntroClueLetter(introClu3, 26)
-    container.parent.addChild(introClu4)
-    introClu4.visible = false;
-    introClu4.x = introClu4X;
-    introClu4.y = introClu4Y;
-    introClu4.scaleX = introClu4.scaleY = 1;
-    updateIntroClueLetter(introClu4, 13)
+    for (var k = 1; k < 5; k++) {
+        if (!introClueBgArr[k]) {
+            introClueBgArr[k] = buildIntroClueBackground();
+            container.parent.addChild(introClueBgArr[k]);
+        }
+        introClueBgArr[k].x = introCluePosX[k];
+        introClueBgArr[k].y = introCluePosY[k];
+        introClueBgArr[k].alpha = 0;
+        introClueBgArr[k].visible = false;
+
+        var clueLabel = this["introClu" + k];
+        container.parent.addChild(clueLabel);
+        clueLabel.x = introCluePosX[k];
+        clueLabel.y = introCluePosY[k];
+        clueLabel.scaleX = clueLabel.scaleY = 1;
+        clueLabel.visible = false;
+        updateIntroClueLetter(clueLabel, introClueTxtArr[k]);
+    }
     introClueArr.push("", introClu1, introClu2, introClu3, introClu4)
 
     introtextArr1 = new createjs.Text("I", "135px Veggieburger-Bold", "white")
@@ -186,27 +233,39 @@ function handleComplete1_1() {
 function quesTween() {
      var val1 = 500
     for (i = 1; i < 5; i++) {
+        if (introClueBgArr[i]) {
+            introClueBgArr[i].visible = true;
+            introClueBgArr[i].alpha = 0;
+            introClueBgArr[i].scaleX = introClueBgArr[i].scaleY = .95;
+            createjs.Tween.get(introClueBgArr[i]).wait(val1)
+                .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 250, createjs.Ease.quadOut);
+        }
+
         introClueArr[i].visible = true;
-           introClueArr[i].alpha=0;
-        introClueArr[i].scaleX = introClueArr[i].scaleY = .95;
+        introClueArr[i].alpha = 0;
+        introClueArr[i].scaleX = introClueArr[i].scaleY = .9;
         updateIntroClueLetter(introClueArr[i], introClueTxtArr[i])
-        if (i == 4) {
-            createjs.Tween.get(introClueArr[i]) .wait(val1)
-                .to({ alpha: 1, scaleX: .9, scaleY: .9 }, 250)
-           
-        }
-        else {
-            createjs.Tween.get(introClueArr[i]).wait(val1)
-                .to({ alpha: 1, scaleX: .9, scaleY: .9 }, 250)
-                
-        }
+        createjs.Tween.get(introClueArr[i]).wait(val1)
+            .to({ alpha: 1, scaleX: 1, scaleY: 1 }, 250, createjs.Ease.quadOut);
         val1=val1+150
     }
 
-    introQues1.visible = true;
-    introQues1.alpha = 0
-    createjs.Tween.get(introQues1)
-        .wait(1000).to({ alpha: 1 }, 500).call(handleComplete2_1);
+    if (introQuestionCard) {
+        introQuestionCard.visible = true;
+        introQuestionCard.alpha = 0;
+        introQuestionCard.scaleX = introQuestionCard.scaleY = 0.82;
+        createjs.Tween.get(introQuestionCard, { override: true })
+            .wait(900)
+            .to({ alpha: 1, scaleX: 0.9, scaleY: 0.9 }, 400, createjs.Ease.quadOut)
+            .call(handleComplete2_1);
+    } else if (introQues1) {
+        introQues1.visible = true;
+        introQues1.alpha = 0;
+        createjs.Tween.get(introQues1)
+            .wait(1000).to({ alpha: 1 }, 500).call(handleComplete2_1);
+    } else {
+        createjs.Tween.get({}).wait(1000).call(handleComplete2_1);
+    }
 }
 function handleComplete2_1() {
     createjs.Tween.removeAllTweens();
@@ -217,18 +276,33 @@ function choiceTween() {
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = true;
         updateIntroClueLetter(introClueArr[i], introClueTxtArr[i])
-        this["introChoice" + i].y = 590, this["introChoice" + i].x = this["introChoice" + i].x;
+        if (introChoiceGlowArr[i]) {
+            introChoiceGlowArr[i].visible = true;
+            introChoiceGlowArr[i].alpha = 0;
+            introChoiceGlowArr[i].scaleX = introChoiceGlowArr[i].scaleY = .78;
+            createjs.Tween.get(introChoiceGlowArr[i]).wait(val)
+                .to({ alpha: 0.45, scaleX: .85, scaleY: .85 }, 280, createjs.Ease.quadOut);
+        }
+        if (introChoiceBgArr[i]) {
+            introChoiceBgArr[i].visible = true;
+            introChoiceBgArr[i].alpha = 0;
+            introChoiceBgArr[i].scaleX = introChoiceBgArr[i].scaleY = .72;
+            createjs.Tween.get(introChoiceBgArr[i]).wait(val)
+                .to({ alpha: 1, scaleX: .82, scaleY: .82 }, 320, createjs.Ease.quadOut);
+        }
+        this["introChoice" + i].y = introChoicePosY[i] + 30;
+        this["introChoice" + i].x = introChoicePosX[i];
         this["introChoice" + i].visible = true;
         this["introChoice" + i].alpha = 0;
         if (i == 4) {
             createjs.Tween.get(this["introChoice" + i])
                 .wait(val)
-                .to({ y: 590, scaleX: .8, scaleY: .8, alpha: 1 }, val).call(handleComplete4_1);
+                .to({ y: introChoicePosY[i], scaleX: .82, scaleY: .82, alpha: 1 }, 320, createjs.Ease.quadOut).call(handleComplete4_1);
         }
         else {
             createjs.Tween.get(this["introChoice" + i])
                 .wait(val)
-                .to({ y: 590, scaleX: .8, scaleY: .8, alpha: 1 }, val);
+                .to({ y: introChoicePosY[i], scaleX: .82, scaleY: .82, alpha: 1 }, 320, createjs.Ease.quadOut);
         }
         val = val + 150
     }
@@ -377,8 +451,19 @@ function removeGameIntro() {
     introArrow.visible = false
     container.parent.removeChild(introfingure)
     introfingure.visible = false
-    container.parent.removeChild(introQues1)
-    introQues1.visible = false
+    if (introQuestionCard) {
+        if (introQuestionCard.parent) {
+            introQuestionCard.parent.removeChild(introQuestionCard);
+        }
+        introQuestionCard.visible = false;
+        introQuestionCard = null;
+    }
+    if (introQues1) {
+        if (introQues1.parent) {
+            introQues1.parent.removeChild(introQues1);
+        }
+        introQues1.visible = false
+    }
     container.parent.removeChild(introQuestxt)
     introQuestxt.visible = false
     container.parent.removeChild(introChoice1)
@@ -392,16 +477,35 @@ function removeGameIntro() {
  container.parent.removeChild(introtextArr1)
     introtextArr1.visible = false
     for (i = 1; i < 5; i++) {
-        introClueArr[i].visible = false;
+        if (introChoiceGlowArr[i]) {
+            if (introChoiceGlowArr[i].parent) {
+                introChoiceGlowArr[i].parent.removeChild(introChoiceGlowArr[i]);
+            }
+            introChoiceGlowArr[i].visible = false;
+        }
+        if (introChoiceBgArr[i]) {
+            if (introChoiceBgArr[i].parent) {
+                introChoiceBgArr[i].parent.removeChild(introChoiceBgArr[i]);
+            }
+            introChoiceBgArr[i].visible = false;
+        }
+        if (introClueBgArr[i]) {
+            if (introClueBgArr[i].parent) {
+                introClueBgArr[i].parent.removeChild(introClueBgArr[i]);
+            }
+            introClueBgArr[i].visible = false;
+        }
+        if (introClueArr[i]) {
+            introClueArr[i].visible = false;
+            if (introClueArr[i].parent) {
+                introClueArr[i].parent.removeChild(introClueArr[i]);
+            }
+        }
     }
-    container.parent.removeChild(introClu1)
-    introClu1.visible = false
-    container.parent.removeChild(introClu2)
-    introClu2.visible = false
-    container.parent.removeChild(introClu3)
-    introClu3.visible = false
-    container.parent.removeChild(introClu4)
-    introClu4.visible = false
+    introClueArr = [];
+    introClueBgArr = [];
+    introChoiceBgArr = [];
+    introChoiceGlowArr = [];
 
     if (highlightTweenArr[0]) {
         highlightTweenArr[0].setPaused(false);
