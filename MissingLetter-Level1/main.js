@@ -27,10 +27,9 @@ var loadProgressLabel, progresPrecentage, loaderWidth;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var index;
 var j = 1;
-var cluetext, ques
+var ques, clueTextField
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
-var qarr = [];
 var alphaArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 var quesArr = ["byte", "chat", "dump", "aged", "aqua", "atom", "auto", "body", "peon", "yoga", "edit", "inch", "oath", "pity",
     "quiz", "desk", "rain", "vote", "sail", "leap", "ugly", "wing", "zero", "zeal", "city",
@@ -38,6 +37,8 @@ var quesArr = ["byte", "chat", "dump", "aged", "aqua", "atom", "auto", "body", "
     "page", "pray", "task", "mask", "home", "pond", "hold", "bold", "here", "fear", "bite"];
 
 var choiceArr = []
+var ansRemovedArr = []
+var farr = []
 var tweenMcArr = []
 var btn1 = [100, 200, 350, 500, 650];
 var btn2 = [80, 230, 380, 530, 680];
@@ -53,6 +54,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -74,10 +76,7 @@ function init() {
     var success = createManifest();
     if (success == 1) {
         manifest.push(
-            { id: "choice1", src: gameAssetsPath + "anskey.png" },
-            { id: "cluetext", src: gameAssetsPath + "clueText.png" },
-            { id: "QusTxtString", src: questionTextPath + "MissingLetter-Level1-QT.png" },
-            { id: "quekey", src: gameAssetsPath + "quekey.png" }
+            { id: "choice1", src: gameAssetsPath + "anskey.png" }
 
 
         )
@@ -88,16 +87,12 @@ function init() {
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
 
-    var event = assets[i];
-    var id = event.item.id;
-
-    if (id == "QusTxtString") {
-        QusTxtString = new createjs.Bitmap(preload.getResult('QusTxtString'));
-        container.parent.addChild(QusTxtString)
-        QusTxtString.visible = false;
+    if (!QusTxtString) {
+        call_UI_gameQuestion(container, "Choose the missing letter to complete the word.");
     }
 
-
+    var event = assets[i];
+    var id = event.item.id;
 
     if (id == "choice1") {
         var spriteSheet1 = new createjs.SpriteSheet({
@@ -112,34 +107,6 @@ function doneLoading1(event) {
         choice1.visible = false;
         choice1.x = 200; choice1.y = 450;
         console.log("get Choice1= " + choice1)
-    };
-
-
-    if (id == "quekey") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("quekey")],
-            "frames": { "regX": 50, "height": 155, "count": 0, "regY": 50, "width": 158 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-
-        });
-        quekey = new createjs.Sprite(spriteSheet1);
-        quekey.visible = false;
-        quekey.scaleX = quekey.scaleY = .5
-        container.parent.addChild(quekey);
-    };
-
-    if (id == "cluetext") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("cluetext")],
-            "frames": { "regX": 50, "height": 114, "count": 0, "regY": 50, "width": 478 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-
-        });
-        cluetext = new createjs.Sprite(spriteSheet1);
-        container.parent.addChild(cluetext);
-        cluetext.visible = false;
     };
 
 
@@ -173,19 +140,18 @@ function CreateGameElements() {
     questiontext = QusTxtString
     container.parent.addChild(questiontext);
     questiontext.visible = false;
-    container.parent.addChild(cluetext);
-    cluetext.visible = false;
-    cluetext.x = 460; cluetext.y = 430;
-    cluetext.scaleX = cluetext.scaleY = 1.2
 
-    for (i = 0; i < 4; i++) {
-        qarr[i] = quekey.clone();
-        container.parent.addChild(qarr[i])
-        qarr[i].scaleX = qarr[i].scaleY = .9
-        qarr[i].x = 379 + (i * 155)//btn1[i];
-        qarr[i].y = 250;
-        console.log("Getx = " + qarr[i].x)
+    if (!clueTextField) {
+        clueTextField = new createjs.Text("", "800 70px 'Baloo 2'", "#F4FAFF");
+        clueTextField.textAlign = "center";
+        clueTextField.textBaseline = "middle";
+        clueTextField.shadow = new createjs.Shadow("rgba(6,16,40,0.46)", 0, 10, 26);
+        clueTextField.lineWidth = 780;
+        clueTextField.x = canvas.width / 2;
+        clueTextField.y = 420;
+        container.parent.addChild(clueTextField);
     }
+    clueTextField.visible = false;
 
     for (i = 0; i < 5; i++) {
         choiceArr[i] = choice1.clone();
@@ -225,25 +191,18 @@ function pickques() {
 
     ques = quesArr[qno[cnt]];
     console.log("qno"+qno[cnt])
-    cluetext.gotoAndStop(qno[cnt]);
-    var ran = Math.floor(Math.random() * 3);
-    var len = 4;
-
-    for (i = 0; i < len; i++) {
-        ch = ques.charAt(i)
-        index = alphaArr.indexOf(ch);
-        if (i == ran) {
-            ans = ch;
-            console.log("ans" + ans)
-            qarr[i].gotoAndStop(26);
-
+    var ran = Math.floor(Math.random() * ques.length);
+    if (clueTextField) {
+        var clueChars = ques.toUpperCase().split("");
+        if (ran >= 0 && ran < clueChars.length) {
+            clueChars[ran] = "_";
         }
-        else {
-            qarr[i].gotoAndStop(index);
-        }
-        qarr[i].visible = false;
-
+        clueTextField.text = clueChars.join("  ");
+        clueTextField.visible = false;
+        clueTextField.alpha = 1;
     }
+    ans = ques.charAt(ran);
+    console.log("ans" + ans)
     farr = [];
 
     index = alphaArr.indexOf(ans);
@@ -280,15 +239,11 @@ function createTween() {
     createjs.Tween.get(questiontext).wait(200)
         .to({ alpha: 1, y: 20 })
     /////////////////////////////////////
-    for (i = 0; i < 4; i++) {
-        qarr[i].visible = true;
-        qarr[i].alpha = 0;
-        createjs.Tween.get(qarr[i]).wait(500).to({ scaleX: .85, scaleY: .85, alpha: 1 }, 500)
-            .to({ scaleX: .95, scaleY: .95, alpha: 1 }, createjs.Tween.bounceInOut)
+    if (clueTextField) {
+        clueTextField.visible = true;
+        clueTextField.alpha = 0;
+        createjs.Tween.get(clueTextField).wait(700).to({ alpha: 1 }, 500)
     }
-    cluetext.visible = true;
-    cluetext.alpha = 0
-    createjs.Tween.get(cluetext).wait(700).to({ y: 430, scaleX: .95, scaleY: .95, alpha: 1 }, 500)
     ///////////////////////////choice tween////////////////////////////////////
     for (i = 0; i < 5; i++) {
         choiceArr[i].visible = true;
@@ -339,9 +294,8 @@ function disablechoices() {
         choiceArr[i].mouseEnabled = false
     }
      questiontext.visible = false;  
-    cluetext.visible = false;
-    for (i = 0; i < 4; i++) {     
-        qarr[i].visible=false       
+    if (clueTextField) {
+        clueTextField.visible = false;
     }
 
 }
@@ -380,6 +334,9 @@ function answerSelected(e) {
 
 function correct() {
     getValidation("correct");
+    if (clueTextField) {
+        clueTextField.text = ques ? ques.toUpperCase().split("").join("  ") : clueTextField.text;
+    }
     disablechoices();
 }
 
