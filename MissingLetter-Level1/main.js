@@ -362,6 +362,7 @@ function CreateGameElements() {
         container.parent.addChild(questiontext);
         questiontext.visible = false;
     }
+    clueTextField.visible = false;
 
     ensureQuestionCard();
     if (questionCardContainer) {
