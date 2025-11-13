@@ -2,7 +2,7 @@
 var messageField;		//Message display field
 var assets = [];
 var cnt = -1, qscnt = -1, ans, uans, interval, time = 180, totalQuestions = 10, answeredQuestions = 0, choiceCnt = 2, quesCnt = 0, resTimerOut = 0, rst = 0, responseTime = 0;
-var startBtn, introScrn, container, choice1, choice2, choice3, choice4, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
+var startBtn, introScrn, container, question, circleOutline, circle1Outline, boardMc, helpMc, quesMarkMc, questionText, quesHolderMc, resultLoading, preloadMc;
 var mc, mc1, mc2, mc3, mc4, mc5, startMc, questionInterval = 0;
 var parrotWowMc, parrotOopsMc, parrotGameOverMc, parrotTimeOverMc, gameIntroAnimMc;
 var bgSnd, correctSnd, wrongSnd, gameOverSnd, timeOverSnd, tickSnd;
@@ -27,20 +27,35 @@ var loadProgressLabel, progresPrecentage, loaderWidth;
 /////////////////////////////////////////////////////////////////////////GAME SPECIFIC VARIABLES//////////////////////////////////////////////////////////
 var index;
 var j = 1;
-var cluetext, ques
+var ques;
+var QusTxtString;
+var questiontext;
+var choiceArr = [];
+var choiceBgArr = [];
+var choiceGlowArr = [];
+var choicePulseArr = [];
+var choiceLabelArr = [];
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
-var qarr = [];
 var alphaArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 var quesArr = ["byte", "chat", "dump", "aged", "aqua", "atom", "auto", "body", "peon", "yoga", "edit", "inch", "oath", "pity",
     "quiz", "desk", "rain", "vote", "sail", "leap", "ugly", "wing", "zero", "zeal", "city",
     "open", "feed", "jeep", "clap", "obey", "half", "item", "iron", "kick", "list", "gate", "bake", "date", "late",
     "page", "pray", "task", "mask", "home", "pond", "hold", "bold", "here", "fear", "bite"];
 
-var choiceArr = []
+var ansRemovedArr = []
+var farr = []
 var tweenMcArr = []
 var btn1 = [100, 200, 350, 500, 650];
 var btn2 = [80, 230, 380, 530, 680];
+
+var CLUE_LETTER_FONT = "800 82px 'Baloo 2'";
+var CLUE_LETTER_COLOR = "#F4FAFF";
+var CHOICE_LETTER_FONT = "800 68px 'Baloo 2'";
+var CHOICE_LETTER_COLOR = "#FFFFFF";
+var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.36)", 0, 8, 22);
+var CLUE_ROW_Y = 372;
+var CHOICE_ROW_Y = 600;
 
 ///////////////////////////////////////////////////////////////////
 //register key functions
@@ -53,6 +68,7 @@ function init() {
     stage = new createjs.Stage(canvas);
     container = new createjs.Container();
     stage.addChild(container)
+    call_UI_ambientOverlay(container);
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -73,76 +89,247 @@ function init() {
 
     var success = createManifest();
     if (success == 1) {
-        manifest.push(
-            { id: "choice1", src: gameAssetsPath + "anskey.png" },
-            { id: "cluetext", src: gameAssetsPath + "clueText.png" },
-            { id: "QusTxtString", src: questionTextPath + "MissingLetter-Level1-QT.png" },
-            { id: "quekey", src: gameAssetsPath + "quekey.png" }
-
-
-        )
         preloadAllAssets()
         stage.update();
     }
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
+    if (!QusTxtString) {
+        call_UI_gameQuestion(container, "Choose the missing letter to complete the word.");
+    }
+}
 
-    var event = assets[i];
-    var id = event.item.id;
+function getCenteredPositions(count, options) {
+    options = options || {};
+    var centerX = typeof options.centerX === "number" ? options.centerX : canvas.width / 2;
+    var spacing = typeof options.spacing === "number" ? options.spacing : 180;
+    var positions = [];
+    if (count <= 0) {
+        return positions;
+    }
+    var startX = centerX - ((count - 1) * spacing) / 2;
+    for (var i = 0; i < count; i++) {
+        positions.push(startX + i * spacing);
+    }
+    return positions;
+}
 
-    if (id == "QusTxtString") {
-        QusTxtString = new createjs.Bitmap(preload.getResult('QusTxtString'));
-        container.parent.addChild(QusTxtString)
-        QusTxtString.visible = false;
+function buildChoiceTile() {
+    var tile = new createjs.Container();
+    tile.visible = false;
+    tile.alpha = 0;
+    tile.mouseChildren = false;
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
+    tile.__baseScale = 0.68;
+    tile.scaleX = tile.scaleY = tile.__baseScale;
+    tile.x = 0;
+    tile.y = CHOICE_ROW_Y;
+
+    var glow = new createjs.Shape();
+    drawChoiceSpeechWave(glow);
+    glow.alpha = 0;
+    glow.visible = false;
+    glow.mouseEnabled = false;
+    glow.mouseChildren = false;
+    tile.addChild(glow);
+
+    var bg = new createjs.Shape();
+    drawChoiceTileBackground(bg);
+    bg.alpha = 0.95;
+    bg.__baseScale = 1;
+    bg.mouseEnabled = false;
+    bg.mouseChildren = false;
+    tile.addChild(bg);
+
+    var pulse = new createjs.Shape();
+    drawChoiceSpeechWave(pulse);
+    pulse.alpha = 0;
+    pulse.visible = false;
+    pulse.mouseEnabled = false;
+    pulse.mouseChildren = false;
+    tile.addChild(pulse);
+
+    var label = new createjs.Text("", CHOICE_LETTER_FONT, CHOICE_LETTER_COLOR);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.shadow = LETTER_SHADOW;
+    label.mouseEnabled = false;
+    label.mouseChildren = false;
+    tile.addChild(label);
+
+    tile.__glow = glow;
+    tile.__bg = bg;
+    tile.__pulse = pulse;
+    tile.__label = label;
+    tile.__letter = "";
+
+    bindChoiceTile(tile);
+
+    return tile;
+}
+
+function resetChoiceTile(tile, options) {
+    if (!tile) {
+        return;
+    }
+    var baseScale = tile.__baseScale || 0.68;
+    tile.scaleX = tile.scaleY = baseScale;
+    tile.alpha = 0;
+    tile.visible = false;
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
+    tile.__letter = "";
+    tile.y = (options && options.offscreenY) != null ? options.offscreenY : CHOICE_ROW_Y + 40;
+    if (tile.__bg) {
+        tile.__bg.alpha = 0.95;
+        tile.__bg.scaleX = tile.__bg.scaleY = 1;
+        drawChoiceTileBackground(tile.__bg);
+    }
+    if (tile.__glow) {
+        tile.__glow.alpha = 0;
+        tile.__glow.visible = false;
+        tile.__glow.scaleX = tile.__glow.scaleY = 1;
+    }
+    if (tile.__pulse) {
+        tile.__pulse.alpha = 0;
+        tile.__pulse.visible = false;
+        tile.__pulse.scaleX = tile.__pulse.scaleY = 1;
+    }
+    if (tile.__label) {
+        tile.__label.text = "";
+        tile.__label.alpha = 0;
+    }
+}
+
+function highlightChoiceTile(tile, isHover) {
+    if (!tile) {
+        return;
+    }
+    var bg = tile.__bg;
+    var glow = tile.__glow;
+    var pulse = tile.__pulse;
+    var baseScale = tile.__baseScale || tile.scaleX || 0.68;
+    var targetScale = isHover ? baseScale * 1.06 : baseScale;
+
+    createjs.Tween.get(tile, { override: true })
+        .to({ scaleX: targetScale, scaleY: targetScale }, 160, createjs.Ease.quadOut);
+
+    if (bg) {
+        drawChoiceTileBackground(bg, isHover ? CHOICE_TILE_HOVER_COLORS : CHOICE_TILE_BASE_COLORS);
+        createjs.Tween.get(bg, { override: true })
+            .to({ alpha: isHover ? 1 : 0.95 }, 160, createjs.Ease.quadOut);
     }
 
+    if (glow) {
+        glow.visible = true;
+        createjs.Tween.get(glow, { override: true })
+            .to({ alpha: isHover ? 0.45 : 0.2, scaleX: isHover ? 1.05 : 1, scaleY: isHover ? 1.05 : 1 }, 180, createjs.Ease.quadOut);
+    }
 
+    if (pulse) {
+        pulse.visible = true;
+        createjs.Tween.get(pulse, { override: true })
+            .to({ alpha: isHover ? 0.4 : 0.18, scaleX: isHover ? 1.05 : 1, scaleY: isHover ? 1.05 : 1 }, 200, createjs.Ease.quadOut);
+    }
+}
 
-    if (id == "choice1") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("choice1")],
-            "frames": { "regX": 50, "height": 175, "count": 0, "regY": 50, "width": 178 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
+function pressChoiceTile(tile) {
+    if (!tile) {
+        return;
+    }
+    var baseScale = tile.__baseScale || tile.scaleX || 0.68;
+    createjs.Tween.get(tile, { override: true })
+        .to({ scaleX: baseScale * 0.94, scaleY: baseScale * 0.94 }, 100, createjs.Ease.quadOut);
+}
 
-        });
-        choice1 = new createjs.Sprite(spriteSheet1);
-        container.parent.addChild(choice1);
-        choice1.visible = false;
-        choice1.x = 200; choice1.y = 450;
-        console.log("get Choice1= " + choice1)
-    };
+function releaseChoiceTile(tile) {
+    if (!tile) {
+        return;
+    }
+    var baseScale = tile.__baseScale || tile.scaleX || 0.68;
+    createjs.Tween.get(tile, { override: true })
+        .to({ scaleX: baseScale * 1.04, scaleY: baseScale * 1.04 }, 140, createjs.Ease.quadOut)
+        .to({ scaleX: baseScale, scaleY: baseScale }, 160, createjs.Ease.quadIn);
+}
 
+function bindChoiceTile(tile) {
+    if (!tile) {
+        return;
+    }
+    tile.on("mouseover", function () {
+        if (!tile.mouseEnabled) {
+            return;
+        }
+        highlightChoiceTile(tile, true);
+    });
 
-    if (id == "quekey") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("quekey")],
-            "frames": { "regX": 50, "height": 155, "count": 0, "regY": 50, "width": 158 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
+    tile.on("mouseout", function () {
+        highlightChoiceTile(tile, false);
+    });
 
-        });
-        quekey = new createjs.Sprite(spriteSheet1);
-        quekey.visible = false;
-        quekey.scaleX = quekey.scaleY = .5
-        container.parent.addChild(quekey);
-    };
+    tile.on("mousedown", function () {
+        if (!tile.mouseEnabled) {
+            return;
+        }
+        pressChoiceTile(tile);
+    });
 
-    if (id == "cluetext") {
-        var spriteSheet1 = new createjs.SpriteSheet({
-            framerate: 30,
-            "images": [preload.getResult("cluetext")],
-            "frames": { "regX": 50, "height": 114, "count": 0, "regY": 50, "width": 478 },
-            // define two animations, run (loops, 1.5x speed) and jump (returns to run):
+    tile.on("pressup", function () {
+        releaseChoiceTile(tile);
+    });
 
-        });
-        cluetext = new createjs.Sprite(spriteSheet1);
-        container.parent.addChild(cluetext);
-        cluetext.visible = false;
-    };
+    tile.on("click", function (evt) {
+        if (!tile.mouseEnabled) {
+            return;
+        }
+        answerSelected(evt);
+    });
+}
 
+function layoutChoiceTiles(count) {
+    var positions = getCenteredPositions(count, { spacing: 175 });
+    for (var i = 0; i < choiceArr.length; i++) {
+        var tile = choiceArr[i];
+        if (!tile) {
+            continue;
+        }
+        if (i < positions.length) {
+            tile.x = positions[i];
+            tile.__targetX = positions[i];
+            tile.__targetY = CHOICE_ROW_Y;
+        } else {
+            tile.visible = false;
+        }
+    }
+}
 
+function updateChoiceLetter(index, letter) {
+    var tile = choiceArr[index];
+    if (!tile) {
+        return;
+    }
+    tile.__letter = letter;
+    if (choiceLabelArr[index]) {
+        var value = letter ? String(letter).toUpperCase() : "";
+        choiceLabelArr[index].text = value;
+        choiceLabelArr[index].alpha = value ? 1 : 0;
+    }
+}
+
+function setClueDisplay(text) {
+    if (!question) {
+        return;
+    }
+    question.text = text != null ? String(text) : "";
+    question.visible = true;
+    if (questionCardContainer) {
+        questionCardContainer.visible = true;
+    }
+    if (typeof layoutQuestionCardContents === "function") {
+        layoutQuestionCardContents();
+    }
 }
 
 function tick(e) {
@@ -170,45 +357,54 @@ function handleClick(e) {
 function CreateGameElements() {
 
     interval = setInterval(countTime, 1000);
-    questiontext = QusTxtString
-    container.parent.addChild(questiontext);
-    questiontext.visible = false;
-    container.parent.addChild(cluetext);
-    cluetext.visible = false;
-    cluetext.x = 460; cluetext.y = 430;
-    cluetext.scaleX = cluetext.scaleY = 1.2
-
-    for (i = 0; i < 4; i++) {
-        qarr[i] = quekey.clone();
-        container.parent.addChild(qarr[i])
-        qarr[i].scaleX = qarr[i].scaleY = .9
-        qarr[i].x = 379 + (i * 155)//btn1[i];
-        qarr[i].y = 250;
-        console.log("Getx = " + qarr[i].x)
+    questiontext = QusTxtString;
+    if (questiontext) {
+        container.parent.addChild(questiontext);
+        questiontext.visible = false;
     }
 
-    for (i = 0; i < 5; i++) {
-        choiceArr[i] = choice1.clone();
-        container.parent.addChild(choiceArr[i])
-        choiceArr[i].visible = false
-        choiceArr[i].x = 213 + (i * 200);
-        choiceArr[i].y = 585;
-        choiceArr[i].scaleX = choiceArr[i].scaleY = .85;
-
-
+    ensureQuestionCard();
+    if (questionCardContainer) {
+        questionCardContainer.visible = false;
+        questionCardContainer.alpha = 0;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
     }
+    if (question) {
+        question.visible = false;
+        question.alpha = 1;
+    }
+
+    for (var i = 0; i < 5; i++) {
+        if (!choiceArr[i]) {
+            choiceArr[i] = buildChoiceTile();
+            choiceBgArr[i] = choiceArr[i].__bg;
+            choiceGlowArr[i] = choiceArr[i].__glow;
+            choicePulseArr[i] = choiceArr[i].__pulse;
+            choiceLabelArr[i] = choiceArr[i].__label;
+            container.parent.addChild(choiceArr[i]);
+        }
+        resetChoiceTile(choiceArr[i], { offscreenY: CHOICE_ROW_Y + 40 });
+    }
+
+    layoutChoiceTiles(5);
 
 }
 //==============================================================HELP ENABLE/DISABLE===================================================================//
 function helpDisable() {
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].mouseEnabled = false;
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            choiceArr[i].mouseEnabled = false;
+            choiceArr[i].cursor = "default";
+        }
     }
 }
 
 function helpEnable() {
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].mouseEnabled = true;
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            choiceArr[i].mouseEnabled = true;
+            choiceArr[i].cursor = "pointer";
+        }
     }
 }
 //==================================================================PICKQUES==========================================================================//
@@ -225,25 +421,19 @@ function pickques() {
 
     ques = quesArr[qno[cnt]];
     console.log("qno"+qno[cnt])
-    cluetext.gotoAndStop(qno[cnt]);
-    var ran = Math.floor(Math.random() * 3);
-    var len = 4;
-
-    for (i = 0; i < len; i++) {
-        ch = ques.charAt(i)
-        index = alphaArr.indexOf(ch);
-        if (i == ran) {
-            ans = ch;
-            console.log("ans" + ans)
-            qarr[i].gotoAndStop(26);
-
-        }
-        else {
-            qarr[i].gotoAndStop(index);
-        }
-        qarr[i].visible = false;
-
+    var ran = Math.floor(Math.random() * ques.length);
+    var clueChars = ques.toUpperCase().split("");
+    if (ran >= 0 && ran < clueChars.length) {
+        clueChars[ran] = "_";
     }
+    setClueDisplay(clueChars.join("  "));
+    if (questionCardContainer) {
+        questionCardContainer.visible = false;
+        questionCardContainer.alpha = 0;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
+    }
+    ans = ques.charAt(ran);
+    console.log("ans" + ans)
     farr = [];
 
     index = alphaArr.indexOf(ans);
@@ -263,55 +453,64 @@ function pickques() {
 }
 //====================================================================CHOICE ENABLE/DISABLE==============================================================//
 function enablechoices() {
-    for (i = 0; i < 5; i++) {
-        var index = alphaArr.indexOf(farr[i]);
-        choiceArr[i].gotoAndStop(index);
-        choiceArr[i].name = alphaArr[index];
-        choiceArr[i].visible = false;
-        choiceArr[i].alpha = 0;
-
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
+        resetChoiceTile(choiceArr[i], { offscreenY: CHOICE_ROW_Y + 40 });
+        updateChoiceLetter(i, farr[i]);
     }
     createTween();
 }
 function createTween() {
-    //////////////////////////////QuestionText////////////////////////////    
-    questiontext.visible = true
-    questiontext.alpha = 0;
-    createjs.Tween.get(questiontext).wait(200)
-        .to({ alpha: 1, y: 20 })
-    /////////////////////////////////////
-    for (i = 0; i < 4; i++) {
-        qarr[i].visible = true;
-        qarr[i].alpha = 0;
-        createjs.Tween.get(qarr[i]).wait(500).to({ scaleX: .85, scaleY: .85, alpha: 1 }, 500)
-            .to({ scaleX: .95, scaleY: .95, alpha: 1 }, createjs.Tween.bounceInOut)
+    //////////////////////////////QuestionText////////////////////////////
+    if (questiontext) {
+        var targetY = questiontext.__targetY != null ? questiontext.__targetY : questiontext.y;
+        questiontext.__targetY = targetY;
+        questiontext.visible = true;
+        questiontext.alpha = 0;
+        questiontext.y = targetY - 18;
+        createjs.Tween.get(questiontext, { override: true })
+            .wait(200)
+            .to({ alpha: 1, y: targetY }, 420, createjs.Ease.quadOut);
     }
-    cluetext.visible = true;
-    cluetext.alpha = 0
-    createjs.Tween.get(cluetext).wait(700).to({ y: 430, scaleX: .95, scaleY: .95, alpha: 1 }, 500)
+
+    if (questionCardContainer) {
+        questionCardContainer.visible = true;
+        questionCardContainer.alpha = 0;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.72;
+        createjs.Tween.get(questionCardContainer, { override: true })
+            .wait(520)
+            .to({ alpha: 1, scaleX: 0.78, scaleY: 0.78 }, 480, createjs.Ease.quadOut);
+    }
+
     ///////////////////////////choice tween////////////////////////////////////
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].visible = true;
-        choiceArr[i].alpha = 0;
-        /*  createjs.Tween.get(choiceArr[i]).wait(900)          
-       .to({ visible: true, alpha: 1,y:565, scaleX:.95, scaleY: .95},500)
-      .to({ visible: true,alpha: 1,y:585, scaleX: .95, scaleY: .95 }, 500)*/
+    for (var i = 0; i < choiceArr.length; i++) {
+        var tile = choiceArr[i];
+        if (!tile) {
+            continue;
+        }
+        tile.visible = true;
+        tile.alpha = 0;
+        tile.y = CHOICE_ROW_Y + 44;
+        tile.scaleX = tile.scaleY = tile.__baseScale || tile.scaleX || 0.68;
+        var label = choiceLabelArr[i];
+        if (label) {
+            label.alpha = tile.__letter ? 1 : 0;
+        }
+        (function (targetTile, letterLabel, delayIndex) {
+            var delay = 820 + delayIndex * 120;
+            createjs.Tween.get(targetTile, { override: true })
+                .wait(delay)
+                .to({ alpha: 1, y: CHOICE_ROW_Y }, 420, createjs.Ease.quadOut)
+                .call(function () {
+                    if (letterLabel && targetTile.__letter) {
+                        letterLabel.alpha = 1;
+                    }
+                    highlightChoiceTile(targetTile, false);
+                });
+        })(tile, label, i);
     }
-     createjs.Tween.get(choiceArr[0]).wait(900)
-        .to({ visible: true, alpha: 1, y: 565, scaleX: .6, scaleY: .6 }, 500)
-        .to({ visible: true, alpha: 1, y: 585, scaleX: .65, scaleY: .65 }, 500)
-    createjs.Tween.get(choiceArr[1]).wait(1000)
-        .to({ visible: true, alpha: 1, y: 565, scaleX: .6, scaleY: .6 }, 500)
-        .to({ visible: true, alpha: 1, y: 585, scaleX: .65, scaleY: .65 }, 500)
-    createjs.Tween.get(choiceArr[2]).wait(1100)
-        .to({ visible: true, alpha: 1, y: 565, scaleX: .6, scaleY: .6 }, 500)
-        .to({ visible: true, alpha: 1, y: 585, scaleX: .65, scaleY: .65 }, 500)
-    createjs.Tween.get(choiceArr[3]).wait(1200)
-        .to({ visible: true, alpha: 1, y: 565, scaleX: .6, scaleY: .6 }, 500)
-        .to({ visible: true, alpha: 1, y: 585, scaleX: .65, scaleY: .65 }, 500)
-    createjs.Tween.get(choiceArr[4]).wait(1300)
-        .to({ visible: true, alpha: 1, y: 565, scaleX: .6, scaleY: .6 }, 500)
-        .to({ visible: true, alpha: 1, y: 585, scaleX: .65, scaleY: .65 }, 500)
     //////////////////////////////////////////////////////////////////
 
     repTimeClearInterval = setTimeout(AddListenerFn, 2000)
@@ -319,10 +518,12 @@ function createTween() {
 function AddListenerFn() {
     clearTimeout(repTimeClearInterval)
     console.log("eventlisterneer")
-    for (i = 0; i < 5; i++) {
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
         choiceArr[i].cursor = "pointer";
-        choiceArr[i].mouseEnabled = true
-        choiceArr[i].addEventListener("click", answerSelected);
+        choiceArr[i].mouseEnabled = true;
     }
     rst = 0;
     gameResponseTimerStart();
@@ -332,16 +533,17 @@ function AddListenerFn() {
 
 function disablechoices() {
     createjs.Tween.removeAllTweens();
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].removeEventListener("click", answerSelected);
-        choiceArr[i].visible = false;
-        choiceArr[i].alpha = .5;
-        choiceArr[i].mouseEnabled = false
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (!choiceArr[i]) {
+            continue;
+        }
+        choiceArr[i].mouseEnabled = false;
+        choiceArr[i].cursor = "default";
+        choiceArr[i].alpha = 0.35;
     }
-     questiontext.visible = false;  
-    cluetext.visible = false;
-    for (i = 0; i < 4; i++) {     
-        qarr[i].visible=false       
+    if (questiontext) {
+        questiontext.visible = false;
+        questiontext.alpha = 1;
     }
 
 }
@@ -358,18 +560,15 @@ function onRoll_out(e) {
 
 function answerSelected(e) {
     e.preventDefault();
-    uans = e.currentTarget.name;
+    var selectedTile = e.currentTarget;
+    uans = selectedTile.__letter;
 
     gameResponseTimerStop();
     if (ans == uans) {
-        currentX = e.currentTarget.x - 20
-        currentY = e.currentTarget.y - 20
-        e.currentTarget.visible = true;
+        currentX = selectedTile.x - 20
+        currentY = selectedTile.y - 20
+        selectedTile.visible = true;
         disableMouse()
-
-        for (i = 0; i < 5; i++) {
-            choiceArr[i].removeEventListener("click", answerSelected);
-        }
         setTimeout(correct, 500)
     } else {
 
@@ -380,13 +579,16 @@ function answerSelected(e) {
 
 function correct() {
     getValidation("correct");
+    setClueDisplay(ques ? ques.toUpperCase().split("").join("  ") : "");
     disablechoices();
 }
 
 
 function disableMouse() {
-    for (i = 0; i < 5; i++) {
-        choiceArr[i].mouseEnabled = false
+    for (var i = 0; i < choiceArr.length; i++) {
+        if (choiceArr[i]) {
+            choiceArr[i].mouseEnabled = false;
+        }
     }
 }
 
