@@ -51,11 +51,11 @@ var btn2 = [80, 230, 380, 530, 680];
 
 var CLUE_LETTER_FONT = "800 82px 'Baloo 2'";
 var CLUE_LETTER_COLOR = "#F4FAFF";
-var CHOICE_LETTER_FONT = "800 68px 'Baloo 2'";
+var CHOICE_LETTER_FONT = "800 72px 'Baloo 2'";
 var CHOICE_LETTER_COLOR = "#FFFFFF";
 var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.36)", 0, 8, 22);
 var CLUE_ROW_Y = 372;
-var CHOICE_ROW_Y = 600;
+var CHOICE_ROW_Y = 612;
 
 ///////////////////////////////////////////////////////////////////
 //register key functions
@@ -122,7 +122,7 @@ function buildChoiceTile() {
     tile.mouseChildren = false;
     tile.mouseEnabled = false;
     tile.cursor = "default";
-    tile.__baseScale = 0.68;
+    tile.__baseScale = 0.8;
     tile.scaleX = tile.scaleY = tile.__baseScale;
     tile.x = 0;
     tile.y = CHOICE_ROW_Y;
@@ -289,7 +289,7 @@ function bindChoiceTile(tile) {
 }
 
 function layoutChoiceTiles(count) {
-    var positions = getCenteredPositions(count, { spacing: 175 });
+    var positions = getCenteredPositions(count, { spacing: 184 });
     for (var i = 0; i < choiceArr.length; i++) {
         var tile = choiceArr[i];
         if (!tile) {
@@ -326,6 +326,9 @@ function setClueDisplay(text) {
     question.visible = true;
     if (questionCardContainer) {
         questionCardContainer.visible = true;
+        if (container && container.parent) {
+            container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
+        }
     }
     if (typeof layoutQuestionCardContents === "function") {
         layoutQuestionCardContents();
@@ -360,19 +363,39 @@ function CreateGameElements() {
     questiontext = QusTxtString;
     if (questiontext) {
         container.parent.addChild(questiontext);
+        var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas.width / 2;
+        questiontext.x = promptCenterX;
+        questiontext.y = 132;
+        questiontext.__targetY = questiontext.y;
+        if (questiontext.__labelBG && typeof questiontext.__labelBG.update === "function") {
+            questiontext.__labelBG.update();
+        }
         questiontext.visible = false;
     }
     clueTextField.visible = false;
 
     ensureQuestionCard();
     if (questionCardContainer) {
+        questionCardContainer.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas.width / 2;
+        questionCardContainer.y = 352;
         questionCardContainer.visible = false;
         questionCardContainer.alpha = 0;
         questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
+        if (container && container.parent) {
+            container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
+        }
     }
     if (question) {
+        question.font = "800 88px 'Baloo 2'";
+        question.lineHeight = 72;
+        question.textAlign = "center";
+        question.y = 0;
         question.visible = false;
         question.alpha = 1;
+    }
+    if (typeof questionSubtitle !== "undefined" && questionSubtitle) {
+        questionSubtitle.text = "";
+        questionSubtitle.visible = false;
     }
 
     for (var i = 0; i < 5; i++) {

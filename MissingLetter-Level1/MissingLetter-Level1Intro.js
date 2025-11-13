@@ -5,8 +5,55 @@ var highlightTweenArr = []
 var cluegotoArr = []
 var setIntroCnt = 0
 var removeIntraval = 0
-var introQuestxtX = 636; introQuestxtY = 120;
-var introQues1X = 635, introQues1Y = 280
+var introQuestxtX = 640; introQuestxtY = 132;
+var introQues1X = 640, introQues1Y = 316
+
+var introAlphaArr = [
+    "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+];
+
+function frameIndexToLetter(frameIndex) {
+    if (frameIndex === 26) {
+        return "_";
+    }
+    return introAlphaArr[frameIndex] || "";
+}
+
+function buildIntroChoiceLetter() {
+    var txt = new createjs.Text("", "800 70px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroChoiceLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value;
+    target.alpha = value ? 1 : 0.15;
+}
+
+function buildIntroClueLetter() {
+    var txt = new createjs.Text("", "800 64px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroClueLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value === "_" ? "_" : value;
+    target.alpha = value ? 1 : 0.2;
+}
 
 var introAlphaArr = [
     "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
@@ -82,6 +129,61 @@ var introChoiceBgArr = []
 var introChoiceGlowArr = []
 var introQuestionCard;
 
+function getIntroPromptBasePosition() {
+    var baseX = introQuestxtX;
+    var baseY = introQuestxtY;
+    if (typeof QusTxtString !== "undefined" && QusTxtString) {
+        if (typeof QusTxtString.x === "number") {
+            baseX = QusTxtString.x;
+        }
+        if (typeof QusTxtString.y === "number") {
+            baseY = QusTxtString.y;
+        }
+    }
+    return { x: baseX, y: baseY };
+}
+
+function buildIntroPromptLabel() {
+    var prompt;
+    if (typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.clone === "function") {
+        prompt = QusTxtString.clone();
+    }
+    if (!prompt) {
+        prompt = new createjs.Text(
+            "Choose the missing letter to complete the word.",
+            "700 28px 'Baloo 2'",
+            "#EAF2FF"
+        );
+        prompt.textAlign = "center";
+        prompt.textBaseline = "middle";
+        prompt.lineWidth = 1000;
+        prompt.lineHeight = 40;
+        prompt.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
+    }
+
+    var promptPos = getIntroPromptBasePosition();
+    prompt.x = promptPos.x;
+    prompt.y = promptPos.y;
+
+    var promptParent = container && container.parent ? container.parent : null;
+    if (promptParent && !prompt.__labelBG && typeof SAUI_attachQuestionLabelBG === "function") {
+        prompt.__labelBG = SAUI_attachQuestionLabelBG(prompt, promptParent, {
+            padX: 20,
+            padY: 12,
+            fill: "rgba(0,0,0,0.3)",
+            stroke: "rgba(255,255,255,0.14)",
+            strokeW: 2,
+            maxRadius: 22
+        });
+    }
+
+    if (prompt.__labelBG && typeof prompt.__labelBG.update === "function") {
+        prompt.__labelBG.update();
+    }
+
+    return prompt;
+}
+
 function buildIntroChoiceBackground() {
     var shape = new createjs.Shape();
     drawChoiceTileBackground(shape);
@@ -117,7 +219,11 @@ function commongameintro() {
     introClueBgArr = []
     introChoiceBgArr = []
     introChoiceGlowArr = []
-    introTitle = Title.clone()
+    if (typeof Title !== "undefined" && Title && typeof Title.clone === "function") {
+        introTitle = Title.clone();
+    } else {
+        introTitle = null;
+    }
     introClu1 = buildIntroClueLetter()
     introClu2 = buildIntroClueLetter()
     introClu3 = buildIntroClueLetter()
@@ -128,12 +234,14 @@ function commongameintro() {
     introChoice3 = buildIntroChoiceLetter()
     introChoice4 = buildIntroChoiceLetter()
 
-    introArrow = arrow1.clone()
-    introfingure = fingure.clone()
+    introArrow = typeof arrow1 !== "undefined" && arrow1 && typeof arrow1.clone === "function" ? arrow1.clone() : null;
+    introfingure = typeof fingure !== "undefined" && fingure && typeof fingure.clone === "function" ? fingure.clone() : null;
 
 
-    container.parent.addChild(introTitle)
-    introTitle.visible = true;
+    if (introTitle) {
+        container.parent.addChild(introTitle)
+        introTitle.visible = true;
+    }
 
 
 
@@ -155,8 +263,10 @@ function commongameintro() {
         introQues1.visible = false;
     }
 
-    introQuestxt = QusTxtString.clone();
-    container.parent.addChild(introQuestxt);
+    introQuestxt = buildIntroPromptLabel();
+    if (container && container.parent) {
+        container.parent.addChild(introQuestxt);
+    }
     introQuestxt.visible = true;
 
     for (var c = 1; c < 5; c++) {
@@ -322,22 +432,27 @@ function setArrowTween() {
 
     }
     else {
-        container.parent.addChild(introArrow);
-        introArrow.visible = true;
-        introArrow.x = introArrowX;
-        introArrow.y = introArrowY;
+        if (introArrow) {
+            container.parent.addChild(introArrow);
+            introArrow.visible = true;
+            introArrow.x = introArrowX;
+            introArrow.y = introArrowY;
 
-        highlightTweenArr[0] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[0])
-        highlightTweenArr[0] = createjs.Tween.get(introArrow)
-        .to({ y: introArrowY + 10 }, 350)
-        .to({ y: introArrowY }, 350)
-        .to({ y: introArrowY + 10 }, 350)
-        .to({ y: introArrowY }, 350)
-        .to({ y: introArrowY + 10 }, 350)
-        .to({ y: introArrowY }, 350)
-        .wait(400)
-        .call(this.onComplete1)
+            highlightTweenArr[0] = new createjs.MovieClip()
+            container.parent.addChild(highlightTweenArr[0])
+            highlightTweenArr[0] = createjs.Tween.get(introArrow)
+            .to({ y: introArrowY + 10 }, 350)
+            .to({ y: introArrowY }, 350)
+            .to({ y: introArrowY + 10 }, 350)
+            .to({ y: introArrowY }, 350)
+            .to({ y: introArrowY + 10 }, 350)
+            .to({ y: introArrowY }, 350)
+            .wait(400)
+            .call(this.onComplete1)
+        } else {
+            highlightTweenArr[0] = null;
+            createjs.Tween.get({}).wait(400).call(this.onComplete1);
+        }
 
     }
 
@@ -351,15 +466,30 @@ function setFingureTween() {
     }
     else {
 
-        container.parent.removeChild(introArrow);
-        introArrow.visible = false;
-        container.parent.addChild(introfingure);
-        introfingure.visible = true;
-        introfingure.x = introfingureX;
-        introfingure.y = introfingureY;
-        highlightTweenArr[1] = new createjs.MovieClip()
-        container.parent.addChild(highlightTweenArr[1])
-        highlightTweenArr[1] = createjs.Tween.get(introfingure).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).to({ x: introfingureX }, 350).to({ x: introfingureX - 15 }, 350).wait(200).call(this.onComplete2)
+        if (introArrow && introArrow.parent) {
+            introArrow.parent.removeChild(introArrow);
+        }
+        if (introArrow) {
+            introArrow.visible = false;
+        }
+        if (introfingure) {
+            container.parent.addChild(introfingure);
+            introfingure.visible = true;
+            introfingure.x = introfingureX;
+            introfingure.y = introfingureY;
+            highlightTweenArr[1] = new createjs.MovieClip()
+            container.parent.addChild(highlightTweenArr[1])
+            highlightTweenArr[1] = createjs.Tween.get(introfingure)
+                .to({ x: introfingureX }, 350)
+                .to({ x: introfingureX - 15 }, 350)
+                .to({ x: introfingureX }, 350)
+                .to({ x: introfingureX - 15 }, 350)
+                .wait(200)
+                .call(this.onComplete2)
+        } else {
+            highlightTweenArr[1] = null;
+            createjs.Tween.get({}).wait(200).call(this.onComplete2);
+        }
 
     }
 }
@@ -368,10 +498,14 @@ this.onComplete1 = function(e) {
 
     if (highlightTweenArr[0]) {
         console.log("onComplete1")
-        container.parent.removeChild(highlightTweenArr[0]);
+        if (container && container.parent) {
+            container.parent.removeChild(highlightTweenArr[0]);
+        }
     }
 
-    container.parent.removeChild(introArrow);
+    if (introArrow && introArrow.parent) {
+        introArrow.parent.removeChild(introArrow);
+    }
     if (stopValue == 0) {
         console.log("onComplete1  == stopValue")
         removeGameIntro()
@@ -386,10 +520,16 @@ this.onComplete2 = function(e) {
     createjs.Tween.removeAllTweens();
     if (highlightTweenArr[1]) {
         console.log("onComplete2")
-        container.parent.removeChild(highlightTweenArr[1]);
+        if (container && container.parent) {
+            container.parent.removeChild(highlightTweenArr[1]);
+        }
     }
-    container.parent.removeChild(introfingure);
-    introfingure.visible = false;
+    if (introfingure && introfingure.parent) {
+        introfingure.parent.removeChild(introfingure);
+    }
+    if (introfingure) {
+        introfingure.visible = false;
+    }
 
     if (stopValue == 0) {
         console.log("onComplete2  == stopValue")
@@ -404,7 +544,7 @@ function AnswerValidate()
 {
         createjs.Tween.removeAllTweens();
         introtextArr1.visible = true;
-        introtextArr1. alpha = 0
+        introtextArr1.alpha = 0
         introtextArr1.x=965
         introtextArr1.y=625
         createjs.Tween.get(introtextArr1).wait(200)
@@ -447,10 +587,18 @@ function removeGameIntro() {
     createjs.Tween.removeAllTweens();
     // container.parent.removeChild(introTitle)
     // introTitle.visible = false;
-    container.parent.removeChild(introArrow)
-    introArrow.visible = false
-    container.parent.removeChild(introfingure)
-    introfingure.visible = false
+    if (introArrow && introArrow.parent) {
+        introArrow.parent.removeChild(introArrow);
+    }
+    if (introArrow) {
+        introArrow.visible = false
+    }
+    if (introfingure && introfingure.parent) {
+        introfingure.parent.removeChild(introfingure);
+    }
+    if (introfingure) {
+        introfingure.visible = false
+    }
     if (introQuestionCard) {
         if (introQuestionCard.parent) {
             introQuestionCard.parent.removeChild(introQuestionCard);
@@ -464,18 +612,30 @@ function removeGameIntro() {
         }
         introQues1.visible = false
     }
-    container.parent.removeChild(introQuestxt)
-    introQuestxt.visible = false
-    container.parent.removeChild(introChoice1)
-    introChoice1.visible = false
-    container.parent.removeChild(introChoice2)
-    introChoice2.visible = false
-    container.parent.removeChild(introChoice3)
-    introChoice3.visible = false
-    container.parent.removeChild(introChoice4)
-    introChoice4.visible = false
- container.parent.removeChild(introtextArr1)
-    introtextArr1.visible = false
+    if (introQuestxt && introQuestxt.__labelBG && introQuestxt.__labelBG.parent) {
+        introQuestxt.__labelBG.parent.removeChild(introQuestxt.__labelBG);
+    }
+    if (introQuestxt && introQuestxt.parent) {
+        introQuestxt.parent.removeChild(introQuestxt)
+    }
+    if (introQuestxt) {
+        introQuestxt.visible = false
+    }
+    for (var t = 1; t <= 4; t++) {
+        var introChoice = this["introChoice" + t];
+        if (introChoice && introChoice.parent) {
+            introChoice.parent.removeChild(introChoice);
+        }
+        if (introChoice) {
+            introChoice.visible = false;
+        }
+    }
+    if (introtextArr1 && introtextArr1.parent) {
+        introtextArr1.parent.removeChild(introtextArr1);
+    }
+    if (introtextArr1) {
+        introtextArr1.visible = false
+    }
     for (i = 1; i < 5; i++) {
         if (introChoiceGlowArr[i]) {
             if (introChoiceGlowArr[i].parent) {
@@ -509,12 +669,20 @@ function removeGameIntro() {
 
     if (highlightTweenArr[0]) {
         highlightTweenArr[0].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[0]);
+        if (container && container.parent) {
+            container.parent.removeChild(highlightTweenArr[0]);
+        }
     }
     if (highlightTweenArr[1]) {
         highlightTweenArr[1].setPaused(false);
-        container.parent.removeChild(highlightTweenArr[1]);
+        if (container && container.parent) {
+            container.parent.removeChild(highlightTweenArr[1]);
+        }
     }
-    container.parent.removeChild(introfingure);
-    introfingure.visible = false;
+    if (introfingure && introfingure.parent) {
+        introfingure.parent.removeChild(introfingure);
+    }
+    if (introfingure) {
+        introfingure.visible = false;
+    }
 }
