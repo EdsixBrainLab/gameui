@@ -245,6 +245,34 @@ function updateClueWord(word, options) {
     if (clueSlotContainer) {
         clueSlotContainer.visible = letters.length > 0;
     }
+    var baseScale = tile.__baseScale || 0.68;
+    tile.scaleX = tile.scaleY = baseScale;
+    tile.alpha = 0;
+    tile.visible = false;
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
+    tile.__letter = "";
+    tile.y = (options && options.offscreenY) != null ? options.offscreenY : CHOICE_ROW_Y + 40;
+    if (tile.__bg) {
+        tile.__bg.alpha = 0.95;
+        tile.__bg.scaleX = tile.__bg.scaleY = 1;
+        drawChoiceTileBackground(tile.__bg);
+    }
+    if (tile.__glow) {
+        tile.__glow.alpha = 0;
+        tile.__glow.visible = false;
+        tile.__glow.scaleX = tile.__glow.scaleY = 1;
+    }
+    if (tile.__pulse) {
+        tile.__pulse.alpha = 0;
+        tile.__pulse.visible = false;
+        tile.__pulse.scaleX = tile.__pulse.scaleY = 1;
+    }
+    if (tile.__label) {
+        tile.__label.text = "";
+        tile.__label.alpha = 0;
+    }
+}
 
     if (question) {
         question.text = letters.join("  ");

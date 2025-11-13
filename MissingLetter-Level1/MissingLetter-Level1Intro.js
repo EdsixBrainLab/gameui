@@ -275,13 +275,33 @@ function commongameintro() {
     configureIntroArrowSprite(introArrow);
     configureIntroFingerSprite(introfingure);
 
+    return prompt;
+}
 
     if (introTitle) {
         container.parent.addChild(introTitle)
         introTitle.visible = true;
     }
 
+function buildIntroChoiceGlow() {
+    var glow = new createjs.Shape();
+    drawChoiceSpeechWave(glow);
+    glow.alpha = 0;
+    glow.visible = false;
+    glow.mouseEnabled = false;
+    glow.mouseChildren = false;
+    return glow;
+}
 
+function buildIntroClueBackground() {
+    var shape = new createjs.Shape();
+    drawClueSlotBackground(shape);
+    shape.alpha = 0;
+    shape.visible = false;
+    shape.mouseEnabled = false;
+    shape.mouseChildren = false;
+    return shape;
+}
 
     var introSampleFrames = [17, 0, 26, 13];
     var introSampleText = "";
