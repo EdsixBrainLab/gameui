@@ -8,6 +8,53 @@ var removeIntraval = 0
 var introQuestxtX = 636; introQuestxtY = 120;
 var introQues1X = 635, introQues1Y = 280
 
+var introAlphaArr = [
+    "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+];
+
+function frameIndexToLetter(frameIndex) {
+    if (frameIndex === 26) {
+        return "_";
+    }
+    return introAlphaArr[frameIndex] || "";
+}
+
+function buildIntroChoiceLetter() {
+    var txt = new createjs.Text("", "800 70px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroChoiceLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value;
+    target.alpha = value ? 1 : 0.15;
+}
+
+function buildIntroClueLetter() {
+    var txt = new createjs.Text("", "800 64px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroClueLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value === "_" ? "_" : value;
+    target.alpha = value ? 1 : 0.2;
+}
+
 var introChoice1X = 280, introChoice1Y = 590;
 var introChoice2X = 500, introChoice2Y = 590;
 var introChoice3X = 720, introChoice3Y = 590;
@@ -28,15 +75,15 @@ var introClueTxtArr = ["", 17, 0, 26, 13]
 function commongameintro() {
     introClueArr = []
     introTitle = Title.clone()
-    introClu1 = quekey.clone()
-    introClu2 = quekey.clone()
-    introClu3 = quekey.clone()
-    introClu4 = quekey.clone()
+    introClu1 = buildIntroClueLetter()
+    introClu2 = buildIntroClueLetter()
+    introClu3 = buildIntroClueLetter()
+    introClu4 = buildIntroClueLetter()
 
-    introChoice1 = choice1.clone()
-    introChoice2 = choice1.clone()
-    introChoice3 = choice1.clone()
-    introChoice4 = choice1.clone()
+    introChoice1 = buildIntroChoiceLetter()
+    introChoice2 = buildIntroChoiceLetter()
+    introChoice3 = buildIntroChoiceLetter()
+    introChoice4 = buildIntroChoiceLetter()
 
     introArrow = arrow1.clone()
     introfingure = fingure.clone()
@@ -47,11 +94,19 @@ function commongameintro() {
 
 
 
-    introQues1 = cluetext.clone()
+    var introSampleFrames = [17, 0, 26, 13];
+    var introSampleText = "";
+    for (var f = 0; f < introSampleFrames.length; f++) {
+        introSampleText += frameIndexToLetter(introSampleFrames[f]) + (f < introSampleFrames.length - 1 ? "  " : "");
+    }
+    introQues1 = new createjs.Text(introSampleText, "800 70px 'Baloo 2'", "#F4FAFF");
+    introQues1.textAlign = "center";
+    introQues1.textBaseline = "middle";
+    introQues1.shadow = new createjs.Shadow("rgba(6,16,40,0.46)", 0, 10, 26);
     container.parent.addChild(introQues1);
     introQues1.visible = false;
-    introQues1.x = 460; introQues1.y = 410;
-    introQues1.gotoAndStop(16);
+    introQues1.x = introQues1X;
+    introQues1.y = introQues1Y + 130;
 
     introQuestxt = QusTxtString.clone();
     container.parent.addChild(introQuestxt);
@@ -62,25 +117,25 @@ function commongameintro() {
     introChoice1.y = introChoice1Y;
 
     introChoice1.visible = false;
-    introChoice1.gotoAndStop(13);
+    updateIntroChoiceLetter(introChoice1, 13);
     container.parent.addChild(introChoice2)
     introChoice2.visible = false;
     introChoice2.x = introChoice2X;
     introChoice2.y = introChoice2Y;
 
-    introChoice2.gotoAndStop(17)
+    updateIntroChoiceLetter(introChoice2, 17)
     container.parent.addChild(introChoice3)
     introChoice3.visible = false;
     introChoice3.x = introChoice3X;
     introChoice3.y = introChoice3Y;
 
-    introChoice3.gotoAndStop(0)
+    updateIntroChoiceLetter(introChoice3, 0)
     container.parent.addChild(introChoice4)
     introChoice4.visible = false;
     introChoice4.x = introChoice4X;
     introChoice4.y = introChoice4Y;
 
-    introChoice4.gotoAndStop(8)
+    updateIntroChoiceLetter(introChoice4, 8)
 
     cluegotoArr = [, 26, 0, 17, 13]
     container.parent.addChild(introClu1)
@@ -88,25 +143,25 @@ function commongameintro() {
     introClu1.y = introClu1Y;
     introClu1.scaleX = introClu1.scaleY = 1;
     introClu1.visible = false;
-    introClu1.gotoAndStop(17);
+    updateIntroClueLetter(introClu1, 17);
     container.parent.addChild(introClu2)
     introClu2.visible = false;
     introClu2.x = introClu2X;
     introClu2.y = introClu2Y;
     introClu2.scaleX = introClu2.scaleY = 1;
-    introClu2.gotoAndStop(0)
+    updateIntroClueLetter(introClu2, 0)
     container.parent.addChild(introClu3)
     introClu3.visible = false;
     introClu3.x = introClu3X;
     introClu3.y = introClu3Y;
     introClu3.scaleX = introClu3.scaleY = 1;
-    introClu3.gotoAndStop(26)
+    updateIntroClueLetter(introClu3, 26)
     container.parent.addChild(introClu4)
     introClu4.visible = false;
     introClu4.x = introClu4X;
     introClu4.y = introClu4Y;
     introClu4.scaleX = introClu4.scaleY = 1;
-    introClu4.gotoAndStop(13)
+    updateIntroClueLetter(introClu4, 13)
     introClueArr.push("", introClu1, introClu2, introClu3, introClu4)
 
     introtextArr1 = new createjs.Text("I", "135px Veggieburger-Bold", "white")
@@ -134,7 +189,7 @@ function quesTween() {
         introClueArr[i].visible = true;
            introClueArr[i].alpha=0;
         introClueArr[i].scaleX = introClueArr[i].scaleY = .95;
-        introClueArr[i].gotoAndStop(introClueTxtArr[i])
+        updateIntroClueLetter(introClueArr[i], introClueTxtArr[i])
         if (i == 4) {
             createjs.Tween.get(introClueArr[i]) .wait(val1)
                 .to({ alpha: 1, scaleX: .9, scaleY: .9 }, 250)
@@ -161,7 +216,7 @@ function choiceTween() {
     var val = 700
     for (i = 1; i < 5; i++) {
         introClueArr[i].visible = true;
-        introClueArr[i].gotoAndStop(introClueTxtArr[i])
+        updateIntroClueLetter(introClueArr[i], introClueTxtArr[i])
         this["introChoice" + i].y = 590, this["introChoice" + i].x = this["introChoice" + i].x;
         this["introChoice" + i].visible = true;
         this["introChoice" + i].alpha = 0;
@@ -291,7 +346,7 @@ function ValueTween()
        introtextArr1.visible=false
         introClu3.visible = true;
         introClu3.alpha = 0;
-        introClu3.gotoAndStop(8)
+        updateIntroClueLetter(introClu3, 8)
         createjs.Tween.get(introClu3)
             .to({ x: 687, y: 230, alpha: 1 }, 1000).call(setCallDelay)
 }
