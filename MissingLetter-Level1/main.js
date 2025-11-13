@@ -372,6 +372,7 @@ function CreateGameElements() {
         }
         questiontext.visible = false;
     }
+    clueTextField.visible = false;
 
     ensureQuestionCard();
     if (questionCardContainer) {

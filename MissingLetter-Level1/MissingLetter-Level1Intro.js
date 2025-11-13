@@ -55,6 +55,53 @@ function updateIntroClueLetter(target, frameIndex) {
     target.alpha = value ? 1 : 0.2;
 }
 
+var introAlphaArr = [
+    "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+];
+
+function frameIndexToLetter(frameIndex) {
+    if (frameIndex === 26) {
+        return "_";
+    }
+    return introAlphaArr[frameIndex] || "";
+}
+
+function buildIntroChoiceLetter() {
+    var txt = new createjs.Text("", "800 70px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroChoiceLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value;
+    target.alpha = value ? 1 : 0.15;
+}
+
+function buildIntroClueLetter() {
+    var txt = new createjs.Text("", "800 64px 'Baloo 2'", "#FFFFFF");
+    txt.textAlign = "center";
+    txt.textBaseline = "middle";
+    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
+    txt.visible = false;
+    return txt;
+}
+
+function updateIntroClueLetter(target, frameIndex) {
+    if (!target) {
+        return;
+    }
+    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    target.text = value === "_" ? "_" : value;
+    target.alpha = value ? 1 : 0.2;
+}
+
 var introChoice1X = 280, introChoice1Y = 590;
 var introChoice2X = 500, introChoice2Y = 590;
 var introChoice3X = 720, introChoice3Y = 590;
