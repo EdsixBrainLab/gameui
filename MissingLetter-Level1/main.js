@@ -35,6 +35,17 @@ var choiceBgArr = [];
 var choiceGlowArr = [];
 var choicePulseArr = [];
 var choiceLabelArr = [];
+var clueSlotContainer;
+var clueSlotArr = [];
+var clueSlotBgArr = [];
+var clueSlotLetterArr = [];
+var currentClueWord = "";
+var currentMissingIndex = -1;
+
+var TOTAL_CLUE_SLOTS = 4;
+var CLUE_SLOT_BASE_SCALE = 0.9;
+var CLUE_SLOT_SPACING = 156;
+var CLUE_PLACEHOLDER_CHAR = "_";
 ///////////////////////////////////////////////////////////////////////GAME SPECIFIC ARRAY//////////////////////////////////////////////////////////////
 var qno = [];
 var alphaArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -54,8 +65,8 @@ var CLUE_LETTER_COLOR = "#F4FAFF";
 var CHOICE_LETTER_FONT = "800 72px 'Baloo 2'";
 var CHOICE_LETTER_COLOR = "#FFFFFF";
 var LETTER_SHADOW = new createjs.Shadow("rgba(8,18,44,0.36)", 0, 8, 22);
-var CLUE_ROW_Y = 372;
-var CHOICE_ROW_Y = 612;
+var CLUE_ROW_Y = 352;
+var CHOICE_ROW_Y = 585;
 
 ///////////////////////////////////////////////////////////////////
 //register key functions
@@ -69,6 +80,7 @@ function init() {
     container = new createjs.Container();
     stage.addChild(container)
     call_UI_ambientOverlay(container);
+    call_UI_gameQuestion(container, "Choose the missing letter to complete the word.");
     createjs.Ticker.addEventListener("tick", stage);
     callLoader();
     createLoader()
@@ -95,8 +107,8 @@ function init() {
 }
 //=================================================================DONE LOADING=================================================================//
 function doneLoading1(event) {
-    if (!QusTxtString) {
-        call_UI_gameQuestion(container, "Choose the missing letter to complete the word.");
+    if (QusTxtString && QusTxtString.__labelBG && typeof QusTxtString.__labelBG.update === "function") {
+        QusTxtString.__labelBG.update();
     }
 }
 
@@ -115,6 +127,195 @@ function getCenteredPositions(count, options) {
     return positions;
 }
 
+function buildClueSlot() {
+    var slot = new createjs.Container();
+    slot.visible = false;
+    slot.alpha = 0;
+    slot.mouseEnabled = false;
+    slot.mouseChildren = false;
+    slot.__baseScale = CLUE_SLOT_BASE_SCALE;
+
+    var bg = new createjs.Shape();
+    drawClueSlotBackground(bg);
+    bg.alpha = 0.96;
+    bg.mouseEnabled = false;
+    bg.mouseChildren = false;
+    slot.addChild(bg);
+
+    var label = new createjs.Text("", CLUE_LETTER_FONT, CLUE_LETTER_COLOR);
+    label.textAlign = "center";
+    label.textBaseline = "middle";
+    label.shadow = LETTER_SHADOW;
+    label.mouseEnabled = false;
+    label.mouseChildren = false;
+    slot.addChild(label);
+
+    slot.__bg = bg;
+    slot.__label = label;
+
+    return slot;
+}
+
+function ensureClueSlots() {
+    ensureQuestionCard();
+    if (!questionCardContainer) {
+        return;
+    }
+
+    if (!clueSlotContainer) {
+        clueSlotContainer = new createjs.Container();
+        clueSlotContainer.y = 0;
+        clueSlotContainer.visible = false;
+        questionCardContainer.addChild(clueSlotContainer);
+    }
+
+    for (var i = clueSlotArr.length; i < TOTAL_CLUE_SLOTS; i++) {
+        var slot = buildClueSlot();
+        clueSlotContainer.addChild(slot);
+        clueSlotArr[i] = slot;
+        clueSlotBgArr[i] = slot.__bg;
+        clueSlotLetterArr[i] = slot.__label;
+    }
+
+    layoutClueSlots();
+}
+
+function layoutClueSlots() {
+    if (!clueSlotContainer || !clueSlotArr.length) {
+        return;
+    }
+
+    var positions = getCenteredPositions(TOTAL_CLUE_SLOTS, { centerX: 0, spacing: CLUE_SLOT_SPACING });
+    for (var i = 0; i < TOTAL_CLUE_SLOTS; i++) {
+        var slot = clueSlotArr[i];
+        if (!slot) {
+            continue;
+        }
+        slot.x = positions[i];
+        slot.y = 0;
+    }
+}
+
+function updateClueWord(word, options) {
+    options = options || {};
+    ensureClueSlots();
+
+    currentClueWord = word ? String(word).toUpperCase() : "";
+    currentMissingIndex = typeof options.missingIndex === "number" ? options.missingIndex : -1;
+
+    var reveal = !!options.reveal;
+    var placeholder = options.placeholder != null ? options.placeholder : CLUE_PLACEHOLDER_CHAR;
+    var letters = currentClueWord ? currentClueWord.split("") : [];
+    var colors = options.colors || CLUE_SLOT_BASE_COLORS;
+
+    for (var i = 0; i < TOTAL_CLUE_SLOTS; i++) {
+        var slot = clueSlotArr[i];
+        if (!slot) {
+            continue;
+        }
+
+        var label = slot.__label;
+        var bg = slot.__bg;
+
+        if (i < letters.length) {
+            var char = letters[i];
+            var display = reveal || i !== currentMissingIndex ? char : placeholder;
+            if (label) {
+                label.text = display;
+                label.alpha = display === placeholder ? 0.58 : display ? 1 : 0.2;
+            }
+            if (bg) {
+                drawClueSlotBackground(bg, colors);
+                bg.alpha = 0.96;
+            }
+            slot.visible = true;
+        } else {
+            if (label) {
+                label.text = "";
+                label.alpha = 0;
+            }
+            if (bg) {
+                drawClueSlotBackground(bg, colors);
+                bg.alpha = 0;
+            }
+            slot.visible = false;
+        }
+    }
+
+    if (clueSlotContainer) {
+        clueSlotContainer.visible = letters.length > 0;
+    }
+    var baseScale = tile.__baseScale || 0.68;
+    tile.scaleX = tile.scaleY = baseScale;
+    tile.alpha = 0;
+    tile.visible = false;
+    tile.mouseEnabled = false;
+    tile.cursor = "default";
+    tile.__letter = "";
+    tile.y = (options && options.offscreenY) != null ? options.offscreenY : CHOICE_ROW_Y + 40;
+    if (tile.__bg) {
+        tile.__bg.alpha = 0.95;
+        tile.__bg.scaleX = tile.__bg.scaleY = 1;
+        drawChoiceTileBackground(tile.__bg);
+    }
+    if (tile.__glow) {
+        tile.__glow.alpha = 0;
+        tile.__glow.visible = false;
+        tile.__glow.scaleX = tile.__glow.scaleY = 1;
+    }
+    if (tile.__pulse) {
+        tile.__pulse.alpha = 0;
+        tile.__pulse.visible = false;
+        tile.__pulse.scaleX = tile.__pulse.scaleY = 1;
+    }
+    if (tile.__label) {
+        tile.__label.text = "";
+        tile.__label.alpha = 0;
+    }
+}
+
+    if (question) {
+        question.text = letters.join("  ");
+        question.visible = false;
+    }
+}
+
+function prepareClueSlotsForRound() {
+    if (!clueSlotArr.length) {
+        return;
+    }
+    if (clueSlotContainer && currentClueWord) {
+        clueSlotContainer.visible = true;
+    }
+    for (var i = 0; i < clueSlotArr.length; i++) {
+        var slot = clueSlotArr[i];
+        if (!slot || !slot.visible) {
+            continue;
+        }
+        var baseScale = slot.__baseScale || CLUE_SLOT_BASE_SCALE;
+        slot.alpha = 0;
+        slot.y = -24;
+        slot.scaleX = slot.scaleY = baseScale * 0.92;
+        if (slot.__bg) {
+            drawClueSlotBackground(slot.__bg, CLUE_SLOT_BASE_COLORS);
+            slot.__bg.alpha = 0.96;
+        }
+    }
+}
+
+function revealClueWord() {
+    if (!currentClueWord) {
+        return;
+    }
+    updateClueWord(currentClueWord, { reveal: true, colors: CLUE_SLOT_SUCCESS_COLORS });
+}
+
+function hideClueWord() {
+    if (clueSlotContainer) {
+        clueSlotContainer.visible = false;
+    }
+}
+
 function buildChoiceTile() {
     var tile = new createjs.Container();
     tile.visible = false;
@@ -122,7 +323,7 @@ function buildChoiceTile() {
     tile.mouseChildren = false;
     tile.mouseEnabled = false;
     tile.cursor = "default";
-    tile.__baseScale = 0.8;
+    tile.__baseScale = 0.68;
     tile.scaleX = tile.scaleY = tile.__baseScale;
     tile.x = 0;
     tile.y = CHOICE_ROW_Y;
@@ -318,23 +519,6 @@ function updateChoiceLetter(index, letter) {
     }
 }
 
-function setClueDisplay(text) {
-    if (!question) {
-        return;
-    }
-    question.text = text != null ? String(text) : "";
-    question.visible = true;
-    if (questionCardContainer) {
-        questionCardContainer.visible = true;
-        if (container && container.parent) {
-            container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
-        }
-    }
-    if (typeof layoutQuestionCardContents === "function") {
-        layoutQuestionCardContents();
-    }
-}
-
 function tick(e) {
     stage.update();
 }
@@ -362,34 +546,41 @@ function CreateGameElements() {
     interval = setInterval(countTime, 1000);
     questiontext = QusTxtString;
     if (questiontext) {
-        container.parent.addChild(questiontext);
-        var promptCenterX = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas.width / 2;
-        questiontext.x = promptCenterX;
-        questiontext.y = 132;
-        questiontext.__targetY = questiontext.y;
+        if (!questiontext.parent) {
+            container.parent.addChild(questiontext);
+        }
+        if (typeof getCanvasCenterX === "function") {
+            questiontext.x = getCanvasCenterX();
+        }
+        if (typeof questiontext.__targetY !== "number") {
+            questiontext.__targetY = questiontext.y;
+        } else {
+            questiontext.y = questiontext.__targetY;
+        }
         if (questiontext.__labelBG && typeof questiontext.__labelBG.update === "function") {
             questiontext.__labelBG.update();
         }
         questiontext.visible = false;
     }
-    clueTextField.visible = false;
 
     ensureQuestionCard();
     if (questionCardContainer) {
         questionCardContainer.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas.width / 2;
-        questionCardContainer.y = 352;
+        questionCardContainer.y = 340;
         questionCardContainer.visible = false;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.82;
         if (container && container.parent) {
             container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
         }
     }
+    ensureClueSlots();
     if (question) {
         question.font = "800 88px 'Baloo 2'";
         question.lineHeight = 72;
         question.textAlign = "center";
         question.y = 0;
+        question.text = "";
         question.visible = false;
         question.alpha = 1;
     }
@@ -446,15 +637,12 @@ function pickques() {
     ques = quesArr[qno[cnt]];
     console.log("qno"+qno[cnt])
     var ran = Math.floor(Math.random() * ques.length);
-    var clueChars = ques.toUpperCase().split("");
-    if (ran >= 0 && ran < clueChars.length) {
-        clueChars[ran] = "_";
-    }
-    setClueDisplay(clueChars.join("  "));
+    updateClueWord(ques, { missingIndex: ran, placeholder: CLUE_PLACEHOLDER_CHAR });
+    prepareClueSlotsForRound();
     if (questionCardContainer) {
         questionCardContainer.visible = false;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.74;
     }
     ans = ques.charAt(ran);
     console.log("ans" + ans)
@@ -477,6 +665,7 @@ function pickques() {
 }
 //====================================================================CHOICE ENABLE/DISABLE==============================================================//
 function enablechoices() {
+    prepareClueSlotsForRound();
     for (var i = 0; i < choiceArr.length; i++) {
         if (!choiceArr[i]) {
             continue;
@@ -502,10 +691,25 @@ function createTween() {
     if (questionCardContainer) {
         questionCardContainer.visible = true;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.72;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.74;
         createjs.Tween.get(questionCardContainer, { override: true })
             .wait(520)
-            .to({ alpha: 1, scaleX: 0.78, scaleY: 0.78 }, 480, createjs.Ease.quadOut);
+            .to({ alpha: 1, scaleX: 0.82, scaleY: 0.82 }, 520, createjs.Ease.quadOut);
+    }
+
+    if (clueSlotArr.length) {
+        var slotDelay = 540;
+        for (var s = 0; s < clueSlotArr.length; s++) {
+            (function (slot, index) {
+                if (!slot || !slot.visible) {
+                    return;
+                }
+                var baseScale = slot.__baseScale || CLUE_SLOT_BASE_SCALE;
+                createjs.Tween.get(slot, { override: true })
+                    .wait(slotDelay + index * 140)
+                    .to({ alpha: 1, y: 0, scaleX: baseScale, scaleY: baseScale }, 420, createjs.Ease.quadOut);
+            })(clueSlotArr[s], s);
+        }
     }
 
     ///////////////////////////choice tween////////////////////////////////////
@@ -570,6 +774,8 @@ function disablechoices() {
         questiontext.alpha = 1;
     }
 
+    hideClueWord();
+
 }
 
 function onRoll_over(e) {
@@ -603,7 +809,7 @@ function answerSelected(e) {
 
 function correct() {
     getValidation("correct");
-    setClueDisplay(ques ? ques.toUpperCase().split("").join("  ") : "");
+    revealClueWord();
     disablechoices();
 }
 

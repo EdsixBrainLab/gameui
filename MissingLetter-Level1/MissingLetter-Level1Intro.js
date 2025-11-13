@@ -20,15 +20,31 @@ function frameIndexToLetter(frameIndex) {
 }
 
 function buildIntroChoiceLetter() {
+    var builder = getIntroHelper("SA_buildChoiceLetterDisplay") || getIntroHelper("SAUI_buildChoiceLetterDisplay");
+    if (typeof builder === "function") {
+        var display = builder({ interactive: false, baseScale: 0.8 });
+        if (display) {
+            display.visible = false;
+            return display;
+        }
+    }
     var txt = new createjs.Text("", "800 70px 'Baloo 2'", "#FFFFFF");
     txt.textAlign = "center";
     txt.textBaseline = "middle";
     txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
     txt.visible = false;
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 0.8;
     return txt;
 }
 
 function updateIntroChoiceLetter(target, frameIndex) {
+    var updater = getIntroHelper("SA_updateChoiceLetterDisplay") || getIntroHelper("SAUI_updateChoiceLetterDisplay");
+    if (typeof updater === "function") {
+        updater(target, frameIndex != null ? frameIndexToLetter(frameIndex) : "");
+        return;
+    }
     if (!target) {
         return;
     }
@@ -38,68 +54,37 @@ function updateIntroChoiceLetter(target, frameIndex) {
 }
 
 function buildIntroClueLetter() {
+    var builder = getIntroHelper("SA_buildClueLetterDisplay") || getIntroHelper("SAUI_buildClueLetterDisplay");
+    if (typeof builder === "function") {
+        var display = builder({ baseScale: 1, interactive: false });
+        if (display) {
+            display.visible = false;
+            return display;
+        }
+    }
     var txt = new createjs.Text("", "800 64px 'Baloo 2'", "#FFFFFF");
     txt.textAlign = "center";
     txt.textBaseline = "middle";
     txt.shadow = new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
     txt.visible = false;
+    txt.mouseEnabled = false;
+    txt.mouseChildren = false;
+    txt.__baseScale = 1;
     return txt;
 }
 
 function updateIntroClueLetter(target, frameIndex) {
+    var updater = getIntroHelper("SA_updateClueLetterDisplay") || getIntroHelper("SAUI_updateClueLetterDisplay");
+    var letter = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
+    if (typeof updater === "function") {
+        updater(target, letter);
+        return;
+    }
     if (!target) {
         return;
     }
-    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
-    target.text = value === "_" ? "_" : value;
-    target.alpha = value ? 1 : 0.2;
-}
-
-var introAlphaArr = [
-    "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
-];
-
-function frameIndexToLetter(frameIndex) {
-    if (frameIndex === 26) {
-        return "_";
-    }
-    return introAlphaArr[frameIndex] || "";
-}
-
-function buildIntroChoiceLetter() {
-    var txt = new createjs.Text("", "800 70px 'Baloo 2'", "#FFFFFF");
-    txt.textAlign = "center";
-    txt.textBaseline = "middle";
-    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.38)", 0, 6, 14);
-    txt.visible = false;
-    return txt;
-}
-
-function updateIntroChoiceLetter(target, frameIndex) {
-    if (!target) {
-        return;
-    }
-    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
-    target.text = value;
-    target.alpha = value ? 1 : 0.15;
-}
-
-function buildIntroClueLetter() {
-    var txt = new createjs.Text("", "800 64px 'Baloo 2'", "#FFFFFF");
-    txt.textAlign = "center";
-    txt.textBaseline = "middle";
-    txt.shadow = new createjs.Shadow("rgba(8,18,44,0.32)", 0, 4, 12);
-    txt.visible = false;
-    return txt;
-}
-
-function updateIntroClueLetter(target, frameIndex) {
-    if (!target) {
-        return;
-    }
-    var value = frameIndex != null ? frameIndexToLetter(frameIndex) : "";
-    target.text = value === "_" ? "_" : value;
-    target.alpha = value ? 1 : 0.2;
+    target.text = letter === "_" ? "_" : letter;
+    target.alpha = letter ? 1 : 0.2;
 }
 
 var introChoice1X = 280, introChoice1Y = 590;
@@ -115,6 +100,9 @@ var introClu2X = 537, introClu2Y = 220;
 var introClu3X = 691, introClu3Y = 220;
 var introClu4X = 846, introClu4Y = 220;
 
+var introChoiceDefaultX = [, introChoice1X, introChoice2X, introChoice3X, introChoice4X];
+var introClueDefaultX = [, introClu1X, introClu2X, introClu3X, introClu4X];
+
 var introCluePosX = [, introClu1X, introClu2X, introClu3X, introClu4X];
 var introCluePosY = [, introClu1Y, introClu2Y, introClu3Y, introClu4Y];
 var introArrowX = 944, introArrowY = 470;
@@ -128,6 +116,44 @@ var introClueBgArr = []
 var introChoiceBgArr = []
 var introChoiceGlowArr = []
 var introQuestionCard;
+
+var introGlobalScope = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : this);
+
+function getIntroHelper(name) {
+    if (!name) {
+        return null;
+    }
+    if (introGlobalScope && typeof introGlobalScope[name] === "function") {
+        return introGlobalScope[name];
+    }
+    if (introGlobalScope && introGlobalScope.SAUIX && typeof introGlobalScope.SAUIX[name] === "function") {
+        return introGlobalScope.SAUIX[name];
+    }
+    return null;
+}
+
+var computeIntroRow = getIntroHelper("SAUI_computeCenteredRow");
+var highlightChoiceHelper = getIntroHelper("SAUI_highlightChoiceTile");
+var highlightClueSlotHelper = getIntroHelper("SAUI_highlightClueSlot");
+var styleClueSlotHelper = getIntroHelper("SAUI_styleClueSlot");
+
+var configureIntroArrowSprite = getIntroHelper("SAUI_configureIntroArrowSprite") || function (sprite) {
+    if (!sprite) {
+        return;
+    }
+    sprite.visible = false;
+    sprite.alpha = 0;
+};
+
+var configureIntroFingerSprite = getIntroHelper("SAUI_configureIntroFingerSprite") || function (sprite) {
+    if (!sprite) {
+        return;
+    }
+    sprite.visible = false;
+    sprite.alpha = 0;
+};
+
+var buildIntroGlowShape = getIntroHelper("SAUI_buildIntroGlowShape");
 
 function getIntroPromptBasePosition() {
     var baseX = introQuestxtX;
@@ -195,8 +221,14 @@ function buildIntroChoiceBackground() {
 }
 
 function buildIntroChoiceGlow() {
-    var glow = new createjs.Shape();
-    drawChoiceSpeechWave(glow);
+    var glow;
+    if (typeof buildIntroGlowShape === "function") {
+        glow = buildIntroGlowShape();
+    }
+    if (!glow) {
+        glow = new createjs.Shape();
+        drawChoiceSpeechWave(glow);
+    }
     glow.alpha = 0;
     glow.visible = false;
     glow.mouseEnabled = false;
@@ -206,7 +238,11 @@ function buildIntroChoiceGlow() {
 
 function buildIntroClueBackground() {
     var shape = new createjs.Shape();
-    drawClueSlotBackground(shape);
+    if (typeof styleClueSlotHelper === "function") {
+        styleClueSlotHelper({ background: shape, baseScale: 1 });
+    } else {
+        drawClueSlotBackground(shape);
+    }
     shape.alpha = 0;
     shape.visible = false;
     shape.mouseEnabled = false;
@@ -236,14 +272,36 @@ function commongameintro() {
 
     introArrow = typeof arrow1 !== "undefined" && arrow1 && typeof arrow1.clone === "function" ? arrow1.clone() : null;
     introfingure = typeof fingure !== "undefined" && fingure && typeof fingure.clone === "function" ? fingure.clone() : null;
+    configureIntroArrowSprite(introArrow);
+    configureIntroFingerSprite(introfingure);
 
+    return prompt;
+}
 
     if (introTitle) {
         container.parent.addChild(introTitle)
         introTitle.visible = true;
     }
 
+function buildIntroChoiceGlow() {
+    var glow = new createjs.Shape();
+    drawChoiceSpeechWave(glow);
+    glow.alpha = 0;
+    glow.visible = false;
+    glow.mouseEnabled = false;
+    glow.mouseChildren = false;
+    return glow;
+}
 
+function buildIntroClueBackground() {
+    var shape = new createjs.Shape();
+    drawClueSlotBackground(shape);
+    shape.alpha = 0;
+    shape.visible = false;
+    shape.mouseEnabled = false;
+    shape.mouseChildren = false;
+    return shape;
+}
 
     var introSampleFrames = [17, 0, 26, 13];
     var introSampleText = "";
@@ -269,6 +327,43 @@ function commongameintro() {
     }
     introQuestxt.visible = true;
 
+    var resolvedChoiceX = introChoiceDefaultX.slice();
+    if (typeof computeIntroRow === "function") {
+        var choiceLayout = computeIntroRow(4, {
+            centerX: introQuestxtX,
+            baseSpacing: 184,
+            maxSpan: 820
+        });
+        if (choiceLayout && choiceLayout.positions && choiceLayout.positions.length === 4) {
+            resolvedChoiceX = [null].concat(choiceLayout.positions);
+        }
+    }
+
+    for (var p = 1; p <= 4; p++) {
+        introChoicePosX[p] = resolvedChoiceX[p] != null ? resolvedChoiceX[p] : introChoiceDefaultX[p];
+    }
+
+    var resolvedClueX = introClueDefaultX.slice();
+    if (typeof computeIntroRow === "function") {
+        var clueLayout = computeIntroRow(4, {
+            centerX: introQues1X,
+            baseSpacing: 150,
+            maxSpan: 600
+        });
+        if (clueLayout && clueLayout.positions && clueLayout.positions.length === 4) {
+            resolvedClueX = [null].concat(clueLayout.positions);
+        }
+    }
+
+    for (var q = 1; q <= 4; q++) {
+        introCluePosX[q] = resolvedClueX[q] != null ? resolvedClueX[q] : introClueDefaultX[q];
+    }
+
+    introArrowX = introChoicePosX[2];
+    introArrowY = introChoicePosY[2] - 120;
+    introfingureX = introChoicePosX[2];
+    introfingureY = introChoicePosY[2] + 24;
+
     for (var c = 1; c < 5; c++) {
         if (!introChoiceGlowArr[c]) {
             introChoiceGlowArr[c] = buildIntroChoiceGlow();
@@ -293,6 +388,15 @@ function commongameintro() {
         choiceLabel.x = introChoicePosX[c];
         choiceLabel.y = introChoicePosY[c];
         choiceLabel.visible = false;
+        var choiceBaseScale = choiceLabel && choiceLabel.__baseScale ? choiceLabel.__baseScale : 0.8;
+        choiceLabel.scaleX = choiceLabel.scaleY = choiceBaseScale;
+        if (introChoiceGlowArr[c]) {
+            introChoiceGlowArr[c].scaleX = introChoiceGlowArr[c].scaleY = choiceBaseScale * 1.32;
+        }
+        if (introChoiceBgArr[c]) {
+            introChoiceBgArr[c].scaleX = introChoiceBgArr[c].scaleY = choiceBaseScale * 1.16;
+            drawChoiceTileBackground(introChoiceBgArr[c]);
+        }
     }
 
     updateIntroChoiceLetter(introChoice1, 13);
@@ -315,9 +419,18 @@ function commongameintro() {
         container.parent.addChild(clueLabel);
         clueLabel.x = introCluePosX[k];
         clueLabel.y = introCluePosY[k];
-        clueLabel.scaleX = clueLabel.scaleY = 1;
+        var clueBaseScale = clueLabel && clueLabel.__baseScale ? clueLabel.__baseScale : 1;
+        clueLabel.scaleX = clueLabel.scaleY = clueBaseScale;
         clueLabel.visible = false;
         updateIntroClueLetter(clueLabel, introClueTxtArr[k]);
+        if (introClueBgArr[k]) {
+            introClueBgArr[k].scaleX = introClueBgArr[k].scaleY = clueBaseScale * 1.08;
+            if (typeof styleClueSlotHelper === "function") {
+                styleClueSlotHelper({ background: introClueBgArr[k], baseScale: clueBaseScale * 1.08 });
+            } else {
+                drawClueSlotBackground(introClueBgArr[k]);
+            }
+        }
     }
     introClueArr.push("", introClu1, introClu2, introClu3, introClu4)
 
@@ -545,12 +658,18 @@ function AnswerValidate()
         createjs.Tween.removeAllTweens();
         introtextArr1.visible = true;
         introtextArr1.alpha = 0
-        introtextArr1.x=965
-        introtextArr1.y=625
+        var startX = typeof introChoicePosX[4] === "number" ? introChoicePosX[4] + 24 : 965;
+        var startY = typeof introChoicePosY[4] === "number" ? introChoicePosY[4] + 35 : 625;
+        var midX = (typeof introChoicePosX[4] === "number" && typeof introCluePosX[3] === "number") ? (introChoicePosX[4] + introCluePosX[3]) / 2 : 855;
+        var midY = (typeof introChoicePosY[4] === "number" && typeof introCluePosY[3] === "number") ? (introChoicePosY[4] + introCluePosY[3]) / 2 : 480;
+        var endX = typeof introCluePosX[3] === "number" ? introCluePosX[3] : 720;
+        var endY = typeof introCluePosY[3] === "number" ? introCluePosY[3] - 40 : 280;
+        introtextArr1.x = startX;
+        introtextArr1.y = startY;
         createjs.Tween.get(introtextArr1).wait(200)
-            .to({ x: 965, y: 625, scaleX: .8, scaleY: .8, alpha: 1 }, 500)
-             .to({ x: 855, y: 480, scaleX: .8, scaleY: .8, alpha: 1 }, 500)
-              .to({ visible:false,x: 720, y: 280,  alpha: 0 }, 500)
+            .to({ x: startX, y: startY, scaleX: .8, scaleY: .8, alpha: 1 }, 500)
+            .to({ x: midX, y: midY, scaleX: .8, scaleY: .8, alpha: 1 }, 500)
+            .to({ visible:false, x: endX, y: endY, alpha: 0 }, 500)
              //  .to({ visible:false,x: 720, y: 250, alpha: 0}, 250)
                .call(ValueTween)
 }
@@ -562,7 +681,7 @@ function ValueTween()
         introClu3.alpha = 0;
         updateIntroClueLetter(introClu3, 8)
         createjs.Tween.get(introClu3)
-            .to({ x: 687, y: 230, alpha: 1 }, 1000).call(setCallDelay)
+            .to({ x: introCluePosX[3], y: introCluePosY[3], alpha: 1 }, 1000).call(setCallDelay)
 }
 function setCallDelay() {
     clearInterval(removeIntraval)
