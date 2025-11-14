@@ -35,6 +35,7 @@ var choiceBgArr = [];
 var choiceGlowArr = [];
 var choicePulseArr = [];
 var choiceLabelArr = [];
+var repTimeClearInterval = 0;
 var clueSlotContainer;
 var clueSlotArr = [];
 var clueSlotBgArr = [];
@@ -449,8 +450,26 @@ function bindChoiceTile(tile) {
         pressChoiceTile(tile);
     });
 
-    tile.on("pressup", function () {
+    tile.on("pressup", function (evt) {
+        if (!tile.mouseEnabled) {
+            return;
+        }
         releaseChoiceTile(tile);
+
+        var nativeEvent = evt && evt.nativeEvent ? evt.nativeEvent : null;
+        var nativeType = nativeEvent && nativeEvent.type ? nativeEvent.type.toLowerCase() : "";
+        var pointerType = nativeEvent && nativeEvent.pointerType ? nativeEvent.pointerType.toLowerCase() : "";
+
+        var isTouchPointer = false;
+        if (nativeType.indexOf("touch") === 0) {
+            isTouchPointer = true;
+        } else if (nativeType.indexOf("pointer") === 0) {
+            isTouchPointer = pointerType && pointerType !== "mouse";
+        }
+
+        if (isTouchPointer) {
+            answerSelected(evt);
+        }
     });
 
     tile.on("click", function (evt) {
