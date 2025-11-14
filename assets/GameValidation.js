@@ -541,6 +541,13 @@ function showFeedbackBanner(isCorrect) {
     var answerBlockWidth = 0;
     var answerBlockHeight = 0;
 
+    if (feedbackContainer && feedbackContainer.parent && typeof feedbackContainer.parent.setChildIndex === "function") {
+        feedbackContainer.parent.setChildIndex(
+            feedbackContainer,
+            feedbackContainer.parent.getNumChildren() - 1
+        );
+    }
+
     if (feedbackAnswerTxt) {
         if (hasAnswer) {
             feedbackAnswerTxt.text = displayAnswer;
