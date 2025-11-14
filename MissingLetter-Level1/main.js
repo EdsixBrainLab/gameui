@@ -83,6 +83,9 @@ function init() {
     call_UI_ambientOverlay(container);
     call_UI_gameQuestion(container, "Choose the missing letter to complete the word.");
     createjs.Ticker.addEventListener("tick", stage);
+    if (createjs.Touch && typeof createjs.Touch.enable === "function") {
+        createjs.Touch.enable(stage, true, false);
+    }
     callLoader();
     createLoader()
     createCanvasResize()
@@ -300,6 +303,10 @@ function buildChoiceTile() {
     tile.scaleX = tile.scaleY = tile.__baseScale;
     tile.x = 0;
     tile.y = CHOICE_ROW_Y;
+
+    var hitArea = new createjs.Shape();
+    hitArea.graphics.beginFill("#000").drawRoundRect(-74, -74, 148, 148, 48);
+    tile.hitArea = hitArea;
 
     var glow = new createjs.Shape();
     drawChoiceSpeechWave(glow);
