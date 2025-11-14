@@ -164,7 +164,7 @@ function ensureClueSlots() {
 
     if (!clueSlotContainer) {
         clueSlotContainer = new createjs.Container();
-        clueSlotContainer.y = 0;
+        clueSlotContainer.y = -12;
         clueSlotContainer.visible = false;
         questionCardContainer.addChild(clueSlotContainer);
     }
@@ -245,34 +245,6 @@ function updateClueWord(word, options) {
     if (clueSlotContainer) {
         clueSlotContainer.visible = letters.length > 0;
     }
-    var baseScale = tile.__baseScale || 0.68;
-    tile.scaleX = tile.scaleY = baseScale;
-    tile.alpha = 0;
-    tile.visible = false;
-    tile.mouseEnabled = false;
-    tile.cursor = "default";
-    tile.__letter = "";
-    tile.y = (options && options.offscreenY) != null ? options.offscreenY : CHOICE_ROW_Y + 40;
-    if (tile.__bg) {
-        tile.__bg.alpha = 0.95;
-        tile.__bg.scaleX = tile.__bg.scaleY = 1;
-        drawChoiceTileBackground(tile.__bg);
-    }
-    if (tile.__glow) {
-        tile.__glow.alpha = 0;
-        tile.__glow.visible = false;
-        tile.__glow.scaleX = tile.__glow.scaleY = 1;
-    }
-    if (tile.__pulse) {
-        tile.__pulse.alpha = 0;
-        tile.__pulse.visible = false;
-        tile.__pulse.scaleX = tile.__pulse.scaleY = 1;
-    }
-    if (tile.__label) {
-        tile.__label.text = "";
-        tile.__label.alpha = 0;
-    }
-}
 
     if (question) {
         question.text = letters.join("  ");
@@ -566,10 +538,10 @@ function CreateGameElements() {
     ensureQuestionCard();
     if (questionCardContainer) {
         questionCardContainer.x = typeof getCanvasCenterX === "function" ? getCanvasCenterX() : canvas.width / 2;
-        questionCardContainer.y = 340;
+        questionCardContainer.y = 300;
         questionCardContainer.visible = false;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.82;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.86;
         if (container && container.parent) {
             container.parent.setChildIndex(questionCardContainer, container.parent.getNumChildren() - 1);
         }
@@ -642,7 +614,7 @@ function pickques() {
     if (questionCardContainer) {
         questionCardContainer.visible = false;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.74;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
     }
     ans = ques.charAt(ran);
     console.log("ans" + ans)
@@ -691,10 +663,10 @@ function createTween() {
     if (questionCardContainer) {
         questionCardContainer.visible = true;
         questionCardContainer.alpha = 0;
-        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.74;
+        questionCardContainer.scaleX = questionCardContainer.scaleY = 0.78;
         createjs.Tween.get(questionCardContainer, { override: true })
             .wait(520)
-            .to({ alpha: 1, scaleX: 0.82, scaleY: 0.82 }, 520, createjs.Ease.quadOut);
+            .to({ alpha: 1, scaleX: 0.86, scaleY: 0.86 }, 520, createjs.Ease.quadOut);
     }
 
     if (clueSlotArr.length) {

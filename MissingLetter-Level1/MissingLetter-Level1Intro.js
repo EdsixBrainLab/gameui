@@ -119,6 +119,19 @@ var introQuestionCard;
 
 var introGlobalScope = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : this);
 
+function getIntroQuestionPromptTemplate() {
+    if (!introGlobalScope) {
+        return null;
+    }
+    if (introGlobalScope.QusTxtString) {
+        return introGlobalScope.QusTxtString;
+    }
+    if (introGlobalScope.SAUIX && introGlobalScope.SAUIX.QusTxtString) {
+        return introGlobalScope.SAUIX.QusTxtString;
+    }
+    return null;
+}
+
 function getIntroHelper(name) {
     if (!name) {
         return null;
@@ -170,21 +183,26 @@ function getIntroPromptBasePosition() {
 }
 
 function buildIntroPromptLabel() {
-    var prompt;
-    if (typeof QusTxtString !== "undefined" && QusTxtString && typeof QusTxtString.clone === "function") {
-        prompt = QusTxtString.clone();
+    var template = getIntroQuestionPromptTemplate();
+    var prompt = null;
+    if (template && typeof template.clone === "function") {
+        try {
+            prompt = template.clone();
+        } catch (err) {
+            prompt = null;
+        }
     }
     if (!prompt) {
         prompt = new createjs.Text(
             "Choose the missing letter to complete the word.",
-            "700 28px 'Baloo 2'",
-            "#EAF2FF"
+            template && template.font ? template.font : "700 28px 'Baloo 2'",
+            template && template.color ? template.color : "#EAF2FF"
         );
-        prompt.textAlign = "center";
-        prompt.textBaseline = "middle";
-        prompt.lineWidth = 1000;
-        prompt.lineHeight = 40;
-        prompt.shadow = new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
+        prompt.textAlign = template && template.textAlign ? template.textAlign : "center";
+        prompt.textBaseline = template && template.textBaseline ? template.textBaseline : "middle";
+        prompt.lineWidth = template && template.lineWidth ? template.lineWidth : 1000;
+        prompt.lineHeight = template && template.lineHeight ? template.lineHeight : 40;
+        prompt.shadow = template && template.shadow ? template.shadow.clone ? template.shadow.clone() : template.shadow : new createjs.Shadow("rgba(6,16,38,0.36)", 0, 12, 26);
     }
 
     var promptPos = getIntroPromptBasePosition();
@@ -275,8 +293,13 @@ function commongameintro() {
     configureIntroArrowSprite(introArrow);
     configureIntroFingerSprite(introfingure);
 
-    return prompt;
-}
+var configureIntroArrowSprite = getIntroHelper("SAUI_configureIntroArrowSprite") || function (sprite) {
+    if (!sprite) {
+        return;
+    }
+    sprite.visible = false;
+    sprite.alpha = 0;
+};
 
     if (introTitle) {
         container.parent.addChild(introTitle)
